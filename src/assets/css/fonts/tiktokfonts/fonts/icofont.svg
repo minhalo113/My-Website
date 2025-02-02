@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+<font id="icofont" horiz-adv-x="1000" >
+<font-face font-family="IcoFont" font-weight="400" font-style="Regular" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="tiktok" horiz-adv-x="1000" unicode="&#xf033;" d="M758 583c-5 2-10 5-15 9-15 10-29 22-41 35-29 35-41 70-45 95h0c-3 21-2 34-1 34h-137v-539c0-8 0-15 0-22 0-1 0-1 0-2 0-1 0-1 0-2 0 0 0 0 0 0-2-19-8-38-18-54-10-17-24-30-40-40-17-10-37-15-57-15-63 0-115 53-115 118 0 66 52 119 115 119 12 0 24-2 36-6l0 142c-35 5-70 2-104-8-33-10-64-27-91-50-24-21-43-46-58-74-6-10-28-51-31-117-1-38 10-77 15-93v0c3-10 16-42 37-69 17-22 37-41 59-57v0l0 0c66-46 139-43 139-43 13 0 56 0 104 23 53 26 84 65 84 65 19 23 34 49 45 77 13 34 17 73 17 89v287c1-1 23-16 23-16 0 0 32-21 81-35 36-9 84-11 84-11v138c-17-2-51 4-86 22z" />
+</font>
+</defs>
+</svg>

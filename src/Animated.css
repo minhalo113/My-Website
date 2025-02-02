@@ -1,0 +1,40 @@
+.combined-effect {
+    animation: rotate-scale-float 5s ease-in-out infinite;
+  }
+  
+  @keyframes rotate-scale-float {
+    0% {
+      transform: scale(1) rotate(0deg) translateY(0);
+    }
+    25% {
+      transform: scale(1.1) rotate(90deg) translateY(-10px);
+    }
+    50% {
+      transform: scale(0.9) rotate(180deg) translateY(0);
+    }
+    75% {
+      transform: scale(1.2) rotate(270deg) translateY(10px);
+    }
+    100% {
+      transform: scale(1) rotate(360deg) translateY(0);
+    }
+  }
+  
+  .drip-glow-effect {
+    animation: glow-drift 6s ease-in-out infinite;
+  }
+  
+  @keyframes glow-drift {
+    0% {
+      transform: translateX(0px) translateY(0px) scale(1);
+    }
+    25% {
+      transform: translateX(-10px) translateY(-5px) scale(1.05);
+    }
+    50% {
+      transform: translateX(10px) translateY(5px) scale(0.95);
+    }
+    75% {
+      transform: translateX(-5px) translateY(-10px) scale(1.1);
+    }
+  }

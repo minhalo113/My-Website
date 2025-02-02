@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+<font id="icofont" horiz-adv-x="1000" >
+<font-face font-family="IcoFont" font-weight="400" font-style="Regular" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="computer" horiz-adv-x="1000" unicode="&#xeeee;" d="M890 724v1h-780v-1c-26-2-44-23-47-48v-526c0-10 2-19 6-27 10-17 25-26 45-26h282v-61h-88c-6 0-10-5-10-10v-41c0-5 4-10 10-10h385c5 0 9 5 9 10v41c0 5-4 10-9 10h-89v61h282c20 0 34 9 44 26 5 9 8 17 8 27v526c-3 25-24 46-48 48z m0-52v-522c0-3-1-5-4-5h-772c-3 0-4 2-4 5v526h780v-4z" />
+</font>
+</defs>
+</svg>

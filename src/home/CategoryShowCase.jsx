@@ -1,0 +1,92 @@
+import React,{useState} from 'react'
+import productData from "../products.json"
+import '../Animated.css'
+import Rating from '../components/Rating'
+import { Link } from 'react-router-dom';
+import '../App.css'
+
+const title = "Our Books"
+
+const CategoryShowCase = () => {
+    const [items, setItems] = useState(productData)
+    const filterItem = (categItem) =>{
+        const updateItems = productData.filter((curElem) => {
+            return curElem.category === categItem
+        });
+    setItems(updateItems)
+    }
+
+  return (
+    <div className='course-section style-3 padding-tb'>
+        <div>
+            {/*shape*/}
+            <img className='course-shape one combined-effect' src = "/src/assets/images/shape-img/icon/circle-background.png" style={{width:'100px', height: 'auto'}}>
+            </img>
+            <img className='course-shape two drip-glow-effect' src = "/src/assets/images/shape-img/icon/circle-background-2.png" style={{width:'100px', height: 'auto'}}>
+            </img>
+            </div>
+        
+        {/*main section*/}
+        <div className='container' >
+            {/* section header */}
+            <div className='section-header' style={{justifyContent:'center'}}>
+                <h2 className='title'>
+                    {title}
+                </h2>
+                <div className='course-filter-group'>
+                    <ul className='lab-ul' style={{justifyContent: 'center'}}>
+                        <li onClick= {() => setItems(productData)}>All Categories</li>
+                        <li onClick= {() => filterItem("business")}>Business</li>
+                        <li onClick= {() => filterItem("health")}>Health</li>
+                        <li onClick= {() => filterItem("history&geography")}>History & Geography</li>
+                        <li onClick= {() => filterItem("humour")}>Humour</li>
+                        <li onClick= {() => filterItem("reference")}>Reference</li>
+                        <li onClick= {() => filterItem("religion")}>Religion</li>
+                        <li onClick= {() => filterItem("romance")}>Romance</li>
+                        <li onClick= {() => filterItem("sciencefiction&fantasy")}>Science Fiction & Fantasy</li>
+                        <li onClick= {() => filterItem("self-help")}>Self-Help</li>
+                        <li onClick= {() => filterItem("socialscience")}>Social Science</li>
+                        <li onClick= {() => filterItem("teen&youngadult")}>Teen & Young Adult</li>
+                        <li onClick= {() => filterItem("Men's Sneaker")}>Men's Sneaker</li>
+                    </ul>
+                </div>
+            </div>
+
+            {/* section body */}
+            <div className = "section-wrapper">
+                <div className='row g-4 justify-content-center row-cols-x1-4 row-cols-lg-3 row-cols-md-2 row-cols-1
+                 course-filter' >
+                    {items.map((product) => 
+                        <div key={product.id} className='col'>
+                            <div className='course-item style-4'>
+                            <div className='course-inner'>
+                                <div className='course-thumb'>
+                                    <img src = {product.img} alt='' />
+                                    <div className='course-category'>
+                                        <div className='course-cate'><a href="#">{product.category}</a></div>
+                                        <div className='course-reiew'><Rating/></div>
+                                    </div>
+                                </div>
+
+                                <div className='course-content'>
+                                    <Link to={`/shop/${product.id}`}><h6>{product.name}</h6></Link>
+                                    <div className='course-footer'>
+                                        <div className='course-author'>
+                                        <Link to = "/" className='ca-name'>{product.seller}</Link>
+                                        </div>
+                                        <div className='course-price' style={{color: "#DCA54A"}}>
+                                            ${product.price}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div></div> )}
+                </div>
+            </div>
+        </div>
+    </div>
+  )
+}
+
+export default CategoryShowCase
