@@ -7,24 +7,10 @@ import Select from 'react-select/base';
 
 
 const title = (
-    <h2>Books You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h2>
+    <h2>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h2>
 )
 
-const desc = "Thousands of stories, one small price."
-const bannerList = [
-    {
-        iconName:"icofont-users-alt-4",
-        text:"1.5 Million Customers",
-    },
-    {
-        iconName:"icofont-notification",
-        text:"More than 2000 Merchant",
-    },
-    {
-        iconName:"icofont-globe",
-        text: "Buy Anything Online",
-    },
-];
+const desc = "🎲 Endless Fun, One Small Price!"
 
 const Banner = () => {
     const [searchInput, setSearchInput] = useState("");

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const subTitle = "Why Choose Us"; 
 const title = "Explore Our Collection"; 
-const desc = "Browse our vast collection of cutting-edge gadgets on any device with ease. Discover the latest innovations, smart accessories, and must-have tech at your fingertips. Just explore, shop, and elevate your experience!"; 
+const desc = "Browse our vast collection of exciting toys on any device with ease. Discover the latest playtime innovations, fun accessories, and must-have toys at your fingertips. Just explore, shop, and bring joy to every adventure!"; 
 const btnText = "Shop Now";
 
 const countList = [ 

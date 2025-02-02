@@ -83,7 +83,6 @@ const Shop = () => {
                   <ShopCategory filterItem ={filterItem} menuItems={menuItems} setProducts = {setproducts}
                   selectedCategory = {selectedCategory} setSelectedCategory = {setSelectedCategory}/>
                   <PopularPost/>
-                  <Tags/>
                 </aside>
               </div>
             </div>

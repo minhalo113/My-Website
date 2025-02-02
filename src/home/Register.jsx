@@ -1,11 +1,11 @@
 import React from 'react'
-const subTitle = "Discover Your Next Great Read!"
+const subTitle = "🎉 Discover the Magic of Play!"
 
 const title = (
-    <h2 className='title'>Join us for a day filled with amazing books at unbeatable prices. <b><span>Explore, enjoy, and find your new favorite story!</span></b></h2>
+    <h2 className='title'>Join us for a fun-filled day of exciting toys at unbeatable prices. <b><span> Explore, play, and find your next favorite toy!</span></b></h2>
 )
 
-const desc = "Limited Time Offer! Hurry Up";
+const desc = "No time limit—just endless fun! 🚀🎁🧸";
 const Register = () => {
   return (
     <section className='register-section padding-tb pb-0'>
@@ -26,7 +26,7 @@ const Register = () => {
                             <input type = "text" name = "name" placeholder='Username' className='reg-input'/>
                             <input type = "email" name = "email" placeholder='Email' className='reg-input'/>
                             <input type = "number" name = "number" placeholder='Phone' className='reg-input'/>
-                            <button type='submit' className='lab-btn' style={{background : "#DCA54A"}}>
+                            <button onClick={login} type='submit' className='lab-btn' style={{background : "#DCA54A"}}>
                                 Register Now
                             </button>
                         </form>

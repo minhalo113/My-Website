@@ -2,8 +2,8 @@ import React from 'react'
 import { Link } from 'react-router-dom';
 <link rel="stylesheet" href="myProjects/webProject/icofont/css/icofont.min.css"></link>
 
-const title = "About The Tech Haven"; 
-const desc = "Welcome to Tech Haven, your go-to destination for cutting-edge gadgets designed to enhance your daily life with innovation, convenience, and next-level technology.";
+const title = "About The Toy Haven"; 
+const desc = "Welcome to Toy Haven, your ultimate destination for fun, creativity, and adventure! Explore a world of exciting toys designed to spark imagination and endless joy.";
 const ItemTitle = "Categories"; 
 const quickTitle = "Quick Links"; 
 // const blogTitle = "Recent Blogs";

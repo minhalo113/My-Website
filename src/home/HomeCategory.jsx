@@ -3,9 +3,8 @@ import Banner from './Banner'
 import productData from "../products.json"
 import { Link } from 'react-router-dom';
 
-const subTitle = "Choose Any Books";
-const title = "Buy Any Book With Us";
-const btnText = "Get Started Now";
+const subTitle = "Discover the Joy of Play!";
+const title = "Find the Perfect Toy for Every Adventure";
 
 const HomeCategory = () => {
   return (
@@ -39,9 +38,7 @@ const HomeCategory = () => {
                 </div>
             </div>
         </div>
-        <div className='text-center mt-5'>
-            <Link to = "/shop" className='lab-btn' style={{background:"#DCA54A"}}><span style={{color: '#101115'}}>{btnText}</span></Link>
-        </div>
+
     </div>
   )
 }

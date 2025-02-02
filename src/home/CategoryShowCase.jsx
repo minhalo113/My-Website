@@ -5,7 +5,8 @@ import Rating from '../components/Rating'
 import { Link } from 'react-router-dom';
 import '../App.css'
 
-const title = "Our Books"
+const title = "Our Toys"
+const btnText = "Start Shopping Now";
 
 const CategoryShowCase = () => {
     const [items, setItems] = useState(productData)
@@ -56,7 +57,7 @@ const CategoryShowCase = () => {
             <div className = "section-wrapper">
                 <div className='row g-4 justify-content-center row-cols-x1-4 row-cols-lg-3 row-cols-md-2 row-cols-1
                  course-filter' >
-                    {items.map((product) => 
+                    {items.slice(0, 10).map((product) => 
                         <div key={product.id} className='col'>
                             <div className='course-item style-4'>
                             <div className='course-inner'>
@@ -81,7 +82,12 @@ const CategoryShowCase = () => {
                                 </div>
 
                             </div>
-                        </div></div> )}
+                        </div>
+                        </div> )}
+
+                        <div className='text-center mt-5'>
+                            <Link to = "/shop" className='lab-btn' style={{background:"#DCA54A"}}><span style={{color: '#101115'}}>{btnText}</span></Link>
+                        </div>
                 </div>
             </div>
         </div>
