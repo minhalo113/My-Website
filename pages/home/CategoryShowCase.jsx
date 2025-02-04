@@ -72,7 +72,7 @@ const CategoryShowCase = () => {
                             <div className='course-item style-4'>
                             <div className='course-inner'>
                                 <div className='course-thumb'>
-                                    <img src = {product.img} alt='' />
+                                    <img src = {Array.isArray(product.img) ? product.img[0] : product.img} alt='' />
                                     <div className='course-category'>
                                         <div className='course-cate'><a href={`/shop/${product.id}`}>{product.category}</a></div>
                                         <div className='course-reiew'><Rating/></div>

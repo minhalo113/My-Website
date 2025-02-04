@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PageHeader from '../components/PageHeader';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import delImgUrl from "../assets/images/shop/del.png"
 import CheckOutPage from './CheckOutPage';
 
@@ -76,10 +76,10 @@ const CartPage = () => {
                                         <tr key = {index}>
                                             <td className='product-item cat-product'>
                                                 <div className='p-thumb'>
-                                                    <Link to = "/shop"><img src = {item.img} alt = ""/></Link>
+                                                    <Link href = "/shop"><img src = {Array.isArray(item.img) ? item.img[0] : item.img} alt = ""/></Link>
                                                 </div>
                                                 <div className='p-content'>
-                                                    <Link to = "/shop">{item.name}</Link>
+                                                    <Link href = "/shop">{item.name}</Link>
                                                 </div>
                                             </td>
 

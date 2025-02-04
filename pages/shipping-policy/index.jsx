@@ -6,7 +6,7 @@ const ShippingPolicy = () => {
     <div>
         <PageHeader title = "Shipping Policy" curPage="Shipping Policy"></PageHeader>
         <div className='container'>
-        <p style={{textAlign: "center"}}><h4>Shipping policy</h4></p>
+        <p><strong>Shipping Policy</strong></p>
         <p>Thank you for choosing Toy Haven! We are committed to providing you with a seamless shopping experience. Please review the following information regarding our shipping and delivery policies:</p>
 
         <p><strong>Shipping Methods and Timelines:</strong></p>

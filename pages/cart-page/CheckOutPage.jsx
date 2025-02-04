@@ -1,12 +1,13 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import React, { useState } from 'react'
-import "../components/modal.css"
-import { useLocation, useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 const CheckOutPage = () => {
     const [show, setShow] = useState(false);
     const [activeTab, setactiveTab] = useState("visa");
+
+    const router = useRouter();
 
     const handleTabChange = (tabId) => {
         setactiveTab(tabId)
@@ -15,14 +16,10 @@ const CheckOutPage = () => {
     const handleShow = () => setShow(true);
     const handleClose = () => setShow(false);
 
-    const location = useLocation();
-    const navigate = useNavigate();
-    const from = location.state?.from?.pathname || "/";
-
     const handleOrderConfirm = () => {
         alert("Your Order is placed successfully!")
         localStorage.removeItem("cart");
-        navigate(from, {replace:true})
+        router.push("/")
     }
 
   return (

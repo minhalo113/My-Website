@@ -5,6 +5,7 @@ import "./styles/magnific-popup.css"
 import "./styles/swiper.min.css"
 import "./styles/style.min.css"
 import "./styles/icofont.min.css"
+import "./styles/modal.css"
 
 import Head from "next/head"
 import NavItems from "./components/NavItems";

@@ -29,7 +29,7 @@ const HomeCategory = () => {
                             <Link href = "/shop" className='category-item'>
                                 <div className='category-inner'>
                                     <div className='category-thumb'>
-                                        <img src={val.img} style={{width: "200px", height: "auto"}}></img>
+                                        <img src = {Array.isArray(val.img) ? val.img[0] : val.img} style={{width: "200px", height: "auto"}}></img>
                                     </div>
 
                                     <div className='category-content'>
