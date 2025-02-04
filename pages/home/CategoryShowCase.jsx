@@ -1,5 +1,5 @@
-import React,{useState} from 'react'
-import productData from "../products.json"
+import React,{useState, useEffect} from 'react'
+
 import Rating from '../components/Rating'
 import Link from 'next/link'
 
@@ -7,21 +7,33 @@ const title = "Our Toys"
 const btnText = "Start Shopping Now";
 
 const CategoryShowCase = () => {
-    const [items, setItems] = useState(productData)
+    const [productData, setProductData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [items, setItems] = useState([]);
+    const [activeCategory, setActiveCategory] = useState("All Categories");
+    
+    useEffect(() =>{
+        fetch("/data/products.json").then(res => res.json()).then(data => {setProductData(data); setLoading(false);setItems(data)})
+    }, [])
+
     const filterItem = (categItem) =>{
+        if(!productData.length) return;
         const updateItems = productData.filter((curElem) => {
             return curElem.category === categItem
         });
-    setItems(updateItems)
+        setItems(updateItems);
+        setActiveCategory(categItem);
     }
+
+    if (loading) return <p>Loading product details...</p>
 
   return (
     <div className='course-section style-3 padding-tb'>
         <div>
             {/*shape*/}
-            <img className='course-shape one combined-effect' src = "/src/assets/images/shape-img/icon/circle-background.png" style={{width:'100px', height: 'auto'}}>
+            <img className='course-shape one combined-effect' src = "/images/shape-img/icon/circle-background.png" style={{width:'100px', height: 'auto'}}>
             </img>
-            <img className='course-shape two drip-glow-effect' src = "/src/assets/images/shape-img/icon/circle-background-2.png" style={{width:'100px', height: 'auto'}}>
+            <img className='course-shape two drip-glow-effect' src = "/images/shape-img/icon/circle-background-2.png" style={{width:'100px', height: 'auto'}}>
             </img>
             </div>
         
@@ -34,19 +46,19 @@ const CategoryShowCase = () => {
                 </h2>
                 <div className='course-filter-group'>
                     <ul className='lab-ul' style={{justifyContent: 'center'}}>
-                        <li onClick= {() => setItems(productData)}>All Categories</li>
-                        <li onClick= {() => filterItem("business")}>Business</li>
-                        <li onClick= {() => filterItem("health")}>Health</li>
-                        <li onClick= {() => filterItem("history&geography")}>History & Geography</li>
-                        <li onClick= {() => filterItem("humour")}>Humour</li>
-                        <li onClick= {() => filterItem("reference")}>Reference</li>
-                        <li onClick= {() => filterItem("religion")}>Religion</li>
-                        <li onClick= {() => filterItem("romance")}>Romance</li>
-                        <li onClick= {() => filterItem("sciencefiction&fantasy")}>Science Fiction & Fantasy</li>
-                        <li onClick= {() => filterItem("self-help")}>Self-Help</li>
-                        <li onClick= {() => filterItem("socialscience")}>Social Science</li>
-                        <li onClick= {() => filterItem("teen&youngadult")}>Teen & Young Adult</li>
-                        <li onClick= {() => filterItem("Men's Sneaker")}>Men's Sneaker</li>
+                        <li onClick= {() => {setActiveCategory("All Categories");setItems(productData)}} style={{background: activeCategory === "All Categories" ? "#DCA54A" : ""}}>All Categories</li>
+                        <li onClick= {() => filterItem("business")} style={{background: activeCategory === "business" ? "#DCA54A" : ""}}>Business</li>
+                        <li onClick= {() => filterItem("health")} style={{background: activeCategory === "health" ? "#DCA54A" : ""}}>Health</li>
+                        <li onClick= {() => filterItem("history&geography")} style={{background: activeCategory === "history&geography" ? "#DCA54A" : ""}}>History & Geography</li>
+                        <li onClick= {() => filterItem("humour")} style={{background: activeCategory === "humour" ? "#DCA54A" : ""}}>Humour</li>
+                        <li onClick= {() => filterItem("reference")} style={{background: activeCategory === "reference" ? "#DCA54A" : ""}}>Reference</li>
+                        <li onClick= {() => filterItem("religion")} style={{background: activeCategory === "religion" ? "#DCA54A" : ""}}>Religion</li>
+                        <li onClick= {() => filterItem("romance")} style={{background: activeCategory === "romance" ? "#DCA54A" : ""}}>Romance</li>
+                        <li onClick= {() => filterItem("sciencefiction&fantasy")} style={{background: activeCategory === "sciencefiction&fantasy" ? "#DCA54A" : ""}}>Science Fiction & Fantasy</li>
+                        <li onClick= {() => filterItem("self-help")} style={{background: activeCategory === "self-help" ? "#DCA54A" : ""}}>Self-Help</li>
+                        <li onClick= {() => filterItem("socialscience")} style={{background: activeCategory === "socialscience" ? "#DCA54A" : ""}}>Social Science</li>
+                        <li onClick= {() => filterItem("teen&youngadult")} style={{background: activeCategory === "teen&youngadult" ? "#DCA54A" : ""}}>Teen & Young Adult</li>
+                        <li onClick= {() => filterItem("Men's Sneaker")} style={{background: activeCategory === "Men's Sneaker" ? "#DCA54A" : ""}}>Men's Sneaker</li>
                     </ul>
                 </div>
             </div>

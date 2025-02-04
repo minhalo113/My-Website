@@ -1,12 +1,18 @@
 import React from 'react'
 import Banner from './Banner'
-import productData from "../products.json"
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 const subTitle = "Discover the Joy of Play!";
 const title = "Find the Perfect Toy for Every Adventure";
 
 const HomeCategory = () => {
+    const [productData, setProductData] = useState([])
+    
+    useEffect(() =>{
+        fetch("/data/products.json").then(res => res.json()).then(data => setProductData(data))
+    }, [])
+
   return (
     <div className='category-section style-4 padding-tb'>
         <div className = "container">

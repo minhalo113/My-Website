@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
-import productData from "../products.json"
+
 import { Link } from 'react-router-dom';
 import SelectedCategory from '../components/SelectedCategory';
 import Select from 'react-select/base';
@@ -12,6 +12,12 @@ const title = (
 const desc = "🎲 Endless Fun, One Small Price!"
 
 const Banner = () => {
+    const [productData, setProductData] = useState([])
+    
+    useEffect(() =>{
+        fetch("/data/products.json").then(res => res.json()).then(data => setProductData(data))
+    }, [])
+
     const [searchInput, setSearchInput] = useState("");
     const [filteredProducts, setfilteredProducts] = useState(productData);
 

@@ -8,13 +8,13 @@ const desc = "Explore a world of joy at Toy Haven! From classic favorites to the
 const year = "3+";
 const expareance = "Years Of Experiences";
 
-const aboutList = [ { imgUrl: '/src/assets/images/about/icon/01.jpg', 
+const aboutList = [ { imgUrl: '/images/about/icon/01.jpg', 
     title: "Expertly Crafted Toys",
     desc: "Designed with quality and creativity, our toys bring joy, learning, and adventure to every playtime."}, 
-    { imgUrl: '/src/assets/images/about/icon/02.jpg',
+    { imgUrl: '/images/about/icon/02.jpg',
         title:"Safe & Certified",
         desc: "We ensure all our toys meet the highest safety standards, giving parents peace of mind and kids endless fun." }, 
-        { imgUrl: '/src/assets/images/about/icon/03.jpg', imgAlt: 'about icon rajibraj91 rajibraj', 
+        { imgUrl: '/images/about/icon/03.jpg', imgAlt: 'about icon rajibraj91 rajibraj', 
             title: "Exciting Collections",
         desc: "From educational toys to action figures, discover a world of fun with our diverse range of toys for all ages." }, ]
 
@@ -29,11 +29,11 @@ const About = () => {
                     <div className='col'>
                         <div className='about-left'>
                             <div className="about-thumb">
-                                <img src = "/src/assets/images/about/01.jpg" alt = ""/>
+                                <img src = "/images/about/01.jpg" alt = ""/>
                             </div>
 
                             <div className='abs-thumb'>
-                                <img src = "/src/assets/images/about/02.jpg" alt = ""/>
+                                <img src = "/images/about/02.jpg" alt = ""/>
                             </div>
 
                             <div className='about-left-content'>

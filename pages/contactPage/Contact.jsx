@@ -10,12 +10,12 @@ const conTitle = "Fill The Form Below So We Can Get To Know You And Your Needs B
 const btnText = "Send our Message";
 
 const contactList = [ 
-    // { imgUrl: "/src/assets/images/icon/01.png", imgAlt: "contact icon", 
+    // { imgUrl: "/images/icon/01.png", imgAlt: "contact icon", 
     // title: "Office Address", desc: "1201 park street, Fifth Avenue", },
-     { imgUrl: "/src/assets/images/icon/02.png", imgAlt: "contact icon", title: "Phone number",
-         desc: "+780 655 6756", }, { imgUrl: "/src/assets/images/icon/03.png",
+     { imgUrl: "/images/icon/02.png", imgAlt: "contact icon", title: "Phone number",
+         desc: "+780 655 6756", }, { imgUrl: "/images/icon/03.png",
              imgAlt: "contact icon", title: "Send email", desc: "ahistoryfactaday@gmail.com", }, 
-            //  { imgUrl: "/src/assets/images/icon/04.png", imgAlt: "contact icon", title: "Our website", 
+            //  { imgUrl: "/images/icon/04.png", imgAlt: "contact icon", title: "Our website", 
             //     desc: "www.shopcart.com", }, 
             ];
 

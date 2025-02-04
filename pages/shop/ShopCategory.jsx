@@ -1,16 +1,27 @@
-import React from 'react'
-import '../App.css'
-import Data from "../products.json"
+import React, { useEffect } from 'react'
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, setSelectedCategory}) => {
+    const [Data, setData] = useState([])
+
+    const router = useRouter();
+    const {id} = router.query;
+
+    useEffect(() => {
+        fetch("/data/products.json")
+        .then(res => res.json())
+        .then(data => setData(data))
+        .catch(error => console.error("Error fetching products:", error));
+    }, [])
 
   return (
-    <>
+    <div className='widget'>
         <div className='widget-header'>
-            <h5 className='ms-2'>All Categories</h5>
+            <h4>All Categories</h4>
         </div>
  
-        <div>
+        <div className='widget-wrapper'>
             <button onClick={() => {setProducts(Data); setSelectedCategory("all")}} className={`m-2 ${selectedCategory === "all" ? "bg-warning" : ""}`}>All</button>
             {
 
@@ -25,7 +36,7 @@ const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, set
                 })
             }
         </div>
-    </>
+    </div>
   )
 }
 

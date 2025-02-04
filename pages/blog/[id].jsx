@@ -1,17 +1,18 @@
 import React from 'react'
 import blogList from '../utilis/blogdata'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import PageHeader from '../components/PageHeader';
-// import PopularPost from '../shop/PopularPost';
-// import Tags from '../shop/Tags';
+import PopularPost from '../shop/PopularPost';
+import Tags from '../shop/Tags';
 
 const SingleBlog = () => {
     const [blog, setBlog] = useState(blogList);
-    const {id} = useParams();
+    const router = useRouter();
+    const {id} = router.query;
 
     const result = blog.filter((b) => b.id === Number(id));
-    console.log(blog)
+    console.log(id)
 
   return (
     <div>
@@ -116,12 +117,12 @@ const SingleBlog = () => {
                         </article>
                     </div>
 
-                    {/* <div className='col-lg-4 col-12'>
+                    <div className='col-lg-4 col-12'>
                         <aside>
-                            <Tags/>
+                            {/* <Tags/> */}
                             <PopularPost/>
                         </aside>
-                    </div> */}
+                    </div>
                 </div>
             </div>
         </div>

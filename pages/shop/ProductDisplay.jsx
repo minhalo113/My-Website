@@ -1,8 +1,12 @@
 import React from 'react'
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+
+import { notFound } from 'next/navigation';
 
 const desc = "This is the detail of the product."
+
 
 const ProductDisplay = ({item}) => {
     const {name, id, price, seller, ratingsCount, quantity, img} = item;
@@ -121,7 +125,7 @@ const ProductDisplay = ({item}) => {
                     <button type = "submit" className='lab-btn'>
                         <span>Add to Cart</span>
                     </button>
-                    <Link to = "/cart-page" className='lab-btn bg-primary'>
+                    <Link href = "/cart-page" className='lab-btn bg-primary'>
                         <span>Check Out</span>
                     </Link>
                 </div>

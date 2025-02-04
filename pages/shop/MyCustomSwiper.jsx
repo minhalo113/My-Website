@@ -1,0 +1,52 @@
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation } from "swiper/modules";
+import { useRef, useEffect } from "react";
+
+const ProductSwiper = ({ images }) => {
+    const swiperRef = useRef(null); 
+
+    useEffect(() => {
+        if (swiperRef.current && swiperRef.current.swiper) {
+            swiperRef.current.swiper.navigation.init(); 
+            swiperRef.current.swiper.navigation.update(); 
+        }
+    }, []);
+
+    return (
+        <div className="swiper-container pro-single-top">
+            <Swiper
+                ref={swiperRef} 
+                spaceBetween={30}
+                slidesPerView={1}
+                loop={true} 
+                autoplay={{
+                    delay: 2000,
+                    disableOnInteraction: false
+                }}
+                navigation={{
+                    prevEl: ".pro-single-next", 
+                    nextEl: ".pro-single-prev"  
+                }}
+                modules={[Autoplay, Navigation]}
+                className="mySwiper"
+            >
+                {images.map((image, index) => (
+                    <SwiperSlide key={index}> 
+                        <div className="single-thumb">
+                            <img src={image} alt={`Product Image ${index + 1}`} />
+                        </div>
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+
+            <div className="pro-single-prev">
+                <i className="icofont-rounded-right"></i>
+            </div>
+            <div className="pro-single-next">
+                <i className="icofont-rounded-left"></i>
+            </div>
+        </div>
+    );
+};
+
+export default ProductSwiper;
