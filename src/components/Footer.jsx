@@ -21,15 +21,15 @@ const socialList = [
 
 const ItemList = [ { text: 'All Products', link: '/shop', }, 
     { text: 'Shop', link: '/shop', }, { text: 'Blog', link: '/blog', }, 
-    { text: 'About', link: '/about', }, { text: 'Refund Policy', link: '#', }, 
-    { text: 'Shipping Policy', link: '#',},
+    { text: 'About', link: '/about', }, { text: 'Refund Policy', link: '/refund-policy', }, 
+    { text: 'Shipping Policy', link: '/shipping-policy',},
     {/*{ text: 'FAQs', link: '/about', }*/} ]
 
 const quickList = [ /*{ text: 'Summer Sessions', link: '#', },*/
     //  { text: 'Events', link: '#', }, { text: 'Gallery', link: '#', }, 
     // { text: 'Forums', link: '#', },
-     { text: 'Privacy Policy', link: '#', }, 
-     { text: 'Terms of Use', link: '#', }, ]
+     { text: 'Privacy Policy', link: '/privacy-policy', }, 
+     { text: 'Terms of Service', link: '/terms-of-service', }, ]
 
 const Footer = () => {
   return (
@@ -49,7 +49,7 @@ const Footer = () => {
                                         <ul className='lab-ul office-address'>
                                         {
                                             quickList.map((val, i) => (
-                                                <li key={i}><a href= '#'>{val.text}</a></li>
+                                                <li key={i}><a href= {val.link}>{val.text}</a></li>
                                             ))
                                         }
                                         </ul>

@@ -27,13 +27,17 @@ import Contact from './contactPage/Contact.jsx'
 import AuthProvider from './contexts/AuthProvider.jsx'
 import Login from './components/Login.jsx'
 import Signup from './components/Signup.jsx'
+import TermsOfService from './policy/TermsOfServices.jsx'
+import PrivacyPolicy from './policy/PrivacyPolicy.jsx'
+import RefundPolicy from './policy/RefundPolicy.jsx'
+import ShippingPolicy from './policy/ShippingPolicy.jsx'
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { path: "/", element: <Home /> },
+      { path: "/", element: <Home/> },
       { path: "/blog", element: <Blog/> },
       { path: "/blog/:id", element: <SingleBlog/>},
       { path: "/shop", element: <Shop/> },
@@ -41,6 +45,10 @@ const router = createBrowserRouter([
       { path: "/cart-page", element: <CartPage/>},
       { path: "/about", element: <About/>},
       { path: "/contact", element: <Contact/>},
+      { path: "/privacy-policy", element: <PrivacyPolicy/>},
+      { path: "/terms-of-service", element: <TermsOfService/>},
+      { path: "/refund-policy", element: <RefundPolicy/>},
+      { path: "/shipping-policy", element: <ShippingPolicy/>},
     ],
   },
   {
