@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link';
+import PropTypes from 'prop-types';
 
 const PageHeader = ({title, curPage, additionalLink}) => {
     let additionalBreadcrumb = null;
@@ -36,6 +37,17 @@ const PageHeader = ({title, curPage, additionalLink}) => {
         </div>
         </div>
   )
+}
+
+PageHeader.propTypes = {
+    title: PropTypes.string.isRequired,
+    curPage: PropTypes.string.isRequired,
+    additionalLink: PropTypes.arrayOf(
+        PropTypes.shape({
+            label:PropTypes.string.isRequired,
+            path: PropTypes.string.isRequired
+        })
+    )
 }
 
 export default PageHeader

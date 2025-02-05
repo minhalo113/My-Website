@@ -64,8 +64,8 @@ const SingleBlog = () => {
                                                                 <div className='tags-section'>
                                                                     <ul className='tags lab-ul'>
                                                                         {
-                                                                            item.tags.map((tag) => (
-                                                                            <li>
+                                                                            item.tags.map((tag, index) => (
+                                                                            <li key = {index}>
                                                                                 <a href = "#">{tag}</a>
                                                                             </li>
                                                                             ))
