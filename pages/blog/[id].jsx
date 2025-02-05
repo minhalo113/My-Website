@@ -1,5 +1,4 @@
 import React from 'react'
-import blogList from '../utilis/blogdata'
 import { useState } from 'react'
 import { useRouter } from 'next/router';
 import PageHeader from '../components/PageHeader';
@@ -7,7 +6,14 @@ import PopularPost from '../shop/PopularPost';
 import Tags from '../shop/Tags';
 
 const SingleBlog = () => {
-    const [blog, setBlog] = useState(blogList);
+    const [blog, setBlog] = useState([]);
+
+    useEffect(() => {
+        fetch("/utilis/blogdata.js")
+        .then(res => res.json())
+        .then(data => {setBlog(data)})
+        .catch(error => console.error("Error fetching prodcuts:", error))
+    }, [])
     const router = useRouter();
     const {id} = router.query;
 

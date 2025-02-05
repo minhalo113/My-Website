@@ -59,3 +59,7 @@
 // }
 
 // export default AuthProvider;
+const AuthProvider = () => {
+    return <div>Google Map Component</div>;
+};
+export default AuthProvider;

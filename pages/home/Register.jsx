@@ -39,3 +39,7 @@
 // }
 
 // export default Register
+const Register = () => {
+    return <div>Google Map Component</div>;
+};
+export default Register;

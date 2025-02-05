@@ -135,3 +135,7 @@
 // }
 
 // export default Login
+const Login = () => {
+    return <div>Google Map Component</div>;
+};
+export default Login;

@@ -9,3 +9,7 @@
 // }
  
 // export default GoogleMap;
+const GoogleMap = () => {
+    return <div>Google Map Component</div>;
+};
+export default GoogleMap;

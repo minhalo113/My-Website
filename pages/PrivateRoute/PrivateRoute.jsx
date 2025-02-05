@@ -20,3 +20,7 @@
 // }
 
 // export default PrivateRoute
+const PrivateRoute = () => {
+    return <div>Google Map Component</div>;
+};
+export default PrivateRoute;

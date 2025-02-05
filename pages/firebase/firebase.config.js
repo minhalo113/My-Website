@@ -21,3 +21,7 @@
 // const analytics = getAnalytics(app);
 
 // export default app;
+const firebase = () => {
+    return <div>Google Map Component</div>;
+};
+export default firebase;

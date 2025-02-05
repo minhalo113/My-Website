@@ -1,9 +1,16 @@
 import React from 'react'
 import PageHeader from "../components/PageHeader"
-import blogList from "../utilis/blogdata"
 import Link from 'next/link'
+import { useState } from 'react'
 
 export const Blog = () => {
+  const [blogList, setBlogList] = useState([])
+    useEffect(() => {
+        fetch("/utilis/blogdata.js")
+        .then(res => res.json())
+        .then(data => {setBlogList(data)})
+        .catch(error => console.error("Error fetching prodcuts:", error))
+    }, [])
   return (
     <div>
       <PageHeader title = "Blog Page" curPage="Blogs"/>
