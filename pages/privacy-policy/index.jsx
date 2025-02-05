@@ -7,17 +7,17 @@ const PrivacyPolicy = () => {
         <PageHeader title="Privacy Policy" curPage="Privacy Policy"/>
         <div className='container'>
             <p>Last updated: November 21, 2024</p>
-            <p>This Privacy Policy describes how Toy Haven (the "Site", "we", "us", or "our") collects, uses, and discloses your personal information when you visit, use our services, or make a purchase from <a rel="noopener" title="ahistoryfactadaystore.com" href="ahistoryfactadaystore.com" target="_blank">ahistoryfactadaystore.com</a> (the "Site") or otherwise communicate with us regarding the Site (collectively, the "Services"). For purposes of this Privacy Policy, "you" and "your" means you as the user of the Services, whether you are a customer, website visitor, or another individual whose information we have collected pursuant to this Privacy Policy.</p>
+            <p>This Privacy Policy describes how Toy Haven (the &quot;Site&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and discloses your personal information when you visit, use our services, or make a purchase from <a rel="noopener" title="ahistoryfactadaystore.com" href="ahistoryfactadaystore.com" target="_blank">ahistoryfactadaystore.com</a> (the &quot;Site&quot;) or otherwise communicate with us regarding the Site (collectively, the &quot;Services&quot;). For purposes of this Privacy Policy, &quot;you&quot; and &quot;your&quot; means you as the user of the Services, whether you are a customer, website visitor, or another individual whose information we have collected pursuant to this Privacy Policy.</p>
             <p>Please read this Privacy Policy carefully. By using and accessing any of the Services, you agree to the collection, use, and disclosure of your information as described in this Privacy Policy. If you do not agree to this Privacy Policy, please do not use or access any of the Services.</p>
 
             <h2>Changes to This Privacy Policy</h2>
-            <p>We may update this Privacy Policy from time to time, including to reflect changes to our practices or for other operational, legal, or regulatory reasons. We will post the revised Privacy Policy on the Site, update the "Last updated" date and take any other steps required by applicable law.</p>
+            <p>We may update this Privacy Policy from time to time, including to reflect changes to our practices or for other operational, legal, or regulatory reasons. We will post the revised Privacy Policy on the Site, update the &quot;Last updated&quot; date and take any other steps required by applicable law.</p>
             <h2>How We Collect and Use Your Personal Information</h2>
             <p>To provide the Services, we collect and have collected over the past 12 months personal information about you from a variety of sources, as set out below. The information that we collect and use varies depending on how you interact with us.</p>
             <p>In addition to the specific uses set out below, we may use information we collect about you to communicate with you, provide or improve or improve the Services, comply with any applicable legal obligations, enforce any applicable terms of service, and to protect or defend the Services, our rights, and the rights of our users or others.</p>
 
             <h3>What Personal Information We Collect</h3>
-            <p>The types of personal information we obtain about you depends on how you interact with our Site and use our Services. When we use the term "personal information", we are referring to information that identifies, relates to, describes or can be associated with you. The following sections describe the categories and specific types of personal information we collect.</p>
+            <p>The types of personal information we obtain about you depends on how you interact with our Site and use our Services. When we use the term &quot;personal information&quot;, we are referring to information that identifies, relates to, describes or can be associated with you. The following sections describe the categories and specific types of personal information we collect.</p>
             
             <h3>Information We Collect Directly from You</h3>
             <p>Information that you directly submit to us through our Services may include:</p>
@@ -34,7 +34,7 @@ const PrivacyPolicy = () => {
 
             <p>Some features of the Services may require you to directly provide us with certain information about yourself. You may elect not to provide this information, but doing so may prevent you from using or accessing these features.</p>
             <h3>Information We Collect about Your Usage</h3>
-            <p>We may also automatically collect certain information about your interaction with the Services ("<strong>Usage Data</strong>"). To do this, we may use cookies, pixels and similar technologies ("<strong>Cookies</strong>"). Usage Data may include information about how you access and use our Site and your account, including device information, browser information, information about your network connection, your IP address and other information regarding your interaction with the Services.</p>
+            <p>We may also automatically collect certain information about your interaction with the Services (&quot;<strong>Usage Data</strong>&quot;). To do this, we may use cookies, pixels and similar technologies (&quot;<strong>Cookies</strong>&quot;). Usage Data may include information about how you access and use our Site and your account, including device information, browser information, information about your network connection, your IP address and other information regarding your interaction with the Services.</p>
             <h3>Information We Obtain from Third Parties</h3>
             <p>Finally, we may obtain information about you from third parties, including from vendors and service providers who may collect information on our behalf, such as:</p>
             <ul>
@@ -69,7 +69,7 @@ const PrivacyPolicy = () => {
             <li>With our affiliates or otherwise within our corporate group, in our legitimate interests to run a successful business.</li>
             <li>In connection with a business transaction such as a merger or bankruptcy, to comply with any applicable legal obligations (including to respond to subpoenas, search warrants and similar requests), to enforce any applicable terms of service, and to protect or defend the Services, our rights, and the rights of our users or others.</li>
             </ul>
-            <p>We have in the past 12 months disclosed the following categories of personal information and sensitive personal information about users for the purposes set out above in <i>"How we Collect and Use your Personal Information"</i> and <i>"How we Disclose Personal Information"</i>:</p>
+            <p>We have in the past 12 months disclosed the following categories of personal information and sensitive personal information about users for the purposes set out above in <i>&quot;How we Collect and Use your Personal Information&quot;</i> and <i>&quot;How we Disclose Personal Information&quot;</i>:</p>
             <table>
             <tbody>
             <tr>
@@ -121,7 +121,7 @@ const PrivacyPolicy = () => {
             </table>
             <h2>Third Party Websites and Links</h2>
             <p>Our Site may provide links to websites or other online platforms operated by third parties. If you follow links to sites not affiliated or controlled by us, you should review their privacy and security policies and other terms and conditions. We do not guarantee and are not responsible for the privacy or security of such sites, including the accuracy, completeness, or reliability of information found on these sites. Information you provide on public or semi-public venues, including information you share on third-party social networking platforms may also be viewable by other users of the Services and/or users of those third-party platforms without limitation as to its use by us or by a third party. Our inclusion of such links does not, by itself, imply any endorsement of the content on such platforms or of their owners or operators, except as disclosed on the Services.</p>
-            <h2>Children's Data</h2>
+            <h2>Children&apos;s Data</h2>
             <p>The Services are not intended to be used by children, and we do not knowingly collect any personal information about children. If you are the parent or guardian of a child who has provided us with their personal information, you may contact us using the contact details set out below to request that it be deleted.</p>
             <p>As of the Effective Date of this Privacy Policy, we do not have actual knowledge that we “share” or “sell” (as those terms are defined in applicable law) personal information of individuals under 16 years of age.</p>
             <h2>Security and Retention of Your Information</h2>
@@ -153,7 +153,7 @@ const PrivacyPolicy = () => {
             <p>If you have complaints about how we process your personal information, please contact us using the contact details provided below. If you are not satisfied with our response to your complaint, depending on where you live you may have the right to appeal our decision by contacting us using the contact details set out below, or lodge your complaint with your local data protection authority.</p>
             <h2>International Users</h2>
             <p>Please note that we may transfer, store and process your personal information outside the country you live in. Your personal information is also processed by staff and third party service providers and partners in these countries.</p>
-            <p>If we transfer your personal information out of Europe, we will rely on recognized transfer mechanisms like the European Commission's Standard Contractual Clauses, or any equivalent contracts issued by the relevant competent authority of the UK, as relevant, unless the data transfer is to a country that has been determined to provide an adequate level of protection.</p>
+            <p>If we transfer your personal information out of Europe, we will rely on recognized transfer mechanisms like the European Commission&apos;s Standard Contractual Clauses, or any equivalent contracts issued by the relevant competent authority of the UK, as relevant, unless the data transfer is to a country that has been determined to provide an adequate level of protection.</p>
             <h2>Contact</h2>
             <p>Should you have any questions about our privacy practices or this Privacy Policy, or if you would like to exercise any of the rights available to you, please call or email us at ahistoryfactaday@gmail.com.</p>
 

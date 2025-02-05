@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import Rating from "../components/Rating"
+import PropTypes from 'prop-types'
 
 const ProductCards = ({GridList, products}) => {
 
@@ -76,5 +77,21 @@ const ProductCards = ({GridList, products}) => {
     </div>
   )
 }
+
+ProductCards.propTypes = {
+  GridList: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      name: PropTypes.string.isRequired,
+      img: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+      price: PropTypes.number.isRequired,
+    })
+  ).isRequired,
+};
+
+ProductCards.defaultProps = {
+  GridList: true,
+  products: [],
+};
 
 export default ProductCards

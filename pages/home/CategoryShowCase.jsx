@@ -58,7 +58,7 @@ const CategoryShowCase = () => {
                         <li onClick= {() => filterItem("self-help")} style={{background: activeCategory === "self-help" ? "#DCA54A" : ""}}>Self-Help</li>
                         <li onClick= {() => filterItem("socialscience")} style={{background: activeCategory === "socialscience" ? "#DCA54A" : ""}}>Social Science</li>
                         <li onClick= {() => filterItem("teen&youngadult")} style={{background: activeCategory === "teen&youngadult" ? "#DCA54A" : ""}}>Teen & Young Adult</li>
-                        <li onClick= {() => filterItem("Men's Sneaker")} style={{background: activeCategory === "Men's Sneaker" ? "#DCA54A" : ""}}>Men's Sneaker</li>
+                        <li onClick= {() => filterItem("Men's Sneaker")} style={{background: activeCategory === "Men's Sneaker" ? "#DCA54A" : ""}}>Men&apos;s Sneaker</li>
                     </ul>
                 </div>
             </div>

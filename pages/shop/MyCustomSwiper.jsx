@@ -49,4 +49,12 @@ const ProductSwiper = ({ images }) => {
     );
 };
 
+ProductSwiper.propTypes = {
+    images: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
+
+ProductSwiper.defaultProps = {
+    images: [],
+};
+
 export default ProductSwiper;

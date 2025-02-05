@@ -15,7 +15,7 @@ const SelectedCategory = (select) => {
         <option value="self-help">Self-Help</option>
         <option value ="socialscience">Social Science</option>
         <option value ="teen&youngadult">Teen & Young Adult</option>
-        <option value ="Men's Sneaker">Men's Sneaker</option>
+        <option value ="Men's Sneaker">Men&apos;s Sneaker</option>
     </select>
   )
 }

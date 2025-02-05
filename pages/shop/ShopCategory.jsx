@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 
 const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, setSelectedCategory}) => {
     const [Data, setData] = useState([])
@@ -38,6 +39,14 @@ const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, set
         </div>
     </div>
   )
+}
+
+ShopCategory.propTypes = {
+    filterItem: PropTypes.func.isRequired,
+    menuItems: PropTypes.arrayOf(PropTypes.string).isRequired,
+    setProducts: PropTypes.func.isRequired,
+    selectedCategory: PropTypes.string.isRequired,
+    setSelectedCategory: PropTypes.func.isRequired,
 }
 
 export default ShopCategory

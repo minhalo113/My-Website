@@ -136,4 +136,16 @@ const ProductDisplay = ({item}) => {
   )
 }
 
+ProductDisplay.propTypes = {
+    item: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        name: PropTypes.string.isRequired,
+        price: PropTypes.number.isRequired,
+        seller: PropTypes.string.isRequired,
+        ratingsCount: PropTypes.number.isRequired,
+        quantity: PropTypes.number.isRequired,
+        img: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+    }).isRequired,
+};
+
 export default ProductDisplay

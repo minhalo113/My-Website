@@ -62,7 +62,7 @@ const Banner = () => {
                         </button>
 
                         {searchInput && showDropdown && filteredProducts.length > 0 && (
-                            <ul class = "dropdown" style={{marginBottom:"0"}}>
+                            <ul className = "dropdown" style={{marginBottom:"0"}}>
                             {
                                 searchInput && filteredProducts/*.slice(0,10)*/.map((product, i) => 
                                 <li key = {i} style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>

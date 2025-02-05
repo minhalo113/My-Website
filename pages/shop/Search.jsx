@@ -69,4 +69,15 @@ const Search = ({products}) => {
   )
 }
 
+Search.propTypes = {
+    products: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+            name: PropTypes.string.isRequired,
+            img: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+            price: PropTypes.number.isRequired,
+        })
+    ).isRequired,
+};
+
 export default Search
