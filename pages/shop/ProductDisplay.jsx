@@ -9,7 +9,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, id, price, seller, ratingsCount, quantity, img} = item;
+    const {name, id, price, seller, ratingsCount, quantity, img} = item || {};
 
     const [prequantity, setQuantity] = useState(quantity);
     // const [coupon, setCoupon] = useState("");
