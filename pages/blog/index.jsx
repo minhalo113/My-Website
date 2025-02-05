@@ -1,7 +1,7 @@
 import React from 'react'
 import PageHeader from "../components/PageHeader"
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export const Blog = () => {
   const [blogList, setBlogList] = useState([])

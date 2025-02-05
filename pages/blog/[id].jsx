@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router';
 import PageHeader from '../components/PageHeader';
 import PopularPost from '../shop/PopularPost';
