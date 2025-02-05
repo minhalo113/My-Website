@@ -1,6 +1,6 @@
 import React from 'react'
 import PageHeader from '../components/PageHeader'
-import GoogleMap from '../components/GoogleMap';
+// import GoogleMap from '../components/GoogleMap';
 import axios from "axios";
 
 const subTitle = "Get in touch with us"; 
