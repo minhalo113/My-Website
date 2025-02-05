@@ -9,7 +9,7 @@ const Search = ({products}) => {
     const [showDropdown, setShowDropdown] = useState(true)
     const dropdownRef = useRef(null)
     
-    const filteredProducts = products.filter((product) => {
+    const filteredProducts = (products || []).filter((product) => {
         return product.name.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
