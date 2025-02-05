@@ -79,7 +79,8 @@ const ProductCards = ({GridList, products}) => {
 }
 
 ProductCards.propTypes = {
-  GridList: PropTypes.arrayOf(
+  GridList: PropTypes.bool.isRequired,
+  products: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       name: PropTypes.string.isRequired,
@@ -87,7 +88,7 @@ ProductCards.propTypes = {
       price: PropTypes.number.isRequired,
     })
   ).isRequired,
-};
+}
 
 ProductCards.defaultProps = {
   GridList: true,
