@@ -2,7 +2,7 @@ import React from 'react'
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-
+import PropTypes from 'prop-types';
 import { notFound } from 'next/navigation';
 
 const desc = "This is the detail of the product."

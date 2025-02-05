@@ -1,6 +1,7 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
 import { useRef, useEffect } from "react";
+import PropTypes from 'prop-types';
 
 const ProductSwiper = ({ images }) => {
     const swiperRef = useRef(null); 

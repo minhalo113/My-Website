@@ -22,7 +22,7 @@ const ShippingPolicy = () => {
 
         <p><strong>Order Tracking:</strong></p>
         <p>You can track the status of your order using the tracking information provided in your confirmation email.</p>
-        <p>If you have any questions or concerns about your order's status, please don't hesitate to contact our customer support team.</p>
+        <p>If you have any questions or concerns about your order&apos;s status, please don&apos;t hesitate to contact our customer support team.</p>
 
         <p><strong>Shipping Restrictions:</strong></p>
         <p>We are unable to ship to P.O. boxes or APO/FPO addresses.</p>
@@ -32,7 +32,7 @@ const ShippingPolicy = () => {
         <p>For information about returns and exchanges, please refer to our <a title="Refund Policy" href="/refund-policy" target="_blank">Refund Policy</a>.</p>
 
         <p><strong>Contact Us:</strong></p>
-        <p>If you have any further questions or need assistance, please don't hesitate to contact our customer support team at ahistoryfactaday@gmail.com.</p>
+        <p>If you have any further questions or need assistance, please don&apos;t hesitate to contact our customer support team at ahistoryfactaday@gmail.com.</p>
         </div>
     </div>
   )
