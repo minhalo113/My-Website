@@ -1,3 +1,4 @@
+import PropTypes from "prop-types"
 import "./styles/App.css"
 import "./styles/animate.css"
 import "./styles/bootstrap.min.css"
@@ -11,6 +12,7 @@ import Head from "next/head"
 import NavItems from "./components/NavItems";
 import Footer from "./components/Footer";
 import { useRouter } from "next/router";
+import { Component } from "react"
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -34,6 +36,11 @@ function MyApp({ Component, pageProps }) {
       {!noLayoutRoutes.includes(router.pathname) && <Footer />}
     </>
   );
+}
+
+MyApp.propTypes = {
+  Component: PropTypes.elementType.isRequired,
+  pageProps: PropTypes.object.isRequired,
 }
 
 export default MyApp;
