@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 export const Blog = () => {
   const [blogList, setBlogList] = useState([])
     useEffect(() => {
-        fetch("/utilis/blogdata.js")
+        fetch("/utilis/blogdata.json")
         .then(res => res.json())
         .then(data => {setBlogList(data)})
         .catch(error => console.error("Error fetching prodcuts:", error))

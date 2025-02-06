@@ -9,7 +9,7 @@ const SingleBlog = () => {
     const [blog, setBlog] = useState([]);
 
     useEffect(() => {
-        fetch("/utilis/blogdata.js")
+        fetch("/utilis/blogdata.json")
         .then(res => res.json())
         .then(data => {setBlog(data)})
         .catch(error => console.error("Error fetching prodcuts:", error))
