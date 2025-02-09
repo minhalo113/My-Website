@@ -15,8 +15,8 @@ import { useRouter } from "next/router";
 import { Component } from "react"
 
 import {Amplify} from "aws-amplify";
-import awsExports from "./aws-exports"
-Amplify.configure(awsExports)
+// import awsExports from "./aws-exports"
+// Amplify.configure(awsExports)
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
