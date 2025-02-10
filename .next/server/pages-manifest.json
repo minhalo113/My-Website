@@ -2,11 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/blog": "pages/blog.js",
-  "/shop": "pages/shop.js",
-  "/about": "pages/about.js",
-  "/contact": "pages/contact.js",
-  "/cart-page": "pages/cart-page.js",
-  "/blog/[id]": "pages/blog/[id].js",
-  "/": "pages/index.js"
+  "/": "pages/index.js",
+  "/confirmation-code": "pages/confirmation-code.js",
+  "/login": "pages/login.js"
 }

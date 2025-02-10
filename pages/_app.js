@@ -13,14 +13,15 @@ import NavItems from "./components/NavItems";
 import Footer from "./components/Footer";
 import { useRouter } from "next/router";
 import { Component } from "react"
+import ReactDOM from "react-dom";
 
 import {Amplify} from "aws-amplify";
-// import awsExports from "./aws-exports"
-// Amplify.configure(awsExports)
+import awsExports from "../src/aws-exports"
+Amplify.configure(awsExports)
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  const noLayoutRoutes = ["/login", "/sign-up"];
+  const noLayoutRoutes = ["/login", "/sign-up", "/confirmation-code"];
 
   return (
     <>
