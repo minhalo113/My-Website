@@ -126,7 +126,7 @@ const NavItems = () => {
                   </div>
                 ) : (
                   <div className='ellepsis-bar d-md-none'>
-                    <i class="icofont-exit" onClick={()  => {logOut(); setSocialToggle(true)}}>
+                    <i className="icofont-exit" onClick={()  => {logOut(); setSocialToggle(true)}}>
                     </i>
                   </div>
                 )

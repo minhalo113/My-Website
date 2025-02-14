@@ -19,7 +19,7 @@ const ConfirmationCode  = () => {
                 setUserName(storedUsername);
             }
         }
-    })
+    }, [])
 
     const handleSignUpConfirmation = async (event) => {
         event.preventDefault();
