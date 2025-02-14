@@ -85,7 +85,7 @@ const Login = () => {
             {/* account button */}
             <div className="account-bottom">
               <span className="d-block cate pt-10">
-                Don't have an account? <Link href = "/sign-up">Sign Up</Link>
+                Don&apos;t have an account? <Link href = "/sign-up">Sign Up</Link>
               </span>
             </div>
 
