@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import Rating from "../components/Rating"
+import Rating from "../../components/Rating"
 import PropTypes from 'prop-types'
 
 const ProductCards = ({GridList, products}) => {

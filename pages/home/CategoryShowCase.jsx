@@ -1,6 +1,6 @@
 import React,{useState, useEffect} from 'react'
 
-import Rating from '../components/Rating'
+import Rating from '../../components/Rating'
 import Link from 'next/link'
 
 const title = "Our Toys"

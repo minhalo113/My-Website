@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react'
 
 import { Link } from 'react-router-dom';
-import SelectedCategory from '../components/SelectedCategory';
+import SelectedCategory from '../../components/SelectedCategory';
 import Select from 'react-select/base';
 
 

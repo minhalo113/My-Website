@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import PageHeader from '../components/PageHeader';
+import PageHeader from '../../components/PageHeader';
 import Link from 'next/link';
 import delImgUrl from "../assets/images/shop/del.png"
 import CheckOutPage from './CheckOutPage';

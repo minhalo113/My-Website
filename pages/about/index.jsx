@@ -1,5 +1,5 @@
 import React from 'react'
-import PageHeader from '../components/PageHeader';
+import PageHeader from "../../components/PageHeader"
 
 const subTitle = "About Our Store"; 
 const title = "Endless Fun and Adventure for All Ages";  

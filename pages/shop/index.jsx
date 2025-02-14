@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import PageHeader from '../components/PageHeader'
+import PageHeader from '../../components/PageHeader'
 import { Grid } from 'swiper/modules';
 import { useState } from 'react';
 

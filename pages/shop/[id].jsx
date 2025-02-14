@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
-import PageHeader from '../components/PageHeader';
+import PageHeader from '../../components/PageHeader';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 

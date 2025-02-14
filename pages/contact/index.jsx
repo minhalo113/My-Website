@@ -1,5 +1,5 @@
 import React from 'react'
-import PageHeader from '../components/PageHeader'
+import PageHeader from '../../components/PageHeader'
 // import GoogleMap from '../components/GoogleMap';
 import axios from "axios";
 

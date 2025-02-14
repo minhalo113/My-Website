@@ -1,5 +1,5 @@
 import React from 'react'
-import PageHeader from "../components/PageHeader"
+import PageHeader from "../../components/PageHeader"
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 

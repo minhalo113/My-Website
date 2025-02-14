@@ -9,8 +9,8 @@ import "./styles/icofont.min.css"
 import "./styles/modal.css"
 
 import Head from "next/head"
-import NavItems from "./components/NavItems";
-import Footer from "./components/Footer";
+import NavItems from "../components/NavItems";
+import Footer from "../components/Footer";
 import { useRouter } from "next/router";
 import { Component } from "react"
 import ReactDOM from "react-dom";

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState } from 'react';
-import Rating from '../components/Rating';
+import Rating from '../../components/Rating';
 
 const reviewTitle = "Add a Review"
 
