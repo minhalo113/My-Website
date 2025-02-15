@@ -2,6 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/cart-page": "pages/cart-page.js",
-  "/privacy-policy": "pages/privacy-policy.js"
+  "/admin-login": "pages/admin-login.js",
+  "/": "pages/index.js"
 }
