@@ -8,13 +8,15 @@ Amplify.configure(awsExports)
 
 import {signIn} from "aws-amplify/auth";
 import { useRouter } from "next/router";
+import { useDispatch } from 'react-redux';
 
 const title = "Login";
-const socialTitle = "Login with Social Media";
 const btnText = "Login Now";
 
 const Login = () => {
   const [errorMessage, seterrorMessage] = useState("");
+  
+  const dispatch = useDispatch()
 
   const router = useRouter();
 

@@ -1,7 +1,30 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../../api/api"
 import ActionTypes from './../../node_modules/redux/src/utils/actionTypes';
+import {jwtDecode} from 'jwt-decode'
 
+// decode token to check role
+const returnRole = (token) => {
+    if(typeof window !== "undefined"){
+        if (token){
+            const decodeToken = jwtDecode(token)
+            const expireTime = new Date(decodeToken.exp * 1000)
+
+            if (new Date() > expireTime){
+                localStorage.removeItem('accessToken')
+                return ''
+            }else{
+                return decodeToken.role
+            }
+        }else{
+            return ''
+        }
+    }else{
+        return "guest"
+    }
+}
+
+// call admin login API to backend server
 export const admin_login = createAsyncThunk(
     'auth/admin_login',
     async(info, {rejectWithValue, fulfillWithValue}) =>{
@@ -22,11 +45,14 @@ export const authReducer = createSlice({
         successMessage: '',
         errorMessage: '',
         loader: false,
-        userInfo: ''
+        userInfo: '',
+        role: typeof window !== "undefined" ? returnRole(localStorage.getItem('accessToken')) : "guest",
+        token: typeof window !== "undefined" ? localStorage.getItem('accessToken') : "null"
     },
     reducers: {
         messageClear: (state, _) => {
             state.errorMessage = ""
+            state.successMessage = ""
         }
     },
     extraReducers: (builder) => {
@@ -40,6 +66,7 @@ export const authReducer = createSlice({
         })
         .addCase(admin_login.fulfilled, (state, {payload}) => {
             state.loader = false;
+            state.userInfo = payload.userInfo;
             state.successMessage = payload.message;
         })
     }

@@ -13,22 +13,19 @@ import Head from "next/head"
 import NavItems from "../components/NavItems";
 import Footer from "../components/Footer";
 import { useRouter } from "next/router";
-import { Component } from "react"
-import ReactDOM from "react-dom";
-
-import {Amplify} from "aws-amplify";
-import awsExports from "../src/aws-exports"
-Amplify.configure(awsExports)
 
 import {Provider} from 'react-redux'
 import store from "../store/index"
 import {Toaster} from "react-hot-toast";
 
+import { noLayoutRoutes } from "../router/routes/NoLayoutRoutes"
 import {lazy, Suspense} from 'react';
+import ProtectRoute from "../router/routes/ProtectedRoutes"
+import { privateRoutes } from "../router/routes/privateRoutes"
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  const noLayoutRoutes = ["/login", "/sign-up", "/confirmation-code", "/admin-login"];
+  const currentRoute = privateRoutes.find((r) => r.path === router.pathname)
 
   return (
     <>
@@ -44,7 +41,16 @@ function MyApp({ Component, pageProps }) {
       {!noLayoutRoutes.includes(router.pathname) && <NavItems />}
       
       <div className="min-vh-100">
-        <Component {...pageProps} />
+        {
+          currentRoute ? (
+            <ProtectRoute route = {currentRoute}>
+              <Component {...pageProps}/>
+            </ProtectRoute>
+          ) : (
+          
+            <Component {...pageProps}/>
+          )
+        }
       </div>
 
       {!noLayoutRoutes.includes(router.pathname) && <Footer />}
