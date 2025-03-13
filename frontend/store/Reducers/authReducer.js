@@ -4,7 +4,7 @@ import ActionTypes from './../../node_modules/redux/src/utils/actionTypes';
 import {jwtDecode} from 'jwt-decode'
 
 // decode token to check role
-const returnRole = (token) => {
+const returnInfo = (token) => {
     if(typeof window !== "undefined"){
         if (token){
             const decodeToken = jwtDecode(token)
@@ -14,7 +14,7 @@ const returnRole = (token) => {
                 localStorage.removeItem('accessToken')
                 return ''
             }else{
-                return decodeToken.role
+                return decodeToken
             }
         }else{
             return ''
@@ -45,8 +45,8 @@ export const authReducer = createSlice({
         successMessage: '',
         errorMessage: '',
         loader: false,
-        userInfo: '',
-        role: typeof window !== "undefined" ? returnRole(localStorage.getItem('accessToken')) : "guest",
+        userInfo: typeof window !== "undefined" ? returnInfo(localStorage.getItem('accessToken')) : "" ,
+        role: typeof window !== "undefined" ? (returnInfo(localStorage.getItem('accessToken'))).role : "guest",
         token: typeof window !== "undefined" ? localStorage.getItem('accessToken') : "null"
     },
     reducers: {
@@ -68,6 +68,8 @@ export const authReducer = createSlice({
             state.loader = false;
             state.userInfo = payload.userInfo;
             state.successMessage = payload.message;
+            state.token = payload.token;
+            state.role = returnInfo(payload.token).role
         })
     }
 })

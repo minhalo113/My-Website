@@ -1,6 +1,5 @@
-import { Suspense } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSelector } from "react-redux"
-import { Navigate } from 'react-router-dom';
 import PropTypes from "prop-types";
 import { useRouter } from "next/router";
 
@@ -10,25 +9,35 @@ const ProtectRoute = ({route, children}) =>{
     const {role, userInfo} = useSelector(state => state.auth)
     const router = useRouter()
 
-    if (role) {
-        if (route.role) {
-            if (userInfo){
-                if (userInfo.role === route.role){
-                    return <Suspense fallback = {null}>{children}</Suspense>
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, [])
+
+    useEffect(() => {
+        if (isMounted) {
+            if(role){
+                if(route.role){
+                    if (userInfo){
+                        if(userInfo.role !== route.role){
+                            router.replace("/unauthorized")
+                        }
+                    }else{
+                        router.replace("/login")
+                    }
                 }else{
-                    router.replace('/unauthorized');
-                    return null;
+                    router.replace("/unauthorized")
                 }
             }else{
-                router.replace('/unauthorized');
-                return null;
+                router.replace("/login")
             }
-        }else{
-            return <Navigate to = '/unauthorized' replace />
         }
-    }else{
-        return <Navigate to = '/login' replace />
-    }
+    }, [role, userInfo, route, isMounted, router])
+
+    if (!isMounted) return null;
+
+    return <Suspense fallback = {null}>{children}</Suspense>
 }
 
 ProtectRoute.propTypes = {

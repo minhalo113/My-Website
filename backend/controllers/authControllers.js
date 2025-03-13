@@ -4,6 +4,10 @@ import bcrypt from "bcrypt"
 import createToken from '../utils/tokenCreate.js';
 
 class authControllers{
+    // check validation
+    check_validation = async(req, res) => {
+        
+    }
 
     // admin login backend execution
     admin_login = async(req, res) => {
@@ -15,7 +19,11 @@ class authControllers{
                 if(match){
                     const token = await createToken({
                         id: admin.id,
-                        role: admin.role
+                        role: admin.role,
+                        name: admin.name,
+                        email: admin.email,
+                        password: admin.password,
+                        images: admin.images
                     })
                     res.cookie('accessToken', token,{expires: new Date(Date.now() + 7 * 24 * 60 * 60*1000)} )
                     responseReturn(res, 200, {token, message: "Login Success", userInfo: admin});
