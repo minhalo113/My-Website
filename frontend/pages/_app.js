@@ -15,21 +15,21 @@ import Footer from "../components/Footer";
 import { useRouter } from "next/router";
 
 import {Provider} from 'react-redux'
-import store from "../store/index"
 import {Toaster} from "react-hot-toast";
 
 import { noLayoutRoutes } from "../router/routes/NoLayoutRoutes"
 import {lazy, Suspense} from 'react';
 import ProtectRoute from "../router/routes/ProtectedRoutes"
-import { privateRoutes } from "../router/routes/privateRoutes"
+import { privateRoutesAdmin } from "../router/routes/privateRoutesAdmin"
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
-  const currentRoute = privateRoutes.find((r) => r.path === router.pathname)
+  const adminPrivateRoutes = privateRoutesAdmin.find((r) => r.path === router.pathname)
+  const customerPrivateRoutes = null
 
+  const getLayout = Component.getLayout || ((page) => page);
   return (
     <>
-    <Provider store = {store}>
       <Suspense>
     <Head>
         <title>Toy Haven Store | Great Deals On Toys & More</title>
@@ -42,18 +42,12 @@ function MyApp({ Component, pageProps }) {
       
       <div className="min-vh-100">
         {
-          currentRoute ? (
-            <ProtectRoute route = {currentRoute}>
-              <Component {...pageProps}/>
-            </ProtectRoute>
-          ) : (
-          
-            <Component {...pageProps}/>
-          )
+          <Component {...pageProps}/>
         }
       </div>
 
       {!noLayoutRoutes.includes(router.pathname) && <Footer />}
+      
       <Toaster
           toastOptions={{
             position: "top-right",
@@ -64,7 +58,6 @@ function MyApp({ Component, pageProps }) {
           }}
       />
       </Suspense>
-      </Provider>
     </>
   );
 }
