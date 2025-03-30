@@ -12,13 +12,9 @@ import toast from 'react-hot-toast';
 import Search from '../components/Search';
  
 const Category = () => {
-
     const dispatch = useDispatch()
-    const loader = false
-    const categorys = []
-    const successMessage = "success"
-    const errorMessage = "error"
-    // const {loader,successMessage,errorMessage,categorys} = useSelector(state=> state.category)
+
+    const {loader,successMessage,errorMessage,categorys} = useSelector(state=> state.category)
 
     const [currentPage, setCurrentPage] = useState(1)
     const [searchValue, setSearchValue] = useState('')
@@ -33,79 +29,73 @@ const Category = () => {
         image: ''
     })
 
-//     const imageHandle = (e) => {
-//         let files = e.target.files 
-//         if (files.length > 0) {
-//             setImage(URL.createObjectURL(files[0]))
-//             setState({
-//                 ...state,
-//                 image: files[0]
-//             })
-//         }
-//     }
+    const imageHandle = (e) => {
+        let files = e.target.files 
+        if (files.length > 0) {
+            setImage(URL.createObjectURL(files[0]))
+            setState({
+                ...state,
+                image: files[0]
+            })
+        }
+    }
 
 
-//     const addOrUpdateCategory = (e) => {
-//         e.preventDefault()
-//         if (isEdit) {
-//             dispatch(updateCategory({ id:editId, ...state }))
-//         }else{
-//             dispatch(categoryAdd(state))
-//         }
-        
-//         // console.log(state)
-//     }
+    const addOrUpdateCategory = (e) => {
+        e.preventDefault()
+        if (isEdit) {
+            dispatch(updateCategory({ id:editId, ...state }))
+        }else{
+            dispatch(categoryAdd(state))
+        }
+    }
 
-//     useEffect(() => {
-
-//         if (successMessage) {
-//             toast.success(successMessage)
-//             dispatch(messageClear()) 
-//             setState({
-//                 name: '',
-//                 image: ''
-//             }) 
-//             setImage('')
-//             setIsEdit(false)
-//             setEditId(null)
-
-//         }
-//         if (errorMessage) {
-//             toast.error(errorMessage)
-//             dispatch(messageClear())
-//         }
-        
-
-//     },[successMessage,errorMessage,dispatch])
+    useEffect(() => {
+        if (successMessage) {
+            toast.success(successMessage)
+            dispatch(messageClear()) 
+            setState({
+                name: '',
+                image: ''
+            }) 
+            setImage('')
+            setIsEdit(false)
+            setEditId(null)
+        }
+        if (errorMessage) {
+            toast.error(errorMessage)
+            console.log(errorMessage)
+            dispatch(messageClear())
+        }
+    },[successMessage,errorMessage,dispatch])
    
-//     useEffect(() => {
-//         const obj = {
-//             parPage: parseInt(parPage),
-//             page: parseInt(currentPage),
-//             searchValue
-//         }
-//         dispatch(get_category(obj))
+    useEffect(() => {
+        const obj = {
+            parPage: parseInt(parPage),
+            page: parseInt(currentPage),
+            searchValue
+        }
+        dispatch(get_category(obj))
+    },[searchValue, currentPage,parPage])
 
-//     },[searchValue, currentPage,parPage])
+  /// Handle Edit Button 
+    const handleEdit = (category) => {
+        setState({
+            name: category.name,
+            image: category.image
+        })
+        setImage(category.image)
+        setEditId(category._id)
+        setIsEdit(true)
+        setShow(true)
+    }
 
-//   /// Handle Edit Button 
-//     const handleEdit = (category) => {
-//         setState({
-//             name: category.name,
-//             image: category.image
-//         })
-//         setImage(category.image)
-//         setEditId(category._id)
-//         setIsEdit(true)
-//         setShow(true)
-//     }
-
-//     const handleDelete = (id) => {
-//         if (window.confirm('Are you sure to delete category?')) {
-//             console.log("delete category id",id);
-//             dispatch(deleteCategory(id));
-//         }
-//     }
+    const handleDelete = (id) => {
+        if (window.confirm('Are you sure to delete category?')) {
+            console.log("delete category id",id);
+            dispatch(deleteCategory(id));
+        }
+    }
 
     return (
         <div className='px-2 lg:px-7 pt-5'>
@@ -143,10 +133,8 @@ const Category = () => {
                                         
                                         <td scope='row' className='py-1 px-4 font-medium whitespace-nowrap'>
                                             <div className='flex justify-start items-center gap-4'>
-                                            {/* <Link className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50' onClick={() => handleEdit(d)} > <FaEdit/> </Link> 
-                                            <Link className='p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50' onClick={() => handleDelete(d._id)}  > <FaTrash/> </Link>  */}
-                                            <Link className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50'> <FaEdit/> </Link> 
-                                            <Link className='p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50'> <FaTrash/> </Link> 
+                                            <Link className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50' onClick={() => handleEdit(d)} > <FaEdit/> </Link> 
+                                            <Link className='p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50' onClick={() => handleDelete(d._id)}  > <FaTrash/> </Link> 
                                             </div>
                                             
                                         </td>
@@ -179,28 +167,26 @@ const Category = () => {
                             </div>
 
 
-                            {/* <form onSubmit={addOrUpdateCategory}> */}
-                            <form>
+                            <form onSubmit={addOrUpdateCategory}>
                                 <div className='flex flex-col w-full gap-1 mb-3'>
-                                    <label htmlFor="name"> Category Name</label>
+                                    <label htmlFor="name">Category Name</label>
                                     <input value={state.name} onChange={(e)=>setState({...state,name : e.target.value})} className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#ffffff] border border-slate-700 rounded-md text-[#000000]' type="text" id='name' name='category_name' placeholder='Category Name' />
                                 </div>
 
                                 <div>
                                     <label className='flex justify-center items-center flex-col h-[238px] cursor-pointer border border-dashed hover:border-red-500 w-full border-[#d0d2d6]'  htmlFor="image">
                                         {
-                                        imageShow ? <img className='w-full h-full' src={imageShow} /> : <>
-                                        <span><FaImage/> </span>
-                                        <span>Select Image</span> 
+                                            imageShow ? <img className='w-full h-full' src={imageShow} /> : <>
+                                            <span><FaImage/> </span>
+                                            <span>Select Image</span> 
                                         </>
                                         }
                                     </label>
-                                    {/* <input onChange={imageHandle} className='hidden' type="file" name="image" id="image" /> */}
-                                    <input className='hidden' type="file" name="image" id="image" />
+                                    <input onChange={imageHandle} className='hidden' type="file" name="image" id="image" />
                                     <div className='mt-4'>
                                         <button disabled={loader ? true : false}  className='bg-red-500 w-full hover:shadow-red-300/50 hover:shadow-lg text-white rounded-md px-7 py-2 mb-3'>
                                         {
-                                        loader ? <PropagateLoader color='#fff' cssOverride={overrideStyle} /> : isEdit ? 'Update Category' : 'Add Category'
+                                            loader ? <PropagateLoader color='#fff' cssOverride={overrideStyle} /> : isEdit ? 'Update Category' : 'Add Category'
                                         } 
                                         </button> 
                                     </div>

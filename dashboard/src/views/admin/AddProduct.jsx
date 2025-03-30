@@ -3,28 +3,25 @@ import { Link } from 'react-router-dom';
 import { IoMdImages } from "react-icons/io";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useDispatch, useSelector } from 'react-redux';
-// import { get_category } from '../../store/Reducers/categoryReducer';
-// import { add_product,messageClear } from '../../store/Reducers/productReducer';
+import { get_category } from '../../store/Reducers/categoryReducer';
+import { add_product,messageClear } from '../../store/Reducers/productReducer';
 import { PropagateLoader } from 'react-spinners';
 import { overrideStyle } from '../../utilis/utils';
 import toast from 'react-hot-toast';
 
 const AddProduct = () => {
     const dispatch = useDispatch()
-    // const { categorys } = useSelector(state => state.category)
-    const categorys = []
-    const loader = false
-    const successMessage = ""
-    const errorMessage = ""
-    // const { loader,successMessage,errorMessage } = useSelector(state => state.product)
+    const { categorys } = useSelector(state => state.category)
 
-    // useEffect(() => {
-    //     dispatch(get_category({
-    //         searchValue: '',
-    //         parPage: '',
-    //         page: ""
-    //     }))
-    // }, [])
+    const { loader,successMessage,errorMessage } = useSelector(state => state.product)
+
+    useEffect(() => {
+        dispatch(get_category({
+            searchValue: '',
+            parPage: '',
+            page: ""
+        }))
+    }, [])
      
 
     const [state, setState] = useState({

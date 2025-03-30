@@ -8,7 +8,9 @@ import cors from "cors"
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import dbConnect from './utils/db.js';
-import router from "./routes/authRoutes.js";
+
+import authRouter from "./routes/authRoutes.js";
+import categoryRouter from "./routes/dashboard/categoryRoutes.js"
 
 const PORT = process.env.PORT;
 const CONNECTURI = process.env.CONNECTURI;
@@ -23,7 +25,8 @@ app.use(cors({
 app.use(bodyParser.json())
 app.use(cookieParser())
 
-app.use("/api", router)
+app.use("/api", authRouter)
+app.use("/api", categoryRouter)
 
 app.get("/", (req, res) => res.send("My backend"))
 dbConnect()
