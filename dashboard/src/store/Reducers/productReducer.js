@@ -4,6 +4,7 @@ import api from "../../api/api";
 export const add_product = createAsyncThunk(
     'product/add_product',
     async(product, {rejectWithValue, fulfillWithValue}) => {
+        console.log("frontend")
         try{
             const {data} = await api.post('/product-add', product, {withCredentials: true})
             return fulfillWithValue(data)
@@ -65,6 +66,19 @@ export const product_image_update = createAsyncThunk(
     }
 )
 
+export const deleteProduct = createAsyncThunk(
+    'product/deleteProduct',
+    async(id, {rejectWithValue}) => {
+        try{
+            const response = await api.delete(`/product/${id}`, {withCredentials: true})
+            return response.data
+        }catch(error){
+            console.log(error)
+            return rejectWithValue(error.response.data.message)
+        }
+    }
+)
+
 export const productReducer = createSlice({
     name: 'product',
     initialState: {
@@ -78,6 +92,7 @@ export const productReducer = createSlice({
     reducers: {
         messageClear: (state, _) => {
             state.errorMessage = ""
+            state.successMessage = ""
         }
     },
     extraReducers: (builder) => {
@@ -143,6 +158,19 @@ export const productReducer = createSlice({
         .addCase(product_image_update.rejected, (state, {payload}) => {
             state.loader = false;
             state.errorMessage = payload.errorMessage;
+        })
+
+        .addCase(deleteProduct.pending, (state, {payload}) => {
+            state.loader = true
+        })
+        .addCase(deleteProduct.fulfilled, (state, action) => {
+            state.products = state.products.filter(product => product._id !== action.meta.arg);
+            state.successMessage = action.payload.message;
+            state.loader = false;
+        })
+        .addCase(deleteProduct.rejected, (state, action) => {
+            state.loader = false;
+            state.errorMessage = action.payload
         })
     }
 })

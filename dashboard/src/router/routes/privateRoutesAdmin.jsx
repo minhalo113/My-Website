@@ -7,6 +7,7 @@ import PaymentRequest from "../../views/admin/PaymentRequest";
 import AddProduct from './../../views/admin/AddProduct';
 import Products from './../../views/admin/Products';
 import DiscountProducts from './../../views/admin/DiscountProducts';
+import EditProduct from './../../views/admin/EditProduct';
 
 export const privateRoutesAdmin = [
     {
@@ -49,4 +50,9 @@ export const privateRoutesAdmin = [
         element : <DiscountProducts/> ,
         role : 'admin'
     },
+    {
+        path: 'admin/dashboard/edit-product/:productId',
+        element: <EditProduct/>,
+        role: 'admin'
+    }
 ]

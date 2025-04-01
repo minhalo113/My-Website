@@ -48,7 +48,7 @@ export const deleteCategory = createAsyncThunk(
     'category/deleteCategory',
     async(id, {rejectWithValue}) => {
         try{
-            const response = await api.delete(`/category/${id}`)
+            const response = await api.delete(`/category/${id}`, {withCredentials: true})
             return response.data
         }catch(error){
             return rejectWithValue(error.response.data.message)
@@ -109,9 +109,7 @@ export const categoryReducer = createSlice({
         })
         .addCase(updateCategory.rejected, (state, {payload}) => {
             state.loader = false;
-            console.log(state.errorMessage);
             state.errorMessage = payload.error;
-            console.log(state.errorMessage);
         })
         .addCase(updateCategory.pending, (state, {payload}) => {
             state.loader = true

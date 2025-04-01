@@ -104,7 +104,7 @@ class categoryController{
                         })
                         result = await cloudinary.uploader.upload(image.filepath, {folder: 'categorys'})
                     }
-                    story = 2
+
                     const updateData = {
                         name, slug,
                     }
@@ -115,7 +115,7 @@ class categoryController{
                     const category = await categoryModel.findByIdAndUpdate(id, updateData, {new: true});
                     responseReturn(res, 200, {category, message: 'Category Updated Successfully'})
                 }catch(error){
-
+                    console.log(error)
                     responseReturn(res, 500, {error: "Internal Server Error"})
                 }
             }

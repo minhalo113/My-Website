@@ -77,31 +77,29 @@ const AddProduct = () => {
     // console.log(images)
     // console.log(imageShow)
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     if (successMessage) {
-    //         toast.success(successMessage)
-    //         dispatch(messageClear()) 
-    //         setState({
-    //             name: "",
-    //             description: '',
-    //             discount: '',
-    //             price: "",
-    //             brand: "",
-    //             stock: ""
-    //         }) 
-    //         setImageShow([])
-    //         setImages([])
-    //         setCategory('')
+        if (successMessage) {
+            toast.success(successMessage)
+            dispatch(messageClear()) 
+            setState({
+                name: "",
+                description: '',
+                discount: '',
+                price: "",
+                brand: "",
+                stock: ""
+            }) 
+            setImageShow([])
+            setImages([])
+            setCategory('')
 
-    //     }
-    //     if (errorMessage) {
-    //         toast.error(errorMessage)
-    //         dispatch(messageClear())
-    //     }
-        
-
-    // },[successMessage,errorMessage])
+        }
+        if (errorMessage) {
+            toast.error(errorMessage)
+            dispatch(messageClear())
+        }
+    },[successMessage,errorMessage])
 
     const changeImage = (img, index) => {
         if (img) {
@@ -133,19 +131,19 @@ const AddProduct = () => {
         formData.append('stock',state.stock)
         formData.append('discount',state.discount)
         formData.append('brand',state.brand)
-        formData.append('shopName','EasyShop') 
+        formData.append('shopName','Toy Haven') 
         formData.append('category',category)
 
         for (let i = 0; i < images.length; i++) {
             formData.append('images',images[i]) 
         }
 
-        // dispatch(add_product(formData))
+        dispatch(add_product(formData))
     }
 
-    // useEffect(() => {
-    //     setAllCategory(categorys)
-    // },[categorys])
+    useEffect(() => {
+        setAllCategory(categorys)
+    },[categorys])
 
  
     return (
@@ -153,7 +151,7 @@ const AddProduct = () => {
             <div className='w-full p-4 bg-[#6a5fdf] rounded-md'>
                 <div className='flex justify-between items-center pb-4'>
                     <h1 className='text-[#d0d2d6] text-xl font-semibold'>Add Product</h1>
-                    <Link to='/seller/dashboard/products' className='bg-blue-500 hover:shadow-blue-500/50 hover:shadow-lg text-white rounded-sm px-7 py-2 my-2'>All Product</Link> 
+                    <Link to='/admin/dashboard/products' className='bg-blue-500 hover:shadow-blue-500/50 hover:shadow-lg text-white rounded-sm px-7 py-2 my-2'>All Product</Link> 
                 </div>
 <div>
     <form onSubmit={add}>

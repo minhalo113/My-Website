@@ -35,7 +35,6 @@ const EditProduct = () => {
         price: "",
         brand: "",
         stock: ""
-    
     })
 
     const inputHandle = (e) => {
@@ -75,8 +74,6 @@ const EditProduct = () => {
         }
        
     }
-
-   
 
     useEffect(() => {
         setState({
@@ -128,7 +125,7 @@ const EditProduct = () => {
             <div className='w-full p-4 bg-[#6a5fdf] rounded-md'>
                 <div className='flex justify-between items-center pb-4'>
                     <h1 className='text-[#d0d2d6] text-xl font-semibold'>Edit Product</h1>
-                    <Link to='/seller/dashboard/products' className='bg-blue-500 hover:shadow-blue-500/50 hover:shadow-lg text-white rounded-sm px-7 py-2 my-2'>All Product</Link> 
+                    <Link to='/admin/dashboard/products' className='bg-blue-500 hover:shadow-blue-500/50 hover:shadow-lg text-white rounded-sm px-7 py-2 my-2'>All Product</Link> 
                 </div>
 <div>
     <form onSubmit={update}>
@@ -211,9 +208,9 @@ const EditProduct = () => {
 
             <div className='flex'>
             <button disabled={loader ? true : false}  className='bg-red-500 w-[280px] hover:shadow-red-300/50 hover:shadow-lg text-white rounded-md px-7 py-2 mb-3'>
-            {
-               loader ? <PropagateLoader color='#fff' cssOverride={overrideStyle} /> : 'Save Changes'
-            } 
+                {
+                loader ? <PropagateLoader color='#fff' cssOverride={overrideStyle} /> : 'Save Changes'
+                } 
             </button>
 
             </div>
