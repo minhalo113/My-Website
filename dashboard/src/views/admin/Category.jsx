@@ -110,7 +110,7 @@ const Category = () => {
             <div className='flex flex-wrap w-full'>
                 <div className='w-full lg:w-7/12'>
                     <div className='w-full p-4 bg-[#6a5fdf] rounded-md'>
-                        {/* <Search setParPage={setParPage} setSearchValue={setSearchValue} searchValue={searchValue}  /> */}
+                        <Search setParPage={setParPage} setSearchValue={setSearchValue} searchValue={searchValue}  />
                         <div className='relative overflow-x-auto'>
                             <table className='w-full text-sm text-left text-[#d0d2d6]'>
                                 <thead className='text-sm text-[#d0d2d6] uppercase border-b border-slate-700'>

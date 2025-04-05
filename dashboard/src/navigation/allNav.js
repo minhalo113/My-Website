@@ -21,49 +21,49 @@ export const allNav = [
         path: '/admin/dashboard'
     },
     {
-        id : 6,
+        id : 2,
         title : 'Add Product',
         icon : <IoMdAdd />,
         role : 'admin',
         path: '/admin/dashboard/add-product'
     },     
     {
-        id : 7,
+        id : 3,
         title : 'All Product',
         icon : <MdViewList />,
         role : 'admin',
         path: '/admin/dashboard/products'
     },
+    // {
+    //     id : 4,
+    //     title : 'Discount Product',
+    //     icon : <TbBasketDiscount />,
+    //     role : 'admin',
+    //     path: '/admin/dashboard/discount-product'
+    // },
     {
-        id : 8,
-        title : 'Discount Product',
-        icon : <TbBasketDiscount />,
-        role : 'admin',
-        path: '/admin/dashboard/discount-product'
-    },
-    {
-        id : 3,
+        id : 5,
         title : 'Category',
         icon : <BiCategory  />,
         role : 'admin',
         path: '/admin/dashboard/category'
     },
     {
-        id : 2,
+        id : 6,
         title : 'Orders',
         icon : <AiOutlineShoppingCart />,
         role : 'admin',
         path: '/admin/dashboard/orders'
     },
     {
-        id : 4,
+        id : 7,
         title : 'Payment Request',
         icon : <MdPayment />,
         role : 'admin',
         path: '/admin/dashboard/payment-request'
     },
     {
-        id : 5,
+        id : 8,
         title : 'Live Chat',
         icon : <IoIosChatbubbles />,
         role : 'admin',

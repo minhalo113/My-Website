@@ -14,7 +14,7 @@ const Header = ({showSidebar, setShowSidebar}) => {
             </div>
 
             <div className='hidden md:block'>
-                <input className='px-3 py-2 outline-none border bg-transparent border-slate-700 rounded-md text-[#423d72] focus:border-indigo-300 overflow-hidden' type="text" name='search' placeholder='search' />
+                {/* <input className='px-3 py-2 outline-none border bg-transparent border-slate-700 rounded-md text-[#423d72] focus:border-indigo-300 overflow-hidden' type="text" name='search' placeholder='search' /> */}
                 </div>
                 <div className='flex justify-center items-center gap-8 relative'>
                 <div className='flex justify-center items-center'>

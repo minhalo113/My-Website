@@ -40,7 +40,7 @@ const Products = () => {
             <h1 className='text-[#000000] font-semibold text-lg mb-3'>All Products</h1>
 
          <div className='w-full p-4 bg-[#6a5fdf] rounded-md'> 
-         {/* <Search setParPage={setParPage} setSearchValue={setSearchValue} searchValue={searchValue} /> */}
+         <Search setParPage={setParPage} setSearchValue={setSearchValue} searchValue={searchValue} />
 
 
          <div className='relative overflow-x-auto mt-5'>

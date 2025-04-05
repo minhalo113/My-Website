@@ -1,25 +1,26 @@
-import React from 'react'
+import React, {useState} from 'react'
 import PageHeader from '../../components/PageHeader'
-// import GoogleMap from '../components/GoogleMap';
-import axios from "axios";
-
-const subTitle = "Get in touch with us"; 
-const title = "We're Always Eager To Hear From You!"; 
-const conSubTitle = "Get in touch with Contact us"; 
-const conTitle = "Fill The Form Below So We Can Get To Know You And Your Needs Better."; 
-const btnText = "Send our Message";
-
-const contactList = [ 
-    // { imgUrl: "/images/icon/01.png", imgAlt: "contact icon", 
-    // title: "Office Address", desc: "1201 park street, Fifth Avenue", },
-     { imgUrl: "/images/icon/02.png", imgAlt: "contact icon", title: "Phone number",
-         desc: "+780 655 6756", }, { imgUrl: "/images/icon/03.png",
-             imgAlt: "contact icon", title: "Send email", desc: "ahistoryfactaday@gmail.com", }, 
-            //  { imgUrl: "/images/icon/04.png", imgAlt: "contact icon", title: "Our website", 
-            //     desc: "www.shopcart.com", }, 
-            ];
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../../src/api/api';
+import { emailjs } from 'emailjs-com';
+import dotenv from "dotenv"
+import process from "process"
+dotenv.config();
 
 const Contact = () => {
+
+    const subTitle = "Get in touch with us"; 
+    const title = "We're Always Eager To Hear From You!"; 
+    const conSubTitle = "Get in touch with Contact us"; 
+    const conTitle = "Fill The Form Below So We Can Get To Know You And Your Needs Better."; 
+
+    const [btnText, setBtnText] = useState("Send our Message");
+
+    const contactList = [ 
+        { imgUrl: "/images/icon/02.png", imgAlt: "contact icon", title: "Phone number",desc: "+780 655 6756", },
+        { imgUrl: "/images/icon/03.png", imgAlt: "contact icon", title: "Send email", desc: "ahistoryfactaday@gmail.com", }
+        ];
+
   return (
     <div>
         <PageHeader title={"Get In Touch With Us"} curPage={"Contact Us"}/>
@@ -70,7 +71,8 @@ const Contact = () => {
                 </div>
 
                 <div className='section-wrapper'>
-                    <form className='contact-form'>
+                    <form className='contact-form' action = {process.env.NEXT_PUBLIC_SENT_EMAIL} method = "POST">
+                        <input type="hidden" name="_next" value= {process.env.NEXT_PUBLIC_DOMAIN + "/thank-you"} />
                         <div className='form-group'>
                             <input type='text' name='name' id ="name" placeholder='Your Name *'/>
                         </div>

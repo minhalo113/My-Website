@@ -16,7 +16,7 @@ const btnText = "Login Now";
 const Login = () => {
   const [errorMessage, seterrorMessage] = useState("");
   
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
 
   const router = useRouter();
 
