@@ -8,6 +8,7 @@ import ProductSwiper from "./MyCustomSwiper"
 import ProductDisplay from './ProductDisplay';
 import Review from './Review';
 import PopularPost from './PopularPost';
+import api from '../../src/api/api';
 
 const SingleProduct = () => {
     const [product, setProduct] = useState([]);
@@ -17,12 +18,22 @@ const SingleProduct = () => {
     const {id} = router.query;
 
     useEffect(() =>{
-        if(id){
-            fetch("/data/products.json").then(res => res.json()).then(data => {setLoading(false); setProduct(data)}).catch(error => {console.error("Error fetching product:", error); setLoading(false)})
-        }
+        const fetchData = async() => {
+            try{
+                const allProducts = await api.get('/products-get', {withCredentials: true})
+    
+                setProduct(allProducts.data.products);
+            }catch(err){
+                console.log(err)
+            }finally{
+                setLoading(false);
+            }
+        };
+    
+        fetchData();
     }, [id])
 
-    const result = product.filter((p)=> p.id === id);
+    const result = product.filter((p)=> p._id.toString() === id);
     const productData = result.length > 0 ? result[0] : null
 
     if(loading) return <p>Loading product detials...</p>
@@ -41,14 +52,14 @@ const SingleProduct = () => {
                                     <div className='col-md-6 col-12'><div className='product-thumb'>
                                         <div className='swiper-container pro-single-top'>
 
-                                            <ProductSwiper images = {productData.img}/>
+                                            <ProductSwiper images = {productData.images}/>
                                         </div></div></div>
 
                                     <div className='col-md-6 col-12'>
                                         <div className='post-content'>
                                             <div>
                                                 {
-                                                    result.map(item => <ProductDisplay key = {item.id} item = {item}/>)
+                                                    result.map(item => <ProductDisplay key = {item._id.toString()} item = {item}/>)
                                                 }
                                             </div>
                                         </div>

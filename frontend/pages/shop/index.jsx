@@ -12,19 +12,43 @@ import Search from './Search';
 import ShopCategory from './ShopCategory';
 import PopularPost from './PopularPost';
 import Tags from './Tags';
+import api from '../../src/api/api';
 
 const showResults = "Showing 01 - 12 of 139 Results"
 
 const Shop = () => {
-  const [Data, setData] = useState([]);
-  const [products, setproducts] = useState(Data);
-  useEffect(() => {
-      fetch("/data/products.json")
-      .then(res => res.json())
-      .then(data => {setData(data); setproducts(data)})
-      .catch(error => console.error("Error fetching prodcuts:", error))
+  // const [Data, setData] = useState([]);
+  const [products, setproducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [categories, setAllCategories] = useState([]);
+  // useEffect(() => {
+  //     fetch("/data/products.json")
+  //     .then(res => res.json())
+  //     .then(data => {setData(data); setproducts(data)})
+  //     .catch(error => console.error("Error fetching prodcuts:", error))
     
-  }, [])
+  // }, [])
+
+  useEffect(() =>{
+    const fetchData = async() => {
+        try{
+            const allProducts = await api.get('/products-get', {withCredentials: true})
+            const allCategories = await api.get('/category-get', {withCredentials: true})
+
+            setproducts(allProducts.data.products);
+            setTotalProducts(allProducts.data.totalProduct);
+            setAllProducts(allProducts.data.products);
+            setAllCategories(allCategories.data.categorys);
+        }catch(err){
+            console.log(err)
+        }finally{
+            // setLoading(false);
+        }
+    };
+
+    fetchData();
+}, [])
 
   const [GridList, setGridList] = useState(true);
 
@@ -40,15 +64,19 @@ const Shop = () => {
   }
 
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const menuItems = [...new Set(Data.map((Val) => Val.category))];
+  const menuItems = [...new Set(categories.map((category) => category.name))];
 
   const filterItem = (curcat) => {
-    const newItem = Data.filter((newVal) =>{
-      return newVal.category === curcat;
-    })
+    if (curcat === 'all'){
+      setproducts(allProducts);
+    }else{
+      const newItem = allProducts.filter((newVal) =>{
+        return newVal.category === curcat;
+      })
+      setproducts(newItem);
+    }
   
     setSelectedCategory(curcat);
-    setproducts(newItem);
   }
 
   return (
@@ -61,7 +89,7 @@ const Shop = () => {
               <div className='col-lg-8 col-12'>
                 <article>
                   <div className='shop-title d-flex flex-warp justify-content-between'>
-                    <p>{showResults}</p>
+                    <p>{`Showing 01 - 12 of ${totalProducts} Results`}</p>
                     <div className={`product-view-mode ${GridList ? "gridActive" : "listActive"}`}>
                       <a className='grid' onClick = {() => setGridList(!GridList)}>
                         <i className='icofont-ghost'></i>
@@ -91,7 +119,7 @@ const Shop = () => {
                   <Search products={products}/>
                   {/* {console.log(menuItems === undefined)} */}
                   <ShopCategory filterItem ={filterItem} menuItems={menuItems} setProducts = {setproducts}
-                  selectedCategory = {selectedCategory} setSelectedCategory = {setSelectedCategory}/>
+                  selectedCategory = {selectedCategory} setSelectedCategory = {setSelectedCategory} allProducts={products}/>
                   <PopularPost/>
                 </aside>
               </div>

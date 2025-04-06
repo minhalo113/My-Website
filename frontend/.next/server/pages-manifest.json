@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/thank-you": "pages/thank-you.js",
-  "/contact": "pages/contact.js",
-  "/": "pages/index.js"
+  "/": "pages/index.js",
+  "/shop/[id]": "pages/shop/[id].js",
+  "/shop": "pages/shop.js"
 }

@@ -2,6 +2,7 @@ import React from 'react'
 import Banner from './Banner'
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import api from '../../src/api/api.js'
 
 const subTitle = "Discover the Joy of Play!";
 const title = "Find the Perfect Toy for Every Adventure";
@@ -10,7 +11,17 @@ const HomeCategory = () => {
     const [productData, setProductData] = useState([])
     
     useEffect(() =>{
-        fetch("/data/products.json").then(res => res.json()).then(data => setProductData(data))
+        const fetchData = async() => {
+            try{
+                const allProducts = await api.get('/products-get', {withCredentials: true})
+
+                setProductData(allProducts.data.products);
+            }catch(err){
+                console.log(err)
+            }
+        };
+
+        fetchData();
     }, [])
 
   return (
@@ -29,7 +40,7 @@ const HomeCategory = () => {
                             <Link href = "/shop" className='category-item'>
                                 <div className='category-inner'>
                                     <div className='category-thumb'>
-                                        <img src = {Array.isArray(val.img) ? val.img[0] : val.img} style={{width: "200px", height: "auto"}}></img>
+                                        <img src = {Array.isArray(val.images) ? val.images[0] : val.images}></img>
                                     </div>
 
                                     <div className='category-content'>

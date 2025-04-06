@@ -71,6 +71,7 @@ class categoryController{
             }
             
         }catch(error){
+            console.log(error)
             responseReturn(res, 500, {error: "Internal Server Error"})
         }
     }

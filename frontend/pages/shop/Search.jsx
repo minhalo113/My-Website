@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import PropTypes from 'prop-types';
 
 const Search = ({products}) => {
@@ -43,17 +43,17 @@ const Search = ({products}) => {
         <div  style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY :"auto"}}>
             {
                 searchTerm && showDropdown && filteredProducts.slice(0, 20).map((product) => (
-                    <Link key = {product.id} to = {`/shop/${product.id}`}>
+                    <Link key = {product._id.toString()} href = {`/shop/${product._id.toString()}`}>
                         <div className='d-flex gap-3 p-2'>
                             <div>
                                 <div className='pro-thumb h-25'>
-                                    <img src = {product.img} alt = "" width = {70} className='flex-{grow|shrink}-0'/>
+                                    <img src = {product.images[0]} alt = "" className='flex-{grow|shrink}-0'/>
                                 </div>
                             </div>
 
                             <div className='product-content'>
                                 <p>
-                                    <Link to = {`/shop/${product.id}`}>
+                                    <Link href = {`/shop/${product._id.toString()}`}>
                                     {product.name}
                                     </Link>
                                 </p>

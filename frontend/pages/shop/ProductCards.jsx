@@ -14,12 +14,12 @@ const ProductCards = ({GridList, products}) => {
                   {/* product images */}
                   <div className='product-thumb'>
                     <div className='pro-thumb'>
-                      <img src = { Array.isArray(product.img) ? product.img[0] : product.img} alt = ""/>
+                      <img src = { Array.isArray(product.images) ? product.images[0] : product.images} alt = ""/>
                       </div>
 
                       {/* product action link */}
                       <div className='product-action-link'>
-                        <Link href = {`/shop/${product.id}`}><i className='icofont-eye'></i></Link>
+                        <Link href = {`/shop/${product._id.toString()}`}><i className='icofont-eye'></i></Link>
 
                         <a href='#'>
                           <i className='icofont-heart'></i>
@@ -32,7 +32,7 @@ const ProductCards = ({GridList, products}) => {
                   {/* product content */}
                   <div className='product-content'>
                     <h5>
-                      <Link href = {`/shop/${product.id}`}>{product.name}</Link>
+                      <Link href = {`/shop/${product._id.toString()}`}>{product.name}</Link>
                     </h5>
 
                     <p className='productRating'>
@@ -46,11 +46,11 @@ const ProductCards = ({GridList, products}) => {
               <div className='product-list-item'>
                   <div className='product-thumb'>
                     <div className='pro-thumb'>
-                      <img src = {product.img} alt = ""/>
+                      <img src = { Array.isArray(product.images) ? product.images[0] : product.images}  alt = ""/>
                       </div>
 
                       <div className='product-action-link'>
-                        <Link href = {`/shop/${product.id}`}><i className='icofont-eye'></i></Link>
+                        <Link href = {`/shop/${product._id.toString()}`}><i className='icofont-eye'></i></Link>
 
                         <a href='#'>
                           <i className='icofont-heart'></i>
@@ -62,7 +62,7 @@ const ProductCards = ({GridList, products}) => {
 
                   <div className='product-content'>
                     <h5>
-                      <Link href = {`/shop/${product.id}`}>{product.name}</Link>
+                      <Link href = {`/shop/${product._id.toString()}`}>{product.name}</Link>
                     </h5>
 
                     <p className='productRating'>

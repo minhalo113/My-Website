@@ -9,10 +9,9 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, id, price, seller, ratingsCount, quantity, img} = item || {};
+    const {name, id, price, seller, ratingsCount, img, stock, description} = item || {};
 
-    const [prequantity, setQuantity] = useState(quantity);
-    // const [coupon, setCoupon] = useState("");
+    const [prequantity, setQuantity] = useState(0);
     const [size, setSize] = useState("Select Size")
     const [color, setColor] = useState("")
 
@@ -76,12 +75,12 @@ const ProductDisplay = ({item}) => {
 
             <h4>${price}</h4>
             <h6>{seller}</h6>
-            <p>{desc}</p>
+            <p style={{ whiteSpace: 'pre-line' }}>{description}</p>
         </div>
 
         <div>
             <form onSubmit={handleSubmit}>
-                <div className='select-product size'>
+                {/* <div className='select-product size'>
                     <select value={size} onChange={handleSizeChange}>
                         <option>Select Size</option>
                         <option value = "SM">SM</option>
@@ -106,15 +105,39 @@ const ProductDisplay = ({item}) => {
                     </select>
 
                     <i className='icofont-rounded-down'></i>
-                </div>
+                </div> */}
 
-                {/* quantity field */}
-                <div className='cart-plus-minus'>
-                    <div className='dec qtybutton' onClick = {handleDecrease}>-</div>
-                        <input className = 'cart-plus-minus-box' type = "text" name = "qtybutton" id = "qtybutton" value={prequantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value, 10))}/>
-                    <div className='inc qtybutton' onClick = {handleIncrease}>+</div>
-                </div>
+                <div className="flex items-center gap-6">
+                    {/* Quantity input */}
+                    <div className="cart-plus-minus">
+                        <div className="dec qtybutton" onClick={handleDecrease}>-</div>
+                        <input
+                        className="cart-plus-minus-box"
+                        type="text"
+                        name="qtybutton"
+                        id="qtybutton"
+                        value={prequantity}
+                        onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+                        />
+                        <div className="inc qtybutton" onClick={handleIncrease}>+</div>
+                    </div>
+
+                    {/* Stock display */}
+                    {stock !== undefined && (
+                        <div className="flex items-center gap-4 text-lg text-gray-800">
+                        <i className="icofont-box text-3xl text-[#D09A40]" />
+                        <span>
+                            {stock > 10 ? (
+                            <span className="text-green-600 font-semibold">In Stock: {stock} items</span>
+                            ) : stock > 0 ? (
+                            <span className="text-orange-500 font-bold">Hurry! Only {stock} left</span>
+                            ) : (
+                            <span className="text-red-600 font-extrabold">Out of stock</span>
+                            )}
+                        </span>
+                        </div>
+                    )}
+                 </div>
 
                 {/* coupon field */}
                 {/* <div className='discount-code mb-2'>

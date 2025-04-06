@@ -16,7 +16,7 @@ const Review = () => {
     <>
         <ul className={`review-nav lab-ul ${reviewShow ? "RevActive" : "DescActive"}`}>
             <li className='desc' onClick={() => setReviewShow(!reviewShow)}>Description</li>
-            <li className='rev' onClick={() => setReviewShow(!reviewShow)}>Reviews 4</li>
+            <li className='rev' onClick={() => setReviewShow(!reviewShow)}>Reviews</li>
         </ul>
 
         <div className={`review-content ${reviewShow ? "review-content-show" : "description-show"}`}>

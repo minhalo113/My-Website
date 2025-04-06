@@ -33,7 +33,7 @@ const ProductSwiper = ({ images }) => {
             >
                 {images.map((image, index) => (
                     <SwiperSlide key={index}> 
-                        <div className="single-thumb">
+                        <div className="single-thumb flex items-center justify-center h-[400px]">
                             <img src={image} alt={`Product Image ${index + 1}`} />
                         </div>
                     </SwiperSlide>

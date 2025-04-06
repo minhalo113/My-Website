@@ -1,9 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react'
-
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import SelectedCategory from '../../components/SelectedCategory';
 import Select from 'react-select/base';
-
+import api from '../../src/api/api';
 
 const title = (
     <h2>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h2>
@@ -14,9 +13,21 @@ const desc = "🎲 Endless Fun, One Small Price!"
 const Banner = () => {
     const [productData, setProductData] = useState([])
     
+
     useEffect(() =>{
-        fetch("/data/products.json").then(res => res.json()).then(data => setProductData(data))
-    }, [])
+        const fetchData = async() => {
+            try{
+                const allProducts = await api.get('/products-get', {withCredentials: true})
+    
+                setProductData(allProducts.data.products);
+            }catch(err){
+                console.log(err)
+            }finally{
+                // setLoading(false);
+            }
+    }
+    fetchData();}
+    , [])
 
     const [searchInput, setSearchInput] = useState("");
     const [filteredProducts, setfilteredProducts] = useState(productData);
@@ -64,10 +75,10 @@ const Banner = () => {
                         {searchInput && showDropdown && filteredProducts.length > 0 && (
                             <ul className = "dropdown" style={{marginBottom:"0"}}>
                             {
-                                searchInput && filteredProducts/*.slice(0,10)*/.map((product, i) => 
+                                searchInput && filteredProducts.slice(0,10).map((product, i) => 
                                 <li key = {i} style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>
-                                    <img src={product.img} style={{width: "100px", height:'auto', marginRight: '10px'}}/>
-                                    <Link to = {`/shop/${product.id}`} style={{flexGrow: 1, textAlign: 'center'}}>{product.name}</Link>
+                                    <img src={product.images[0]} style={{width: "100px", height:'auto', marginRight: '10px'}}/>
+                                    <Link href = {`/shop/${product._id.toString()}`} style={{flexGrow: 1, textAlign: 'center'}}>{product.name}</Link>
                                     </li>)
                             }
                             </ul>

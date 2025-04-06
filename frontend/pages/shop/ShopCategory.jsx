@@ -3,17 +3,15 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, setSelectedCategory}) => {
+const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, setSelectedCategory, allProducts}) => {
     const [Data, setData] = useState([])
 
     const router = useRouter();
     const {id} = router.query;
 
     useEffect(() => {
-        fetch("/data/products.json")
-        .then(res => res.json())
-        .then(data => setData(data))
-        .catch(error => console.error("Error fetching products:", error));
+        setData(allProducts)
+        console.log(allProducts)
     }, [])
 
   return (
@@ -47,6 +45,7 @@ ShopCategory.propTypes = {
     setProducts: PropTypes.func.isRequired,
     selectedCategory: PropTypes.string.isRequired,
     setSelectedCategory: PropTypes.func.isRequired,
+    allProducts: PropTypes.arrayOf(PropTypes.string).isRequired,
 }
 
 export default ShopCategory 
