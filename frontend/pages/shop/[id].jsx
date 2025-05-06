@@ -8,7 +8,7 @@ import ProductSwiper from "./MyCustomSwiper"
 import ProductDisplay from './ProductDisplay';
 import Review from './Review';
 import PopularPost from './PopularPost';
-import api from '../../src/api/api';
+import api from '../../src/api/api.js';
 
 const SingleProduct = () => {
     const [product, setProduct] = useState([]);
@@ -20,7 +20,7 @@ const SingleProduct = () => {
     useEffect(() =>{
         const fetchData = async() => {
             try{
-                const allProducts = await api.get('/products-get', {withCredentials: true})
+                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
     
                 setProduct(allProducts.data.products);
             }catch(err){

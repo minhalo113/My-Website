@@ -10,6 +10,7 @@ const Products = () => {
 
     const dispatch = useDispatch()
     const {products, totalProduct} = useSelector(state => state.product)
+    console.log(products)
  
     const [currentPage, setCurrentPage] = useState(1)
     const [searchValue, setSearchValue] = useState('')
@@ -98,7 +99,7 @@ const Products = () => {
                 <Pagination
                     pageNumber={currentPage}
                     setPageNumber={setCurrentPage}
-                    totalItem={50}
+                    totalItem={totalProduct}
                     parPage={parPage}
                     showItem={3}
                 />

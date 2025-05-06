@@ -17,8 +17,8 @@ const CategoryShowCase = () => {
     useEffect(() =>{
         const fetchData = async() => {
             try{
-                const allProducts = await api.get('/products-get', {withCredentials: true})
-                const allCategories = await api.get('/category-get', {withCredentials: true})
+                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
+                const allCategories = await api.get('/customers-category-get', {withCredentials: true})
 
                 setProductData(allProducts.data.products);
                 setItems(allProducts.data.products);
@@ -79,7 +79,7 @@ const CategoryShowCase = () => {
             <div className = "section-wrapper">
                 <div className='row g-4 justify-content-center row-cols-x1-4 row-cols-lg-3 row-cols-md-2 row-cols-1
                  course-filter' >
-                    {items.slice(0, 10).map((product) => 
+                    {items.slice(0, 12).map((product) => 
                         <div key={product._id.toString()} className='col'>
                             <div className='course-item style-4'>
                             <div className='course-inner'>

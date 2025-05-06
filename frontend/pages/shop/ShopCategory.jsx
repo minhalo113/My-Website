@@ -3,16 +3,12 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, setSelectedCategory, allProducts}) => {
+const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, setSelectedCategory}) => {
     const [Data, setData] = useState([])
 
     const router = useRouter();
     const {id} = router.query;
 
-    useEffect(() => {
-        setData(allProducts)
-        console.log(allProducts)
-    }, [])
 
   return (
     <div className='widget'>
@@ -21,7 +17,7 @@ const ShopCategory = ({filterItem, menuItems, setProducts, selectedCategory, set
         </div>
  
         <div className='widget-wrapper'>
-            <button onClick={() => {setProducts(Data); setSelectedCategory("all")}} className={`m-2 ${selectedCategory === "all" ? "bg-warning" : ""}`}>All</button>
+            <button onClick={() => {filterItem("all"); setSelectedCategory("all")}} className={`m-2 ${selectedCategory === "all" ? "bg-warning" : ""}`}>All</button>
             {
 
                 (menuItems || []).map((Val, id) =>{

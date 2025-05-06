@@ -74,8 +74,9 @@ class productController{
                     sellerId: id
                 }).countDocuments()
 
+
                 responseReturn(res, 200, {products, totalProduct})
-            }else{
+            }else if(parPage && page){
                 const products = await productModel.find({
                     sellerId: id
                 }).skip(skipPage).limit(parPage).sort({createdAt: -1})
@@ -83,6 +84,11 @@ class productController{
                 const totalProduct = await productModel.find({
                     sellerId: id
                 }).countDocuments()
+                
+                responseReturn(res, 200, {products, totalProduct})
+            }else{
+                const products = await productModel.find({ }).sort({createdAt: -1})
+                const totalProduct = await productModel.find({ }).countDocuments()
 
                 responseReturn(res, 200, {products, totalProduct})
             }

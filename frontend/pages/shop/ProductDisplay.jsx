@@ -4,24 +4,17 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
 import { notFound } from 'next/navigation';
+import { useCart } from '../../context/CartContext';
+import {toast} from "react-hot-toast"
 
 const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, id, price, seller, ratingsCount, img, stock, description} = item || {};
+    const {name, _id, price, seller, ratingsCount, images, stock, description} = item || {};
 
-    const [prequantity, setQuantity] = useState(0);
-    const [size, setSize] = useState("Select Size")
-    const [color, setColor] = useState("")
-
-    const handleSizeChange = (e) => {
-        setSize(e.target.value);
-    } 
-
-    const handleColorChange = (e) => {
-        setColor(e.target.value);
-    } 
+    const [prequantity, setQuantity] = useState(1);
+    const {add} = useCart();
 
     const handleDecrease = () => {
         if(prequantity > 1){
@@ -34,30 +27,20 @@ const ProductDisplay = ({item}) => {
     }
 
     const handleSubmit = (e) => {
-        e.preventDefault();
         const product = {
-            id: id,
-            img: img,
+            id: _id,
+            img: images,
             name: name,
-            price: price,
-            quantity: prequantity,
-            size: size,
-            color: color,
+            price: price
         }
 
-        const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
+        e.preventDefault();
+        add(product, prequantity)
 
-        const existingProductIndex = existingCart.findIndex((item) => item.id === id);
-
-        if(existingProductIndex !== -1){
-            existingCart[existingProductIndex].quantity += prequantity;
-        }else{
-            existingCart.push(product);
-        }
-        localStorage.setItem("cart", JSON.stringify(existingCart))
-        setQuantity(1);
-        setSize("Select Size");
-        setColor("Select Color");
+        toast.success(
+            `${prequantity} × ${name} added to cart`,
+            { duration: 2500 }     
+        );
     }
 
   return (
@@ -80,32 +63,6 @@ const ProductDisplay = ({item}) => {
 
         <div>
             <form onSubmit={handleSubmit}>
-                {/* <div className='select-product size'>
-                    <select value={size} onChange={handleSizeChange}>
-                        <option>Select Size</option>
-                        <option value = "SM">SM</option>
-                        <option value = "MD">MD</option>
-                        <option value = "LG">LG</option>
-                        <option value = "XL">XL</option>
-                        <option value = "XXL">XXL</option>
-                    </select>
-
-                    <i className='icofont-rounded-down'></i>
-                </div>
-
-                <div className='select-product color'>
-                    <select value={color} onChange={handleColorChange}>
-                        <option>Select Color</option>
-                        <option>Pink</option>
-                        <option>Ash</option>
-                        <option>Red</option>
-                        <option>White</option>
-                        <option>Blue</option>
-                        <option>Black</option>
-                    </select>
-
-                    <i className='icofont-rounded-down'></i>
-                </div> */}
 
                 <div className="flex items-center gap-6">
                     {/* Quantity input */}
@@ -139,12 +96,7 @@ const ProductDisplay = ({item}) => {
                     )}
                  </div>
 
-                {/* coupon field */}
-                {/* <div className='discount-code mb-2'>
-                    <input type='text' placeholder='Enter Discount Code' onChange={(e) => setCoupon(e.target.value)}/>
-                </div> */}
                 <div style= {{display: "flex", justifyContent: "space-between", width: "100%" }}>
-                    {/* button section */}
                     <button type = "submit" className='lab-btn'>
                         <span>Add to Cart</span>
                     </button>
@@ -167,7 +119,7 @@ ProductDisplay.propTypes = {
         seller: PropTypes.string.isRequired,
         ratingsCount: PropTypes.number.isRequired,
         quantity: PropTypes.number.isRequired,
-        img: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+        images: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
     }).isRequired,
 };
 

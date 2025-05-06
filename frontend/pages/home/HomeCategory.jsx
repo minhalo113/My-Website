@@ -13,7 +13,7 @@ const HomeCategory = () => {
     useEffect(() =>{
         const fetchData = async() => {
             try{
-                const allProducts = await api.get('/products-get', {withCredentials: true})
+                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
 
                 setProductData(allProducts.data.products);
             }catch(err){

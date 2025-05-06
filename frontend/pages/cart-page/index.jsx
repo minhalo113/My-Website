@@ -1,55 +1,60 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import PageHeader from '../../components/PageHeader';
 import Link from 'next/link';
-import delImgUrl from "../assets/images/shop/del.png"
-import CheckOutPage from './CheckOutPage';
+import {useCart} from "../../context/CartContext"
+import axios from 'axios';
+import api from './../../src/api/api';
 
 const CartPage = () => {
-    const [cartItems, setcartItems] = useState([])
+    const {cart: cartItems, add, remove, clear, handleQuantityChange} = useCart()
 
+    const [mounted, setMounted] = useState(false);
     useEffect(() => {
-        const storedCartItems = JSON.parse(localStorage.getItem("cart")) || [];
-        setcartItems(storedCartItems);
-    }, [])
+        setMounted(true);
+    }, []);
+
+    const [shipping, setShipping] = useState({
+        address: "", phoneNumber: ""
+    });
 
     const calculateTotalPrice = (item) => {
-        return item.price * item.quantity
+        return item.price * item.qty
     }
 
-    const handleIncrease = (item) => {
-        item.quantity += 1;
-        setcartItems([...cartItems]);
+    const handleIncrease = (item) => add(item, 1);
+    const handleDecrease = (item) => add(item, -1);
+    const handleRemoveItem = (item) => remove(item.id);
 
-        localStorage.setItem("cart", JSON.stringify(cartItems));
-    }
+    const cartSubtotal = cartItems.reduce(
+        (t, i) => t + calculateTotalPrice(i), 0
+    )
 
-    const handleDecrease = (item) => {
-        if(item.quantity > 1){
-            item.quantity -= 1;
-            setcartItems([...cartItems]);
+    const handleCheckout  = async(e) => {
+        e.preventDefault();
 
-            localStorage.setItem("cart", JSON.stringify(cartItems));
-
+        const required = ["address", "phoneNumber"];
+        for (const key of required) {
+          if (!shipping[key].trim()) {
+            alert("Please fill out all required fields");
+            return;
+          }
         }
-    };
 
-    const handleRemoveItem = (item) => {
-        const updatedCart = cartItems.filter((cartItem) => cartItem.id !== item.id);
-
-        setcartItems(updatedCart);
-
-        updateLocalStorage(updatedCart);
+        try{
+            const {data} = await api.post("/create-payment-session", {
+                cartItems, shipping,
+            });
+            window.location.href = data.url;
+        }catch(error){
+            console.error(error);
+            alert("Could not start payment - please try again.");
+        }
     }
-
-    const updateLocalStorage = (cart) => {
-        localStorage.setItem("cart", JSON.stringify(cart));
-    }
-
-    const cartSubtotal = cartItems.reduce((total, item) => {
-        return total + calculateTotalPrice(item);
-    }, 0)
-
     const orderTotal = cartSubtotal;
+
+    if (!mounted) {
+        return null;
+    }
 
   return (
     <div>
@@ -87,7 +92,14 @@ const CartPage = () => {
                                             <td className='cat-quantity'>
                                                 <div className='cart-plus-minus'>
                                                     <div className='dec qtybutton' onClick={() => handleDecrease(item)}>-</div>
-                                                    <input type = "text" className='cart-plus-minus-box' name='qtybutton' value={item.quantity}/>
+                                                    <input
+                                                    type="text"
+                                                    className="cart-plus-minus-box"
+                                                    name="qtybutton"
+                                                    value={item.qty}
+                                                    min="0"
+                                                    onChange={(e) => handleQuantityChange(item, e.target.value)}
+                                                    />
                                                     <div className='inc qtybutton' onClick={() => handleIncrease(item)}>+</div>
                                                 </div>
                                             </td>
@@ -96,8 +108,8 @@ const CartPage = () => {
                                                 $ {calculateTotalPrice(item)}
                                             </td>
                                             <td className='cat-edit'>
-                                                <a href='#' onClick={() => handleRemoveItem(item)}>
-                                                    <img src={delImgUrl} alt = ""/>
+                                                <a onClick={() => handleRemoveItem(item)}>
+                                                    🗑️
                                                 </a>
                                             </td>
                                         </tr>
@@ -108,32 +120,27 @@ const CartPage = () => {
                     </div>
 
                     <div className='cart-bottom'>
-                        <div className='cart-checkout-box'>
-                            {/* <form className='coupon'>
-                                <input className = "cart-page-input-text" type='text' name = "coupon" id = "coupon" placeholder='Coupon Code ...'/>
-                                <input type='submit' value={"Apply Coupon"}/>
-                            </form> */}
 
-                            <form className='cart-checkout'>
-                                <input type = "submit" value = "Update Cart"/>
-                                <div>
-                                    <CheckOutPage/>
-                                </div>
-                            </form>
-                        </div>
 
                         <div className='shiping-box'>
                             <div className='row'>
-                                <div className='col-md-6 col-12'>
                                     <div className='calculate-shiping'>
-                                        <h3>Shipping Address</h3>
-                                        <input style={{ width: '100%' }} type="text" name="address" id="address" placeholder="Address" className="cart-page-input-text"/>
-                                        <input style={{ width: '100%' }} type="text" name="postalCode" id="postalCode" placeholder="Postal Code / ZIP*" className="cart-page-input-text"/>
-                                        <button type = "submit">Update Address</button>
-                                    </div>
+                                        <h3>Contact & Shipping Information</h3>
+                                        <input style={{ width: '100%' }} type="text" name="address" id="address" placeholder="Address*" className="cart-page-input-text" 
+                                        value = {shipping.address} onChange={(e) => setShipping({...shipping, address: e.target.value})}/>
+{/* 
+                                        <input style={{ width: '100%' }} type="text" name="postalCode" id="postalCode" placeholder="Postal Code / ZIP*" className="cart-page-input-text"
+                                        value = {shipping.postalCode} onChange={(e) => setShipping({...shipping, postalCode: e.target.value})}/>
+
+                                        <input style={{ width: '100%' }} type="text" name="email" id="email" placeholder="Email*" className="cart-page-input-text"
+                                        value = {shipping.email} onChange={(e) => setShipping({...shipping, email: e.target.value})}/> */}
+
+                                        <input style={{ width: '100%' }} type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone Number*" className="cart-page-input-text"
+                                        value = {shipping.phoneNumber} onChange={(e) => setShipping({...shipping, phoneNumber: e.target.value})}/>
+
                                 </div>
 
-                                <div className='col-md-6 col-12'>
+                                {/* <div className='col-md-6 col-12'> */}
                                     <div className='cart-overview'>
                                         <h3>Cart Totals</h3>
                                         <ul className='lab-ul'>
@@ -153,6 +160,25 @@ const CartPage = () => {
                                             </li>
                                         </ul>
                                     </div>
+                                {/* </div> */}
+
+                                <div>
+                                        <form onSubmit={handleCheckout} className="w-full sm:w-auto">
+                                            <button
+                                            type="submit"
+                                            className="
+                                                w-full inline-flex items-center justify-center gap-2
+                                                px-6 py-3
+                                                rounded-lg
+                                                bg-emerald-600 hover:bg-emerald-700
+                                                text-white font-semibold tracking-wide
+                                                shadow-md hover:shadow-lg
+                                                transition active:scale-95
+                                            "
+                                            >
+                                            Proceed to Payment
+                                            </button>
+                                        </form>
                                 </div>
                             </div>
                         </div>

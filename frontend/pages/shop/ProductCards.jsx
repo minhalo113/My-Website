@@ -2,8 +2,29 @@ import React from 'react'
 import Link from 'next/link'
 import Rating from "../../components/Rating"
 import PropTypes from 'prop-types'
+import { useCart } from '../../context/CartContext';
+import {toast} from "react-hot-toast"
 
 const ProductCards = ({GridList, products}) => {
+  const {add} = useCart();
+
+  const handleSubmit = (e, _product) => {
+    const {_id, images, name, price} = _product;
+    const product = {
+        id: _id,
+        img: images,
+        name: name,
+        price: price
+    }
+
+    e.preventDefault();
+    add(product, 1)
+
+    toast.success(
+        `${1} × ${name} added to cart`,
+        { duration: 2500 }     
+    );
+}
 
   return (
     <div className={`shop-product-wrap row justify-content-center ${GridList ? "grid" : "list"}`}>
@@ -25,7 +46,7 @@ const ProductCards = ({GridList, products}) => {
                           <i className='icofont-heart'></i>
                         </a>
 
-                        <Link href = "/cart-page"><i className='icofont-cart-alt'></i></Link>
+                        <a onClick={(e) => handleSubmit(e, product)} href = "/cart-page"><i className='icofont-cart-alt'></i></a>
                         </div>
                   </div>
 
@@ -56,7 +77,7 @@ const ProductCards = ({GridList, products}) => {
                           <i className='icofont-heart'></i>
                         </a>
 
-                        <Link href = "/cart-page"><i className='icofont-cart-alt'></i></Link>
+                        <a onClick={(e) => handleSubmit(e, product)} href = "/cart-page"><i className='icofont-cart-alt'></i></a>
                         </div>
                   </div>
 

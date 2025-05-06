@@ -11,7 +11,7 @@ import EditProduct from './../../views/admin/EditProduct';
 
 export const privateRoutesAdmin = [
     {
-        path: "/admin/dashboard",
+        path: "admin/dashboard",
         element: <AdminDashboard/>,
         role: 'admin'
     },

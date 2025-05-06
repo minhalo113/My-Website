@@ -33,8 +33,8 @@ const Shop = () => {
   useEffect(() =>{
     const fetchData = async() => {
         try{
-            const allProducts = await api.get('/products-get', {withCredentials: true})
-            const allCategories = await api.get('/category-get', {withCredentials: true})
+            const allProducts = await api.get('/customers-products-get', {withCredentials: true})
+            const allCategories = await api.get('/customers-category-get', {withCredentials: true})
 
             setproducts(allProducts.data.products);
             setTotalProducts(allProducts.data.totalProduct);
@@ -119,7 +119,7 @@ const Shop = () => {
                   <Search products={products}/>
                   {/* {console.log(menuItems === undefined)} */}
                   <ShopCategory filterItem ={filterItem} menuItems={menuItems} setProducts = {setproducts}
-                  selectedCategory = {selectedCategory} setSelectedCategory = {setSelectedCategory} allProducts={products}/>
+                  selectedCategory = {selectedCategory} setSelectedCategory = {setSelectedCategory}/>
                   <PopularPost/>
                 </aside>
               </div>
