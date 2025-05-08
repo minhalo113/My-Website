@@ -67,7 +67,9 @@ const SingleProduct = () => {
                                 </div>
                             </div>
                             <div className='review'>
-                                <Review/>
+                                {
+                                    result.map(item => <Review key = {item._id.toString()} item = {item}/>)
+                                }
                             </div>
                         </article>
                     </div>

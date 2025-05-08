@@ -10,7 +10,7 @@ import "./styles/modal.css"
 import "./styles/output.css"
 
 import Head from "next/head"
-import NavItems from "../components/NavItems";
+import NavItems from "../components/NavItems.jsx";
 import Footer from "../components/Footer";
 import { useRouter } from "next/router";
 

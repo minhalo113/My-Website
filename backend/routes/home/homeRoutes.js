@@ -1,6 +1,5 @@
 import homeController from "../../controllers/home/homeController.js"
 import express from "express"
-import authMiddleware from "../../middlewares/authMiddleware.js"
 
 const homeRouter = express.Router()
 

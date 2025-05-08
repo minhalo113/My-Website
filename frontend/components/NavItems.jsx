@@ -30,6 +30,8 @@ const NavItems = () => {
   // add event listener check user auth
   useEffect(() => {
     currentAuthenticatedUser();
+    
+
     const handleScroll = () => {
       setHeaderFixed(window.scrollY > 200);
     };

@@ -58,7 +58,7 @@ const ProductDisplay = ({item}) => {
 
             <h4>${price}</h4>
             <h6>{seller}</h6>
-            <p style={{ whiteSpace: 'pre-line' }}>{description}</p>
+            {/* <p style={{ whiteSpace: 'pre-line' }}>{description}</p> */}
         </div>
 
         <div>
@@ -80,7 +80,7 @@ const ProductDisplay = ({item}) => {
                     </div>
 
                     {/* Stock display */}
-                    {stock !== undefined && (
+                    {/* {stock !== undefined && (
                         <div className="flex items-center gap-4 text-lg text-gray-800">
                         <i className="icofont-box text-3xl text-[#D09A40]" />
                         <span>
@@ -93,7 +93,7 @@ const ProductDisplay = ({item}) => {
                             )}
                         </span>
                         </div>
-                    )}
+                    )} */}
                  </div>
 
                 <div style= {{display: "flex", justifyContent: "space-between", width: "100%" }}>

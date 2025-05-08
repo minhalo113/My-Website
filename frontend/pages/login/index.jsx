@@ -1,39 +1,43 @@
-import React, { useContext, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
 import Link from "next/link";
-
-import {Amplify} from "aws-amplify";
-import awsExports from "../../src/aws-exports"
-Amplify.configure(awsExports)
-
-import {signIn} from "aws-amplify/auth";
+import toast from 'react-hot-toast'
+import api from '../../src/api/api.js'
 import { useRouter } from "next/router";
-import { useDispatch } from 'react-redux';
 
 const title = "Login";
 const btnText = "Login Now";
 
 const Login = () => {
-  const [errorMessage, seterrorMessage] = useState("");
-  
-  // const dispatch = useDispatch()
+  const router = useRouter()
 
-  const router = useRouter();
+  const [state, setState] = useState({
+    email: '',
+    password: ''
+  })
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    const form = event.target;
-    const username = form.username.value;
-    const password = form.password.value;
+  const handleInput = (e) => {
+    e.preventDefault()
+    setState(
+      ...state,
+      setState(
+        ...state,
+        [e.target.name] = e.target.value
+      )
+    )
+  }
 
+  const handleLogin = async() => {
     try{
-      const {isSignedIn, nextStep} = await signIn({
-        username, password
-      })
-      
-      router.push("/")
-    }catch(error){
-      seterrorMessage(error.message);
+      const {data} = await api.post('/customer/customer-login', state, {withCredentials: true});
+      toast.success(
+        `Login Successfully`,
+        { duration: 2500 }     
+      )
+      localStorage.setItem('customerToken', data.token)
+      router.push('/')
+    }catch(err){
+      toast.error(err.response?.data?.error || 'Login failed')
+      console.error(err.message)
     }
   }
 
@@ -51,20 +55,10 @@ const Login = () => {
             <h3 className='title'>{title}</h3>
             <form className='account-form' onSubmit={handleLogin}>
               <div className='form-group'>
-                <input type='username' name = "username" id = "username" placeholder='Username *' required/>
+                <input onChange={handleInput} type='email' name = "email" id = "email" placeholder='Email *' required/>
               </div>
               <div className='form-group'>
-                <input type='password' name = "password" id = "password" placeholder='Password *' required/>
-              </div>
-
-              <div>
-                {
-                  errorMessage && (
-                    <div className="error-message text-danger mb-1">
-                      {errorMessage}
-                    </div>
-                  )
-                }
+                <input onChange={handleInput} type='password' name = "password" id = "password" placeholder='Password *' required/>
               </div>
 
               <div className='form-group'>
