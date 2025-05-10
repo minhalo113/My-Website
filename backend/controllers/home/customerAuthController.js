@@ -1,6 +1,8 @@
-import responseReturn from './../../utils/response';
-import createToken from './../../utils/tokenCreate';
-
+import responseReturn from './../../utils/response.js';
+import createToken from './../../utils/tokenCreate.js';
+import customerModel from '../../models/customerModel.js';
+import sellerCustomerModel from "../../models/chat/sellerCustomerModel.js"
+import bcrypt from 'bcrypt'
 
 class customerAuthController {
     customer_register = async (req, res) => {
@@ -33,7 +35,7 @@ class customerAuthController {
                 responseReturn(res, 201, {message: "User Register Success", token})
             }
         }catch(error){
-            console.log(error.message);
+            responseReturn(res, 404, { error: error.message})
         }
     }
 
@@ -71,6 +73,10 @@ class customerAuthController {
             expires: new Date(Date.now())
         })
         responseReturn(res, 200, {message: "Logout Success"})
+    }
+
+    customer_get_info = async(req, res) => {
+        responseReturn(res, 200, {user: req.user})
     }
 }
 

@@ -23,6 +23,7 @@ import ProtectRoute from "../router/routes/ProtectedRoutes"
 import { privateRoutesAdmin } from "../router/routes/privateRoutesAdmin"
 
 import {CartProvider} from "./../context/CartContext.jsx"
+import { AuthProvider } from "../context/AuthContext.jsx"
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
@@ -41,16 +42,17 @@ function MyApp({ Component, pageProps }) {
     </Head>
       <CartProvider>
 
+      <AuthProvider>
+        {!noLayoutRoutes.includes(router.pathname) && <NavItems />}
+        
+        <div className="min-vh-100">
+          {
+            <Component {...pageProps}/>
+          }
+        </div>
 
-      {!noLayoutRoutes.includes(router.pathname) && <NavItems />}
-      
-      <div className="min-vh-100">
-        {
-          <Component {...pageProps}/>
-        }
-      </div>
-
-      {!noLayoutRoutes.includes(router.pathname) && <Footer />}
+        {!noLayoutRoutes.includes(router.pathname) && <Footer />}
+      </AuthProvider>
       
       <Toaster
           toastOptions={{

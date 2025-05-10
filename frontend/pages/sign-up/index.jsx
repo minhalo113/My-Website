@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
-import {Amplify} from "aws-amplify";
-import awsExports from "../../src/aws-exports"
-Amplify.configure(awsExports)
-
-import { signUp } from "aws-amplify/auth";
+import api from "../../src/api/api";
+import { AuthContext } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
 const title = "Register Now";
 const socialTitle = "Register With Social Media";
@@ -15,14 +12,16 @@ const btnText = "Get Started Now";
 
 const Signup = () => {
   const [errorMessage, setErrorMessage] = useState("");
+  const {user, setUser} = useContext(AuthContext)
+  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
 
-  // login with email password
-  const handleSignup = async (event) => {
-    event.preventDefault();
-    const form = event.target;
-    const username = form.name.value;
+  // signup with email password
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.name.value;
     const email = form.email.value;
     const password = form.password.value;
     const confirmPassword = form.confirmPassword.value;
@@ -32,22 +31,21 @@ const Signup = () => {
     } else {
       setErrorMessage(""); 
       try{
-        console.log(username, password, email)
-        const {isSignUpComplete, userId, nextStep} = await signUp({
-          username, password,
-          options: {
-            userAttributes: {email: email}
-          }
-        })
-        alert("Signup Successful! Please enter the confirmation code sent to your email.");
+        const {data} = await api.post('/customer/customer-register', {name, email, password}, {withCredentials: true} )
+
+        const res = await api.get('/customer/me', {withCredentials: true})
+        setUser(res.data.user)
+
+        toast.success(data.message);
         if (typeof window !== "undefined") {
-          localStorage.setItem("username", username)
+          localStorage.setItem("Name", name)
         }
 
-        router.push("/confirmation-code");
+        router.push("/");
       }
       catch(error){
-        setErrorMessage("Error signing up: " + error.message);
+        const msg = error?.response?.data?.error || "Unexpected error occurred.";
+        setErrorMessage("Error signing up: " + msg);
       }
     }
   };
@@ -62,21 +60,31 @@ const Signup = () => {
             <h3 className="title">{title}</h3>
             <form className="account-form" onSubmit={handleSignup}>
               <div className="form-group">
-                <input type="text" name="name" placeholder="User Name" />
+                <input type="text" name="name" placeholder="Full Name" />
               </div>
               <div className="form-group">
                 <input type="email" name="email" placeholder="Email" />
               </div>
               <div className="form-group">
-                <input type="password" name="password" placeholder="Password" />
+                <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" />
               </div>
               <div className="form-group">
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                />
+              <input
+                type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm Password"
+              />
               </div>
+
+              <div className="form-group">
+              <label>
+                <input
+                  type="checkbox"
+                  onChange={() => setShowPassword(prev => !prev)}
+                />
+                Show Password
+              </label>
+            </div>
               {/* showing error message */}
               <div>
                 {errorMessage && (

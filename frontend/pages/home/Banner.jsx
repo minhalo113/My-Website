@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import Link from 'next/link';
 import SelectedCategory from '../../components/SelectedCategory';
-import Select from 'react-select/base';
 import api from '../../src/api/api';
 
 const title = (

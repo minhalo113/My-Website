@@ -1,10 +1,11 @@
 import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { getCurrentUser } from 'aws-amplify/auth';
-import { signOut } from "aws-amplify/auth"
+
+import toast from "react-hot-toast"
 import {useRouter} from "next/router";
 import { useRouteError } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import api from '../src/api/api.js'
 
 // import { AuthContext } from '../contexts/AuthProvider';
 
@@ -14,24 +15,10 @@ const NavItems = () => {
   const [headerFixed, setHeaderFixed] = useState(false);
 
   // authInfo
-  const [user, setUser] = useState(null);
+  const {user, setUser, loading} = useContext(AuthContext)
   const router = useRouter();
 
-  async function currentAuthenticatedUser(){
-    try {
-      const {username, userId, signInDetails} = await getCurrentUser();
-      setUser(username);
-    }catch (error){
-      console.log(error);
-      setUser(null);
-    }
-  }
-
-  // add event listener check user auth
   useEffect(() => {
-    currentAuthenticatedUser();
-    
-
     const handleScroll = () => {
       setHeaderFixed(window.scrollY > 200);
     };
@@ -45,14 +32,17 @@ const NavItems = () => {
 
   const logOut = async () => {
     try{
-      await signOut();
-      console.log("already logout")
-      currentAuthenticatedUser()
+      setUser(null)
+      const {data} = await api.get('/customer/logout', {withCredentials: true})
+      toast.success(data.message)
       router.push("/")
     }catch(error){
-      console.log("error signing out: ", error);
+      const msg = error?.response?.data?.error || "Unexpected error occurred."
+      toast.error("Error signing out: ", msg);
     }
   }
+
+  if(loading) return null
 
   return (
     <header  className={`header-section style-4 ${headerFixed ? "header-fixed fadeInUp" : ""}`}>
@@ -99,9 +89,6 @@ const NavItems = () => {
                   </ul>
                 </div>
 
-                {
-                  console.log(user)
-                }
                 {/* sign in and log in */}
                 { user ? 
                 (<><Link href = "/" className='d-none d-md-block' onClick={logOut}>Log Out</Link></>

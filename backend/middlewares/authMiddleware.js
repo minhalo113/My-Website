@@ -25,6 +25,11 @@ const authMiddleware = async(req, res, next) => {
 
         req.role = decodeToken.role;
         req.id = decodeToken.id;
+        req.user = {
+            id: user._id,
+            email: user.email,
+            name: user.name
+        }
         next()
     }catch(error){
         console.log(error)

@@ -3,12 +3,15 @@ import Link from "next/link";
 import toast from 'react-hot-toast'
 import api from '../../src/api/api.js'
 import { useRouter } from "next/router";
+import { AuthContext } from "../../context/AuthContext.jsx";
 
 const title = "Login";
 const btnText = "Login Now";
 
 const Login = () => {
   const router = useRouter()
+  const {user, setUser} = useContext(AuthContext)
+  const [showPassword, setShowPassword] = useState(false);
 
   const [state, setState] = useState({
     email: '',
@@ -16,28 +19,26 @@ const Login = () => {
   })
 
   const handleInput = (e) => {
-    e.preventDefault()
-    setState(
-      ...state,
-      setState(
-        ...state,
-        [e.target.name] = e.target.value
-      )
-    )
+    const {name, value} = e.target;
+    setState((prev) => ({...prev, [name]: value}))
   }
 
-  const handleLogin = async() => {
+  const handleLogin = async(e) => {
+    e.preventDefault()
     try{
       const {data} = await api.post('/customer/customer-login', state, {withCredentials: true});
+
+      const res = await api.get("/customer/me",  {withCredentials: true})
+      setUser(res.data.user);
+
       toast.success(
         `Login Successfully`,
         { duration: 2500 }     
       )
-      localStorage.setItem('customerToken', data.token)
+
       router.push('/')
     }catch(err){
       toast.error(err.response?.data?.error || 'Login failed')
-      console.error(err.message)
     }
   }
 
@@ -58,14 +59,14 @@ const Login = () => {
                 <input onChange={handleInput} type='email' name = "email" id = "email" placeholder='Email *' required/>
               </div>
               <div className='form-group'>
-                <input onChange={handleInput} type='password' name = "password" id = "password" placeholder='Password *' required/>
+                <input onChange={handleInput} type={showPassword ? "text" : "password"} name = "password" id = "password" placeholder='Password *' required/>
               </div>
 
               <div className='form-group'>
                 <div className="d-flex justify-content-between flex-wrap pt-sm-2">
                   <div className="checkgroup">
-                    <input type = "checkbox" name = "remember" id = "remember"/>
-                    <label htmlFor="remember">Remember Me</label>
+                    <input type = "checkbox" name = "remember" id = "remember" onChange={() => setShowPassword(prev => !prev)}/>
+                    <label htmlFor="remember">Show Password</label>
                   </div>
                   <Link href = "/forgetpass">Forget Password?</Link>
                 </div>
