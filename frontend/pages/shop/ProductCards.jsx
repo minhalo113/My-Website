@@ -4,6 +4,7 @@ import Rating from "../../components/Rating"
 import PropTypes from 'prop-types'
 import { useCart } from '../../context/CartContext';
 import {toast} from "react-hot-toast"
+import api from '../../src/api/api';
 
 const ProductCards = ({GridList, products}) => {
   const {add} = useCart();
@@ -26,6 +27,16 @@ const ProductCards = ({GridList, products}) => {
     );
 }
 
+  const addWishlist = async(e, _product) => {
+    const {_id, images, name, price} = _product;
+    try{
+      const res = await api.post("/add-to-wishlist", {productId: _id}, {withCredentials: true});
+      toast.success(res.data?.message)
+    }catch(error){
+      toast.error(error.response?.data?.message || "Error adding to wishlist")
+    }
+  }
+
   return (
     <div className={`shop-product-wrap row justify-content-center ${GridList ? "grid" : "list"}`}>
         {
@@ -39,15 +50,19 @@ const ProductCards = ({GridList, products}) => {
                       </div>
 
                       {/* product action link */}
-                      <div className='product-action-link'>
-                        <Link href = {`/shop/${product._id.toString()}`}><i className='icofont-eye'></i></Link>
+                      <div className="product-action-link flex items-center gap-3">
+                      <Link href={`/shop/${product._id.toString()}`}>
+                        <i className="icofont-eye text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-indigo-400" />
+                      </Link>
 
-                        <a href='#'>
-                          <i className='icofont-heart'></i>
-                        </a>
+                      <a onClick={(e) => addWishlist(e, product)}>
+                        <i className="icofont-heart text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-pink-400" />
+                      </a>
 
-                        <a onClick={(e) => handleSubmit(e, product)} href = "/cart-page"><i className='icofont-cart-alt'></i></a>
-                        </div>
+                      <a onClick={(e) => handleSubmit(e, product)}>
+                        <i className="icofont-cart-alt text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-emerald-400" />
+                      </a>
+                    </div>
                   </div>
 
                   {/* product content */}
@@ -73,11 +88,11 @@ const ProductCards = ({GridList, products}) => {
                       <div className='product-action-link'>
                         <Link href = {`/shop/${product._id.toString()}`}><i className='icofont-eye'></i></Link>
 
-                        <a href='#'>
+                        <a>
                           <i className='icofont-heart'></i>
                         </a>
 
-                        <a onClick={(e) => handleSubmit(e, product)} href = "/cart-page"><i className='icofont-cart-alt'></i></a>
+                        <a onClick={(e) => handleSubmit(e, product)}><i className='icofont-cart-alt'></i></a>
                         </div>
                   </div>
 

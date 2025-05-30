@@ -49,7 +49,7 @@ const Category = () => {
             dispatch(categoryAdd(state))
         }
     }
-
+   
     useEffect(() => {
         if (successMessage) {
             toast.success(successMessage)
@@ -67,16 +67,14 @@ const Category = () => {
             console.log(errorMessage)
             dispatch(messageClear())
         }
-    },[successMessage,errorMessage,dispatch])
-   
-    useEffect(() => {
+
         const obj = {
             parPage: parseInt(parPage),
             page: parseInt(currentPage),
             searchValue
         }
         dispatch(get_category(obj))
-    },[searchValue, currentPage,parPage])
+    },[searchValue, currentPage,parPage, successMessage, errorMessage, dispatch])
 
   /// Handle Edit Button 
     const handleEdit = (category) => {

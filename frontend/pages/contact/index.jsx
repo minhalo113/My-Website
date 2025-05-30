@@ -1,8 +1,5 @@
 import React, {useState} from 'react'
 import PageHeader from '../../components/PageHeader'
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../../src/api/api';
-import { emailjs } from 'emailjs-com';
 import dotenv from "dotenv"
 import process from "process"
 dotenv.config();

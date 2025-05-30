@@ -1,13 +1,15 @@
 import Stripe from 'stripe';
 import responseReturn from "../../utils/response.js";
 import { sendMail } from '../../utils/mail.js';
+import customerOrder from '../../models/orderModel.js';
+import moment from 'moment'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 class paymentController {
     create_payment_session = async (req, res) => {
         try{
-            const {cartItems, shipping} = req.body;
+            const {cartItems, shipping, is_login} = req.body;
 
             if (!cartItems) {
                 return responseReturn(res, 400, {error: "Missing cart or shipping information."})
@@ -27,17 +29,43 @@ class paymentController {
 
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
-                payment_intent_data: {capture_method: 'manual'},
                 line_items,
-                success_url: process.env.NEXT_PUBLIC_BASE_URL
+                payment_intent_data: {capture_method: 'manual',
+                    metadata: {
+                        customerId: req.id,
+                        shipping: JSON.stringify(shipping),
+                        cart: JSON.stringify(cartItems.id)
+                    }
+                },
+                success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout-success?status=success`,
             })
 
-            return responseReturn(res, 200, { url: session.url });
+            if (is_login){
+                try{
+                    const order = await customerOrder.create({
+                        customerId: is_login.id,
+                        customerEmail: is_login.email,
+                        customerName: is_login.name,
+                        shippingInfo: shipping,
+                        products: cartItems,
+                        price: cartItems.reduce((t,i) => t + i.price * i.qty, 0),
+                        payment_status: 'Uncaptured',
+                        delivery_status: 'Pending',
+                        order_status: 'Pending',
+                        date: moment(Date.now()).format('LLL')
+                    })
+                }catch(error){
+                    ////
+                }
+            }
 
+            return responseReturn(res, 200, { url: session.url });
         }catch (error){
             console.log(error);
             return responseReturn(res, 500, {error: "Internal Server Error"})
         }
+
+        
     }
 
     handle_webhook = async(req, res) => {
@@ -62,6 +90,7 @@ class paymentController {
             const sess = event.data.object;
 
             const email = sess.customer_details?.email || sess.customer_email;
+            // const customerId = sess.c
 
             console.log("not good 1")
 
@@ -87,6 +116,8 @@ class paymentController {
                 subject: `HISTORY FACT STORE: New authorised order ${sess.id}`,
                 text: `Customer: ${email}\nSession: ${sess.id}`,
             })
+
+
         }
 
         res.json({received: true})

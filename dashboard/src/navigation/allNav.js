@@ -55,13 +55,13 @@ export const allNav = [
         role : 'admin',
         path: '/admin/dashboard/orders'
     },
-    {
-        id : 7,
-        title : 'Payment Request',
-        icon : <MdPayment />,
-        role : 'admin',
-        path: '/admin/dashboard/payment-request'
-    },
+    // {
+    //     id : 7,
+    //     title : 'Payment Request',
+    //     icon : <MdPayment />,
+    //     role : 'admin',
+    //     path: '/admin/dashboard/payment-request'
+    // },
     {
         id : 8,
         title : 'Live Chat',

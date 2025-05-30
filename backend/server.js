@@ -17,6 +17,8 @@ import paymentRouter from "./routes/home/paymentRoutes.js";
 
 import paymentController from "./controllers/home/paymentController.js";
 import customerAuthControllerRouter from "./routes/home/customerAuthRoutes.js";
+import orderRouter from "./routes/orders/orderRoutes.js";
+import wishlistRouter from "./routes/home/wishlistRoutes.js";
 
 const PORT = process.env.PORT;
 
@@ -41,6 +43,8 @@ app.use("/api", productRouter)
 app.use("/api", homeRouter)
 app.use("/api", paymentRouter)
 app.use("/api", customerAuthControllerRouter)
+app.use('/api', orderRouter)
+app.use('/api', wishlistRouter)
 
 app.get("/", (req, res) => res.send("My backend"))
 dbConnect()

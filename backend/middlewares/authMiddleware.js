@@ -1,18 +1,23 @@
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 import adminModel from "../models/adminModel.js"
 import customerModel from '../models/customerModel.js';
 import bcrypt from 'bcrypt';
 
 const authMiddleware = async(req, res, next) => {
     try{
-        const {accessToken} = req.cookies;
+        const {accessToken, customerToken} = req.cookies;
 
-        if(!accessToken){
+        if(!accessToken && !customerToken){
             return res.status(401).json({error: "Please Login First"})
         }
+        let decodeToken = null;
 
-        const decodeToken = jwt.verify(accessToken, process.env.SECRET)
-        const userEmail = decodeToken.email
+        if(accessToken){
+            decodeToken = jwt.verify(accessToken, process.env.SECRET);
+        }else if (customerToken){
+            decodeToken = jwt.verify(customerToken, process.env.SECRET);
+        }
+        const userEmail = decodeToken.email;
 
         const user = await adminModel.findOne({email: userEmail}).select("+password") || await customerModel.findOne({email: userEmail}).select("+password")
         if (!user){

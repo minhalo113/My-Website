@@ -8,6 +8,7 @@ import AddProduct from './../../views/admin/AddProduct';
 import Products from './../../views/admin/Products';
 import DiscountProducts from './../../views/admin/DiscountProducts';
 import EditProduct from './../../views/admin/EditProduct';
+import OrderDetails from './../../views/admin/OrderDetails';
 
 export const privateRoutesAdmin = [
     {
@@ -53,6 +54,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/edit-product/:productId',
         element: <EditProduct/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/order/details/:orderId',
+        element: <OrderDetails/>,
         role: 'admin'
     }
 ]

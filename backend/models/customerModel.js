@@ -13,6 +13,29 @@ const customerSchema = new Schema({
     method: {
         type: String, required: true
     },
+    role: {
+        type: String, required: false
+    },
+    wishlist: [
+        {
+            productId: {
+                type: Schema.Types.ObjectId,
+                required: true
+            },
+            name: {
+                type: String,
+                required: true
+            },
+            price: {
+                type: Number,
+                required: true
+            },
+            images: {
+                type: Array,
+                required: true
+            },
+        }
+    ]
 }, {timestamps: true})
 
 export default model('customers', customerSchema)

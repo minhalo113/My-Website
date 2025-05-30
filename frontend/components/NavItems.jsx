@@ -22,9 +22,7 @@ const NavItems = () => {
     const handleScroll = () => {
       setHeaderFixed(window.scrollY > 200);
     };
-
     window.addEventListener("scroll", handleScroll);
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -45,7 +43,7 @@ const NavItems = () => {
   if(loading) return null
 
   return (
-    <header  className={`header-section style-4 ${headerFixed ? "header-fixed fadeInUp" : ""}`}>
+    <header className={`header-section style-4 ${headerFixed ? "header-fixed fadeInUp" : ""}`}>
       {/* header top start */}
       <div className={`header-top d-md-none ${socialToggle ? "open" : ""}`} >
           <div>
@@ -54,7 +52,6 @@ const NavItems = () => {
                 <Link href = "/sign-up" className='custom-lab-btn lab-btn me-3'>
                   <span>Create Account</span>
                 </Link>
-
                 <Link href = "/login">
                   Log in
                 </Link>
@@ -85,7 +82,9 @@ const NavItems = () => {
                     <li><Link href = "/blog">Blog</Link></li>
                     <li><Link href = "/about">About</Link></li>
                     <li><Link href = "/contact">Contact</Link></li>
-                    <li><Link href = "/cart-page">Shopping Cart</Link></li>
+                    <li><Link href = "/cart-page">Cart</Link></li>
+                    {user ? <li><Link href = "/wishlist">Wishlist</Link></li> : <></>}
+                    {user ? <li><Link href = "/history">History</Link></li> : <></>}
                   </ul>
                 </div>
 

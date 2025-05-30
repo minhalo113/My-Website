@@ -1,19 +1,20 @@
 import React from "react"
 import { MdOutlineKeyboardDoubleArrowLeft,MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
 
-const Pagination = ({pageNumber, setPageNumber, totalItem, parPage, showItem}) =>
+const Pagination = ({pageNumber, setPageNumber, totalItem, parPage}) =>
 {
     let totalPage = Math.ceil(totalItem / parPage)
-    let startPage = pageNumber - 1
-    let endPage = pageNumber + 1
 
-    if (startPage <= 0){
-        startPage = 1
-        endPage += 1
-    }
-    if(endPage >= totalPage + 1){
-        endPage = totalPage
-        startPage -= 1
+    let startPage = Math.max(pageNumber - 1, 1);
+    let endPage = Math.min(pageNumber + 1, totalPage);
+    
+
+    if (endPage - startPage < 2) {
+        if (startPage === 1) {
+          endPage = Math.min(startPage + 2, totalPage);
+        } else if (endPage === totalPage) {
+          startPage = Math.max(endPage - 2, 1);
+        }
     }
 
     const createBtn = () => {
@@ -21,7 +22,7 @@ const Pagination = ({pageNumber, setPageNumber, totalItem, parPage, showItem}) =
 
         for (let i = startPage; i<= endPage; ++i){
             btns.push(
-                <li onClick={() => setPageNumber(i)} className={` ${pageNumber === i ? 'bg-indigo-300 shadow-lg shadow-indigo-300/50 text-white' : 'bg-slate-600 hover:bg-indigo-400 shadow-lg hover:shadow-indigo-500/50 hover:text-white text-[#d0d2d6]'} w-[33px] h-[33px] rounded-full flex justify-center items-center cursor-pointer `}>
+                <li onClick={() => {setPageNumber(i)}} className={` ${pageNumber === i ? 'bg-indigo-300 shadow-lg shadow-indigo-300/50 text-white' : 'bg-slate-600 hover:bg-indigo-400 shadow-lg hover:shadow-indigo-500/50 hover:text-white text-[#d0d2d6]'} w-[33px] h-[33px] rounded-full flex justify-center items-center cursor-pointer `}>
                     {i}
                 </li>
             )

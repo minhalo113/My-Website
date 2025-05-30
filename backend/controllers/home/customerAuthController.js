@@ -7,17 +7,18 @@ import bcrypt from 'bcrypt'
 class customerAuthController {
     customer_register = async (req, res) => {
         const { name, email, password } = req.body;
-
         try{
             const customer = await customerModel.findOne({ email });
             if (customer) {
-                responseReturn(res, 404, {error: "Email Already Exists"} )
+                return responseReturn(res, 404, {error: "Email Already Exists"} )
             }else{
                 const createCustomer = await customerModel.create({
                     name: name.trim(),
                     email: email.trim(),
                     password: await bcrypt.hash(password, 10),
-                    method: 'manually'
+                    method: 'manually',
+                    role: 'customer',
+                    wishlist: []
                 })
                 await sellerCustomerModel.create({
                     myId: createCustomer.id
@@ -26,16 +27,17 @@ class customerAuthController {
                     id: createCustomer.id,
                     name: createCustomer.name,
                     email: createCustomer.email,
-                    method: createCustomer.method
+                    method: createCustomer.method,
+                    role: createCustomer.role,
+                    password: createCustomer.password,
                 })
                 res.cookie('customerToken', token, {
                     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 })
-
-                responseReturn(res, 201, {message: "User Register Success", token})
+                return responseReturn(res, 201, {message: "User Register Success", token})
             }
         }catch(error){
-            responseReturn(res, 404, { error: error.message})
+            return responseReturn(res, 404, { error: error.message})
         }
     }
 
@@ -51,16 +53,18 @@ class customerAuthController {
                         id: customer.id,
                         name: customer.name,
                         email: customer.email,
-                        method: customer.method
+                        method: customer.method,
+                        role: customer.role,
+                        password: customer.password
                     })
                     res.cookie('customerToken', token, {
-                        expires: new Date(Date.now() + 7 * 24 *60 * 60 *1000)
+                        expires: new Date(Date.now() + 7 * 24 * 60 * 60 *1000)
                     })
                     responseReturn(res, 201, {message: "User Login Success", token})
                 }else{
                     responseReturn(res, 404, {error: "Password Wrong"})
                 }
-            } else{
+            }else{
                 responseReturn(res, 404, {error: "Email Not Found"})
             }         
         }catch(error){
@@ -70,6 +74,9 @@ class customerAuthController {
 
     customer_logout = async(req, res) => {
         res.cookie("customerToken", "", {
+            expires: new Date(Date.now())
+        })
+        res.cookie("accessToken", "", {
             expires: new Date(Date.now())
         })
         responseReturn(res, 200, {message: "Logout Success"})

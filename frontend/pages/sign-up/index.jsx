@@ -37,10 +37,6 @@ const Signup = () => {
         setUser(res.data.user)
 
         toast.success(data.message);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("Name", name)
-        }
-
         router.push("/");
       }
       catch(error){
