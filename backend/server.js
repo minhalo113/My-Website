@@ -1,8 +1,9 @@
 import express from "express"
-import {MongoClient} from "mongodb"
 import dotenv from "dotenv"
 import process from "process"
 dotenv.config();
+import http from 'http'
+import {initSocket} from './socket.js'
 
 import cors from "cors"
 import bodyParser from "body-parser";
@@ -52,6 +53,10 @@ app.use('/api', contactRouter);
 
 app.get("/", (req, res) => res.send("My backend"))
 dbConnect()
+
+const server = http.createServer(app)
+initSocket(server)
+
 app.listen(PORT, () => {
     console.log("Server is running");
 })

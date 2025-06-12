@@ -42,7 +42,7 @@ const CartPage = () => {
           }
         }
 
-        if(!cartItems){
+        if(!cartItems || cartItems.length === 0){
             alert("Your cart is emptier than my fridge on payday!");
             return;
         }

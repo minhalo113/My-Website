@@ -64,7 +64,7 @@ class paymentController {
             )
         }catch(e){
             console.error("Webhook signature failed:", e.message);
-            return res.sendStatus(400);
+            return responseReturn(res, 400, {message: "Webhook signature failed"});
         }
 
         if (event.type === 'checkout.session.completed'){
@@ -110,14 +110,6 @@ class paymentController {
             });
 
             console.log("not good 2")
-
-            await sendMail({
-                from: `"My Store" <${process.env.EMAIL_USER}>`,
-                to: process.env.EMAIL_USER,
-                subject: `HISTORY FACT STORE: New authorised order ${sess.id}`,
-                text: `Customer: ${email}\nSession: ${sess.id}`,
-            })
-
 
         }
 
