@@ -32,32 +32,15 @@ class paymentController {
                 line_items,
                 payment_intent_data: {capture_method: 'manual',
                     metadata: {
-                        customerId: req.id,
+                        customerId: is_login ? is_login.id : 'guest',
+                        customerEmail: is_login ? is_login.email: '',
+                        customerName: is_login ? is_login.name: '',
                         shipping: JSON.stringify(shipping),
-                        cart: JSON.stringify(cartItems.id)
+                        cart: JSON.stringify(cartItems)
                     }
                 },
                 success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout-success?status=success`,
             })
-
-            if (is_login){
-                try{
-                    const order = await customerOrder.create({
-                        customerId: is_login.id,
-                        customerEmail: is_login.email,
-                        customerName: is_login.name,
-                        shippingInfo: shipping,
-                        products: cartItems,
-                        price: cartItems.reduce((t,i) => t + i.price * i.qty, 0),
-                        payment_status: 'Uncaptured',
-                        delivery_status: 'Pending',
-                        order_status: 'Pending',
-                        date: moment(Date.now()).format('LLL')
-                    })
-                }catch(error){
-                    ////
-                }
-            }
 
             return responseReturn(res, 200, { url: session.url });
         }catch (error){
@@ -69,9 +52,9 @@ class paymentController {
     }
 
     handle_webhook = async(req, res) => {
+        console.log('hello')
         const sig = req.headers['stripe-signature'];
         let event;
-        console.log("hi")
 
         try{
             event = stripe.webhooks.constructEvent(
@@ -79,23 +62,41 @@ class paymentController {
                 sig,
                 process.env.STRIPE_WEBHOOK_SECRET,
             )
-            console.log("notgoodff")
         }catch(e){
             console.error("Webhook signature failed:", e.message);
             return res.sendStatus(400);
         }
 
-        console.log("notgood")
         if (event.type === 'checkout.session.completed'){
             const sess = event.data.object;
 
             const email = sess.customer_details?.email || sess.customer_email;
-            // const customerId = sess.c
 
-            console.log("not good 1")
+            const meta = sess.metadata || {};
+            let shipping = {};
+            let cartItems = [];
+            try{shipping = JSON.parse(meta.shipping || '{}');} catch(e) {}
+            try{cartItems = JSON.parse(meta.cart || '[]');} catch(e) {}
+
+            try {
+                await customerOrder.create({
+                    customerId: meta.customerId === 'guest' ? undefined : meta.customerId,
+                    customerEmail: email,
+                    customerName: meta.customerName || '',
+                    shippingInfo: shipping,
+                    products: cartItems,
+                    price: sess.amount_total / 100,
+                    payment_status: 'Uncaptured',
+                    delivery_status: 'Pending',
+                    order_status: 'Pending',
+                    date: moment(Date.now()).format('LLL')
+                });
+            } catch (err) {
+                console.error('Order creation failed', err.message);
+            }
 
             await sendMail({
-                from: `"My Store" <${process.env.EMAIL_USER}>`,
+                from: process.env.RESEND_FROM,
                 to: email,
                 subject: 'Your order is received!',
                 text: 

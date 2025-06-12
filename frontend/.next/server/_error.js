@@ -219,7 +219,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {\n__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ \"axios\");\nvar __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([axios__WEBPACK_IMPORTED_MODULE_0__]);\naxios__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];\n\nconst api = axios__WEBPACK_IMPORTED_MODULE_0__[\"default\"].create({\n    baseURL: \"http://localhost:5000/api\"\n});\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);\n\n__webpack_async_result__();\n} catch(e) { __webpack_async_result__(e); } });//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9zcmMvYXBpL2FwaS5qcyIsIm1hcHBpbmdzIjoiOzs7Ozs7OztBQUF5QjtBQUV6QixNQUFNQyxNQUFNRCxvREFBWSxDQUFDO0lBQ3JCRyxTQUFTO0FBQ2I7QUFDQSxpRUFBZUYsR0FBR0EsRUFBQSIsInNvdXJjZXMiOlsiQzpcXFVzZXJzXFxtaW5oYVxcT25lRHJpdmVcXERlc2t0b3BcXE15IFdlYnNpdGVcXGZyb250ZW5kXFxzcmNcXGFwaVxcYXBpLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBheGlvcyBmcm9tIFwiYXhpb3NcIlxyXG5cclxuY29uc3QgYXBpID0gYXhpb3MuY3JlYXRlKHtcclxuICAgIGJhc2VVUkw6IFwiaHR0cDovL2xvY2FsaG9zdDo1MDAwL2FwaVwiXHJcbn0pXHJcbmV4cG9ydCBkZWZhdWx0IGFwaSJdLCJuYW1lcyI6WyJheGlvcyIsImFwaSIsImNyZWF0ZSIsImJhc2VVUkwiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///./src/api/api.js\n");
+eval("__webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {\n__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ \"axios\");\n/* harmony import */ var dotenv__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! dotenv */ \"dotenv\");\n/* harmony import */ var process__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! process */ \"process\");\nvar __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([axios__WEBPACK_IMPORTED_MODULE_0__]);\naxios__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];\n\n\n\ndotenv__WEBPACK_IMPORTED_MODULE_1__.config();\nconst api = axios__WEBPACK_IMPORTED_MODULE_0__[\"default\"].create({\n    baseURL: \"http://localhost:5000/api\" || 0\n});\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (api);\n\n__webpack_async_result__();\n} catch(e) { __webpack_async_result__(e); } });//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9zcmMvYXBpL2FwaS5qcyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7O0FBQXlCO0FBQ0U7QUFDRTtBQUM3QkMsMENBQWE7QUFFYixNQUFNRyxNQUFNSixvREFBWSxDQUFDO0lBQ3JCTSxTQUFTSiwyQkFBZ0MsSUFBSSxDQUEyQjtBQUM1RTtBQUNBLGlFQUFlRSxHQUFHQSxFQUFBIiwic291cmNlcyI6WyJDOlxcVXNlcnNcXG1pbmhhXFxPbmVEcml2ZVxcRGVza3RvcFxcTXkgV2Vic2l0ZVxcZnJvbnRlbmRcXHNyY1xcYXBpXFxhcGkuanMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGF4aW9zIGZyb20gXCJheGlvc1wiXHJcbmltcG9ydCBkb3RlbnYgZnJvbSBcImRvdGVudlwiXHJcbmltcG9ydCBwcm9jZXNzIGZyb20gXCJwcm9jZXNzXCJcclxuZG90ZW52LmNvbmZpZygpO1xyXG5cclxuY29uc3QgYXBpID0gYXhpb3MuY3JlYXRlKHtcclxuICAgIGJhc2VVUkw6IHByb2Nlc3MuZW52Lk5FWFRfUFVCTElDX0FQSV9CQVNFIHx8IFwiaHR0cDovL2xvY2FsaG9zdDo1MDAwL2FwaVwiXHJcbn0pXHJcbmV4cG9ydCBkZWZhdWx0IGFwaSJdLCJuYW1lcyI6WyJheGlvcyIsImRvdGVudiIsInByb2Nlc3MiLCJjb25maWciLCJhcGkiLCJjcmVhdGUiLCJiYXNlVVJMIiwiZW52IiwiTkVYVF9QVUJMSUNfQVBJX0JBU0UiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///./src/api/api.js\n");
 
 /***/ }),
 
@@ -231,6 +231,17 @@ eval("__webpack_require__.a(__webpack_module__, async (__webpack_handle_async_de
 
 "use strict";
 module.exports = import("axios");;
+
+/***/ }),
+
+/***/ "dotenv":
+/*!*************************!*\
+  !*** external "dotenv" ***!
+  \*************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("dotenv");
 
 /***/ }),
 
@@ -275,6 +286,17 @@ module.exports = require("next/head");
 
 "use strict";
 module.exports = require("path");
+
+/***/ }),
+
+/***/ "process":
+/*!**************************!*\
+  !*** external "process" ***!
+  \**************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");
 
 /***/ }),
 

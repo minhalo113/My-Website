@@ -1,11 +1,8 @@
-import nodemailer from 'nodemailer';
+import {Resend} from 'resend';
+import dotenv from "dotenv"
+import process from "process"
+dotenv.config();
 
-export const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const sendMail = (opts) => transporter.sendMail(opts)
+export const sendMail = (opts) => resend.emails.send(opts)

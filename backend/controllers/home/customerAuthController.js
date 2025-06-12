@@ -5,7 +5,7 @@ import sellerCustomerModel from "../../models/chat/sellerCustomerModel.js"
 import bcrypt from 'bcrypt'
 import formidable from 'formidable';
 import { v2 as cloudinary } from 'cloudinary';
-import { response } from 'express';
+import {sendMail} from '../../utils/mail.js'
 
 class customerAuthController {
     customer_register = async (req, res) => {
@@ -49,8 +49,10 @@ class customerAuthController {
 
         try{
             const customer = await customerModel.findOne({email}).select('+password')
+    
             if(customer){
                 const match = await bcrypt.compare(password, customer.password)
+
                 if(match){
                     const token = await createToken({
                         id: customer.id,
@@ -150,6 +152,46 @@ class customerAuthController {
 
         }catch(err){
             console.log(err)
+            return responseReturn(res, 500, {message: err.message});
+        }
+    }
+
+    generatePassword(length = 8) {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let password = '';
+        for (let i = 0; i < length; i++) {
+          password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+      }
+
+    customer_forgot_password = async(req, res) => {
+        try{
+            const {email} = req.body;
+            const user = await customerModel.findOne({email}).select('+password');
+
+            if (!user) {
+                return responseReturn(res, 404, { message: 'Email Not Found',error: 'Email Not Found'})
+            }
+
+            const randomPassword = this.generatePassword();
+            user.password = await bcrypt.hash(randomPassword, 10);
+            await user.save();
+
+            const {data, error} = await sendMail({
+                from: process.env.RESEND_FROM,
+                to: email,
+                subject: 'Password Reset',
+                text: `Your new password is: ${randomPassword}`,
+            })
+
+            if (error) {
+                throw new Error(error.message)
+              }
+
+            return responseReturn(res, 200, {message: 'A new password has been sent to your email'});
+        }catch(err){
+            console.log(err);
             return responseReturn(res, 500, {message: err.message});
         }
     }
