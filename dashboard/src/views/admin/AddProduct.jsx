@@ -74,9 +74,6 @@ const AddProduct = () => {
             setImageShow([...imageShow, ...imageUrl])
         }
     }
-    // console.log(images)
-    // console.log(imageShow)
-
     useEffect(() => {
 
         if (successMessage) {

@@ -1,12 +1,8 @@
 import React, { useEffect } from 'react'
 import PageHeader from '../../components/PageHeader'
-import { Grid } from 'swiper/modules';
 import { useState } from 'react';
 
-import { useRouter } from 'next/router';
-
 import ProductCards from './ProductCards';
-import { Pagination } from 'react-bootstrap';
 import Paginations from './Paginations';
 import Search from './Search';
 import ShopCategory from './ShopCategory';

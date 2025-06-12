@@ -1,9 +1,8 @@
 import React from 'react'
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import PropTypes from 'prop-types';
-import { notFound } from 'next/navigation';
+import Rating from '../../components/Rating';
 import { useCart } from '../../context/CartContext';
 import {toast} from "react-hot-toast"
 
@@ -11,7 +10,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, seller, ratingsCount, images, stock, description} = item || {};
+    const {name, _id, price, seller, reviewCount, images, stock, description, averageRating} = item || {};
 
     const [prequantity, setQuantity] = useState(1);
     const {add} = useCart();
@@ -47,15 +46,7 @@ const ProductDisplay = ({item}) => {
     <div>
         <div>
             <h4>{name}</h4>
-            <p className='rating'>
-                <i className='icofont-star'></i>
-                <i className='icofont-star'></i>
-                <i className='icofont-star'></i>
-                <i className='icofont-star'></i>
-                <i className='icofont-star'></i>
-                <span> {ratingsCount} {ratingsCount===1 ? 'review' : 'reviews'}</span>
-            </p>
-
+            <Rating rating={averageRating} number_of_ratings={reviewCount}/>
             <h4>${price}</h4>
             <h6>{seller}</h6>
             {/* <p style={{ whiteSpace: 'pre-line' }}>{description}</p> */}

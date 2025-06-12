@@ -9,6 +9,9 @@ import Products from './../../views/admin/Products';
 import DiscountProducts from './../../views/admin/DiscountProducts';
 import EditProduct from './../../views/admin/EditProduct';
 import OrderDetails from './../../views/admin/OrderDetails';
+import BlogPost from "../../views/admin/BlogPost";
+import BlogEdit from "../../views/admin/BlogEdit";
+import AddBlog from "../../views/admin/AddBlog";
 
 export const privateRoutesAdmin = [
     {
@@ -59,6 +62,21 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/order/details/:orderId',
         element: <OrderDetails/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/blog',
+        element: <BlogPost/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/blog-edit/:id',
+        element: <BlogEdit/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/add-blog',
+        element: <AddBlog/>,
         role: 'admin'
     }
 ]

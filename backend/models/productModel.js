@@ -45,10 +45,21 @@ const productSchema = new Schema({
         type: Array,
         required: true
     },
-    rating: {
-        type: Number,
-        default: 0
-    }
+    ratings: [
+        {
+            user: {type: Schema.Types.ObjectId, ref: 'Customer'},
+            userImage: {
+                public_id: {type: String},
+                url: {type: String}
+            },
+            name: {type: String, required: false},
+            rating: {type: Number, required: true, min: 1, max: 5},
+            comment: String,
+            createdAt: {type: Date, default: Date.now}
+        }
+    ],
+    averageRating: {type: Number, default: 0},
+    reviewCount: {type: Number, default: 0}
 }, {timestamps: true})
 
 productSchema.index({

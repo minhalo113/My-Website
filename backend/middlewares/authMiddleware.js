@@ -2,13 +2,15 @@ import jwt, { decode } from 'jsonwebtoken';
 import adminModel from "../models/adminModel.js"
 import customerModel from '../models/customerModel.js';
 import bcrypt from 'bcrypt';
+import responseReturn from '../utils/response.js';
+import { response } from 'express';
 
 const authMiddleware = async(req, res, next) => {
     try{
         const {accessToken, customerToken} = req.cookies;
 
         if(!accessToken && !customerToken){
-            return res.status(401).json({error: "Please Login First"})
+            return responseReturn(res, 401, {message: "Please Login First", error: "Please Login First"});
         }
         let decodeToken = null;
 
@@ -21,11 +23,11 @@ const authMiddleware = async(req, res, next) => {
 
         const user = await adminModel.findOne({email: userEmail}).select("+password") || await customerModel.findOne({email: userEmail}).select("+password")
         if (!user){
-            return res.status(401).json({error: "User not found"});
+            return responseReturn(res, 401, {message: "User not found", error: "User not found"});
         }
         
         if(decodeToken.password !== user.password){
-            return res.status(401).json({error: "Password incorrect"})
+            return responseReturn(res, 401, {message: "Password incorrect", error: "Password incorrect"});
         } 
 
         req.role = decodeToken.role;
@@ -33,12 +35,13 @@ const authMiddleware = async(req, res, next) => {
         req.user = {
             id: user._id,
             email: user.email,
-            name: user.name
+            name: user.name,
+            image: user.profileImages
         }
         next()
     }catch(error){
         console.log(error)
-        return res.status(401).json({error: "Invalid or Expired Token. Please Login Again"})
+        return responseReturn(res, 401, {message: "Invalid or Expired Token. Please Login Again", error: "Invalid or Expired Token. Please Login Again"});
     }
 }
 

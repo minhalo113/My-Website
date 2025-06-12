@@ -2,15 +2,28 @@ import React from 'react'
 import PageHeader from "../../components/PageHeader"
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import api from '../../src/api/api';
 
 export const Blog = () => {
   const [blogList, setBlogList] = useState([])
-    useEffect(() => {
-        fetch("/utilis/blogdata.json")
-        .then(res => res.json())
-        .then(data => {setBlogList(data)})
-        .catch(error => console.error("Error fetching prodcuts:", error))
-    }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get('/get_blogs', {
+          withCredentials: true
+        });
+  
+        setBlogList(response.data.blogs);
+        console.log('Fetched blogs:', response.data.blogs);
+      } catch (err) {
+        console.error('Error fetching blogs:', err);
+      }
+    };
+  
+    fetchData();
+  }, []);  
+
   return (
     <div>
       <PageHeader title = "Blog Page" curPage="Blogs"/>
@@ -25,13 +38,13 @@ export const Blog = () => {
                       <div className='post-inner'>
 
                         <div className='post-thumb'>
-                          <Link href = {`/blog/${blog.id}`}>
-                            <img src = {blog.imgUrl} alt = ""/>
+                          <Link href = {`/blog/${blog._id}`}>
+                            <img src = {blog.image.url} alt = ""/>
                           </Link>
                         </div>
 
                         <div className='post-content'>
-                          <Link href = {`/blog/${blog.id}`}><h4>{blog.title}</h4></Link>
+                          <Link href = {`/blog/${blog._id}`}><h4>{blog.title}</h4></Link>
                           <div className='meta-post'>
                             <ul className='lab-ul'>
                               {
@@ -50,15 +63,15 @@ export const Blog = () => {
 
                         <div className='post-footer'>
                           <div className='pf-left'>
-                            <Link href ={`/blog/${blog.id}`} className='lab-btn-text'>{blog.btnText}
+                            <Link href ={`/blog/${blog._id}`} className='lab-btn-text'>{blog.btnText}
                               <i className='icofont-external-link'></i>
                             </Link>
                           </div>
 
-                          <div className='pf-right'>
+                          {/* <div className='pf-right'>
                             <i className='icofont-comment'></i>
                             <span className='comment-count'>{blog.commentCount}</span>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>

@@ -71,8 +71,8 @@ const ProductCards = ({GridList, products}) => {
                       <Link href = {`/shop/${product._id.toString()}`}>{product.name}</Link>
                     </h5>
 
-                    <p className='productRating'>
-                      <Rating/>
+                    <p className='productRating flex justify-center'>
+                      <Rating rating={product.averageRating} number_of_ratings={product.reviewCount}/>
                     </p>
                     <h6>${product.price}</h6>
                     </div>
@@ -85,15 +85,19 @@ const ProductCards = ({GridList, products}) => {
                       <img src = { Array.isArray(product.images) ? product.images[0] : product.images}  alt = ""/>
                       </div>
 
-                      <div className='product-action-link'>
-                        <Link href = {`/shop/${product._id.toString()}`}><i className='icofont-eye'></i></Link>
+                      <div className="product-action-link flex items-center gap-3">
+                      <Link href={`/shop/${product._id.toString()}`}>
+                        <i className="icofont-eye text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-indigo-400" />
+                      </Link>
 
-                        <a>
-                          <i className='icofont-heart'></i>
-                        </a>
+                      <a onClick={(e) => addWishlist(e, product)}>
+                        <i className="icofont-heart text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-pink-400" />
+                      </a>
 
-                        <a onClick={(e) => handleSubmit(e, product)}><i className='icofont-cart-alt'></i></a>
-                        </div>
+                      <a onClick={(e) => handleSubmit(e, product)}>
+                        <i className="icofont-cart-alt text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-emerald-400" />
+                      </a>
+                    </div>
                   </div>
 
                   <div className='product-content'>
@@ -102,7 +106,7 @@ const ProductCards = ({GridList, products}) => {
                     </h5>
 
                     <p className='productRating'>
-                      <Rating/>
+                      <Rating rating={product.averageRating} number_of_ratings={product.reviewCount}/>
                     </p>
                     <h6>${product.price}</h6>
                     </div>

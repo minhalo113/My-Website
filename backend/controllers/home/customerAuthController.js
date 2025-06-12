@@ -3,6 +3,9 @@ import createToken from './../../utils/tokenCreate.js';
 import customerModel from '../../models/customerModel.js';
 import sellerCustomerModel from "../../models/chat/sellerCustomerModel.js"
 import bcrypt from 'bcrypt'
+import formidable from 'formidable';
+import { v2 as cloudinary } from 'cloudinary';
+import { response } from 'express';
 
 class customerAuthController {
     customer_register = async (req, res) => {
@@ -83,7 +86,72 @@ class customerAuthController {
     }
 
     customer_get_info = async(req, res) => {
-        responseReturn(res, 200, {user: req.user})
+        return responseReturn(res, 200, {user: req.user})
+    }
+
+    customer_change_avater = async(req, res) => {
+        try{
+            const myUser = req.user;
+            const form = formidable({})
+    
+            form.parse(req, async(err, fields, files) => {
+                let images = Array.isArray(files.avatar) ? files.avatar[0] : files.avatar;
+                cloudinary.config({
+                    cloud_name: process.env.cloud_name,
+                    api_key: process.env.api_key,
+                    api_secret: process.env.api_secret,
+                    secure: true
+                })
+
+                try{
+                    const user = await customerModel.findById(myUser.id);
+                    if(!images){
+                        return responseReturn(res, 400, {error: "No image uploaded"});
+                    }
+                    const uploaded = await cloudinary.uploader.upload(images.filepath, {
+                        public_id: `avatars/${user._id}`,
+                        overwrite: true,
+                        invalidate: true
+                    })
+
+                    user.profileImages = {
+                        url: uploaded.secure_url,
+                        public_id: uploaded.public_id
+                    }
+
+                    await user.save()
+    
+                    return responseReturn(res, 201, {message: "Avatar Added Successfully", profileImage: user.profileImages});
+                }catch(error){
+                    console.log(error)
+                    return responseReturn(res, 500, {message: error.message});
+                }
+            })
+        }catch(err){
+            console.log(err)
+            return responseReturn(res, 500, {message: err.message});
+        }
+    }
+
+    customer_update_password = async(req, res) => {
+        try{
+            const {currentPassword, newPassword} = req.body;
+            const user = await customerModel.findById(req.user.id).select(`+password`);
+
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if(!isMatch) return res.status(400).json({message: "Incorrect current password"});
+
+            if(newPassword) {
+                user.password = await bcrypt.hash(newPassword, 10);
+                await user.save();
+            }
+
+            return responseReturn(res, 200, {message: "Profile updated successfully"});
+
+        }catch(err){
+            console.log(err)
+            return responseReturn(res, 500, {message: err.message});
+        }
     }
 }
 

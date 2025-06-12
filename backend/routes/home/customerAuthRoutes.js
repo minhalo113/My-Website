@@ -8,5 +8,7 @@ customerAuthControllerRouter.post('/customer/customer-register', customerAuthCon
 customerAuthControllerRouter.post('/customer/customer-login', customerAuthController.customer_login)
 customerAuthControllerRouter.get('/customer/logout', customerAuthController.customer_logout)
 customerAuthControllerRouter.get('/customer/me', authMiddleware, customerAuthController.customer_get_info)
+customerAuthControllerRouter.post('/customer/profile-image', authMiddleware, customerAuthController.customer_change_avater)
+customerAuthControllerRouter.post('/customer/update-profile', authMiddleware, customerAuthController.customer_update_password)
 
 export default customerAuthControllerRouter;

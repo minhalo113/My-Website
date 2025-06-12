@@ -4,7 +4,6 @@ import api from "../../api/api";
 export const add_product = createAsyncThunk(
     'product/add_product',
     async(product, {rejectWithValue, fulfillWithValue}) => {
-        console.log("frontend")
         try{
             const {data} = await api.post('/product-add', product, {withCredentials: true})
             return fulfillWithValue(data)

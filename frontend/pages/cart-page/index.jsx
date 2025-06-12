@@ -92,10 +92,10 @@ const CartPage = () => {
                                         <tr key = {index}>
                                             <td className='product-item cat-product'>
                                                 <div className='p-thumb'>
-                                                    <Link href = "/shop"><img src = {Array.isArray(item.img) ? item.img[0] : item.img} alt = ""/></Link>
+                                                    <Link href={`/shop/${item.id.toString()}`}><img src = {Array.isArray(item.img) ? item.img[0] : item.img} alt = ""/></Link>
                                                 </div>
                                                 <div className='p-content'>
-                                                    <Link href = "/shop">{item.name}</Link>
+                                                    <Link href={`/shop/${item.id.toString()}`}>{item.name}</Link>
                                                 </div>
                                             </td>
 

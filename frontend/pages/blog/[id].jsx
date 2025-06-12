@@ -4,21 +4,46 @@ import { useRouter } from 'next/router';
 import PageHeader from '../../components/PageHeader';
 import PopularPost from '../shop/PopularPost';
 import Tags from '../shop/Tags';
+import api from '../../src/api/api';
+import { toast } from 'react-hot-toast';
 
 const SingleBlog = () => {
     const [blog, setBlog] = useState([]);
+    const [adjacentBlogs, setAdjacentBlogs] = useState({ prev: null, next: null });
 
-    useEffect(() => {
-        fetch("/utilis/blogdata.json")
-        .then(res => res.json())
-        .then(data => {setBlog(data)})
-        .catch(error => console.error("Error fetching prodcuts:", error))
-    }, [])
     const router = useRouter();
     const {id} = router.query;
 
-    const result = blog.filter((b) => b.id === Number(id));
-    console.log(id)
+    const fetchData = async (id) => {
+        try {
+            const response = await api.get(`/get_blog/${id}`, {
+            withCredentials: true
+            });
+    
+            setBlog([response.data.blog]);
+            console.log('Fetched blogs:', response.data.blog);
+        } catch (err) {
+            console.log('Error fetching blogs:', err);
+        }
+        };
+    
+    const fetchAdjacent = async(id) => {
+        try{
+            const { data } = await api.get(`/blog/adjacent/${id}`, { withCredentials: true });
+            setAdjacentBlogs(data);
+        }catch(err){
+            console.log('Failed to fetch adjacent blogs:', err.response?.data?.message || err.message);
+        }
+    }
+
+    useEffect(() => {
+        if(!id) return;
+        fetchData(id);
+        fetchAdjacent(id)
+
+      }, [id]);    
+
+      if (!blog) return <p>Loading blog...</p>;
 
   return (
     <div>
@@ -35,14 +60,33 @@ const SingleBlog = () => {
                                         <div className='post-item style-2'>
                                             <div className="post-inner">
                                                 {
-                                                    result.map((item) => (
-                                                        <div key = {item.id}>
+                                                    blog.map((item) => (
+                                                        <div key = {item._id}>
                                                             <div className='post-thumb'>
-                                                                <img src = {item.imgUrl} alt = "" className='w-100'/>
+                                                                <img src = {item.image.url} alt = "" className='w-100'/>
                                                             </div>
 
                                                             <div className='post-content'>
                                                                 <h3>{item.title}</h3>
+                                                                <span>
+                                                                🕓 Created: {new Date(item.createdAt).toLocaleString('en-US', {
+                                                                    year: 'numeric',
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}
+                                                                </span>
+                                                                <span style={{ marginLeft: '1rem' }}>
+                                                                🔄 Updated: {new Date(item.updatedAt).toLocaleString('en-US', {
+                                                                    year: 'numeric',
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}
+                                                                </span>
+
                                                                 <div className='meta-post'>
                                                                     <ul className='lab-ul'>
                                                                         {
@@ -53,19 +97,25 @@ const SingleBlog = () => {
                                                                     </ul>
                                                                 </div>
 
-                                                                <p>{item.content}</p>
-
-                                                                <blockquote>
-                                                                    <p>{item.blockquote}</p>
-                                                                    <cite>{item.citation}</cite>
-                                                                </blockquote>
-
-                                                                <div className='video-thumb'>
-                                                                    <img src ={item.youtubeThumbnail} alt = ""/>
-                                                                    <a href={item.youtubeLink} target="_blank" rel="noopener noreferrer" className='video-button popup'>
-                                                                        <i className='icofont-ui-play'></i>
-                                                                    </a>
-                                                                </div>
+                                                                <p style={{ whiteSpace: 'pre-wrap' }}>{item.content}</p>
+                                                                
+                                                                {
+                                                                    item.blockquote && item.citation ? 
+                                                                    <blockquote>
+                                                                        <p>{item.blockquote}</p>
+                                                                        <cite>{item.citation}</cite>
+                                                                    </blockquote> : <></>
+                                                                }
+                                                                
+                                                                {
+                                                                    item.youtubeThumbnail.url && item.youtubeLink ? 
+                                                                    <div className='video-thumb'>
+                                                                        <img src ={item.youtubeThumbnail.url} alt = ""/>
+                                                                        <a href={item.youtubeLink} target="_blank" rel="noopener noreferrer" className='video-button popup'>
+                                                                            <i className='icofont-ui-play'></i>
+                                                                        </a>
+                                                                    </div> : <></>
+                                                                }
                                                             
                                                                 <div className='tags-section'>
                                                                     <ul className='tags lab-ul'>
@@ -97,26 +147,36 @@ const SingleBlog = () => {
                                             </div>
                                         </div>
                                         <div className='navigations-part'>
-                                                <div className='left'>
-                                                    <a href = "#" className='prev'>
-                                                        <i className='icofont-double-left'></i> Previous Blog
+                                            <div className='left'>
+                                                {adjacentBlogs.prev ? (
+                                                <>
+                                                    <a href={`/blog/${adjacentBlogs.prev._id}`} className='prev'>
+                                                    <i className='icofont-double-left'></i> Previous Blog
                                                     </a>
+                                                    <a href={`/blog/${adjacentBlogs.prev._id}`} className='title'>
+                                                    {adjacentBlogs.prev.title}
+                                                    </a>
+                                                </>
+                                                ) : (
+                                                <p>No previous blog</p>
+                                                )}
+                                            </div>
 
-                                                    <a href = "#" className='title'>
-                                                        This is The Previous Blog
+                                            <div className='right'>
+                                                {adjacentBlogs.next ? (
+                                                <>
+                                                    <a href={`/blog/${adjacentBlogs.next._id}`} className='prev'>
+                                                    <i className='icofont-double-right'></i> Later Blog
                                                     </a>
-                                                </div>
-
-                                                <div className='right'>
-                                                    <a href = "#" className='prev'>
-                                                        <i className='icofont-double-right'></i> Later Blog
+                                                    <a href={`/blog/${adjacentBlogs.next._id}`} className='title'>
+                                                    {adjacentBlogs.next.title}
                                                     </a>
-
-                                                    <a href = "#" className='title'>
-                                                        This is The Later Blog
-                                                    </a>
-                                                </div>
-                                        </div>
+                                                </>
+                                                ) : (
+                                                <p>No later blog</p>
+                                                )}
+                                            </div>
+                                            </div>
                                     </div>
                                 </div>
                             </div>

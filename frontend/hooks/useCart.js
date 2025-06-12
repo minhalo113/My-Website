@@ -2,6 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 
 const STORAGE_KEY = "cart"
 
+// Product in cart have structure like this:         
+//     const product = {
+//             id: _id,
+//             img: images,
+//             name: name,
+//             price: price
+//         } 
+
 export default function useCart() {
     const [cart, setCart] = useState(() => {
         try{

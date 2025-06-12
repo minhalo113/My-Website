@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect } from "react";
-import axios from 'axios'
 import PropTypes from "prop-types";
 import api from '../src/api/api.js'
 

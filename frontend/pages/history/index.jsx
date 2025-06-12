@@ -29,7 +29,7 @@ const History = () => {
 
     if (!user){
         return(
-            <div className="min-h-screen bg-slate-900 text-slate-100">
+            <div className="min-h-screen bg-slate-700 text-slate-100">
                 <PageHeader title="Order History" curPage="Order History" />
                 <p className="text-slate-400">Please Logiin First To Check Your Order History</p>
             </div>
@@ -50,7 +50,7 @@ const History = () => {
                 {orders.map((order) => (
                   <div
                     key={order._id}
-                    className="rounded-2xl bg-slate-800 p-6 shadow hover:shadow-indigo-500/30 transition-shadow"
+                    className="rounded-2xl bg-slate-700 p-6 shadow hover:shadow-indigo-500/30 transition-shadow"
                   >
                     <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
                       <div className="flex flex-col gap-1">

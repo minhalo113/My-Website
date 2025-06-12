@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router';
 import PageHeader from '../../components/PageHeader';
-
-import { Swiper, SwiperSlide } from 'swiper/react';
-
 import ProductSwiper from "./MyCustomSwiper"
 import ProductDisplay from './ProductDisplay';
 import Review from './Review';
@@ -11,37 +8,39 @@ import PopularPost from './PopularPost';
 import api from '../../src/api/api.js';
 
 const SingleProduct = () => {
-    const [product, setProduct] = useState([]);
+    const [productData, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    
+    const [reviewList, setReviewList] = useState([])
     
     const router = useRouter();
     const {id} = router.query;
 
-    useEffect(() =>{
-        const fetchData = async() => {
-            try{
-                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
-    
-                setProduct(allProducts.data.products);
-            }catch(err){
-                console.log(err)
-            }finally{
-                setLoading(false);
-            }
-        };
-    
-        fetchData();
-    }, [id])
+    const fetchData = async(_id) => {
+        try{
+            let {data} = await api.get(`/customers-product-get/${_id}`, {withCredentials: true})
+            setProduct(data.product);
+            let reviewRes = await api.get(`/get-reviews/${_id}`, {withCredentials: true})
+            setReviewList(reviewRes.data.reviewList);
 
-    const result = product.filter((p)=> p._id.toString() === id);
-    const productData = result.length > 0 ? result[0] : null
+        }catch(err){
+            console.log(err.response.data.message)
+        }finally{
+            setLoading(false)
+        }
+    }
+
+    useEffect(() =>{
+        if(!id) return;
+        fetchData(id);
+    }, [id])
 
     if(loading) return <p>Loading product detials...</p>
     if (!productData) return <p>Product Not Found.</p>
 
   return (
     <div>
-        <PageHeader title = {"OUR SHOP"} curPage = {"Single Product"} additionalLink={[{label: "Shop", path : "/shop"}]}/>
+        <PageHeader title = {"OUR SHOP"} curPage = {productData.name} additionalLink={[{label: "Shop", path : "/shop"}]}/>
         <div className='shop-single padding-tb aside-bg'>
             <div className='container'>
                 <div className='row justify-content-center'>
@@ -57,19 +56,13 @@ const SingleProduct = () => {
 
                                     <div className='col-md-6 col-12'>
                                         <div className='post-content'>
-                                            <div>
-                                                {
-                                                    result.map(item => <ProductDisplay key = {item._id.toString()} item = {item}/>)
-                                                }
-                                            </div>
+                                            <ProductDisplay item = {productData}/>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className='review'>
-                                {
-                                    result.map(item => <Review key = {item._id.toString()} item = {item}/>)
-                                }
+                                <Review item = {productData} reviewList = {reviewList} reloadFunction = {() => fetchData(id)}/>
                             </div>
                         </article>
                     </div>

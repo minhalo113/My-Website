@@ -15,6 +15,8 @@ const PageHeader = ({title, curPage, additionalLink}) => {
         additionalBreadcrumb = null;
     }
 
+    const truncate = (str, maxLength) => str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
+
   return (
     <div className='pageheader-section'>
         <div className="container">
@@ -28,7 +30,7 @@ const PageHeader = ({title, curPage, additionalLink}) => {
                             <ol className='breadcrumb justify-content-center'>
                                 <li className='breadcrumb-item'><Link href="/">Home</Link></li>
                                 {additionalBreadcrumb}
-                                <li className='breadcrumb-item active' aria-current = "page">{curPage}</li>
+                                <li className='breadcrumb-item active' aria-current = "page">{truncate(curPage, 30)}</li>
                             </ol>
                         </nav>
                     </div>

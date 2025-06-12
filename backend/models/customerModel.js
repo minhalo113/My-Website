@@ -16,6 +16,10 @@ const customerSchema = new Schema({
     role: {
         type: String, required: false
     },
+    profileImages: {
+        url: {type: String},
+        public_id: {type: String}
+    },
     wishlist: [
         {
             productId: {

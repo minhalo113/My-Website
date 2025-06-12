@@ -101,7 +101,6 @@ const Products = () => {
                     setPageNumber={setCurrentPage}
                     totalItem={totalProduct}
                     parPage={parPage}
-                    showItem={3}
                 />
             </div>
         }  

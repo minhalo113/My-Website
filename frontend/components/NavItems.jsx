@@ -14,6 +14,8 @@ const NavItems = () => {
   const [socialToggle, setSocialToggle] = useState(false);
   const [headerFixed, setHeaderFixed] = useState(false);
 
+  const [accountOpen, setAccountOpen] = useState(false);
+
   // authInfo
   const {user, setUser, loading} = useContext(AuthContext)
   const router = useRouter();
@@ -43,10 +45,19 @@ const NavItems = () => {
   if(loading) return null
 
   return (
+    <>
+    <style>
+    {`
+      .custom-hover-override:hover {
+        background: #000000 !important;
+      }
+    `}
+    </style>
+
     <header className={`header-section style-4 ${headerFixed ? "header-fixed fadeInUp" : ""}`}>
       {/* header top start */}
       <div className={`header-top d-md-none ${socialToggle ? "open" : ""}`} >
-          <div>
+
             <div className='container'>
               <div className='header-top-area'>
                 <Link href = "/sign-up" className='custom-lab-btn lab-btn me-3'>
@@ -57,7 +68,7 @@ const NavItems = () => {
                 </Link>
               </div>
             </div>
-          </div>
+
         </div>
         
       {/* header botton */}
@@ -72,6 +83,7 @@ const NavItems = () => {
                 </Link>
               </div>
 
+
             </div>
               {/* menu area */}
               <div className='menu-area'>
@@ -83,8 +95,38 @@ const NavItems = () => {
                     <li><Link href = "/about">About</Link></li>
                     <li><Link href = "/contact">Contact</Link></li>
                     <li><Link href = "/cart-page">Cart</Link></li>
-                    {user ? <li><Link href = "/wishlist">Wishlist</Link></li> : <></>}
-                    {user ? <li><Link href = "/history">History</Link></li> : <></>}
+                    {user && (
+                      <li
+                      className = "flex flex-col border-t border-[rgba(16,17,21,0.1)] lg:border-none">
+                        <button
+                        className="cursor-pointer hover:bg-amber-500/80 text-black button-custom-hover-override"
+                        style={{
+                          padding: '10px 25px',
+                          fontWeight: 700,
+                          textTransform: 'capitalize',
+                          color: '#101115',
+                          width: '100%',
+                          fontSize: '15px',
+                          textAlign: 'left',
+                          height: '100%',
+                        }}                        
+                        onClick={() => setAccountOpen(!accountOpen)}
+                        >
+                          Account
+                        </button>
+
+                        {accountOpen && (
+                          <ul style={{
+                              display: 'block',
+                            }}>
+                            <li><Link href="/profile" className="block py-1 custom-hover-override" style = {{paddingLeft: '2.5rem'}}>Profile</Link></li>
+                            <li><Link href="/wishlist" className="block py-1 custom-hover-override" style = {{paddingLeft: '2.5rem'}}>Wishlist</Link></li>
+                            <li><Link href="/history" className="block py-1 custom-hover-override" style = {{paddingLeft: '2.5rem'}}>History</Link></li>
+                          </ul>
+                        )}
+
+                    </li>
+                    )}
                   </ul>
                 </div>
 
@@ -124,6 +166,7 @@ const NavItems = () => {
         </div>
       </div>
     </header>
+    </>
   )
 }
 

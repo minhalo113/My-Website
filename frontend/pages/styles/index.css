@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+.starsContainer {
+    display: flex;
+  }
+  
+  .star {
+    cursor: pointer;
+    transition: all 0.1s linear;
+  }
+  
+  .star:hover {
+    transform: scale(1.1);
+  }
+  .header-section.style-4 .menu > ul li ul li a.custom-hover-override:hover {
+    background: #D09A40 !important;
+  }
+  .header-section.style-4 .menu > ul li > button.button-custom-hover-override:hover {
+    background: #D09A40 !important;
+  }

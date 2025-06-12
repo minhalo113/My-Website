@@ -11,6 +11,7 @@ import { BsCartCheck } from "react-icons/bs";
 import { IoChatbubbles } from "react-icons/io5";
 import { BsFillChatQuoteFill } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
+import { FaRegNewspaper } from "react-icons/fa";
 
 export const allNav = [
     {
@@ -69,5 +70,11 @@ export const allNav = [
         role : 'admin',
         path: '/admin/dashboard/chat-sellers'
     },
-
+    {
+        id: 9,
+        title: 'Blog Post',
+        icon: <FaRegNewspaper />,
+        role: 'admin',
+        path: '/admin/dashboard/blog'
+    }
 ]
