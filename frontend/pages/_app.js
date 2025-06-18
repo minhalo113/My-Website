@@ -12,6 +12,7 @@ import "./styles/output.css"
 import Head from "next/head"
 import NavItems from "../components/NavItems.jsx";
 import Footer from "../components/Footer";
+import ChatCustomer from "../components/ChatCustomer.jsx"
 import { useRouter } from "next/router";
 
 import {Provider} from 'react-redux'
@@ -19,7 +20,6 @@ import {Toaster} from "react-hot-toast";
 
 import { noLayoutRoutes } from "../router/routes/NoLayoutRoutes"
 import {lazy, Suspense} from 'react';
-import ProtectRoute from "../router/routes/ProtectedRoutes"
 import { privateRoutesAdmin } from "../router/routes/privateRoutesAdmin"
 
 import {CartProvider} from "./../context/CartContext.jsx"
@@ -52,6 +52,7 @@ function MyApp({ Component, pageProps }) {
         </div>
 
         {!noLayoutRoutes.includes(router.pathname) && <Footer />}
+        {!router.pathname.startsWith('/admin') && <ChatCustomer />}
       </AuthProvider>
       
       <Toaster

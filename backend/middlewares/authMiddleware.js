@@ -21,6 +21,7 @@ const authMiddleware = async(req, res, next) => {
         }
         const userEmail = decodeToken.email;
 
+        // const user = await adminModel.findOne({email: userEmail}).select("+password") || await customerModel.findOne({email: userEmail}).select("+password")
         const user = await adminModel.findOne({email: userEmail}).select("+password") || await customerModel.findOne({email: userEmail}).select("+password")
         if (!user){
             return responseReturn(res, 401, {message: "User not found", error: "User not found"});

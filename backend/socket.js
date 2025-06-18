@@ -1,8 +1,7 @@
-import { Server } from "socket.io";
-import { io } from 'socket.io-client';
+import {Server} from 'socket.io'
+import Chat from './models/chatModel.js'
 
 let io
-const messages = []
 
 export const initSocket = (server) => {
     io = new Server(server, {
@@ -18,28 +17,91 @@ export const initSocket = (server) => {
     io.on('connection', (socket) => {
         console.log('Socket connected', socket.id)
 
-        socket.on('customer-message', (msg) => {
-            const chat = {sender: 'customer', message: msg.text, createdAt: new Date()}
-        messages.push(chat)
-        io.emit('customer-message', chat)
+        const {userId, userName, userEmail} = socket.handshake.query
+        if(userId){socket.join(userId)}
+
+        socket.on('register-admin', () => {
+            socket.join('admins')
+        })
+
+        socket.on('customer-message', async(msg) =>{
+            const chat = await Chat.create({
+                userName: userName,
+                userEmail: userEmail,
+                userId: userId || socket.id,
+                sender: 'customer',
+                message: msg.text
+            })
+
+            io.to('admins').emit('customer-message', chat)
+            socket.emit('customer-message', chat)
+        })
+
+        socket.on('admin-message', async (msg) => {
+            if(!msg.userId) return
+
+            const chat = await Chat.create({
+                userName: msg.userName,
+                userEmail: msg.userEmail,
+                userId: msg.userId,
+                sender: 'admin',
+                message: msg.text
+            })
+
+            io.to(msg.userId).emit('admin-message', chat)
+            io.to('admins').emit('admin-message', chat)
         })
     
-        socket.on('admin-message', (msg) => {
-            const chat = {sender: 'admin', nessage: msg.text, createdAt: new Date()}
+        socket.on('get-history', async(id, cb) => {
+            try{
+                const history = await Chat.find({userId: id}).sort({createdAt: 1})
+                cb(history)
+            }catch(err){
+                console.log("Error fetching get-history:", err);
+                cb([])
+            }
+        })
 
-            messages.push(chat)
-            io.emit('admin-message', chat)
+        socket.on('get-all-users', async(cb) => {
+            try{
+                const allChat = await Chat.aggregate([
+                    {$sort: {createdAt: -1}},
+                    {
+                        $group: {
+                            _id: '$userId',
+                            userName: {$first: '$userName'},
+                            userEmail: {$first: '$userEmail'},
+                            message: {$first: '$message'},
+                            createdAt: {$first: '$createdAt'}
+                        }
+                    },
+                    { 
+                        $project: {
+                            userId: '$_id',
+                            userName: 1,
+                            userEmail: 1,
+                            message: 1,
+                            createdAt: 1,
+                            _id: 0
+                        }
+                    },
+                    {$sort: {createdAt: -1}}
+                ])
+                cb(allChat)
+            }catch(err){
+                console.log("Error fetching chats:", err);
+                cb([])
+            }
         })
     })
+
 
     return io
 }
 
 export const getIO = () => {
     if(!io){
-        throw new Error('Socket not initialized')
+        throw new Error('Socket not initialized');
     }
     return io
 }
-
-export const getMessages = () => messages

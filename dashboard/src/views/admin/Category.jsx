@@ -52,29 +52,29 @@ const Category = () => {
    
     useEffect(() => {
         if (successMessage) {
-            toast.success(successMessage)
-            dispatch(messageClear()) 
-            setState({
-                name: '',
-                image: ''
-            }) 
-            setImage('')
-            setIsEdit(false)
-            setEditId(null)
+          toast.success(successMessage);
+          dispatch(messageClear());
+          setState({ name: '', image: '' });
+          setImage('');
+          setIsEdit(false);
+          setEditId(null);
         }
         if (errorMessage) {
-            toast.error(errorMessage)
-            console.log(errorMessage)
-            dispatch(messageClear())
+          toast.error(errorMessage);
+          console.log(errorMessage);
+          dispatch(messageClear());
         }
-
+      }, [successMessage, errorMessage, dispatch]);
+      
+    useEffect(() => {
         const obj = {
-            parPage: parseInt(parPage),
-            page: parseInt(currentPage),
-            searchValue
-        }
-        dispatch(get_category(obj))
-    },[searchValue, currentPage,parPage, successMessage, errorMessage, dispatch])
+          parPage: parseInt(parPage),
+          page: parseInt(currentPage),
+          searchValue
+        };
+      
+        dispatch(get_category(obj));
+      }, [searchValue, currentPage, parPage, dispatch]);
 
   /// Handle Edit Button 
     const handleEdit = (category) => {

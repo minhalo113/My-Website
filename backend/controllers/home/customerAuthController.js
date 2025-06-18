@@ -1,7 +1,6 @@
 import responseReturn from './../../utils/response.js';
 import createToken from './../../utils/tokenCreate.js';
 import customerModel from '../../models/customerModel.js';
-import sellerCustomerModel from "../../models/chat/sellerCustomerModel.js"
 import bcrypt from 'bcrypt'
 import formidable from 'formidable';
 import { v2 as cloudinary } from 'cloudinary';
@@ -23,9 +22,9 @@ class customerAuthController {
                     role: 'customer',
                     wishlist: []
                 })
-                await sellerCustomerModel.create({
-                    myId: createCustomer.id
-                })
+                // await sellerCustomerModel.create({
+                //     myId: createCustomer.id
+                // })
                 const token = await createToken({
                     id: createCustomer.id,
                     name: createCustomer.name,

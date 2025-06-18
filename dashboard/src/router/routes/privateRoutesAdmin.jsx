@@ -3,7 +3,7 @@ import AdminDashboard from './../../views/admin/AdminDashboard';
 import Orders from "../../views/admin/Order";
 import Category from "../../views/admin/Category";
 import ChatSeller from "../../views/admin/ChatSeller";
-import ChatC
+import ChatCustomer from "../../views/admin/ChatCustomer";
 import PaymentRequest from "../../views/admin/PaymentRequest";
 import AddProduct from './../../views/admin/AddProduct';
 import Products from './../../views/admin/Products';
@@ -33,6 +33,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/chat-sellers',
         element : <ChatSeller/> ,
+        role : 'admin'
+    },
+    {
+        path: 'admin/dashboard/chat-customers',
+        element : <ChatCustomer/>,
         role : 'admin'
     },
     {

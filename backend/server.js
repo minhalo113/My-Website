@@ -57,6 +57,10 @@ dbConnect()
 const server = http.createServer(app)
 initSocket(server)
 
-app.listen(PORT, () => {
-    console.log("Server is running");
+server.listen(PORT, () => {
+    console.log("Server is running")
 })
+
+// app.listen(PORT, () => {
+//     console.log("Server is running");
+// })

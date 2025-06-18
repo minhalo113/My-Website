@@ -25,15 +25,10 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/cart-page": [
+    "/login": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/cart-page.js"
-    ],
-    "/checkout-success": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/checkout-success.js"
+      "static/chunks/pages/login.js"
     ],
     "/shop": [
       "static/chunks/webpack.js",
