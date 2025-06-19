@@ -1,105 +1,164 @@
-import React, {useEffect, useState} from 'react';
-import {io} from 'socket.io-client';
-import {v4 as uuid} from 'uuid'
+import React, { useEffect, useState, useRef } from 'react';
+import { io } from 'socket.io-client';
+import { v4 as uuid } from 'uuid';
 
-let customerId = ''
-if (typeof window != 'undefined'){
-    customerId = localStorage.getItem('chatUserId') || uuid()
-    localStorage.setItem('chatUserId', customerId)
+let customerId = '';
+if (typeof window !== 'undefined') {
+  customerId = localStorage.getItem('chatUserId') || uuid();
+  localStorage.setItem('chatUserId', customerId);
 }
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000')
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
 
 const ChatCustomer = () => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
-  const [users, setUsers] = useState([])
-  const [active, setActive] = useState('')
+  const [users, setUsers] = useState([]);
+  const [active, setActive] = useState('');
+  const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    socket.emit('register-admin')
-
-    socket.emit('get-all-users', (usersFromServer) => {
-      console.log(usersFromServer)
-      setUsers(usersFromServer)
-    })
-  }, [])
-
-  useEffect(() => {
-    console.log(active)
-    const handleCustomer = (msg) => {
-
-      if(msg.userId === active.userId){
-        setMessages(prev => [...prev, msg])
-      }
+  const [unread, setUnread] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('adminChatUnread');
+      return stored ? JSON.parse(stored) : {};
     }
+    return {};
+  });
+
+  useEffect(() => {
+    socket.emit('register-admin');
+    socket.emit('get-all-users', (usersFromServer) => {
+      setUsers(usersFromServer);
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleCustomer = (msg) => {
+      if (msg.userId === active.userId) {
+        setMessages((prev) => [...prev, msg]);
+      } else {
+        setUnread((prev) => {
+          const updated = { ...prev, [msg.userId]: true };
+          localStorage.setItem('adminChatUnread', JSON.stringify(updated));
+          return updated;
+        });
+      }
+
+      setUsers((prev) => {
+        if (!prev.find((u) => u.userId === msg.userId)) {
+          return [...prev, { userId: msg.userId, userName: msg.userName, userEmail: msg.userEmail }];
+        }
+        return prev;
+      });
+    };
 
     const handleAdmin = (msg) => {
-      if(msg.userId === active.userId){
-        setMessages(prev => [...prev, msg])
+      if (msg.userId === active.userId) {
+        setMessages((prev) => [...prev, msg]);
       }
-    }
+    };
 
-    socket.on('customer-message', handleCustomer)
-    socket.on('admin-message', handleAdmin)
+    socket.on('customer-message', handleCustomer);
+    socket.on('admin-message', handleAdmin);
 
     return () => {
-      socket.off('customer-message', handleCustomer)
-      socket.off('admin-message', handleAdmin)
-    }
-  }, [active])
-
+      socket.off('customer-message', handleCustomer);
+      socket.off('admin-message', handleAdmin);
+    };
+  }, [active]);
 
   useEffect(() => {
-    if(!active) return
-    socket.emit('get-history', active.userId, (history) => setMessages(history))
-  }, [active])
+    if (!active) return;
+    socket.emit('get-history', active.userId, (history) => setMessages(history));
+  }, [active]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const send = (e) => {
-    e.preventDefault()
-    if(!text.trim() || !active) return
+    e.preventDefault();
+    if (!text.trim() || !active) return;
 
-    console.log(active.userName, active.userEmail)
-    console.log(active)
-    socket.emit('admin-message', {text, userId: active.userId, userName: active.userName, userEmail: active.userEmail})
-    setText('')
-  }
+    socket.emit('admin-message', {
+      text,
+      userId: active.userId,
+      userName: active.userName,
+      userEmail: active.userEmail,
+    });
+    setText('');
+  };
 
-  return(
-    <div className='px-2 lg:px-7 py-5'>
-      <div className='w-full bg-[#6a5fdf] px-4 py-4 rounded-md h-[calc(100vh-140px)]'>
-        <div className='flex h-full'>
-        <div className='w-40 bg-[#475569] text-white p-2 overflow-y-auto mr-2 rounded'>
-            {
-              users.map(u => (
-                <div key = {u} className={`p-2 cursor-pointer ${u === active ? 'bg-blue-500' : ''}`} onClick={() => setActive(u)}>
-                  {u.userName}
-                  <div className='text-xs text-gray-300'>{u.userEmail}</div>
-                  <div className='text-xs text-gray-300'>{u.userId}</div>
-                </div>
-              ))
-            }
-          </div>
+  return (
+    <div className="px-2 lg:px-7 py-5">
+  <div className="w-full bg-[#f0f4f8] px-4 py-4 rounded-md h-[calc(100vh-140px)] shadow-lg">
+    <div className="flex h-full">
 
-            <div className='flex-1 flex flex-col'>
-              <div className='flex-1 overflow-y-auto mb-2 bg-[#475569] p-3 rounded'>
-                {messages.map((m, i) => (
-                  <div key = {i} className={`w-full flex ${m.sender === 'admin' ? 'justify-end' : 'justify-start'} mb-1`}>
-                    <div className='bg-white text-black px-2 py-1 rounded max-w-[70%]'>
-                      {m.message}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <form onSubmit={send} className='flex gap-2'>
-                <input value = {text} onChange={e => setText(e.target.value)} className='flex-1 px-2 py-1 rounded text-black' placeholder='Type message'/>
-                <button className='bg-blue-500 text-white px-4 rounded'>Send</button>
-              </form>
+      {/* User List */}
+      <div className="w-60 bg-[#1e293b] text-white p-2 overflow-y-auto mr-3 rounded-lg shadow-md">
+        {users.map((u) => (
+          <div
+            key={u.userId}
+            className={`p-2 rounded cursor-pointer transition-all duration-200 ${
+              u.userId === active?.userId ? 'bg-indigo-500' : 'hover:bg-slate-600'
+            }`}
+            onClick={() => {
+              setActive(u);
+              setUnread((prev) => {
+                const updated = { ...prev };
+                delete updated[u.userId];
+                localStorage.setItem('adminChatUnread', JSON.stringify(updated));
+                return updated;
+              });
+            }}
+          >
+            <div className="flex justify-between items-center text-sm font-semibold">
+              <span>{u.userName}</span>
+              {unread[u.userId] && <span className="text-red-400 text-xs ml-2">(new)</span>}
             </div>
+            <div className="text-xs text-slate-300 truncate">{u.userEmail}</div>
+          </div>
+        ))}
+      </div>
 
+      {/* Chat Window */}
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 overflow-y-auto bg-white p-4 rounded-lg space-y-2 border border-gray-200">
+          {messages.map((m, i) => (
+            <div
+              key={i}
+              className={`w-full flex ${m.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`px-4 py-2 rounded-xl max-w-[70%] break-words shadow-sm ${
+                  m.sender === 'admin'
+                    ? 'bg-indigo-100 text-indigo-900'
+                    : 'bg-slate-100 text-slate-800'
+                }`}
+              >
+                {m.message}
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
         </div>
+
+        {/* Input */}
+        <form onSubmit={send} className="flex gap-2 mt-3">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="flex-1 px-3 py-2 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            placeholder="Type a message"
+          />
+          <button className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition">
+            Send
+          </button>
+        </form>
       </div>
     </div>
-  )
-}
+  </div>
+</div>
+  );
+};
 
 export default ChatCustomer;
