@@ -5,17 +5,19 @@ import PropTypes from 'prop-types'
 import { useCart } from '../../context/CartContext';
 import {toast} from "react-hot-toast"
 import api from '../../src/api/api';
+import DiscountBadge from '../../components/DiscountBadge';
 
 const ProductCards = ({GridList, products}) => {
   const {add} = useCart();
 
   const handleSubmit = (e, _product) => {
-    const {_id, images, name, price} = _product;
+    const {_id, images, name, price, discount} = _product;
     const product = {
         id: _id,
         img: images,
         name: name,
-        price: price
+        price: price,
+        discount: discount
     }
 
     e.preventDefault();
@@ -40,13 +42,16 @@ const ProductCards = ({GridList, products}) => {
   return (
     <div className={`shop-product-wrap row justify-content-center ${GridList ? "grid" : "list"}`}>
         {
-          products.map((product, i) => (
+          products.map((product, i) => {
+            const discountedPrice = (product.price - (product.price * product.discount) / 100).toFixed(2)
+            return(
             <div key = {i} className='col-lg-4 col-md-6 col-12'>
                 <div className='product-item'>
                   {/* product images */}
                   <div className='product-thumb'>
-                    <div className='pro-thumb'>
+                    <div className='pro-thumb relative'>
                       <img src = { Array.isArray(product.images) ? product.images[0] : product.images} alt = ""/>
+                      <DiscountBadge discount={product.discount} />
                       </div>
 
                       {/* product action link */}
@@ -74,15 +79,27 @@ const ProductCards = ({GridList, products}) => {
                     <p className='productRating flex justify-center'>
                       <Rating rating={product.averageRating} number_of_ratings={product.reviewCount}/>
                     </p>
-                    <h6>${product.price}</h6>
+                    <h6>
+                      {product.discount > 0 ? (
+                        <>
+                          ${discountedPrice}{` `}
+                          <del className='text-sm text-gray-500 ml-1'>
+                            ${product.price}
+                          </del>
+                        </>
+                      ) : (
+                        `$${product.price}`
+                      )}
+                    </h6>
                     </div>
               </div>
 
               {/* list style */}
               <div className='product-list-item'>
                   <div className='product-thumb'>
-                    <div className='pro-thumb'>
+                    <div className='pro-thumb relative'>
                       <img src = { Array.isArray(product.images) ? product.images[0] : product.images}  alt = ""/>
+                      <DiscountBadge discount={product.discount} />
                       </div>
 
                       <div className="product-action-link flex items-center gap-3">
@@ -108,11 +125,23 @@ const ProductCards = ({GridList, products}) => {
                     <p className='productRating'>
                       <Rating rating={product.averageRating} number_of_ratings={product.reviewCount}/>
                     </p>
-                    <h6>${product.price}</h6>
+                    <h6>
+                      {product.discount > 0 ? (
+                        <>
+                        ${discountedPrice}{` `}
+                        <del className='text-sm text-gray-500 ml-1'>
+                          ${product.price}
+                        </del>
+                        </>
+                      ) : (
+                        `$${product.price}`
+                      )}
+                    </h6>
                     </div>
               </div>
             </div>
-          ))
+            )
+          })
         }
     </div>
   )

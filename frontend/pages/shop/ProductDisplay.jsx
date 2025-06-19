@@ -10,7 +10,8 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, seller, reviewCount, images, stock, description, averageRating} = item || {};
+    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating} = item || {}
+    const discountedPrice = (price - (price * discount) / 100).toFixed(2)
 
     const [prequantity, setQuantity] = useState(1);
     const {add} = useCart();
@@ -30,7 +31,8 @@ const ProductDisplay = ({item}) => {
             id: _id,
             img: images,
             name: name,
-            price: price
+            price: price,
+            discount: discount
         }
 
         e.preventDefault();
@@ -47,7 +49,18 @@ const ProductDisplay = ({item}) => {
         <div>
             <h4>{name}</h4>
             <Rating rating={averageRating} number_of_ratings={reviewCount}/>
-            <h4>${price}</h4>
+            <h4>
+                {
+                    discount > 0 ? (
+                        <>
+                            ${discountedPrice}{``}
+                            <del className='text-sm text-gray-500 ml-1'>${price}</del>
+                        </>
+                    ) : (
+                        `$${price}`
+                    )
+                }
+            </h4>
             <h6>{seller}</h6>
             {/* <p style={{ whiteSpace: 'pre-line' }}>{description}</p> */}
         </div>
@@ -56,7 +69,7 @@ const ProductDisplay = ({item}) => {
             <form onSubmit={handleSubmit}>
 
                 <div className="flex items-center gap-6">
-                    {/* Quantity input */}
+
                     <div className="cart-plus-minus">
                         <div className="dec qtybutton" onClick={handleDecrease}>-</div>
                         <input
