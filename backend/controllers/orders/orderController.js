@@ -92,6 +92,20 @@ class orderController {
         }
     }
 
+    delete_order = async(req, res) => {
+        const {orderId} = req.params;
+        try{
+            const deleted = await customerOrder.findByIdAndDelete(orderId)
+            if(!deleted){
+                return responseReturn(res, 404, {error: 'Order Not Found', message: 'Order Not Found'})
+            }
+            return responseReturn(res, 200, "Order deleted successfully")
+        }catch(error){
+            console.log('Delete Order Error', error.message);
+            return responseReturn(res, 500, {error: 'Internal Server Error', message: 'Internal Server Error'})
+        }
+    }
+
     get_customer_orders = async(req, res) => {
         const {user} = req;
         const id = user.id;

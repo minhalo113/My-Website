@@ -49,6 +49,18 @@ export const seller_order_accept_reject_status_update = createAsyncThunk(
     }
 )
 
+export const delete_order = createAsyncThunk(
+    'orders/delete_order',
+    async(orderId, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const {data} = await api.delete(`/seller/order/${orderId}`, {withCredentials: true})
+            return fulfillWithValue(data)
+        }catch(error){
+            return rejectWithValue(error.response.data)
+        }
+    }
+)
+
 export const seller_payment_accept_reject_status_update = createAsyncThunk(
     'orders/seller_payment_accept_reject_status_update',
     async({orderId, info} , {rejectWithValue, fulfillWithValue}) => {
@@ -116,6 +128,16 @@ export const OrderReducer = createSlice({
         .addCase(seller_payment_accept_reject_status_update.rejected, (state, {payload}) => {
             state.errorMessage = payload.message
             state.reloadOrders = true;
+        })
+
+        .addCase(delete_order.fulfilled, (state, action) => {
+            state.successMessage = action.payload.message;
+            state.myOrders = state.myOrders.filter(order => order._id !== action.meta.arg)
+            state.reloadOrders = true;
+        })
+        .addCase(delete_order.rejected, (state, {payload}) => {
+            state.errorMessage = payload.message
+            state.reloadOrders = true
         })
     }
 })

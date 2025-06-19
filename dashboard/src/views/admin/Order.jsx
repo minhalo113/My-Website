@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { LuAArrowDown,  LuSquareArrowDown} from "react-icons/lu";
+
 import { Link } from 'react-router-dom';
 import Pagination from '../Pagination';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearReloadOrders, get_seller_orders, seller_order_accept_reject_status_update, seller_order_delivery_status_update, seller_payment_accept_reject_status_update,messageClear } from '../../store/Reducers/OrderReducer';
+import { clearReloadOrders, get_seller_orders, seller_order_accept_reject_status_update, seller_order_delivery_status_update, seller_payment_accept_reject_status_update, delete_order, messageClear } from '../../store/Reducers/OrderReducer';
 import Search from '../components/Search';
 import toast from 'react-hot-toast';
+import { FaTrash } from 'react-icons/fa';
 
 const Orders = () => {
 
@@ -37,6 +39,12 @@ const Orders = () => {
 
     const payment_status_update = (e, orderId) => {
         dispatch(seller_payment_accept_reject_status_update({orderId, info: {payment_status: e.target.value}}))
+    }
+
+    const handleDelete = (orderId) => {
+        if(window.confirm('Are you sure to delete this order?')){
+            dispatch(delete_order(orderId))
+        }
     }
 
     useEffect(() => {
@@ -120,9 +128,16 @@ const Orders = () => {
                         <option value="Cancelled">Cancelled</option>
                     </select> 
                 </div>
-                <div className='py-3 w-[18%] font-medium'>
-                    <Link to={`/admin/dashboard/order/details/${o._id}`} >View</Link>
+                <div className='py-3 w-[9%] font-medium'>
+                    <Link to={`/admin/dashboard/order/details/${o._id}`} className='underline'>View</Link>
                 </div>
+
+                <div className='py-3 w-[9%] flex justify-center'>
+                    <button onClick={() => handleDelete(o._id)} className='text-red-500'>
+                        <FaTrash />
+                    </button>
+                </div>
+
                 <div onClick={() => showOrderDetailButton(o._id)} className='py-3 w-[8%] font-medium'><LuAArrowDown /></div> 
             </div> 
             <div className={show === o._id ? 'block border-b border-slate-700 bg-[#8288ed] p-3' : 'hidden'}>
