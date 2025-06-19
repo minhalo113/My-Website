@@ -6,6 +6,7 @@ import ProductDisplay from './ProductDisplay';
 import Review from './Review';
 import PopularPost from './PopularPost';
 import api from '../../src/api/api.js';
+import DiscountBadge from '../../components/DiscountBadge.jsx';
 
 const SingleProduct = () => {
     const [productData, setProduct] = useState(null);
@@ -48,11 +49,14 @@ const SingleProduct = () => {
                         <article>
                             <div className='product-details'>
                                 <div className='row align-items-center'>
-                                    <div className='col-md-6 col-12'><div className='product-thumb'>
-                                        <div className='swiper-container pro-single-top'>
-
-                                            <ProductSwiper images = {productData.images}/>
-                                        </div></div></div>
+                                <div className='col-md-6 col-12'>
+                                        <div className='product-thumb relative'>
+                                            <DiscountBadge discount={productData.discount} />
+                                            <div className='swiper-container pro-single-top'>
+                                                <ProductSwiper images={productData.images}/>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div className='col-md-6 col-12'>
                                         <div className='post-content'>
