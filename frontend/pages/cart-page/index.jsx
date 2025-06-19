@@ -20,7 +20,8 @@ const CartPage = () => {
     });
 
     const calculateTotalPrice = (item) => {
-        return item.price * item.qty
+        const price = item.price - (item.price * (item.discount || 0))/ 100;
+        return price * item.qty
     }
 
     const handleIncrease = (item) => add(item, 1);
@@ -99,7 +100,10 @@ const CartPage = () => {
                                                 </div>
                                             </td>
 
-                                            <td className='cat-price'>${item.price}</td>
+                                            <td className='cat-price'>
+                                                ${ (item.price - (item.price * (item.discount || 0)) / 100).toFixed(2) }
+                                            </td>
+
                                             <td className='cat-quantity'>
                                                 <div className='cart-plus-minus'>
                                                     <div className='dec qtybutton' onClick={() => handleDecrease(item)}>-</div>
@@ -116,7 +120,7 @@ const CartPage = () => {
                                             </td>
 
                                             <td className='cat-toprice'>
-                                                {`$${calculateTotalPrice(item)}`}
+                                            {`$${calculateTotalPrice(item).toFixed(2)}`}
                                             </td>
                                             <td className='cat-edit'>
                                                 <a onClick={() => handleRemoveItem(item)}>
@@ -159,7 +163,7 @@ const CartPage = () => {
                                                 <span className='pull-left'>
                                                     Cart Subtotal
                                                 </span>
-                                                <p className='pull-right'>$ {cartSubtotal}</p>
+                                                 <p className='pull-right'>$ {cartSubtotal.toFixed(2)}</p>
                                             </li>
                                             <li>
                                                 <span className='pull-left'>Shipping and Handling</span>

@@ -96,6 +96,7 @@ const Orders = () => {
                         <option value="Accepted">Accepted</option>
                         <option value="Rejected">Rejected</option>
                         <option value="Uncaptured">Uncaptured</option>
+                        <option value="Uncaptured">Pending</option>
                     </select> 
                 </div>
 

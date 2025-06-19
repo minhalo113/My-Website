@@ -546,6 +546,9 @@
   .w-\[25\%\] {
     width: 25%;
   }
+  .w-\[30\%\] {
+    width: 30%;
+  }
   .w-\[33px\] {
     width: 33px;
   }
@@ -560,6 +563,9 @@
   }
   .w-\[45px\] {
     width: 45px;
+  }
+  .w-\[50px\] {
+    width: 50px;
   }
   .w-\[75px\] {
     width: 75px;
@@ -856,6 +862,9 @@
   }
   .bg-\[\#0200f8\] {
     background-color: #0200f8;
+  }
+  .bg-\[\#5960e4\] {
+    background-color: #5960e4;
   }
   .bg-\[\#8288ed\] {
     background-color: #8288ed;
@@ -1591,6 +1600,11 @@
   .sm\:grid-cols-2 {
     @media (width >= 40rem) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .sm\:grid-cols-3 {
+    @media (width >= 40rem) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   .sm\:gap-4 {

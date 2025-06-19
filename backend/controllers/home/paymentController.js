@@ -15,33 +15,49 @@ class paymentController {
                 return responseReturn(res, 400, {error: "Missing cart or shipping information."})
             }
 
-            const line_items = cartItems.map(item => ({
-                price_data: {
-                    currency: "cad",
-                    product_data: {
-                        name: item.name,
-                        images: Array.isArray(item.img) ? [item.img[0]] : [item.img],
-                    },
-                    unit_amount: Math.round(item.price * 100),
-                },
-                quantity: item.qty,
-            }));
+            const line_items = cartItems.map(item => {
+                const price = item.price - (item.price * (item.discount || 0)) / 100;
+                return {
+                    price_data: {
+                        currency: 'cad',
+                        product_data: {
+                            name: item.name,
+                            images: Array.isArray(item.img) ? [item.img[0]] : [item.img],
+                        },
+                        unit_amount: Math.round(price * 100),
+                        },
+                        quantity: item.qty,
+                    };
+                });
+
+            const totalPrice = cartItems.reduce((t, item) => {
+                const price = item.price - (item.price * (item.discount || 0)) / 100;
+                return t + price * item.qty;
+            }, 0);
+            const order = await customerOrder.create({
+                customerId: is_login ? is_login.id : 'guest',
+                customerEmail: is_login ? is_login.email : '',
+                customerName: is_login ? is_login.name : '',
+                shippingInfo: shipping,
+                products: cartItems,
+                price: totalPrice,
+                payment_status: 'Pending',
+                delivery_status: 'Pending',
+                order_status: 'Pending',
+                date: moment(Date.now()).format('LLL')
+            })
 
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
                 line_items,
                 payment_intent_data: {capture_method: 'manual',
                     metadata: {
-                        customerId: is_login ? is_login.id : 'guest',
-                        customerEmail: is_login ? is_login.email: '',
-                        customerName: is_login ? is_login.name: '',
-                        shipping: JSON.stringify(shipping),
-                        cart: JSON.stringify(cartItems)
+                        orderId: order._id.toString()
                     }
                 },
                 success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout-success?status=success`,
             })
-
+            
             return responseReturn(res, 200, { url: session.url });
         }catch (error){
             console.log(error);
@@ -72,27 +88,14 @@ class paymentController {
 
             const email = sess.customer_details?.email || sess.customer_email;
 
-            const meta = sess.metadata || {};
-            let shipping = {};
-            let cartItems = [];
-            try{shipping = JSON.parse(meta.shipping || '{}');} catch(e) {}
-            try{cartItems = JSON.parse(meta.cart || '[]');} catch(e) {}
+            const orderId = sess.metadata?.orderId;
 
-            try {
-                await customerOrder.create({
-                    customerId: meta.customerId === 'guest' ? undefined : meta.customerId,
-                    customerEmail: email,
-                    customerName: meta.customerName || '',
-                    shippingInfo: shipping,
-                    products: cartItems,
-                    price: sess.amount_total / 100,
-                    payment_status: 'Uncaptured',
-                    delivery_status: 'Pending',
-                    order_status: 'Pending',
-                    date: moment(Date.now()).format('LLL')
-                });
-            } catch (err) {
-                console.error('Order creation failed', err.message);
+            if(orderId) {
+                try{
+                    await customerOrder.findByIdAndUpdate(orderId, {payment_status: 'Uncaptured'})
+                }catch(err){
+                    console.error('Order updated failed', err.message);
+                }
             }
 
             await sendMail({
