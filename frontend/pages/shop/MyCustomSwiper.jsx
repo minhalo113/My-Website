@@ -33,8 +33,8 @@ const ProductSwiper = ({ images }) => {
             >
                 {images.map((image, index) => (
                     <SwiperSlide key={index}> 
-                        <div className="single-thumb flex items-center justify-center h-[400px]">
-                            <img src={image} alt={`Product Image ${index + 1}`} />
+                        <div className="single-thumb flex items-center justify-center min-h-[400px] py-4">
+                        <img src={image} alt={`Product Image ${index + 1}`} className="max-h-[500px] object-contain" />
                         </div>
                     </SwiperSlide>
                 ))}
