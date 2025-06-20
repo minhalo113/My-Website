@@ -18,6 +18,9 @@ class paymentController {
 
             const line_items = cartItems.map(item => {
                 const price = item.price - (item.price * (item.discount || 0)) / 100;
+                if (discount) {
+                    price = price - (price * discount) / 100;
+                }
                 return {
                     price_data: {
                         currency: 'cad',
@@ -31,17 +34,16 @@ class paymentController {
                     };
                 });
 
-            const totalPrice = cartItems.reduce((t, item) => {
-                const price = item.price - (item.price * (item.discount || 0)) / 100;
+            const finalPrice = cartItems.reduce((t, item) => {
+                let price = item.price - (item.price * (item.discount || 0)) / 100;
+                if (discount) {
+                    price = price - (price * discount) / 100;
+                }
                 return t + price * item.qty;
             }, 0);
 
-            let finalPrice = totalPrice;
-            if(discount) {
-                finalPrice = totalPrice - (totalPrice * discount) / 100;
-            }
             if (finalPrice <= 0) {
-                return responseReturn(res, 400, { error: "Invalid final price after discount." });
+                return responseReturn(res, 400, { error: "Invalid final price after discount.", message: "Invalid final price after discount." });
             }
 
             const order = await customerOrder.create({

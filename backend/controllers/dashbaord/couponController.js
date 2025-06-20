@@ -59,7 +59,20 @@ class couponController {
         }
     }
 
-    // delete_coupon
+    delete_coupon = async(req, res) => {
+        const {couponId} = req.params;
+        try{
+            const deleted = await couponModel.findByIdAndDelete(couponId);
+            if(!deleted){
+                return responseReturn(res, 404, {error: 'Coupon not found', message: 'Coupon not found'});
+            }
+            return responseReturn(res, 200, {message: 'Coupon deleted successfully'});
+        }catch(error){
+            console.log('delete coupon error', error.message);
+            return responseReturn(res, 500, {error: 'Internal Server Error', message: 'Internal Server Error'});
+        }
+    }
+
 }
 
 export default new couponController();
