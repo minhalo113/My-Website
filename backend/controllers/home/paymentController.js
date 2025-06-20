@@ -17,7 +17,7 @@ class paymentController {
             }
 
             const line_items = cartItems.map(item => {
-                const price = item.price - (item.price * (item.discount || 0)) / 100;
+                let price = item.price - (item.price * (item.discount || 0)) / 100;
                 if (discount) {
                     price = price - (price * discount) / 100;
                 }

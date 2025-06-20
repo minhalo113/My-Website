@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { add_coupon, get_coupons, messageClear } from '../../store/Reducers/couponReducer';
+import { add_coupon, get_coupons, messageClear, delete_coupon } from '../../store/Reducers/couponReducer';
 import toast from 'react-hot-toast';
 
 const Coupon = () => {
@@ -8,6 +8,12 @@ const Coupon = () => {
     const {coupons, loader, successMessage, errorMessage} = useSelector(state => state.coupon);
 
     const [state, setState] = useState({code:'', discount:'', maxUses:''});
+
+    const handleDelete = (id) => {
+        if(window.confirm('Are you sure to delete this coupon?')){
+            dispatch(delete_coupon(id));
+        }
+    }
 
     const addCoupon = e => {
         e.preventDefault();
@@ -50,6 +56,7 @@ const Coupon = () => {
                             <th className='py-2 px-4'>Code</th>
                             <th className='py-2 px-4'>Discount</th>
                             <th className='py-2 px-4'>Used / Max</th>
+                            <th className='py-2 px-4'>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,6 +65,9 @@ const Coupon = () => {
                                 <td className='py-1 px-4'>{c.code}</td>
                                 <td className='py-1 px-4'>{c.discount}%</td>
                                 <td className='py-1 px-4'>{c.used} / {c.maxUses}</td>
+                                <td className='py-1 px-4'>
+                                    <button onClick={() => handleDelete(c._id)} className='text-red-500'>Delete</button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
