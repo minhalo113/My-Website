@@ -3,13 +3,14 @@ import responseReturn from "../../utils/response.js";
 import { sendMail } from '../../utils/mail.js';
 import customerOrder from '../../models/orderModel.js';
 import moment from 'moment'
+import couponController from '../dashbaord/couponController.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 class paymentController {
     create_payment_session = async (req, res) => {
         try{
-            const {cartItems, shipping, is_login} = req.body;
+            const {cartItems, shipping, is_login, couponId, discount} = req.body;
 
             if (!cartItems) {
                 return responseReturn(res, 400, {error: "Missing cart or shipping information."})
@@ -34,13 +35,22 @@ class paymentController {
                 const price = item.price - (item.price * (item.discount || 0)) / 100;
                 return t + price * item.qty;
             }, 0);
+
+            let finalPrice = totalPrice;
+            if(discount) {
+                finalPrice = totalPrice - (totalPrice * discount) / 100;
+            }
+            if (finalPrice <= 0) {
+                return responseReturn(res, 400, { error: "Invalid final price after discount." });
+            }
+
             const order = await customerOrder.create({
                 customerId: is_login ? is_login.id : 'guest',
                 customerEmail: is_login ? is_login.email : '',
                 customerName: is_login ? is_login.name : '',
                 shippingInfo: shipping,
                 products: cartItems,
-                price: totalPrice,
+                price: finalPrice,
                 payment_status: 'Pending',
                 delivery_status: 'Pending',
                 order_status: 'Pending',
@@ -52,7 +62,8 @@ class paymentController {
                 line_items,
                 payment_intent_data: {capture_method: 'manual',
                     metadata: {
-                        orderId: order._id.toString()
+                        orderId: order._id.toString(),
+                        couponId: couponId || ''
                     }
                 },
                 success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout-success?status=success`,
@@ -89,12 +100,21 @@ class paymentController {
             const email = sess.customer_details?.email || sess.customer_email;
 
             const orderId = sess.metadata?.orderId;
+            const couponId = sess.metadata?.couponId;
 
             if(orderId) {
                 try{
                     await customerOrder.findByIdAndUpdate(orderId, {payment_status: 'Uncaptured'})
                 }catch(err){
                     console.error('Order updated failed', err.message);
+                }
+            }
+
+            if(couponId){
+                try{
+                    await couponController.use_coupon(couponId);
+                }catch(err){
+                    console.error('Coupon update error', err.message)
                 }
             }
 

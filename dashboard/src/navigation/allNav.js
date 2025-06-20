@@ -1,6 +1,6 @@
 import { AiOutlineDashboard, AiOutlineShoppingCart } from "react-icons/ai";
 import { BiCategory } from "react-icons/bi";
-import { FaUserTimes, FaUsers } from "react-icons/fa";
+import { FaTags } from "react-icons/fa";
 import { MdPayment } from "react-icons/md";
 import { FaCodePullRequest } from "react-icons/fa6";
 import { IoIosChatbubbles } from "react-icons/io";
@@ -76,5 +76,12 @@ export const allNav = [
         icon: <FaRegNewspaper />,
         role: 'admin',
         path: '/admin/dashboard/blog'
+    },
+    {
+        id: 10,
+        title: 'Coupons',
+        icon: <FaTags />,
+        role: 'admin',
+        path: '/admin/dashboard/coupons'
     }
 ]

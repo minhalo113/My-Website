@@ -13,6 +13,7 @@ import OrderDetails from './../../views/admin/OrderDetails';
 import BlogPost from "../../views/admin/BlogPost";
 import BlogEdit from "../../views/admin/BlogEdit";
 import AddBlog from "../../views/admin/AddBlog";
+import Coupon from "../../views/admin/Coupon";
 
 export const privateRoutesAdmin = [
     {
@@ -83,6 +84,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/add-blog',
         element: <AddBlog/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/coupons',
+        element: <Coupon/>,
         role: 'admin'
     }
 ]

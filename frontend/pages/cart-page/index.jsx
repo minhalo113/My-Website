@@ -18,6 +18,8 @@ const CartPage = () => {
     const [shipping, setShipping] = useState({
         address: "", phoneNumber: ""
     });
+    const [coupon, setCoupon] = useState({code: '', discount: 0, id: null});
+    const [couponError, setCouponError] = useState('');
 
     const calculateTotalPrice = (item) => {
         const price = item.price - (item.price * (item.discount || 0))/ 100;
@@ -31,6 +33,19 @@ const CartPage = () => {
     const cartSubtotal = cartItems.reduce(
         (t, i) => t + calculateTotalPrice(i), 0
     )
+
+    const handleApplyCoupon = async () => {
+        if(!coupon.code.trim()) return;
+        try {
+            const {data} = await api.post('/coupon-apply', {code: coupon.code});
+            setCoupon({code: coupon.code, discount: data.discount, id: data.couponId});
+            setCouponError('');
+        }catch(err){
+            setCoupon({code: '', discount: 0, id: null});
+            setCouponError(err.response?.data?.error || 'Invalid coupon');
+        }
+    };
+
 
     const handleCheckout  = async(e) => {
         e.preventDefault();
@@ -54,7 +69,7 @@ const CartPage = () => {
                 is_login = user
             }
             const {data} = await api.post("/create-payment-session", {
-                cartItems, shipping, is_login
+                cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount
             });
             window.location.href = data.url;
         }catch(error){
@@ -62,7 +77,7 @@ const CartPage = () => {
             alert("Yikes! Payment session failed. Gremlins in the system? Try again in a bit.");
         }
     }
-    const orderTotal = cartSubtotal;
+    const orderTotal = cartSubtotal - (cartSubtotal * coupon.discount) / 100;
 
     if (!mounted) {
         return null;
@@ -155,6 +170,7 @@ const CartPage = () => {
 
                                 </div>
 
+
                                 {/* <div className='col-md-6 col-12'> */}
                                     <div className='cart-overview'>
                                         <h3>Cart Totals</h3>
@@ -173,9 +189,58 @@ const CartPage = () => {
                                                 <span className='pull-left'>Order Total</span>
                                                 <p className='pull-right'>$ {orderTotal.toFixed(2)}</p>
                                             </li>
+
                                         </ul>
                                     </div>
                                 {/* </div> */}
+                                <div className="mt-10 space-y-3 bg-[#f8fafc] p-5 rounded-md shadow-md border border-slate-300">
+                                    <h3 className="text-lg font-semibold text-slate-800 mb-2">Apply Coupon</h3>
+                                    
+                                    <div className="flex flex-col sm:flex-row gap-3 items-center mb-20">
+                                        <input
+                                        type="text"
+                                        placeholder="Enter coupon code"
+                                        className="w-full sm:flex-1 px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        value={coupon.code}
+                                        onChange={(e) => setCoupon({ ...coupon, code: e.target.value })}
+                                        />
+                                        <button
+                                        type="button"
+                                        onClick={handleApplyCoupon}
+                                        className="px-5 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition font-medium"
+                                        >
+                                        Apply
+                                        </button>
+
+                                        
+                                    </div>
+                                    {coupon.discount > 0 && (
+                                        <li
+                                            style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            fontWeight: '500',
+                                            color: '#16a34a', // emerald-600
+                                            }}
+                                        >
+                                            <span style={{ fontWeight: 'bold' }}>Coupon Discount</span>
+                                            <span style={{ margin: 0, fontWeight: 'bold' }}>- {coupon.discount}%</span>
+                                        </li>
+                                        )}
+
+                                        {couponError && (
+                                        <p
+                                            style={{
+                                            color: '#dc2626', 
+                                            fontSize: '0.875rem',
+                                            marginTop: '0.5rem',
+                                            }}
+                                        >
+                                            {couponError}
+                                        </p>
+                                        )}
+                                </div>
 
                                 <div>
                                         <form onSubmit={handleCheckout} className="w-full sm:w-auto">
@@ -202,4 +267,4 @@ const CartPage = () => {
   )
 }
 
-export default CartPage
+export default CartPage;

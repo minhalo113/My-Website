@@ -22,6 +22,7 @@ import orderRouter from "./routes/orders/orderRoutes.js";
 import wishlistRouter from "./routes/home/wishlistRoutes.js";
 import blogRouter from "./routes/dashboard/blogRoutes.js";
 import contactRouter from "./routes/home/contactRoutes.js";
+import couponRouter from './routes/dashboard/couponRoutes.js';
 
 const PORT = process.env.PORT;
 
@@ -50,6 +51,7 @@ app.use('/api', orderRouter)
 app.use('/api', wishlistRouter)
 app.use('/api', blogRouter)
 app.use('/api', contactRouter);
+app.use('/api', couponRouter);
 
 app.get("/", (req, res) => res.send("My backend"))
 dbConnect()
