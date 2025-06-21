@@ -11,14 +11,17 @@ const desc = "🎲 Endless Fun, One Small Price!"
 
 const Banner = () => {
     const [productData, setProductData] = useState([])
-    
+    const [categorys, setCategorys] = useState([])
+    const [selectedCategory, setSelectedCategory] = useState('all')
 
     useEffect(() =>{
         const fetchData = async() => {
             try{
                 const allProducts = await api.get('/customers-products-get', {withCredentials: true})
+                const allCategorys = await api.get('/customers-category-get', {withCredentials: true})
     
                 setProductData(allProducts.data.products);
+                setCategorys(allCategorys.data.categorys);
             }catch(err){
                 console.log(err)
             }finally{
@@ -38,11 +41,29 @@ const Banner = () => {
         const searchTerm = e.target.value;
         setSearchInput(searchTerm)
 
-        const filtered = productData.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        const filtered = productData.filter((product) => {
+            const matchesName = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+            return matchesName && matchesCategory;
+        });
 
         setfilteredProducts(filtered)
         setShowDropdown(true);
     }
+
+    const handleCategoryChange = (e) => {
+        const newCategory = e.target.value;
+        setSelectedCategory(newCategory);
+
+        const filtered = productData.filter((product) => {
+            const matchesName = product.name.toLowerCase().includes(searchInput.toLowerCase());
+            const matchesCategory = newCategory === "all" || product.category === newCategory;
+            return matchesName && matchesCategory;
+        })
+
+        setfilteredProducts(filtered);
+        setShowDropdown(true);
+    } 
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -64,7 +85,12 @@ const Banner = () => {
                 <div className='banner-content'>
                     {title}
                     <form style={{boxShadow: "0 0 0", marginBottom: "1rem"}} ref={dropdownRef} onFocus={() => setShowDropdown(true)}>
-                        <SelectedCategory select = {"all"}/>
+                    <SelectedCategory
+                    select={selectedCategory}
+                    allCategorys={categorys}
+                    onChange={handleCategoryChange}
+                    />
+
                         <input type = "text" name = "search" id = "search" placeholder='What treasure are you hunting for today?' 
                         value={searchInput} onChange={handleSearch}/>
                         <button type = "submit">

@@ -13,6 +13,7 @@ import Head from "next/head"
 import NavItems from "../components/NavItems.jsx";
 import Footer from "../components/Footer";
 import ChatCustomer from "../components/ChatCustomer.jsx"
+import AnnouncementBar from "../components/AnnouncementBar.jsx"
 import { useRouter } from "next/router";
 
 import {Provider} from 'react-redux'
@@ -43,8 +44,8 @@ function MyApp({ Component, pageProps }) {
       <CartProvider>
 
       <AuthProvider>
+        {!noLayoutRoutes.includes(router.pathname) && !router.pathname.startsWith('/admin') && <AnnouncementBar />}
         {!noLayoutRoutes.includes(router.pathname) && <NavItems />}
-        
         <div className="min-vh-100">
           {
             <Component {...pageProps}/>

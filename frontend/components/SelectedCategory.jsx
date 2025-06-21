@@ -1,23 +1,27 @@
-import React from 'react'
+import React from 'react';
+import PropTypes from 'prop-types';
 
-const SelectedCategory = (select) => {
+const SelectedCategory = ({ select, allCategorys, onChange }) => {
   return (
-    <select>
-        <option value="all">All Categories</option>
-        <option value="business">Business</option>
-        <option value="health">Health</option>
-        <option value="history&geography">History & Geography</option>
-        <option value="humour">Humour</option>
-        <option value="reference">Reference</option>
-        <option value="religion">Religion</option>
-        <option value="romance">Romance</option>
-        <option value="sciencefiction&fantasy">Science Fiction & Fantasy</option>
-        <option value="self-help">Self-Help</option>
-        <option value ="socialscience">Social Science</option>
-        <option value ="teen&youngadult">Teen & Young Adult</option>
-        <option value ="Men's Sneaker">Men&apos;s Sneaker</option>
+    <select value={select} onChange={onChange}>
+      <option value="all">All Categories</option>
+      {allCategorys.map((category, index) => (
+        <option key={index} value={category.name}>
+          {category.name}
+        </option>
+      ))}
     </select>
-  )
-}
+  );
+};
 
-export default SelectedCategory
+SelectedCategory.propTypes = {
+  select: PropTypes.string.isRequired,
+  allCategorys: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired
+    })
+  ).isRequired,
+  onChange: PropTypes.func.isRequired
+};
+
+export default SelectedCategory;

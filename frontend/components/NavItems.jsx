@@ -34,6 +34,7 @@ const NavItems = () => {
     try{
       setUser(null)
       const {data} = await api.get('/customer/logout', {withCredentials: true})
+      localStorage.removeItem("chatUserId");
       toast.success(data.message)
       router.push("/")
     }catch(error){
@@ -81,6 +82,7 @@ const NavItems = () => {
                 <Link href = {"/"}>
                   <img src = "/images/logo/myLogo.webp" alt = ""   style={{width: "120px", height: "120px"}}/>
                 </Link>
+
               </div>
 
 
@@ -89,12 +91,52 @@ const NavItems = () => {
               <div className='menu-area'>
                 <div className='menu'>
                   <ul className={`lab-ul ${menuToggle ? "active": ""}`}>
-                    <li><Link href = "/">Home</Link></li>
-                    <li><Link href = "/shop">Shop</Link></li>
-                    <li><Link href = "/blog">Blog</Link></li>
-                    <li><Link href = "/about">About</Link></li>
-                    <li><Link href = "/contact">Contact</Link></li>
-                    <li><Link href = "/cart-page">Cart</Link></li>
+                      <li>
+                      <Link
+                        href="/"
+                        className="inline-block transition-transform duration-200 hover:-translate-y-1"
+                      >
+                        Home
+                      </Link>
+                    </li>
+
+                    <li>
+                    <Link
+                      href="/shop"
+                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
+                    >
+                      Shop
+                    </Link>
+                  </li>
+
+                  <li >
+                    <Link
+                      href="/blog"
+                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
+                    >
+                      Blog
+                    </Link>
+                  </li>
+
+                  <li>
+                    <Link
+                      href="/about"
+                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
+                    >
+                      About
+                    </Link>
+                  </li>
+
+                  <li >
+                    <Link
+                      href="/cart-page"
+                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
+                    >
+                      Cart
+                    </Link>
+                  </li>
+
+            
                     {user && (
                       <li
                       className = "flex flex-col border-t border-[rgba(16,17,21,0.1)] lg:border-none">
