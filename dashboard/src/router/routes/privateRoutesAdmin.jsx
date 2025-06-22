@@ -15,6 +15,8 @@ import BlogEdit from "../../views/admin/BlogEdit";
 import AddBlog from "../../views/admin/AddBlog";
 import Coupon from "../../views/admin/Coupon";
 
+import HomeSwiper from "../../views/admin/HomeSwiper";
+
 export const privateRoutesAdmin = [
     {
         path: "admin/dashboard",
@@ -89,6 +91,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/coupons',
         element: <Coupon/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/home-swiper',
+        element: <HomeSwiper/>,
         role: 'admin'
     }
 ]

@@ -83,5 +83,12 @@ export const allNav = [
         icon: <FaTags />,
         role: 'admin',
         path: '/admin/dashboard/coupons'
+    },
+    {
+        id: 11,
+        title: 'Home Swiper',
+        icon: <MdPayment />,
+        role: 'admin',
+        path: '/admin/dashboard/home-swiper'
     }
 ]

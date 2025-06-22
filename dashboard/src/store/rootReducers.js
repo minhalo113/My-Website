@@ -4,6 +4,7 @@ import productReducer from "./Reducers/productReducer.js";
 import OrderReducer from "./Reducers/OrderReducer.js"
 import blogReducer from "./Reducers/blogReducer.js";
 import couponReducer from './Reducers/couponReducer.js'
+import homeSwiperReducer from './Reducers/homeSwiperReducer.js'
 
 const rootReducer = {
     auth: authReducer,
@@ -12,7 +13,8 @@ const rootReducer = {
     // // chat: chatReducer,
     order: OrderReducer,
     blog: blogReducer,
-    coupon: couponReducer
+    coupon: couponReducer,
+    homeSwiper: homeSwiperReducer
     // // payment: PaymentReducer,
     // // dashboard: dashboardReducer
 }

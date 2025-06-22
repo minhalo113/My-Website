@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react'
 import Link from 'next/link';
 import SelectedCategory from '../../components/SelectedCategory';
 import api from '../../src/api/api';
+import HomeImageSwiper from '../../components/HomeImageSwiper';
 
 const title = (
     <h2>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h2>
@@ -84,6 +85,7 @@ const Banner = () => {
             <div className='container'>
                 <div className='banner-content'>
                     {title}
+                    <HomeImageSwiper />
                     <form style={{boxShadow: "0 0 0", marginBottom: "1rem"}} ref={dropdownRef} onFocus={() => setShowDropdown(true)}>
                     <SelectedCategory
                     select={selectedCategory}
