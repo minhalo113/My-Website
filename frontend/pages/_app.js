@@ -37,9 +37,18 @@ function MyApp({ Component, pageProps }) {
     <Suspense>
     <Head>
         <title>Toy Haven Store | Great Deals On Toys & More</title>
-        <meta name = "viewport" content = "width=device-width, initial-scale=1.0"></meta>
-        <meta charSet = "UTF-8"/>
-        <link rel = "icon" href="/cropped-cropped-DALL·E-2024-11-21-11.20.10-A-vintage-style-logo-featuring-an-open-book-in-the-center-with-an-hourglass-above-it-a-globe-on-the-left-and-a-ships-wheel-on-the-right.-The-logo-i-1.webp"></link>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charSet="UTF-8" />
+        <meta name="description" content="Toy Haven Store offers a wide selection of toys with great deals and fast shipping." />
+        <meta name="keywords" content="toys, kids, games, Toy Haven, online store" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://www.toyhaven.store/" />
+        <meta property="og:title" content="Toy Haven Store | Great Deals On Toys & More" />
+        <meta property="og:description" content="Find the perfect toys for any occasion at Toy Haven Store." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.toyhaven.store/" />
+        <meta property="og:image" content="/cropped-cropped-DALL·E-2024-11-21-11.20.10-A-vintage-style-logo-featuring-an-open-book-in-the-center-with-an-hourglass-above-it-a-globe-on-the-left-and-a-ships-wheel-on-the-right.-The-logo-i-1.webp" />
+        <link rel="icon" href="/cropped-cropped-DALL·E-2024-11-21-11.20.10-A-vintage-style-logo-featuring-an-open-book-in-the-center-with-an-hourglass-above-it-a-globe-on-the-left-and-a-ships-wheel-on-the-right.-The-logo-i-1.webp" />
     </Head>
       <CartProvider>
 
