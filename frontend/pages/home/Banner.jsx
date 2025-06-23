@@ -81,12 +81,11 @@ const Banner = () => {
     }, []);
 
     return (
-        <div className = "banner-section style-4" style = {{overflow: 'hidden', flexWrap:'wrap', height:'1000px'}}>
+        <div className = "banner-section style-4" style = {{overflow: 'hidden', flexWrap:'wrap', paddingBottom: "50px"}}>
             <div className='container'>
                 <div className='banner-content'>
                     {title}
-                    <HomeImageSwiper />
-                    <form style={{boxShadow: "0 0 0", marginBottom: "1rem"}} ref={dropdownRef} onFocus={() => setShowDropdown(true)}>
+                    <form style={{boxShadow: "0 0 0"}} ref={dropdownRef} onFocus={() => setShowDropdown(true)}>
                     <SelectedCategory
                     select={selectedCategory}
                     allCategorys={categorys}
@@ -103,7 +102,7 @@ const Banner = () => {
                             <ul className = "dropdown" style={{marginBottom:"0"}}>
                             {
                                 searchInput && filteredProducts.slice(0,10).map((product, i) => 
-                                <li key = {i} style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>
+                                    <li key = {i} style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>
                                     <img src={product.images[0]} style={{width: "100px", height:'auto', marginRight: '10px'}}/>
                                     <Link href = {`/shop/${product._id.toString()}`} style={{flexGrow: 1, textAlign: 'center'}}>{product.name}</Link>
                                     </li>)
@@ -112,7 +111,8 @@ const Banner = () => {
                             )}
                     </form>
 
-                    <p>{desc}</p>
+                    <p style={{marginBottom: "50px"}}>{desc}</p>
+                    <HomeImageSwiper />
                 </div>
             </div>
 

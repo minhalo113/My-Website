@@ -11,7 +11,10 @@ class homeSwiperController {
                 return responseReturn(res, 400, {error: err.message, message: err.message});
             }
             try{
-                const {link} = fields;
+                let {link} = fields;
+                if(Array.isArray(link)){
+                    link = link[0];
+                }
                 cloudinary.config({
                     cloud_name: process.env.cloud_name,
                     api_key: process.env.api_key,

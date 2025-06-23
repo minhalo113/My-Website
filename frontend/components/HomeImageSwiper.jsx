@@ -20,19 +20,23 @@ const HomeImageSwiper = () => {
   }, []);
 
   return (
-    <div className='w-full mb-4'>
+    <div className="w-full">
       <Swiper
         spaceBetween={0}
         slidesPerView={1}
         loop={true}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         modules={[Autoplay]}
-        className='w-full h-[300px] md:h-[400px] lg:h-[500px]'
+        className="w-full max-h-[500px]" 
       >
-        {items.map(item => (
-          <SwiperSlide key={item._id}>
-            <a href={item.link} className='block w-full h-full'>
-              <img src={item.image.url} className='w-full h-full object-cover' />
+        {items.map((item) => (
+          <SwiperSlide key={item._id} className="flex justify-center items-center">
+            <a href={item.link} className="block w-full h-full">
+              <img
+                src={item.image.url}
+                className="mx-auto w-full max-h-[500px] object-contain"
+                alt="Banner"
+              />
             </a>
           </SwiperSlide>
         ))}
