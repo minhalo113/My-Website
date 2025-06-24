@@ -7,6 +7,7 @@ import Review from './Review';
 import PopularPost from './PopularPost';
 import api from '../../src/api/api.js';
 import DiscountBadge from '../../components/DiscountBadge.jsx';
+import SEO from '../../components/SEO';
 
 const SingleProduct = () => {
     const [productData, setProduct] = useState(null);
@@ -41,6 +42,13 @@ const SingleProduct = () => {
 
   return (
     <div>
+                <SEO
+            title={`${productData.name} | Toy Haven Store`}
+            description={productData.description}
+            canonical={`https://www.toyhaven.store/product/${productData._id}`}
+            keywords={productData.name}
+            image={productData?.images?.[0]}
+        />
         <PageHeader title = {"OUR SHOP"} curPage = {productData.name} additionalLink={[{label: "Shop", path : "/shop"}]}/>
         <div className='shop-single padding-tb aside-bg'>
             <div className='container'>

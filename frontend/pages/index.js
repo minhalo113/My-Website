@@ -6,15 +6,16 @@ import LocationSprade from './home/LocationSprade'
 import AboutUs from './home/AboutUs'
 import AppSection from './home/AppSection'
 import Sponsor from './home/Sponsor'
-import Head from 'next/head'
+import SEO from '../components/SEO'
 
 export const Home = () => {
   return (
     <>
-        <Head>
-            <title>Toy Haven Store | Home</title>
-            <meta name="description" content="Discover the latest toys and deals at Toy Haven Store." />
-        </Head>
+        <SEO
+            title="Toy Haven Store | Home"
+            description="Discover the latest toys and deals at Toy Haven Store."
+            canonical="https://www.toyhaven.store/"
+        />
         <div>
             <Banner/>
             <HomeCategory/>
