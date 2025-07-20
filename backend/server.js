@@ -28,6 +28,7 @@ import homeSwiperRouter from './routes/dashboard/homeSwiperRoutes.js';
 const PORT = process.env.PORT || 8080;
 const DASHBOARD_URL = process.env.DASHBOARD_URL
 const WEB_URL = process.env.WEB_URL
+const GIT_WEB_URL = process.env.GIT_WEB_URL
 
 const app = express();
 
@@ -38,7 +39,7 @@ app.post(
   );
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.70:3001', DASHBOARD_URL, WEB_URL],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.70:3001', DASHBOARD_URL, WEB_URL, GIT_WEB_URL],
     credentials: true
 }))
 app.use(bodyParser.json())

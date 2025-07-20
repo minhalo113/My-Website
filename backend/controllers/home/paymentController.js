@@ -62,13 +62,13 @@ class paymentController {
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
                 line_items,
-                payment_intent_data: {capture_method: 'manual',
-                    metadata: {
-                        orderId: order._id.toString(),
-                        couponId: couponId || ''
-                    }
+                metadata: {
+                    orderId: order._id.toString(),
+                    couponId: couponId || ''
                 },
-                success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout-success?status=success`,
+                payment_intent_data: {capture_method: 'manual'
+                },
+                success_url: `${process.env.GIT_WEB_URL}/checkout-success?status=success`,
             })
             
             return responseReturn(res, 200, { url: session.url });
@@ -81,7 +81,6 @@ class paymentController {
     }
 
     handle_webhook = async(req, res) => {
-        console.log('hello')
         const sig = req.headers['stripe-signature'];
         let event;
 
@@ -119,6 +118,8 @@ class paymentController {
                     console.error('Coupon update error', err.message)
                 }
             }
+            console.log(orderId)
+            console.log(couponId)
 
             await sendMail({
                 from: process.env.RESEND_FROM,
@@ -130,11 +131,10 @@ class paymentController {
                     2,
                     )}. ` +
                     `We will capture the payment and sent another email to you once your items are ready to ship.\n\n` +
-                    `Order reference: ${sess.id}\n\n` +
+                    `Order reference: ${orderId}\n\n` +
                     `Thanks for shopping with us!`,
             });
 
-            console.log("not good 2")
 
         }
 

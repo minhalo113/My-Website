@@ -5,4 +5,17 @@ dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const sendMail = (opts) => resend.emails.send(opts)
+export const sendMail = async (opts) => {
+    try{
+        const result = await resend.emails.send(opts);
+        console.log("Email send result:", result);
+
+        if (result.error){
+            console.error("Email send errorL ", result.error)
+        }
+        return result
+    }catch(e){
+        console.log("Not good: ", e);
+
+    }
+}
