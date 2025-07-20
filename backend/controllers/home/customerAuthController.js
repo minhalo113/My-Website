@@ -6,6 +6,14 @@ import formidable from 'formidable';
 import { v2 as cloudinary } from 'cloudinary';
 import {sendMail} from '../../utils/mail.js'
 
+const BASE_COOKIE_PROPS = {
+    httpOny: true,
+    secure: process.env.NODE_ENV !== 'development',
+    sameSite: 'none',
+    domain: '.ahistoryfactaday.org',
+    path: '/',
+}
+
 class customerAuthController {
     customer_register = async (req, res) => {
         const { name, email, password } = req.body;
@@ -33,9 +41,13 @@ class customerAuthController {
                     role: createCustomer.role,
                     password: createCustomer.password,
                 })
+
+                const ONE_WEEK = 7 * 24 * 60 * 60 * 1000
                 res.cookie('customerToken', token, {
-                    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                })
+                        ...BASE_COOKIE_PROPS,
+                        maxAge: ONE_WEEK,
+                    })
+
                 return responseReturn(res, 201, {message: "User Register Success", token})
             }
         }catch(error){
@@ -61,9 +73,13 @@ class customerAuthController {
                         role: customer.role,
                         password: customer.password
                     })
-                    res.cookie('customerToken', token, {
-                        expires: new Date(Date.now() + 7 * 24 * 60 * 60 *1000)
+
+                    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000
+                    res.cookie('customerToken', token,{
+                        ...BASE_COOKIE_PROPS,
+                        maxAge: ONE_WEEK,
                     })
+
                     responseReturn(res, 201, {message: "User Login Success", token})
                 }else{
                     responseReturn(res, 404, {error: "Password Wrong"})
@@ -76,15 +92,18 @@ class customerAuthController {
         }
     }
 
-    customer_logout = async(req, res) => {
-        res.cookie("customerToken", "", {
-            expires: new Date(Date.now())
-        })
-        res.cookie("accessToken", "", {
-            expires: new Date(Date.now())
-        })
-        responseReturn(res, 200, {message: "Logout Success"})
-    }
+    customer_logout = (req, res) => {
+        res.cookie('customerToken', '', {
+            ...BASE_COOKIE_PROPS,
+            expires: new Date(0),       
+        });
+        res.cookie('accessToken', '', {
+            ...BASE_COOKIE_PROPS,
+            expires: new Date(0),
+        });
+
+        responseReturn(res, 200, { message: 'Logout Success' });
+    };
 
     customer_get_info = async(req, res) => {
         return responseReturn(res, 200, {user: req.user})

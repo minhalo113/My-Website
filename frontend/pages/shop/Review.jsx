@@ -69,7 +69,7 @@ const Review = ({ item, reloadFunction, reviewList }) => {
             {reviewList.map((review, i) => (
               <li key={i} className="review-item">
                 <div className="post-thumb">
-                  <img src={review.userImage.url}/>
+                  <img src={review?.userImage?.url}/>
                 </div>
                 <div className="post-content">
                   <div className="entry-meta">

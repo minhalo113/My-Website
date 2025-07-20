@@ -25,7 +25,9 @@ import contactRouter from "./routes/home/contactRoutes.js";
 import couponRouter from './routes/dashboard/couponRoutes.js';
 import homeSwiperRouter from './routes/dashboard/homeSwiperRoutes.js';
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
+const DASHBOARD_URL = process.env.DASHBOARD_URL
+const WEB_URL = process.env.WEB_URL
 
 const app = express();
 
@@ -36,7 +38,7 @@ app.post(
   );
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.70:3001'],
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.70:3001', DASHBOARD_URL, WEB_URL],
     credentials: true
 }))
 app.use(bodyParser.json())
@@ -54,6 +56,10 @@ app.use('/api', blogRouter)
 app.use('/api', contactRouter);
 app.use('/api', couponRouter);
 app.use('/api', homeSwiperRouter);
+
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 
 app.get("/", (req, res) => res.send("My backend"))
 dbConnect()

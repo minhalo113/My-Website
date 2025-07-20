@@ -1,4 +1,3 @@
-import React from 'react'
 import Banner from './home/Banner'
 import HomeCategory from './home/HomeCategory'
 import CategoryShowCase from './home/CategoryShowCase'

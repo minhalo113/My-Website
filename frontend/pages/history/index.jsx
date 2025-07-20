@@ -3,6 +3,7 @@ import { ChevronDown, PackageCheck, PackageX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import PropTypes from "prop-types";
 import api from "../../src/api/api";
 
 const History = () => {
@@ -16,7 +17,6 @@ const History = () => {
             try{
                 const customerOrders = await api.get('/customers-orders', {withCredentials: true})
                 setOrders(customerOrders.data.orders)
-                console.log(orders)
             }catch(err){
                 console.log(err)
             }finally{
@@ -136,5 +136,10 @@ function InfoPair({ label, value }) {
       </div>
     );
   }
+
+InfoPair.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+};
 
 export default History

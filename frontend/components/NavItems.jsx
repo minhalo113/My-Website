@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import toast from "react-hot-toast"
 import {useRouter} from "next/router";
-import { useRouteError } from "react-router-dom";
+
 import { AuthContext } from "../context/AuthContext";
 import api from '../src/api/api.js'
 

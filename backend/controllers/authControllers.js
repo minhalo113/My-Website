@@ -25,7 +25,16 @@ class authControllers{
                         password: admin.password,
                         images: admin.images
                     })
-                    res.cookie('accessToken', token,{expires: new Date(Date.now() + 7 * 24 * 60 * 60*1000)} )
+
+                    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000
+                    res.cookie('accessToken', token, {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV !== 'development',
+                        sameSite: 'none',
+                        domain: '.ahistoryfactaday.org',
+                        path: '/',
+                        maxAge: ONE_WEEK,
+                    });
                     responseReturn(res, 200, {token, message: "Login Success", userInfo: admin});
                 }else{
                     responseReturn(res, 401, {error: "Password Wrong"});

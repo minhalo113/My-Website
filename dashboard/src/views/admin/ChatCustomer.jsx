@@ -7,7 +7,8 @@ if (typeof window !== 'undefined') {
   customerId = localStorage.getItem('chatUserId') || uuid();
   localStorage.setItem('chatUserId', customerId);
 }
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
+const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000');
+console.log('Socket URL:', process.env.REACT_APP_SOCKET_URL);
 
 const ChatCustomer = () => {
   const [messages, setMessages] = useState([]);

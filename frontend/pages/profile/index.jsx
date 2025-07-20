@@ -19,7 +19,8 @@ const ProfilePage = () => {
         if(user){
             setName(user.name || '');
             setEmail(user.email || '');
-            setPreviewUrl(user.image.url || '');
+            setPreviewUrl(user?.image?.url || '');
+            console.log(user?.image)
         }
     }, [user])
 

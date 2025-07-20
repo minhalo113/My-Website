@@ -65,24 +65,20 @@ class productController{
         try{
             if (searchValue) {
                 const products = await productModel.find({
-                    $text: {$search: searchValue},
-                    sellerId: id
+                    $text: {$search: searchValue}
                 }).skip(skipPage).limit(parPage).sort({createAt: -1})
 
                 const totalProduct = await productModel.find({
-                    $text: {$search: searchValue},
-                    sellerId: id
+                    $text: {$search: searchValue}
                 }).countDocuments()
 
 
                 responseReturn(res, 200, {products, totalProduct})
             }else if(parPage && page){
                 const products = await productModel.find({
-                    sellerId: id
                 }).skip(skipPage).limit(parPage).sort({createdAt: -1})
 
                 const totalProduct = await productModel.find({
-                    sellerId: id
                 }).countDocuments()
                 
                 responseReturn(res, 200, {products, totalProduct})

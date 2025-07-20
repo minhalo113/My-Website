@@ -1,5 +1,4 @@
-import React from 'react'
-import { Link } from 'react-router-dom';
+
 <link rel="stylesheet" href="myProjects/webProject/icofont/css/icofont.min.css"></link>
 
 const title = "About The Toy Haven"; 

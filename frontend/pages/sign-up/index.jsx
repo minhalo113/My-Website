@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import api from "../../src/api/api";

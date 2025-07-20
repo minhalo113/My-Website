@@ -1,5 +1,3 @@
-import React from 'react'
-import { Link } from 'react-router-dom';
 
 const title = "More than 60,000 customers"
 const desc = "Buy products on your any device with our app & enjoy your time what you want. Just download & install & start to shopping";

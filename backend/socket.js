@@ -1,14 +1,22 @@
-import {Server} from 'socket.io'
+import { Server } from "socket.io";
 import Chat from './models/chatModel.js'
+import dotenv from 'dotenv'
+dotenv.config()
 
 let io
+const messages = []
+
+const DASHBOARD_URL = process.env.DASHBOARD_URL
+const WEB_URL = process.env.WEB_URL
 
 export const initSocket = (server) => {
     io = new Server(server, {
         cors: {
             origin: [
                 'http://localhost:3000',
-                'http://localhost:3001'
+                'http://localhost:3001',
+                DASHBOARD_URL,
+                WEB_URL
             ],
             credentials: true
         }
@@ -101,7 +109,9 @@ export const initSocket = (server) => {
 
 export const getIO = () => {
     if(!io){
-        throw new Error('Socket not initialized');
+        throw new Error('Socket not initialized')
     }
     return io
 }
+
+export const getMessages = () => messages
