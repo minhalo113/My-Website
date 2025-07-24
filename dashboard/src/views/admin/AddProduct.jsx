@@ -65,6 +65,8 @@ const AddProduct = () => {
     const [imageShow, setImageShow] = useState([])
     const [colorImages, setColorImages] = useState([])
     const [colorImageShow, setColorImageShow] = useState([])
+    const [typeImages, setTypeImages] = useState([])
+    const [typeImageShow, setTypeImageShow] = useState([])
 
     const imageHandle = (e) => {
         const files = e.target.files
@@ -93,6 +95,20 @@ const AddProduct = () => {
         }
     }
 
+    const typeImageHandle = (e) => {
+        const files = e.target.files
+        const length = files.length
+
+        if(length > 0){
+            setTypeImages([...typeImages, ...files])
+            let imageUrl = []
+            for (let i = 0; i < length; ++i){
+                imageUrl.push({url: URL.createObjectURL(files[i])})
+            }
+            setTypeImageShow([...typeImageShow, ...imageUrl])
+        }
+    }
+
     useEffect(() => {
 
         if (successMessage) {
@@ -113,6 +129,8 @@ const AddProduct = () => {
             setImages([])
             setColorImageShow([])
             setColorImages([])
+            setTypeImageShow([])
+            setTypeImages([])
             setCategory('')
         }
         if (errorMessage) {
@@ -163,6 +181,10 @@ const AddProduct = () => {
 
         for (let i = 0; i < colorImages.length ; ++i ){
             formData.append('colorImages', colorImages[i])
+        }
+
+        for (let i = 0; i < typeImages.length ; ++i ){
+            formData.append('typeImages', typeImages[i])
         }
 
         dispatch(add_product(formData))
@@ -277,21 +299,35 @@ const AddProduct = () => {
                 </label>
                 <input className='hidden' onChange={imageHandle} multiple type="file" id='image' />
 
-            </div>
+           </div>
 
-            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
-               {
-                colorImageShow.map((img, i) => <div className='h-[120px] relative'>
-                    <img className='w-full h-full rounded-sm' src = {img.url} alt = ''>
-                    </img>
+           <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+              {
+               colorImageShow.map((img, i) => <div className='h-[120px] relative'>
+                   <img className='w-full h-full rounded-sm' src = {img.url} alt = ''>
+                   </img>
+               </div>)
+              }
+
+              <label className='flex justify-center items-center flex-col h-[120px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor='colorImage'>
+                   <span><IoMdImages/></span>
+                   <span>Color Image</span>
+              </label>
+              <input className='hidden' onChange={colorImageHandle} multiple type = 'file' id = 'colorImage'/>
+           </div>
+
+           <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+              {
+               typeImageShow.map((img, i) => <div className='h-[120px] relative'>
+                    <img className='w-full h-full rounded-sm' src = {img.url} alt = '' />
                 </div>)
                }
 
-               <label className='flex justify-center items-center flex-col h-[120px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor='colorImage'>
+               <label className='flex justify-center items-center flex-col h-[120px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor='typeImage'>
                     <span><IoMdImages/></span>
-                    <span>Color Image</span>
+                    <span>Type Image</span>
                </label>
-               <input className='hidden' onChange={colorImageHandle} multiple type = 'file' id = 'colorImage'/>
+               <input className='hidden' onChange={typeImageHandle} multiple type='file' id='typeImage'/>
             </div>
 
             <div className='flex'>
