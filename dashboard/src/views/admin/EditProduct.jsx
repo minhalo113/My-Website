@@ -243,6 +243,7 @@ const EditProduct = () => {
             </div> 
 
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+                <span>Product Image</span>
                 {
                     imageShow && imageShow.length > 0 && imageShow.map((img, i) => <div>
                         <label htmlFor={i}>
@@ -255,6 +256,7 @@ const EditProduct = () => {
             </div>
 
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+                <span>Color Image</span>
                 {
                     colorImageShow && colorImageShow.length > 0 && colorImageShow.map((img, i) => <div>
                         <label htmlFor={`c-${i}`}>
@@ -267,6 +269,7 @@ const EditProduct = () => {
             </div>
 
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+                <span>Type Image</span>
                 {
                     typeImageShow && typeImageShow.length > 0 && typeImageShow.map((img, i) => <div>
                         <label htmlFor={`t-${i}`}>
