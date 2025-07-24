@@ -165,9 +165,21 @@ const Orders = () => {
                                     <div><span className='font-semibold text-red-900'>Name: </span>{p.name}</div>
                                     <div>
                                         <span className='font-semibold text-red-900'>
-                                            Color: 
+                                            Color:
                                         </span>
                                         {p.color || 'N/A'}
+                                    </div>
+                                    <div>
+                                        <span className='font-semibold text-red-900'>
+                                            Size:
+                                        </span>
+                                        {p.size || 'N/A'}
+                                    </div>
+                                    <div>
+                                        <span className='font-semibold text-red-900'>
+                                            Type:
+                                        </span>
+                                        {p.type || 'N/A'}
                                     </div>
                                     <div><span className='font-semibold text-red-900'>Price: </span>{p.price}</div>
                                     <div><span className='font-semibold text-red-900'>Quantity: </span>{p.qty}</div>

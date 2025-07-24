@@ -14,7 +14,7 @@ class productController{
 
             shopName = String(shopName).trim()
 
-            let {images, colorImages} = files;
+            let {images, colorImages, typeImages} = files;
             name = String(name).trim()
             const slug = name.split(' ').join('-')
 
@@ -28,11 +28,15 @@ class productController{
             try {
                 let allImageUrl = [];
                 let allColorImageUrl = [];
+                let allTypeImageUrl = [];
                 if (!Array.isArray(images)){
                     images = [images]
                 }
                 if (colorImages && !Array.isArray(colorImages)){
                     colorImages = [colorImages]
+                }
+                if (typeImages && !Array.isArray(typeImages)){
+                    typeImages = [typeImages]
                 }
 
                 for (let i = 0; i < images.length; ++i){
@@ -44,6 +48,13 @@ class productController{
                     for (let i = 0; i < colorImages.length; ++i){
                         const result = await cloudinary.uploader.upload(colorImages[i].filepath, {folder: 'products/colors'});
                         allColorImageUrl.push(result.url)
+                    }
+                }
+
+                if (typeImages){
+                    for (let i = 0; i < typeImages.length; ++i){
+                        const result = await cloudinary.uploader.upload(typeImages[i].filepath, {folder: 'products/types'});
+                        allTypeImageUrl.push(result.url)
                     }
                 }
 
@@ -61,6 +72,7 @@ class productController{
                     brand: String(brand).trim(),
                     colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
+                    typeImages: allTypeImageUrl,
                     types: types ? String(types).split(',').map(c => c.trim()).filter(Boolean) : [],
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : []
                 })
@@ -164,10 +176,15 @@ class productController{
                             const index = colorImages.findIndex(img => img === oldImage)
                             colorImages[index] = result.url;
                             await productModel.findByIdAndUpdate(productId, {colorImages})
+                        } else if (imageType == 'type') {
+                            let {typeImages} = await productModel.findById(productId)
+                            const index = typeImages.findIndex(img => img === oldImage)
+                            typeImages[index] = result.url;
+                            await productModel.findByIdAndUpdate(productId, {typeImages})
                         }else{
                             let {images} = await productModel.findById(productId)
                             const index = images.findIndex(img => img === oldImage)
-                            imges[index] = result.url;
+                            images[index] = result.url;
                             await productModel.findByIdAndUpdate(productId, {images})
                         }
 

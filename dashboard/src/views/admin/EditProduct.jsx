@@ -66,6 +66,7 @@ const EditProduct = () => {
     }
     const [imageShow, setImageShow] = useState([])
     const [colorImageShow, setColorImageShow] = useState([])
+    const [typeImageShow, setTypeImageShow] = useState([])
   
     const changeImage = (img, files) => {
         if (files.length > 0) {
@@ -90,6 +91,17 @@ const EditProduct = () => {
         }
     }
 
+    const changeTypeImage = (img, files) => {
+        if(files.length > 0){
+            dispatch(product_image_update({
+                oldImage: img,
+                newImage: files[0],
+                productId,
+                imageType: 'type'
+            }))
+        }
+    }
+
     useEffect(() => {
         setState({
             name: product.name,
@@ -105,6 +117,7 @@ const EditProduct = () => {
         setCategory(product.category)
         setImageShow(product.images)
         setColorImageShow(product.colorImages || [])
+        setTypeImageShow(product.typeImages || [])
     },[product])
 
     useEffect(() => {
@@ -251,6 +264,17 @@ const EditProduct = () => {
                     </div> )
                 }
 
+            </div>
+
+            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+                {
+                    typeImageShow && typeImageShow.length > 0 && typeImageShow.map((img, i) => <div>
+                        <label htmlFor={`t-${i}`}>
+                            <img src={img} alt='' />
+                        </label>
+                        <input onChange={(e) => changeTypeImage(img, e.target.files)} type="file" id={`t-${i}`} className='hidden' />
+                    </div> )
+                }
             </div>
 
             <div className='flex'>

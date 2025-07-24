@@ -10,12 +10,13 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating, colors = [], colorImages = [], types = [], sizes = []} = item || {}
+    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating, colors = [], colorImages = [], typeImages = [], types = [], sizes = []} = item || {}
     const discountedPrice = (price - (price * discount) / 100).toFixed(2)
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(colors[0] || '')
     const [selectedSize, setSelectedSize] = useState(sizes[0] || '')
+    const [selectedType, setSelectedType] = useState(types[0] || '')
     const {add} = useCart();
 
     const handleDecrease = () => {
@@ -36,7 +37,8 @@ const ProductDisplay = ({item}) => {
             price: price,
             discount: discount,
             color: selectedColor,
-            size: selectedSize
+            size: selectedSize,
+            type: selectedType
         }
 
         e.preventDefault();
@@ -72,30 +74,55 @@ const ProductDisplay = ({item}) => {
         <div>
             <form onSubmit={handleSubmit}>
 
-                <div className="flex items-center gap-6">
+                <div className="flex flex-col gap-4">
 
-                    {colorImages.length > 0 ? (
-                        <div className="flex gap-2">
-                            {colorImages.map((img,i) => (
-                                <img key={i} src={img} onClick={() => setSelectedColor(colors[i] || '')} className={`w-8 h-8 border ${selectedColor === colors[i] ? 'border-black' : 'border-gray-300'} cursor-pointer`} />
-                            ))}
+                    { (colorImages.length > 0 || colors.length > 0) && (
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium">Color:</span>
+                            {colorImages.length > 0 ? (
+                                <div className="flex gap-2">
+                                    {colorImages.map((img,i) => (
+                                        <img key={i} src={img} onClick={() => setSelectedColor(colors[i] || '')} className={`w-8 h-8 border ${selectedColor === colors[i] ? 'border-black' : 'border-gray-300'} cursor-pointer`} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <select value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
+                                    {colors.map(c => (
+                                        <option key={c} value={c}>{c}</option>
+                                    ))}
+                                </select>
+                            )}
                         </div>
-                    ) : (
-                        colors.length > 0 && (
-                            <select value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
-                                {colors.map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        )
                     )}
 
                     {sizes.length > 0 && (
-                        <select value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
-                            {sizes.map(s => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium">Size:</span>
+                            <select value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
+                                {sizes.map(s => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {(typeImages.length > 0 || types.length > 0) && (
+                        <div className="flex items-center gap-2">
+                            <span className="font-medium">Type:</span>
+                            {typeImages.length > 0 ? (
+                                <div className="flex gap-2">
+                                    {typeImages.map((img,i) => (
+                                        <img key={i} src={img} onClick={() => setSelectedType(types[i] || '')} className={`w-8 h-8 border ${selectedType === types[i] ? 'border-black' : 'border-gray-300'} cursor-pointer`} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
+                                    {types.map(t => (
+                                        <option key={t} value={t}>{t}</option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
                     )}
 
                     <div className="cart-plus-minus">
@@ -154,6 +181,7 @@ ProductDisplay.propTypes = {
         images: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
         colors: PropTypes.array,
         colorImages: PropTypes.array,
+        typeImages: PropTypes.array,
         types: PropTypes.array,
         sizes: PropTypes.array
     }).isRequired,
