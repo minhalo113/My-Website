@@ -10,11 +10,11 @@ class productController{
         const form = formidable({multiples: true});
 
         form.parse(req, async(err, field, files) => {
-            let {name, category, description, stock, price, discount, shopName, brand, colors} = field;
+            let {name, category, description, stock, price, discount, shopName, brand, colors, types, sizes} = field;
 
             shopName = String(shopName).trim()
 
-            let {images} = files;
+            let {images, colorImages} = files;
             name = String(name).trim()
             const slug = name.split(' ').join('-')
 
@@ -27,13 +27,24 @@ class productController{
 
             try {
                 let allImageUrl = [];
+                let allColorImageUrl = [];
                 if (!Array.isArray(images)){
                     images = [images]
+                }
+                if (colorImages && !Array.isArray(colorImages)){
+                    colorImages = [colorImages]
                 }
 
                 for (let i = 0; i < images.length; ++i){
                     const result = await cloudinary.uploader.upload(images[i].filepath, {folder: 'products'});
                     allImageUrl.push(result.url)
+                }
+
+                if (colorImages){
+                    for (let i = 0; i < colorImages.length; ++i){
+                        const result = await cloudinary.uploader.upload(colorImages[i].filepath, {folder: 'products/colors'});
+                        allColorImageUrl.push(result.url)
+                    }
                 }
 
                 await productModel.create({
@@ -48,7 +59,10 @@ class productController{
                     discount: parseInt(discount),
                     images: allImageUrl,
                     brand: String(brand).trim(),
-                    colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
+                    colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
+                    colorImages: allColorImageUrl,
+                    types: types ? String(types).split(',').map(c => c.trim()).filter(Boolean) : [],
+                    sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : []
                 })
                 responseReturn(res, 201, {message: "Product Added Successfully"})
             }catch(error){
@@ -105,7 +119,7 @@ class productController{
     }
 
     product_update = async(req, res) => {
-        let {name, description, stock, price, category, discount, brand, colors, productId} = req.body;
+        let {name, description, stock, price, category, discount, brand, colors, types, sizes, productId} = req.body;
 
         name = String(name).trim()
         const slug = name.split(' ').join('-')
@@ -113,7 +127,9 @@ class productController{
         try{
             await productModel.findByIdAndUpdate(productId, {
                 name, description, stock, price, category, discount, brand,
-                colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
+                colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
+                types: types ? String(types).split(',').map(c => c.trim()).filter(Boolean) : [],
+                sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : []
                 ,productId, slug
             })
             const product = await productModel.findById(productId)
@@ -127,7 +143,7 @@ class productController{
         const form = new formidable.IncomingForm({mutiple: true})
 
         form.parse(req, async(err, field, files) => {
-            const {oldImage, productId} = field
+            const {oldImage, productId, imageType} = field
             const {newImage} = files
 
             if(err){
@@ -142,10 +158,19 @@ class productController{
                     })
                     const result = await cloudinary.uploader.upload(newImage[0].filepath, {folder: 'products'})
                     if(result){
-                        let {images} = await productModel.findById(productId)
-                        const index = images.findIndex(img => img === oldImage)
-                        images[index] = result.url;
-                        await productModel.findByIdAndUpdate(productId, {images})
+
+                        if (imageType == 'color'){
+                            let {colorImages} = await productModel.findById(productId)
+                            const index = colorImages.findIndex(img => img === oldImage)
+                            colorImages[index] = result.url;
+                            await productModel.findByIdAndUpdate(productId, {colorImages})
+                        }else{
+                            let {images} = await productModel.findById(productId)
+                            const index = images.findIndex(img => img === oldImage)
+                            imges[index] = result.url;
+                            await productModel.findByIdAndUpdate(productId, {images})
+                        }
+
                         const product = await productModel.findById(productId)
                         responseReturn(res, 200, {product, message: "Product Image Updated Successfully"})
                     }else{

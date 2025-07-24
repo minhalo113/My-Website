@@ -36,6 +36,8 @@ const EditProduct = () => {
         brand: "",
         stock: "",
         colors: '',
+        types: '',
+        sizes: ''
     })
 
     const inputHandle = (e) => {
@@ -63,17 +65,29 @@ const EditProduct = () => {
 
     }
     const [imageShow, setImageShow] = useState([])
-
+    const [colorImageShow, setColorImageShow] = useState([])
   
     const changeImage = (img, files) => {
         if (files.length > 0) {
             dispatch(product_image_update({
                 oldImage: img,
                 newImage: files[0],
-                productId
+                productId,
+                imageType: 'product'
             }))
         }
        
+    }
+
+    const changeColorImage = (img, files) =>{
+        if(files.length > 0){
+            dispatch(product_image_update({
+                oldImage: img,
+                newImage: files[0],
+                productId,
+                imageType: 'color'
+            }))
+        }
     }
 
     useEffect(() => {
@@ -84,10 +98,13 @@ const EditProduct = () => {
             price: product.price,
             brand: product.brand,
             stock: product.stock,
-            colors: Array.isArray(product.colors) ? product.colors.join(',') : ''
+            colors: Array.isArray(product.colors) ? product.colors.join(',') : '',
+            types: Array.isArray(product.types) ? product.types.join(',') : '',
+            sizes: Array.isArray(product.sizes) ? product.sizes.join(',') : ''
         })
         setCategory(product.category)
         setImageShow(product.images)
+        setColorImageShow(product.colorImages || [])
     },[product])
 
     useEffect(() => {
@@ -117,6 +134,8 @@ const EditProduct = () => {
             brand: state.brand,
             stock: state.stock,
             colors: state.colors,
+            types: state.types,
+            sizes: state.sizes,
             category: category,
             productId: productId
         }
@@ -148,6 +167,14 @@ const EditProduct = () => {
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colors} type="text" name='colors' id='colors' placeholder='e.g. red, blue' />
             </div>
 
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor="types">Types (comma seperated)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.types} type="text" name='types' id='types' placeholder='e.g. plush, action figure' />
+            </div>
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor="sizes">Sizes (comma seperated)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.sizes} type="text" name='sizes' id='sizes' placeholder='e.g. small, large' />
+            </div>
         </div>
 
 
@@ -209,6 +236,18 @@ const EditProduct = () => {
                             <img src={img} alt="" />
                         </label>
                         <input onChange={(e) => changeImage(img, e.target.files)} type="file" id={i} className='hidden' />
+                    </div> )
+                }
+
+            </div>
+
+            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+                {
+                    colorImageShow && colorImageShow.length > 0 && colorImageShow.map((img, i) => <div>
+                        <label htmlFor={`c-${i}`}>
+                            <img src={img} alt='' />
+                        </label>
+                        <input onChange={(e) => changeColorImage(img, e.target.files)} type="file" id={`c-${i}`} className='hidden' />
                     </div> )
                 }
 

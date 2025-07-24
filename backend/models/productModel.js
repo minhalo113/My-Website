@@ -25,6 +25,18 @@ const productSchema = new Schema({
         type: [String],
         default: []
     },
+    colorImages: {
+        type: [String],
+        default: []
+    },
+    types: {
+        type: [String],
+        default: []
+    },
+    sizes: {
+        type: [String],
+        default: []
+    },
     price: {
         type: Number,
         required: true
@@ -80,4 +92,4 @@ productSchema.index({
     }
 })
 
-export default model("products", productSchema)
+export default model('products', productSchema);

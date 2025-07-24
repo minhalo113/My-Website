@@ -31,7 +31,9 @@ const AddProduct = () => {
         price: "",
         brand: "",
         stock: "",
-        colors: ''
+        colors: '',
+        types: '',
+        sizes: ''
     })
 
     const inputHandle = (e) => {
@@ -61,9 +63,11 @@ const AddProduct = () => {
 
     const [images, setImages] = useState([])
     const [imageShow, setImageShow] = useState([])
+    const [colorImages, setColorImages] = useState([])
+    const [colorImageShow, setColorImageShow] = useState([])
 
     const imageHandle = (e) => {
-        const files = e.target.files 
+        const files = e.target.files
         const length = files.length;
         if (length > 0) {
             setImages([...images, ...files])
@@ -74,6 +78,21 @@ const AddProduct = () => {
             setImageShow([...imageShow, ...imageUrl])
         }
     }
+
+    const colorImageHandle = (e) => {
+        const files = e.target.files
+        const length = files.length
+
+        if (length > 0){
+            setColorImages([...colorImages, ...files])
+            let imageUrl = []
+            for (let i = 0; i < length; ++i){
+                imageUrl.push({url: URL.createObjectURL(files[i])})
+            }
+            setColorImageShow([...colorImageShow, ...imageUrl])
+        }
+    }
+
     useEffect(() => {
 
         if (successMessage) {
@@ -87,11 +106,14 @@ const AddProduct = () => {
                 brand: "",
                 stock: "",
                 colors: '',
+                types: '',
+                sizes: ''
             }) 
             setImageShow([])
             setImages([])
+            setColorImageShow([])
+            setColorImages([])
             setCategory('')
-
         }
         if (errorMessage) {
             toast.error(errorMessage)
@@ -130,11 +152,17 @@ const AddProduct = () => {
         formData.append('discount',state.discount)
         formData.append('brand',state.brand)
         formData.append('colors', state.colors)
+        formData.append('types', state.types)
+        formData.append('sizes', state.sizes)
         formData.append('shopName','Toy Haven') 
         formData.append('category',category)
 
         for (let i = 0; i < images.length; i++) {
             formData.append('images',images[i]) 
+        }
+
+        for (let i = 0; i < colorImages.length ; ++i ){
+            formData.append('colorImages', colorImages[i])
         }
 
         dispatch(add_product(formData))
@@ -168,6 +196,15 @@ const AddProduct = () => {
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor='colors'>Colors (comma seperated)</label>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colors} type='text' name='colors' id = 'colors' placeholder='e.g. red, blue'/>
+            </div>
+
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor='types'>Types (comma seperated)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.types} type='text' name='types' id='types' placeholder='e.g. plush, action figure'/>
+            </div>
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor='sizes'>Sizes (comma seperated)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.sizes} type='text' name='sizes' id='sizes' placeholder='e.g. small, large'/>
             </div>
         </div>
 
@@ -240,6 +277,21 @@ const AddProduct = () => {
                 </label>
                 <input className='hidden' onChange={imageHandle} multiple type="file" id='image' />
 
+            </div>
+
+            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+               {
+                colorImageShow.map((img, i) => <div className='h-[120px] relative'>
+                    <img className='w-full h-full rounded-sm' src = {img.url} alt = ''>
+                    </img>
+                </div>)
+               }
+
+               <label className='flex justify-center items-center flex-col h-[120px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor='colorImage'>
+                    <span><IoMdImages/></span>
+                    <span>Color Image</span>
+               </label>
+               <input className='hidden' onChange={colorImageHandle} multiple type = 'file' id = 'colorImage'/>
             </div>
 
             <div className='flex'>

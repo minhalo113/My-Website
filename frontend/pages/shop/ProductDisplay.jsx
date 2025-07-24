@@ -10,11 +10,12 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating, colors = []} = item || {}
+    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating, colors = [], colorImages = [], types = [], sizes = []} = item || {}
     const discountedPrice = (price - (price * discount) / 100).toFixed(2)
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(colors[0] || '')
+    const [selectedSize, setSelectedSize] = useState(sizes[0] || '')
     const {add} = useCart();
 
     const handleDecrease = () => {
@@ -34,7 +35,8 @@ const ProductDisplay = ({item}) => {
             name: name,
             price: price,
             discount: discount,
-            color: selectedColor
+            color: selectedColor,
+            size: selectedSize
         }
 
         e.preventDefault();
@@ -72,10 +74,26 @@ const ProductDisplay = ({item}) => {
 
                 <div className="flex items-center gap-6">
 
-                    {colors.length > 0 && (
-                        <select value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
-                            {colors.map(c => (
-                                <option key={c} value={c}>{c}</option>
+                    {colorImages.length > 0 ? (
+                        <div className="flex gap-2">
+                            {colorImages.map((img,i) => (
+                                <img key={i} src={img} onClick={() => setSelectedColor(colors[i] || '')} className={`w-8 h-8 border ${selectedColor === colors[i] ? 'border-black' : 'border-gray-300'} cursor-pointer`} />
+                            ))}
+                        </div>
+                    ) : (
+                        colors.length > 0 && (
+                            <select value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
+                                {colors.map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))}
+                            </select>
+                        )
+                    )}
+
+                    {sizes.length > 0 && (
+                        <select value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
+                            {sizes.map(s => (
+                                <option key={s} value={s}>{s}</option>
                             ))}
                         </select>
                     )}
@@ -134,7 +152,10 @@ ProductDisplay.propTypes = {
         ratingsCount: PropTypes.number.isRequired,
         quantity: PropTypes.number.isRequired,
         images: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
-        colors: PropTypes.array
+        colors: PropTypes.array,
+        colorImages: PropTypes.array,
+        types: PropTypes.array,
+        sizes: PropTypes.array
     }).isRequired,
 };
 
