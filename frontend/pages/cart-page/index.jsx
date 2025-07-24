@@ -95,6 +95,7 @@ const CartPage = () => {
                             <thead>
                                 <tr>
                                     <th className="cat-product">Product</th>
+                                    <th>Color</th>
                                     <th className="cat-price">Price</th>
                                     <th className="cat-quantity">Quantity</th>
                                     <th className="cat-toprice">Total</th>
@@ -113,6 +114,10 @@ const CartPage = () => {
                                                 <div className='p-content'>
                                                     <Link href={`/shop/${item.id.toString()}`}>{item.name}</Link>
                                                 </div>
+                                            </td>
+
+                                            <td>
+                                                {item.color || '-'}
                                             </td>
 
                                             <td className='cat-price'>

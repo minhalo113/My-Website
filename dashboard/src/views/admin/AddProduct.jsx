@@ -30,8 +30,8 @@ const AddProduct = () => {
         discount: '',
         price: "",
         brand: "",
-        stock: ""
-    
+        stock: "",
+        colors: ''
     })
 
     const inputHandle = (e) => {
@@ -85,7 +85,8 @@ const AddProduct = () => {
                 discount: '',
                 price: "",
                 brand: "",
-                stock: ""
+                stock: "",
+                colors: '',
             }) 
             setImageShow([])
             setImages([])
@@ -128,6 +129,7 @@ const AddProduct = () => {
         formData.append('stock',state.stock)
         formData.append('discount',state.discount)
         formData.append('brand',state.brand)
+        formData.append('colors', state.colors)
         formData.append('shopName','Toy Haven') 
         formData.append('category',category)
 
@@ -163,6 +165,10 @@ const AddProduct = () => {
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.brand} type="text" name='brand' id='brand' placeholder='Brand Name' />
             </div>   
 
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor='colors'>Colors (comma seperated)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colors} type='text' name='colors' id = 'colors' placeholder='e.g. red, blue'/>
+            </div>
         </div>
 
 

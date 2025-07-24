@@ -90,6 +90,7 @@ const OrderDetails = () => {
                         <h2 className='font-semibold'>{p.name}</h2>
                         <p>
                             <span>Brand: {p.brand ? p.brand : "N/A"}</span><br />
+                            <span>Color: {p.color || 'N/A'}</span><br />
                             <span className='text-lg'>Quantity: {p.qty}</span><br/>
                             <span className='text-lg'>Price: {p.price}</span><br/>
                             <span className='text-lg'>Product ID: {p.id}</span><br/>

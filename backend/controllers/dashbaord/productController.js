@@ -10,7 +10,7 @@ class productController{
         const form = formidable({multiples: true});
 
         form.parse(req, async(err, field, files) => {
-            let {name, category, description, stock, price, discount, shopName, brand} = field;
+            let {name, category, description, stock, price, discount, shopName, brand, colors} = field;
 
             shopName = String(shopName).trim()
 
@@ -47,7 +47,8 @@ class productController{
                     price: parseInt(price),
                     discount: parseInt(discount),
                     images: allImageUrl,
-                    brand: String(brand).trim()
+                    brand: String(brand).trim(),
+                    colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
                 })
                 responseReturn(res, 201, {message: "Product Added Successfully"})
             }catch(error){
@@ -104,13 +105,16 @@ class productController{
     }
 
     product_update = async(req, res) => {
-        let {name, description, stock, price, category, discount, brand, productId} = req.body;
+        let {name, description, stock, price, category, discount, brand, colors, productId} = req.body;
+
         name = String(name).trim()
         const slug = name.split(' ').join('-')
 
         try{
             await productModel.findByIdAndUpdate(productId, {
-                name, description, stock, price, category, discount, brand, productId, slug
+                name, description, stock, price, category, discount, brand,
+                colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
+                ,productId, slug
             })
             const product = await productModel.findById(productId)
             responseReturn(res, 200, {product, message: "Product Updated Successfully"})

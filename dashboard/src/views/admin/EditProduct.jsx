@@ -34,7 +34,8 @@ const EditProduct = () => {
         discount: '',
         price: "",
         brand: "",
-        stock: ""
+        stock: "",
+        colors: '',
     })
 
     const inputHandle = (e) => {
@@ -82,7 +83,8 @@ const EditProduct = () => {
             discount: product.discount,
             price: product.price,
             brand: product.brand,
-            stock: product.stock
+            stock: product.stock,
+            colors: Array.isArray(product.colors) ? product.colors.join(',') : ''
         })
         setCategory(product.category)
         setImageShow(product.images)
@@ -114,6 +116,7 @@ const EditProduct = () => {
             price: state.price,
             brand: state.brand,
             stock: state.stock,
+            colors: state.colors,
             category: category,
             productId: productId
         }
@@ -139,6 +142,11 @@ const EditProduct = () => {
                 <label htmlFor="brand">Product Brand</label>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.brand} type="text" name='brand' id='brand' placeholder='Brand Name' />
             </div>   
+
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor= "colors">Colors (comma seperated)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colors} type="text" name='colors' id='colors' placeholder='e.g. red, blue' />
+            </div>
 
         </div>
 

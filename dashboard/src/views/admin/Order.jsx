@@ -148,7 +148,7 @@ const Orders = () => {
                     <div><span className="font-bold text-red-700">Customer Name:</span> {o.customerName || 'N/A'}</div>
                     <div><span className="font-bold text-red-700">Phone:</span> {o.shippingInfo?.phoneNumber || 'N/A'}</div>
                     <div><span className="font-bold text-red-700">Address:</span> {o.shippingInfo?.address || 'N/A'}</div>
-                    <div><span className="font-bold text-red-700">Address:</span> {o.shippingInfo?.postalCode || 'N/A'}</div>
+                    <div><span className="font-bold text-red-700">Postal Code:</span> {o.shippingInfo?.postalCode || 'N/A'}</div>
                     <div>
                         <div className='flex items-center justify-between'>
                             <span className='font-bold text-red-700'>Products:</span>
@@ -163,6 +163,12 @@ const Orders = () => {
                             {o.products.map((p,i) => (
                                 <li key = {i} className="border border-slate-400 rounded-md p-3 bg-slate-300 text-slate-900">
                                     <div><span className='font-semibold text-red-900'>Name: </span>{p.name}</div>
+                                    <div>
+                                        <span className='font-semibold text-red-900'>
+                                            Color: 
+                                        </span>
+                                        {p.color || 'N/A'}
+                                    </div>
                                     <div><span className='font-semibold text-red-900'>Price: </span>{p.price}</div>
                                     <div><span className='font-semibold text-red-900'>Quantity: </span>{p.qty}</div>
                                 </li>

@@ -10,10 +10,11 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating} = item || {}
+    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating, colors = []} = item || {}
     const discountedPrice = (price - (price * discount) / 100).toFixed(2)
 
     const [prequantity, setQuantity] = useState(1);
+    const [selectedColor, setSelectedColor] = useState(colors[0] || '')
     const {add} = useCart();
 
     const handleDecrease = () => {
@@ -32,7 +33,8 @@ const ProductDisplay = ({item}) => {
             img: images,
             name: name,
             price: price,
-            discount: discount
+            discount: discount,
+            color: selectedColor
         }
 
         e.preventDefault();
@@ -69,6 +71,14 @@ const ProductDisplay = ({item}) => {
             <form onSubmit={handleSubmit}>
 
                 <div className="flex items-center gap-6">
+
+                    {colors.length > 0 && (
+                        <select value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
+                            {colors.map(c => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                    )}
 
                     <div className="cart-plus-minus">
                         <div className="dec qtybutton" onClick={handleDecrease}>-</div>
@@ -124,6 +134,7 @@ ProductDisplay.propTypes = {
         ratingsCount: PropTypes.number.isRequired,
         quantity: PropTypes.number.isRequired,
         images: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
+        colors: PropTypes.array
     }).isRequired,
 };
 
