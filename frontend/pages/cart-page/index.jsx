@@ -94,14 +94,14 @@ const CartPage = () => {
                         <table>
                             <thead>
                                 <tr>
-                                    <th className="cat-product">Product</th>
-                                    <th>Color</th>
-                                    <th>Size</th>
-                                    <th>Type</th>
-                                    <th className="cat-price">Price</th>
-                                    <th className="cat-quantity">Quantity</th>
-                                    <th className="cat-toprice">Total</th>
-                                    <th className="cat-edit">Edit</th>
+                                    <th>Product</th>
+                                    <th style={{ textAlign: "center", verticalAlign: "middle" }}>Color</th>
+                                    <th style={{ textAlign: "center", verticalAlign: "middle" }}>Size</th>
+                                    <th style={{ textAlign: "center", verticalAlign: "middle" }}>Type</th>
+                                    <th style={{ textAlign: "center", verticalAlign: "middle" }}>Price</th>
+                                    <th style={{ textAlign: "center", verticalAlign: "middle" }}>Quantity</th>
+                                    <th style={{ textAlign: "center", verticalAlign: "middle" }}>Total</th>
+                                    <th style={{ textAlign: "center", verticalAlign: "middle" }}>Edit</th>
                                 </tr>
                             </thead>
 
@@ -118,21 +118,21 @@ const CartPage = () => {
                                                 </div>
                                             </td>
 
-                                            <td>
+                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                                                 {item.color || '-'}
                                             </td>
-                                            <td>
+                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                                                 {item.size || '-'}
                                             </td>
-                                            <td>
+                                            <td style={{ textAlign: "center", verticalAlign: "middle" }}>
                                                 {item.type || '-'}
                                             </td>
 
-                                            <td className='cat-price'>
+                                            <td className='cat-price' style={{ textAlign: "center", verticalAlign: "middle" }}>
                                                 ${ (item.price - (item.price * (item.discount || 0)) / 100).toFixed(2) }
                                             </td>
 
-                                            <td className='cat-quantity'>
+                                            <td className='cat-quantity' style={{ textAlign: "center", verticalAlign: "middle" }}>
                                                 <div className='cart-plus-minus'>
                                                     <div className='dec qtybutton' onClick={() => handleDecrease(item)}>-</div>
                                                     <input
@@ -147,10 +147,10 @@ const CartPage = () => {
                                                 </div>
                                             </td>
 
-                                            <td className='cat-toprice'>
+                                            <td className='cat-toprice' style={{ textAlign: "center", verticalAlign: "middle" }}>
                                             {`$${calculateTotalPrice(item).toFixed(2)}`}
                                             </td>
-                                            <td className='cat-edit'>
+                                            <td className='cat-edit' style={{ textAlign: "center", verticalAlign: "middle" }}>
                                                 <a onClick={() => handleRemoveItem(item)}>
                                                     🗑️
                                                 </a>

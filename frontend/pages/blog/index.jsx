@@ -17,7 +17,7 @@ export const Blog = () => {
         setBlogList(response.data.blogs);
         console.log('Fetched blogs:', response.data.blogs);
       } catch (err) {
-        console.error('Error fetching blogs:', err);
+        console.log('Error fetching blogs:', err);
       }
     };
   
