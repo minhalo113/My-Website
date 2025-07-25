@@ -42,6 +42,7 @@ const WishList = () => {
         const {productId, images, name, price} = _product;
         const product = {
             id: productId,
+            cartId: `${productId}`,
             img: images,
             name: name,
             price: price

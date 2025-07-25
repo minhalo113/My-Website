@@ -28,7 +28,7 @@ const CartPage = () => {
 
     const handleIncrease = (item) => add(item, 1);
     const handleDecrease = (item) => add(item, -1);
-    const handleRemoveItem = (item) => remove(item.id);
+    const handleRemoveItem = (item) => remove(item.cartId);
 
     const cartSubtotal = cartItems.reduce(
         (t, i) => t + calculateTotalPrice(i), 0
@@ -107,8 +107,8 @@ const CartPage = () => {
 
                             <tbody>
                                 {
-                                    cartItems.map((item, index) => (
-                                        <tr key = {index}>
+                                    cartItems.map((item) => (
+                                        <tr key={item.cartId}>
                                             <td className='product-item cat-product'>
                                                 <div className='p-thumb'>
                                                     <Link href={`/shop/${item.id.toString()}`}><img src = {Array.isArray(item.img) ? item.img[0] : item.img} alt = ""/></Link>

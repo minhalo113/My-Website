@@ -13,7 +13,7 @@ const ProductCards = ({GridList, products}) => {
   const handleSubmit = (e, _product) => {
     const {_id, images, name, price, discount} = _product;
     const product = {
-        id: _id,
+        id: _id, cartId: `${_id}`,
         img: images,
         name: name,
         price: price,

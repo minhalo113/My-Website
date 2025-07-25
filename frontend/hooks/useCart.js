@@ -3,18 +3,23 @@ import { useState, useEffect, useCallback } from "react";
 const STORAGE_KEY = "cart"
 
 // Product in cart have structure like this:         
-//     const product = {
-//             id: _id,
-//             img: images,
-//             name: name,
-//             price: price
-//         } 
+        // const product = {
+        //     id: _id, cartId: `${_id}`,
+        //     img: images,
+        //     name: name,
+        //     price: price,
+        //     discount: discount
+        // }
 
 export default function useCart() {
     const [cart, setCart] = useState(() => {
         try{
             const raw = localStorage.getItem(STORAGE_KEY)
-            return raw ? JSON.parse(raw) : [];
+            const parsed = raw ? JSON.parse(raw) : [];
+            return parsed.map(item => ({
+                ...item,
+                cartId: item.cartId || `${item.id}-${item.color || ''}-${item.size || ''}-${item.type || ''}`
+            }))
         }catch{
             return [];
         }
@@ -31,11 +36,11 @@ export default function useCart() {
 
     const add = useCallback((product, qty = 1) => {
         setCart(c => {
-            const updatedCart = c.map(i => 
-                i.id === product.id ? {...i, qty: i.qty + qty } : i
+            const updatedCart = c.map(i =>
+                i.cartId === product.cartId ? { ...i, qty: i.qty + qty } : i
             ).filter(i => i.qty > 0)
 
-            const exists = c.some(i => i.id === product.id);
+            const exists = c.some(i => i.cartId === product.cartId);
 
             if (!exists && qty > 0){
                 updatedCart.push({...product, qty})
@@ -46,8 +51,8 @@ export default function useCart() {
         );
     }, [])
 
-    const remove = useCallback(id => {
-        setCart(c => c.filter(i => i.id !== id));
+    const remove = useCallback(cartId => {
+        setCart(c => c.filter(i => i.cartId !== cartId));
     }, []);
 
     const clear = useCallback(() => setCart([]), []);

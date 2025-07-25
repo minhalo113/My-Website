@@ -32,6 +32,7 @@ const ProductDisplay = ({item}) => {
     const handleSubmit = (e) => {
         const product = {
             id: _id,
+            cartId: `${_id}-${selectedColor || ''}-${selectedSize || ''}-${selectedType || ''}`,
             img: images,
             name: name,
             price: price,
@@ -82,7 +83,16 @@ const ProductDisplay = ({item}) => {
                             {colorImages.length > 0 ? (
                                 <div className="flex gap-2">
                                     {colorImages.map((img,i) => (
-                                        <img key={i} src={img} onClick={() => setSelectedColor(colors[i] || '')} className={`w-8 h-8 border ${selectedColor === colors[i] ? 'border-black' : 'border-gray-300'} cursor-pointer`} />
+                                        <div key={i} className="relative">
+                                            <img
+                                                src={img}
+                                                onClick={() => setSelectedColor(colors[i] || '')}
+                                                className={`w-8 h-8 border ${selectedColor === colors[i] ? 'border-2 border-emerald-600' : 'border-gray-300'} cursor-pointer`}
+                                            />
+                                            {selectedColor === colors[i] && (
+                                                <span className="absolute inset-0 flex items-center justify-center text-xs text-white bg-emerald-600/70 rounded-sm">✓</span>
+                                            )}
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
@@ -112,7 +122,16 @@ const ProductDisplay = ({item}) => {
                             {typeImages.length > 0 ? (
                                 <div className="flex gap-2">
                                     {typeImages.map((img,i) => (
-                                        <img key={i} src={img} onClick={() => setSelectedType(types[i] || '')} className={`w-8 h-8 border ${selectedType === types[i] ? 'border-black' : 'border-gray-300'} cursor-pointer`} />
+                                        <div key={i} className="relative">
+                                            <img
+                                                src={img}
+                                                onClick={() => setSelectedType(types[i] || '')}
+                                                className={`w-8 h-8 border ${selectedType === types[i] ? 'border-2 border-emerald-600' : 'border-gray-300'} cursor-pointer`}
+                                            />
+                                            {selectedType === types[i] && (
+                                                <span className="absolute inset-0 flex items-center justify-center text-xs text-white bg-emerald-600/70 rounded-sm">✓</span>
+                                            )}
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
