@@ -11,13 +11,30 @@ const ProductCards = ({GridList, products}) => {
   const {add} = useCart();
 
   const handleSubmit = (e, _product) => {
-    const {_id, images, name, price, discount} = _product;
+  const {
+        _id,
+        images,
+        name,
+        price,
+        discount,
+        colors = [],
+        types = [],
+        sizes = [],
+      } = _product;
+
+      const defaultColor = colors[0] || "";
+      const defaultSize = sizes[0] || "";
+      const defaultType = types[0] || "";
     const product = {
-        id: _id, cartId: `${_id}`,
-        img: images,
-        name: name,
-        price: price,
-        discount: discount
+      id: _id,
+      cartId: `${_id}-${defaultColor}-${defaultSize}-${defaultType}`,
+      img: images,
+      name: name,
+      price: price,
+      discount: discount,
+      color: defaultColor,
+      size: defaultSize,
+      type: defaultType,
     }
 
     e.preventDefault();
