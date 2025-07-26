@@ -18,23 +18,21 @@ const ProductCards = ({GridList, products}) => {
         price,
         discount,
         colors = [],
-        types = [],
         sizes = [],
       } = _product;
 
       const defaultColor = colors[0] || "";
       const defaultSize = sizes[0] || "";
-      const defaultType = types[0] || "";
+      const defaultType = "";
     const product = {
       id: _id,
-      cartId: `${_id}-${defaultColor}-${defaultSize}-${defaultType}`,
+      cartId: `${_id}-${defaultColor}-${defaultSize}`,
       img: images,
       name: name,
       price: price,
       discount: discount,
       color: defaultColor,
       size: defaultSize,
-      type: defaultType,
     }
 
     e.preventDefault();

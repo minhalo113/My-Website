@@ -10,26 +10,21 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, description, averageRating, deliveryTime, colors = [], colorImages = [], typeImages = [], types = [], sizes = [], colorPrices = {}, sizePrices = {}, typePrices = {}} = item || {}
+    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, description, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = {}} = item || {}
     const baseDiscounted = (price - (price * discount) / 100)
     const getVariantPrice = () => {
         let p = baseDiscounted;
         if(selectedColor && colorPrices[selectedColor] !== undefined){
             p = colorPrices[selectedColor]
         }
-        if(selectedSize && sizePrices[selectedSize] !== undefined){
-            p = sizePrices[selectedSize]
-        }
-        if(selectedType && typePrices[selectedType] !== undefined){
-            p = typePrices[selectedType]
-        }
+
         return p.toFixed(2)
     }
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(colors[0] || '')
     const [selectedSize, setSelectedSize] = useState(sizes[0] || '')
-    const [selectedType, setSelectedType] = useState(types[0] || '')
+
     const {add} = useCart();
 
     const handleDecrease = () => {
@@ -45,14 +40,13 @@ const ProductDisplay = ({item}) => {
     const handleSubmit = (e) => {
         const product = {
             id: _id,
-            cartId: `${_id}-${selectedColor || ''}-${selectedSize || ''}-${selectedType || ''}`,
+            cartId: `${_id}-${selectedColor || ''}-${selectedSize || ''}`,
             img: images,
             name: name,
             price: price,
             discount: discount,
             color: selectedColor,
             size: selectedSize,
-            type: selectedType
         }
 
         e.preventDefault();
@@ -70,7 +64,7 @@ const ProductDisplay = ({item}) => {
             <h4>{name}</h4>
             <Rating rating={averageRating} number_of_ratings={reviewCount}/>
             <h4>
-                {discount > 0 || selectedColor || selectedSize || selectedType ? (
+                {discount > 0 || selectedColor ? (
                     <>
                         ${getVariantPrice()}{``}
                         <del className='text-sm text-gray-500 ml-1'>${price}</del>
@@ -100,7 +94,7 @@ const ProductDisplay = ({item}) => {
 
                     { (colorImages.length > 0 || colors.length > 0) && (
                         <div className="flex items-center gap-2">
-                            <span className="font-medium">Color:</span>
+                            <span className="font-medium">Option:</span>
                             {colorImages.length > 0 ? (
                                 <div className="flex gap-2">
                                     {colorImages.map((img,i) => (
@@ -140,40 +134,6 @@ const ProductDisplay = ({item}) => {
                                     <option key={s} value={s}>{s}</option>
                                 ))}
                             </select>
-                        </div>
-                    )}
-
-                    {(typeImages.length > 0 || types.length > 0) && (
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium">Type:</span>
-                            {typeImages.length > 0 ? (
-                                <div className="flex gap-2">
-                                    {typeImages.map((img, i) => (
-                                        <div key={i} className="flex flex-col items-center w-10">
-                                        <img
-                                            src={img}
-                                            onClick={() => setSelectedType(types[i] || '')}
-                                            className={`w-10 h-10 rounded cursor-pointer transition-all duration-200 ease-in-out ${
-                                            selectedType === types[i]
-                                                ? 'border-4 border-emerald-500 ring-2 ring-emerald-300'
-                                                : 'border border-gray-300'
-                                            }`}
-                                        />
-                                        {selectedType === types[i] && (
-                                            <span className="mt-1 text-xs font-bold text-black">
-                                            {selectedType}
-                                            </span>
-                                        )}
-                                        </div>
-                                    ))}
-                                    </div>
-                            ) : (
-                                <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
-                                    {types.map(t => (
-                                        <option key={t} value={t}>{t}</option>
-                                    ))}
-                                </select>
-                            )}
                         </div>
                     )}
 
@@ -240,8 +200,6 @@ ProductDisplay.propTypes = {
         images: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
         colors: PropTypes.array,
         colorImages: PropTypes.array,
-        typeImages: PropTypes.array,
-        types: PropTypes.array,
         sizes: PropTypes.array
     }).isRequired,
 };

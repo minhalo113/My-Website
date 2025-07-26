@@ -29,14 +29,6 @@ const productSchema = new Schema({
         type: [String],
         default: []
     },
-    typeImages: {
-        type: [String],
-        default: []
-    },
-    types: {
-        type: [String],
-        default: []
-    },
     sizes: {
         type: [String],
         default: []
@@ -74,14 +66,6 @@ const productSchema = new Schema({
         default: []
     },
     colorPrices: {
-        type: Object,
-        default: {}
-    },
-    sizePrices: {
-        type: Object,
-        default: {}
-    },
-    typePrices: {
         type: Object,
         default: {}
     },

@@ -10,11 +10,11 @@ class productController{
         const form = formidable({multiples: true});
 
         form.parse(req, async(err, field, files) => {
-            let {name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, types, sizes, colorPrices, sizePrices, typePrices} = field;
+            let {name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices} = field;
 
             shopName = String(shopName).trim()
 
-            let {images, colorImages, typeImages, videos} = files;
+            let {images, colorImages, videos} = files;
             name = String(name).trim()
             const slug = name.split(' ').join('-')
 
@@ -28,17 +28,14 @@ class productController{
             try {
 
                 const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
-                const typeArr = types ? String(types).split(',').map(t => t.trim()).filter(Boolean) : []
+
                 if(colorArr.length !== (files.colorImages ? (Array.isArray(files.colorImages) ? files.colorImages.length : 1) : 0)){
                     return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
-                }
-                if(typeArr.length !== (files.typeImages ? (Array.isArray(files.typeImages) ? files.typeImages.length : 1) : 0)){
-                    return responseReturn(res, 400, {error: 'Number of types and type images must match'})
                 }
 
                 let allImageUrl = [];
                 let allColorImageUrl = [];
-                let allTypeImageUrl = [];
+
                 let allVideoUrl = [];
                 if (!Array.isArray(images)){
                     images = [images]
@@ -46,9 +43,7 @@ class productController{
                 if (colorImages && !Array.isArray(colorImages)){
                     colorImages = [colorImages]
                 }
-                if (typeImages && !Array.isArray(typeImages)){
-                    typeImages = [typeImages]
-                }
+
                 if (videos && !Array.isArray(videos)){
                     videos = [videos]
                 }
@@ -62,13 +57,6 @@ class productController{
                     for (let i = 0; i < colorImages.length; ++i){
                         const result = await cloudinary.uploader.upload(colorImages[i].filepath, {folder: 'products/colors'});
                         allColorImageUrl.push(result.url)
-                    }
-                }
-
-                if (typeImages){
-                    for (let i = 0; i < typeImages.length; ++i){
-                        const result = await cloudinary.uploader.upload(typeImages[i].filepath, {folder: 'products/types'});
-                        allTypeImageUrl.push(result.url)
                     }
                 }
 
@@ -107,13 +95,9 @@ class productController{
                     videos: allVideoUrl,
                     brand: String(brand).trim(),
                     colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
-                    colorImages: allColorImageUrl,
-                    typeImages: allTypeImageUrl,
-                    types: types ? String(types).split(',').map(c => c.trim()).filter(Boolean) : [],
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
-                    colorPrices: parseMap(colorPrices),
-                    sizePrices: parseMap(sizePrices),
-                    typePrices: parseMap(typePrices)
+                    colorImages: allColorImageUrl,
+                    colorPrices: parseMap(colorPrices)
                 })
                 responseReturn(res, 201, {message: "Product Added Successfully"})
             }catch(error){
@@ -170,13 +154,13 @@ class productController{
     }
 
     product_update = async(req, res) => {
-        let {name, description, stock, price, category, discount, deliveryTime, brand, colors, types, sizes, colorPrices, sizePrices, typePrices, productId} = req.body;
+        let {name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId} = req.body;
 
         name = String(name).trim()
         const slug = name.split(' ').join('-')
 
         const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
-        const typeArr = types ? String(types).split(',').map(t => t.trim()).filter(Boolean) : []
+        const sizeArr = sizes ? String(sizes).split(',').map(s => s.trim()).filter(Boolean) : []
 
         try{
             const parseMap = (str) => {
@@ -198,18 +182,11 @@ class productController{
             if(colorArr.length !== (product.colorImages ? product.colorImages.length : 0)){
                 return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
             }
-            if(typeArr.length !== (product.typeImages ? product.typeImages.length : 0)){
-                return responseReturn(res, 400, {error: 'Number of types and type images must match'})
-            }
 
             await productModel.findByIdAndUpdate(productId, {
                 name, description, stock, price, category, discount, deliveryTime, brand,
                 colors: colorArr,
-                types: typeArr,
-                sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                 colorPrices: parseMap(colorPrices),
-                sizePrices: parseMap(sizePrices),
-                typePrices: parseMap(typePrices),
                 productId, slug
             })
             const updatedProduct = await productModel.findById(productId)
@@ -244,12 +221,7 @@ class productController{
                             const index = colorImages.findIndex(img => img === oldImage)
                             colorImages[index] = result.url;
                             await productModel.findByIdAndUpdate(productId, {colorImages})
-                        } else if (imageType == 'type') {
-                            let {typeImages} = await productModel.findById(productId)
-                            const index = typeImages.findIndex(img => img === oldImage)
-                            typeImages[index] = result.url;
-                            await productModel.findByIdAndUpdate(productId, {typeImages})
-                        }else{
+                        } else{
                             let {images} = await productModel.findById(productId)
                             const index = images.findIndex(img => img === oldImage)
                             images[index] = result.url;
