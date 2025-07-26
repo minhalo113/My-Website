@@ -1,5 +1,5 @@
 import customerOrder from '../../models/orderModel.js'
-import productModel from '../../productModel.js'
+import productModel from '../../models/productModel.js'
 import customerModel from '../../models/customerModel.js'
 import responseReturn from '../../utils/response.js';
 
