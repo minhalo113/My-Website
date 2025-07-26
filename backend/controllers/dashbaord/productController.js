@@ -10,11 +10,11 @@ class productController{
         const form = formidable({multiples: true});
 
         form.parse(req, async(err, field, files) => {
-            let {name, category, description, stock, price, discount, shopName, brand, colors, types, sizes} = field;
+            let {name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, types, sizes, colorPrices, sizePrices, typePrices} = field;
 
             shopName = String(shopName).trim()
 
-            let {images, colorImages, typeImages} = files;
+            let {images, colorImages, typeImages, videos} = files;
             name = String(name).trim()
             const slug = name.split(' ').join('-')
 
@@ -26,9 +26,20 @@ class productController{
             })
 
             try {
+
+                const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
+                const typeArr = types ? String(types).split(',').map(t => t.trim()).filter(Boolean) : []
+                if(colorArr.length !== (files.colorImages ? (Array.isArray(files.colorImages) ? files.colorImages.length : 1) : 0)){
+                    return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
+                }
+                if(typeArr.length !== (files.typeImages ? (Array.isArray(files.typeImages) ? files.typeImages.length : 1) : 0)){
+                    return responseReturn(res, 400, {error: 'Number of types and type images must match'})
+                }
+
                 let allImageUrl = [];
                 let allColorImageUrl = [];
                 let allTypeImageUrl = [];
+                let allVideoUrl = [];
                 if (!Array.isArray(images)){
                     images = [images]
                 }
@@ -37,6 +48,9 @@ class productController{
                 }
                 if (typeImages && !Array.isArray(typeImages)){
                     typeImages = [typeImages]
+                }
+                if (videos && !Array.isArray(videos)){
+                    videos = [videos]
                 }
 
                 for (let i = 0; i < images.length; ++i){
@@ -58,6 +72,26 @@ class productController{
                     }
                 }
 
+                if(videos){
+                    for (let i = 0; i < videos.length; ++i){
+                        const result = await cloudinary.uploader.upload(videos[i].filepath, {folder: 'products/videos', resource_type: 'video'});
+                        allVideoUrl.push(result.url)
+                    }
+                }
+
+                const parseMap = (str) => {
+                    const obj = {};
+                    if (str){
+                        String(str).split(',').forEach(p=>{
+                            const [k,v] = p.split(':').map(s=>s.trim());
+                            if (k && v){
+                                obj[k] = parseInt(v)
+                            }
+                        })
+                    }
+                    return obj;
+                }
+
                 await productModel.create({
                     sellerId: id,
                     name,
@@ -68,13 +102,18 @@ class productController{
                     stock: parseInt(stock),
                     price: parseInt(price),
                     discount: parseInt(discount),
+                    deliveryTime: deliveryTime ? String(deliveryTime).trim() : '',
                     images: allImageUrl,
+                    videos: allVideoUrl,
                     brand: String(brand).trim(),
                     colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
                     typeImages: allTypeImageUrl,
                     types: types ? String(types).split(',').map(c => c.trim()).filter(Boolean) : [],
-                    sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : []
+                    sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
+                    colorPrices: parseMap(colorPrices),
+                    sizePrices: parseMap(sizePrices),
+                    typePrices: parseMap(typePrices)
                 })
                 responseReturn(res, 201, {message: "Product Added Successfully"})
             }catch(error){
@@ -131,21 +170,50 @@ class productController{
     }
 
     product_update = async(req, res) => {
-        let {name, description, stock, price, category, discount, brand, colors, types, sizes, productId} = req.body;
+        let {name, description, stock, price, category, discount, deliveryTime, brand, colors, types, sizes, colorPrices, sizePrices, typePrices, productId} = req.body;
 
         name = String(name).trim()
         const slug = name.split(' ').join('-')
 
+        const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
+        const typeArr = types ? String(types).split(',').map(t => t.trim()).filter(Boolean) : []
+
         try{
-            await productModel.findByIdAndUpdate(productId, {
-                name, description, stock, price, category, discount, brand,
-                colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
-                types: types ? String(types).split(',').map(c => c.trim()).filter(Boolean) : [],
-                sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : []
-                ,productId, slug
-            })
+            const parseMap = (str) => {
+                const obj = {};
+                if (str) {
+                    String(str).split(',').forEach(p=>{
+                        const [k, v] = p.split(':').map(s=>s.trim());
+                        if (k && v){
+                            obj[k] = parseInt(v);
+                        }
+                    })
+                }
+                return obj
+            };
             const product = await productModel.findById(productId)
-            responseReturn(res, 200, {product, message: "Product Updated Successfully"})
+            if(!product){
+                return responseReturn(res, 404, {error: 'Product not found'})
+            }
+            if(colorArr.length !== (product.colorImages ? product.colorImages.length : 0)){
+                return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
+            }
+            if(typeArr.length !== (product.typeImages ? product.typeImages.length : 0)){
+                return responseReturn(res, 400, {error: 'Number of types and type images must match'})
+            }
+
+            await productModel.findByIdAndUpdate(productId, {
+                name, description, stock, price, category, discount, deliveryTime, brand,
+                colors: colorArr,
+                types: typeArr,
+                sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
+                colorPrices: parseMap(colorPrices),
+                sizePrices: parseMap(sizePrices),
+                typePrices: parseMap(typePrices),
+                productId, slug
+            })
+            const updatedProduct = await productModel.findById(productId)
+            responseReturn(res, 200, {product: updatedProduct, message: "Product Updated Successfully"})
         }catch(error){
             responseReturn(res, 500, {error: error.message})
         }

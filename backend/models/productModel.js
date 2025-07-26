@@ -53,6 +53,10 @@ const productSchema = new Schema({
         type: Number,
         required: true
     },
+    deliveryTime: {
+        type: String,
+        default: ''
+    },
     description: {
         type: String,
         required: true
@@ -64,6 +68,22 @@ const productSchema = new Schema({
     images: {
         type: Array,
         required: true
+    },
+    videos: {
+        type: [String],
+        default: []
+    },
+    colorPrices: {
+        type: Object,
+        default: {}
+    },
+    sizePrices: {
+        type: Object,
+        default: {}
+    },
+    typePrices: {
+        type: Object,
+        default: {}
     },
     ratings: [
         {

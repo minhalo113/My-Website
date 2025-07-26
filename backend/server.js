@@ -24,6 +24,7 @@ import blogRouter from "./routes/dashboard/blogRoutes.js";
 import contactRouter from "./routes/home/contactRoutes.js";
 import couponRouter from './routes/dashboard/couponRoutes.js';
 import homeSwiperRouter from './routes/dashboard/homeSwiperRoutes.js';
+import dashboardRouter from './routes/dashboard/dashboardRoutes.js';
 
 const PORT = process.env.PORT || 8080;
 const DASHBOARD_URL = process.env.DASHBOARD_URL
@@ -57,6 +58,7 @@ app.use('/api', blogRouter)
 app.use('/api', contactRouter);
 app.use('/api', couponRouter);
 app.use('/api', homeSwiperRouter);
+app.use('/api', dashboardRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).send('OK');

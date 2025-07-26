@@ -33,7 +33,11 @@ const AddProduct = () => {
         stock: "",
         colors: '',
         types: '',
-        sizes: ''
+        sizes: '',
+        deliveryTime: '',
+        colorPrices: '',
+        sizePrices: '',
+        typePrices: ''
     })
 
     const inputHandle = (e) => {
@@ -67,6 +71,8 @@ const AddProduct = () => {
     const [colorImageShow, setColorImageShow] = useState([])
     const [typeImages, setTypeImages] = useState([])
     const [typeImageShow, setTypeImageShow] = useState([])
+    const [videos, setVideos] = useState([])
+    const [videoNames, setVideoNames] = useState([])
 
     const imageHandle = (e) => {
         const files = e.target.files
@@ -109,6 +115,19 @@ const AddProduct = () => {
         }
     }
 
+    const videoHandle = (e) => {
+        const files = e.target.files
+        const length = files.length
+        if (length > 0){
+            setVideos([...videos, ...files])
+            let names = []
+            for (let i = 0; i < length ; ++i){
+                names.push(files[i].name)
+            }
+            setVideoNames([...videoNames, ...names])
+        }
+    }
+
     useEffect(() => {
 
         if (successMessage) {
@@ -123,7 +142,11 @@ const AddProduct = () => {
                 stock: "",
                 colors: '',
                 types: '',
-                sizes: ''
+                sizes: '',
+                deliveryTime: '',
+                colorPrices: '',
+                sizePrices: '',
+                typePrices: ''
             }) 
             setImageShow([])
             setImages([])
@@ -131,6 +154,8 @@ const AddProduct = () => {
             setColorImages([])
             setTypeImageShow([])
             setTypeImages([])
+            setVideos([])
+            setVideoNames([])
             setCategory('')
         }
         if (errorMessage) {
@@ -162,12 +187,28 @@ const AddProduct = () => {
 
     const add = (e) => {
         e.preventDefault()
+
+        const colorArr = state.colors.split(',').map(c => c.trim()).filter(Boolean)
+        const typeArr = state.types.split(',').map(t => t.trim()).filter(Boolean)
+        if(colorArr.length !== colorImages.length){
+            toast.error('Number of colors and color images must match')
+            return
+        }
+        if(typeArr.length !== typeImages.length){
+            toast.error('Number of types and type images must match')
+            return
+        }
+
         const formData = new FormData()
         formData.append('name',state.name)
         formData.append('description',state.description)
         formData.append('price',state.price)
         formData.append('stock',state.stock)
         formData.append('discount',state.discount)
+        formData.append('deliveryTime', state.deliveryTime)
+        formData.append('colorPrices', state.colorPrices)
+        formData.append('sizePrices', state.sizePrices)
+        formData.append('typePrices', state.typePrices)
         formData.append('brand',state.brand)
         formData.append('colors', state.colors)
         formData.append('types', state.types)
@@ -185,6 +226,10 @@ const AddProduct = () => {
 
         for (let i = 0; i < typeImages.length ; ++i ){
             formData.append('typeImages', typeImages[i])
+        }
+        
+        for (let i = 0; i < videos.length; ++i){
+            formData.append('videos', videos[i])
         }
 
         dispatch(add_product(formData))
@@ -273,7 +318,26 @@ const AddProduct = () => {
                 <label htmlFor="discount">Discount</label>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.discount} type="number" name='discount' id='discount' placeholder='discount by %' />
             </div>   
+            
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor="deliveryTime">Estimated Delivery</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.deliveryTime} type="text" name='deliveryTime' id='deliveryTime' placeholder='e.g. 3-5 days' />
+            </div>
 
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor='colorPrices'>Color Prices (color:price)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colorPrices} type='text' name='colorPrices' id='colorPrices' placeholder='red:20, blue:25'/>
+            </div>
+
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor='sizePrices'>Size Prices (size:price)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.sizePrices} type='text' name='sizePrices' id='sizePrices' placeholder='small:10, large:20'/>
+            </div>
+
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor='typePrices'>Type Prices (type:price)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.typePrices} type='text' name='typePrices' id='typePrices' placeholder='plush:15'/>
+            </div>
         </div>
 
         <div className='flex flex-col w-full gap-1 mb-5'>
@@ -329,6 +393,14 @@ const AddProduct = () => {
                </label>
                <input className='hidden' onChange={typeImageHandle} multiple type='file' id='typeImage'/>
             </div>
+
+            <div className='flex flex-col w-full gap-1 mb-4 text-[#d0d2d6]'>
+                <label htmlFor='video'>Product Videos</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={videoHandle} multiple type='file' id='video' />
+                <div className='mt-2'>
+                    {videoNames.map((n,i) => <p key={i}>{n}</p>)}
+                </div>
+           </div>
 
             <div className='flex'>
             <button disabled={loader ? true : false}  className='bg-red-500 w-[280px] hover:shadow-red-300/50 hover:shadow-lg text-white rounded-md px-7 py-2 mb-3'>

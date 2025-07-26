@@ -10,8 +10,21 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, stock, description, averageRating, colors = [], colorImages = [], typeImages = [], types = [], sizes = []} = item || {}
-    const discountedPrice = (price - (price * discount) / 100).toFixed(2)
+    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, description, averageRating, deliveryTime, colors = [], colorImages = [], typeImages = [], types = [], sizes = [], colorPrices = {}, sizePrices = {}, typePrices = {}} = item || {}
+    const baseDiscounted = (price - (price * discount) / 100)
+    const getVariantPrice = () => {
+        let p = baseDiscounted;
+        if(selectedColor && colorPrices[selectedColor] !== undefined){
+            p = colorPrices[selectedColor]
+        }
+        if(selectedSize && sizePrices[selectedSize] !== undefined){
+            p = sizePrices[selectedSize]
+        }
+        if(selectedType && typePrices[selectedType] !== undefined){
+            p = typePrices[selectedType]
+        }
+        return p.toFixed(2)
+    }
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(colors[0] || '')
@@ -57,20 +70,28 @@ const ProductDisplay = ({item}) => {
             <h4>{name}</h4>
             <Rating rating={averageRating} number_of_ratings={reviewCount}/>
             <h4>
-                {
-                    discount > 0 ? (
-                        <>
-                            ${discountedPrice}{``}
-                            <del className='text-sm text-gray-500 ml-1'>${price}</del>
-                        </>
-                    ) : (
-                        `$${price}`
-                    )
-                }
+                {discount > 0 || selectedColor || selectedSize || selectedType ? (
+                    <>
+                        ${getVariantPrice()}{``}
+                        <del className='text-sm text-gray-500 ml-1'>${price}</del>
+                    </>
+                ) : (
+                    `$${getVariantPrice()}`
+                )}
             </h4>
             <h6>{seller}</h6>
             {/* <p style={{ whiteSpace: 'pre-line' }}>{description}</p> */}
         </div>
+
+        {videos.length > 0 && (
+            <div className="my-4">
+                {videos.map((v,i) => (
+                    <video key={i} controls className="w-full mb-2">
+                        <source src={v} type="video/mp4" />
+                    </video>
+                ))}
+            </div>
+        )}
 
         <div>
             <form onSubmit={handleSubmit}>
@@ -184,6 +205,13 @@ const ProductDisplay = ({item}) => {
                         </span>
                         </div>
                     )}
+
+                    {deliveryTime && (
+                        <div className="flex items-center gap-4 text-lg text-gray-800">
+                            <i className="icofont-truck-loaded text-3xl text-[#D09A40]" />
+                            <span>Est. Delivery: {deliveryTime}</span>
+                        </div>
+                    )}
                  </div>
 
                 <div style= {{display: "flex", justifyContent: "space-between", width: "100%" }}>
@@ -218,4 +246,4 @@ ProductDisplay.propTypes = {
     }).isRequired,
 };
 
-export default ProductDisplay
+export default ProductDisplay;
