@@ -15,6 +15,7 @@ class productController{
             shopName = String(shopName).trim()
 
             let {images, colorImages, videos} = files;
+
             name = String(name).trim()
             const slug = name.split(' ').join('-')
 
@@ -101,6 +102,7 @@ class productController{
                 })
                 responseReturn(res, 201, {message: "Product Added Successfully"})
             }catch(error){
+                console.log(error.message)
                 responseReturn(res, 500, {error: error.message})
             }
         })

@@ -102,6 +102,7 @@ export const productReducer = createSlice({
         })
         .addCase(add_product.rejected, (state, {payload}) => {
             state.loader = false;
+            console.log(payload)
             state.errorMessage = payload.error
         })
         .addCase(add_product.fulfilled, (state, {payload}) => {
