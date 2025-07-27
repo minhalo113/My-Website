@@ -58,7 +58,9 @@ const ProductCards = ({GridList, products}) => {
     <div className={`shop-product-wrap row justify-content-center ${GridList ? "grid" : "list"}`}>
         {
           products.map((product, i) => {
-            const discountedPrice = (product.price - (product.price * product.discount) / 100).toFixed(2)
+            const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && product.colorPrices[product.colors[0]] !== undefined;
+            const variantPrice = hasVariant ? parseFloat(product.colorPrices[product.colors[0]]).toFixed(2) : null;
+            const discountedPrice = (!hasVariant && product.discount > 0) ? (product.price - (product.price * product.discount) / 100).toFixed(2) : null;
             return(
             <div key = {i} className='col-lg-4 col-md-6 col-12'>
                 <div className='product-item'>
@@ -95,7 +97,7 @@ const ProductCards = ({GridList, products}) => {
                       <Rating rating={product.averageRating} number_of_ratings={product.reviewCount}/>
                     </p>
                     <h6>
-                      {product.discount > 0 ? (
+                      {hasVariant ? (`$${variantPrice}`) : product.discount > 0 ? (
                         <>
                           ${discountedPrice}{` `}
                           <del className='text-sm text-gray-500 ml-1'>
@@ -141,7 +143,9 @@ const ProductCards = ({GridList, products}) => {
                       <Rating rating={product.averageRating} number_of_ratings={product.reviewCount}/>
                     </p>
                     <h6>
-                      {product.discount > 0 ? (
+                      {hasVariant ? (
+                        `$${variantPrice}`
+                      ) : product.discount > 0 ? (
                         <>
                         ${discountedPrice}{` `}
                         <del className='text-sm text-gray-500 ml-1'>

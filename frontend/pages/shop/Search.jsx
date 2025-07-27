@@ -42,7 +42,10 @@ const Search = ({products}) => {
 
         <div  style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY :"auto"}}>
             {
-                searchTerm && showDropdown && filteredProducts.slice(0, 20).map((product) => (
+                searchTerm && showDropdown && filteredProducts.slice(0, 20).map((product) => {
+                    const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && product.colorPrices[product.colors[0]] !== undefined;
+                    const variantPrice = hasVariant ? parseFloat(product.colorPrices[product.colors[0]]).toFixed(2) : null;
+                    return(
                     <Link key = {product._id.toString()} href = {`/shop/${product._id.toString()}`}>
                         <div className='d-flex gap-3 p-2'>
                             <div>
@@ -58,12 +61,13 @@ const Search = ({products}) => {
                                     </Link>
                                 </p>
                                 <h6>
-                                    ${product.price}
+                                    {hasVariant ? `$${variantPrice}` : `$${product.price}`}
                                 </h6>
                             </div>
                         </div>
                     </Link>
-                ))
+                    )
+                })
             }
         </div>
     </div>

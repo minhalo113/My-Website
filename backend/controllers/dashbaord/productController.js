@@ -74,7 +74,7 @@ class productController{
                         String(str).split(',').forEach(p=>{
                             const [k,v] = p.split(':').map(s=>s.trim());
                             if (k && v){
-                                obj[k] = parseInt(v)
+                                obj[k] = parseFloat(v);
                             }
                         })
                     }
@@ -171,7 +171,7 @@ class productController{
                     String(str).split(',').forEach(p=>{
                         const [k, v] = p.split(':').map(s=>s.trim());
                         if (k && v){
-                            obj[k] = parseInt(v);
+                            obj[k] = parseFloat(v);
                         }
                     })
                 }

@@ -98,7 +98,12 @@ const CategoryShowCase = () => {
                                         <Link href = {`/shop/${product._id.toString()}`} className='ca-name'>{product.seller}</Link>
                                         </div>
                                         <div className='course-price' style={{color: "#DCA54A"}}>
-                                            ${product.price}
+                                            {(() => {
+                                                const hasVariant = product.colors && product.colors.length > 0 &&
+                                                  product.colorPrices && product.colorPrices[product.colors[0]] !== undefined;
+                                                const variantPrice = hasVariant ? parseFloat(product.colorPrices[product.colors[0]]).toFixed(2) : null;
+                                                return hasVariant ? `$${variantPrice}` : `$${product.price}`;
+                                            })()}
                                         </div>
                                     </div>
                                 </div>

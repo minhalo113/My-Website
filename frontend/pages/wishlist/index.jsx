@@ -104,10 +104,15 @@ const WishList = () => {
                           {product.name}
                         </h6>
                         <p className="text-sm text-slate-800/80">
-                          {new Intl.NumberFormat("en-CA", {
-                            style: "currency",
-                            currency: "CAD",
-                          }).format(product.price)}
+                          {(() => {
+                            const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && product.colorPrices[product.colors[0]] !== undefined;
+                            const variantPrice = hasVariant ? parseFloat(product.colorPrices[product.colors[0]]).toFixed(2) : null;
+                            const priceToShow = hasVariant ? variantPrice : product.price;
+                            return new Intl.NumberFormat("en-CA", {
+                              style: "currency",
+                              currency: "CAD",
+                            }).format(priceToShow);
+                          })()}
                         </p>
                         <div className="my-4 h-px w-full bg-slate-700" />
                         <div className="flex flex-wrap gap-3 text-xs font-medium">
