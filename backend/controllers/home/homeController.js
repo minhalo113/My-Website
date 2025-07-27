@@ -106,7 +106,7 @@ class homeControllers{
 
     rate_product = async(req, res) => {
         try{
-            const {rating, comment} = req.body;
+            const {rating, comment, images = []} = req.body;
             const product = await productModel.findById(req.params.productId);
 
             const userId = req.user.id.toString();
@@ -119,11 +119,12 @@ class homeControllers{
             if(existing){
                 existing.rating = rating;
                 existing.comment = comment;
+                existing.images = images;
                 existing.createdAt = new Date();
                 existing.name = curUser.name;
                 existing.userImage = curUser.image;
             }else{
-                product.ratings.push({user: userId, rating, comment, name: curUser.name, userImage: curUser.image})
+                product.ratings.push({user: userId, rating, comment, images, name: curUser.name, userImage: curUser.image})
             }
             product.averageRating = Math.round(product.ratings.reduce((acc, r) => acc + r.rating, 0) / product.ratings.length * 10) / 10;
             product.reviewCount = product.ratings.length;

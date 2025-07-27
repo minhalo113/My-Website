@@ -5,20 +5,20 @@ import PropTypes from 'prop-types';
 import Rating from '../../components/Rating';
 import { useCart } from '../../context/CartContext';
 import {toast} from "react-hot-toast"
+import api from '../../src/api/api';
 
 const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
     const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, description, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = {}} = item || {}
-    const baseDiscounted = (price - (price * discount) / 100)
+    const getOriginalPrice = () => {
+        return selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
+    };
     const getVariantPrice = () => {
-        let p = baseDiscounted;
-        if(selectedColor && colorPrices[selectedColor] !== undefined){
-            p = colorPrices[selectedColor]
-        }
-
-        return p.toFixed(2)
+        let p = getOriginalPrice();
+        p = p - (p * discount) / 100;
+        return p.toFixed(2);
     }
 
     const [prequantity, setQuantity] = useState(1);
@@ -26,6 +26,19 @@ const ProductDisplay = ({item}) => {
     const [selectedSize, setSelectedSize] = useState(sizes[0] || '')
 
     const {add} = useCart();
+    const addWishlist = async(e) => {
+        e.preventDefault();
+        try{
+            const res = await api.post('/add-to-wishlist', {
+                productId: _id,
+                color: selectedColor,
+                size: selectedSize
+            }, {withCredentials: true});
+            toast.success(res.data?.message || 'Added to wishlist');
+        }catch(err){
+            toast.error(err.response?.data?.message || 'Error adding to wishlist');
+        }
+    };
 
     const handleDecrease = () => {
         if(prequantity > 1){
@@ -38,12 +51,13 @@ const ProductDisplay = ({item}) => {
     }
 
     const handleSubmit = (e) => {
+        const variantPrice = selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
         const product = {
             id: _id,
             cartId: `${_id}-${selectedColor || ''}-${selectedSize || ''}`,
             img: images,
             name: name,
-            price: price,
+            price: variantPrice,
             discount: discount,
             color: selectedColor,
             size: selectedSize,
@@ -64,10 +78,10 @@ const ProductDisplay = ({item}) => {
             <h4>{name}</h4>
             <Rating rating={averageRating} number_of_ratings={reviewCount}/>
             <h4>
-                {discount > 0 || selectedColor ? (
+                {discount > 0 ? (
                     <>
                         ${getVariantPrice()}{``}
-                        <del className='text-sm text-gray-500 ml-1'>${price}</del>
+                        <del className='text-sm text-gray-500 ml-1'>${getOriginalPrice().toFixed(2)}</del>
                     </>
                 ) : (
                     `$${getVariantPrice()}`
@@ -174,11 +188,14 @@ const ProductDisplay = ({item}) => {
                     )}
                  </div>
 
-                <div style= {{display: "flex", justifyContent: "space-between", width: "100%" }}>
-                    <button type = "submit" className='lab-btn'>
+                <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
+                    <button type="submit" className='lab-btn'>
                         <span>Add to Cart</span>
                     </button>
-                    <Link href = "/cart-page" className='lab-btn bg-primary'>
+                    <button type="button" onClick={addWishlist} className='lab-btn bg-emerald-600 text-white'>
+                        <span>Add to Wishlist</span>
+                    </button>
+                    <Link href="/cart-page" className='lab-btn bg-primary'>
                         <span>Check Out</span>
                     </Link>
                 </div>

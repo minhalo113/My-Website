@@ -79,6 +79,7 @@ const productSchema = new Schema({
             name: {type: String, required: false},
             rating: {type: Number, required: true, min: 1, max: 5},
             comment: String,
+            images: {type: [String], default: []},
             createdAt: {type: Date, default: Date.now}
         }
     ],

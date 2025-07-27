@@ -43,8 +43,17 @@ const Search = ({products}) => {
         <div  style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY :"auto"}}>
             {
                 searchTerm && showDropdown && filteredProducts.slice(0, 20).map((product) => {
-                    const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && product.colorPrices[product.colors[0]] !== undefined;
-                    const variantPrice = hasVariant ? parseFloat(product.colorPrices[product.colors[0]]).toFixed(2) : null;
+                    const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && Object.keys(product.colorPrices).length > 0;
+                    let variantRange = null;
+                    if(hasVariant){
+                        const prices = product.colors.map(c => product.colorPrices[c]).filter(v=>v!==undefined);
+                        const min = Math.min(...prices);
+                        const max = Math.max(...prices);
+                        variantRange = {
+                            minBase: min.toFixed(2),
+                            maxBase: max.toFixed(2)
+                        };
+                    }
                     return(
                     <Link key = {product._id.toString()} href = {`/shop/${product._id.toString()}`}>
                         <div className='d-flex gap-3 p-2'>
@@ -61,7 +70,7 @@ const Search = ({products}) => {
                                     </Link>
                                 </p>
                                 <h6>
-                                    {hasVariant ? `$${variantPrice}` : `$${product.price}`}
+                                    {hasVariant ? (variantRange.minBase === variantRange.maxBase ? `$${variantRange.minBase}` : `$${variantRange.minBase} - $${variantRange.maxBase}`) : `$${product.price}`}
                                 </h6>
                             </div>
                         </div>

@@ -34,6 +34,14 @@ const customerSchema = new Schema({
                 type: Number,
                 required: true
             },
+            color: {
+                type: String,
+                required: false
+            },
+            size: {
+                type: String,
+                required: false
+            },
             images: {
                 type: Array,
                 required: true

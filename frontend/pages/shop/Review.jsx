@@ -18,6 +18,7 @@ const Review = ({ item, reloadFunction, reviewList }) => {
 
   const [rating, setRating] = useState(0);
   const [temporaryRating, setTemporaryRating] = useState(0);
+  const [images, setImages] = useState([]);
   let stars = Array(DEFAULT_COUNT).fill(DEFAULT_ICON);
 
   const handleClick = (rating) => {
@@ -27,7 +28,7 @@ const Review = ({ item, reloadFunction, reviewList }) => {
   const submitRating = async(e, _id) => {
     e.preventDefault()
     try{
-      const res = await api.post(`/rate-product/${_id}`, {rating, comment}, {withCredentials: true});
+      const res = await api.post(`/rate-product/${_id}`, {rating, comment, images}, {withCredentials: true});
       toast.success(res.data.message)
     }catch(err){
       console.log(err)
@@ -50,6 +51,18 @@ const Review = ({ item, reloadFunction, reviewList }) => {
     paddingLeft: '1rem',
     paddingTop: '1rem'
   };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    const promises = files.map(file => {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(file);
+      })
+    });
+    Promise.all(promises).then(imgs => setImages(imgs));
+  }
 
   return (
     <>  
@@ -102,6 +115,13 @@ const Review = ({ item, reloadFunction, reviewList }) => {
                   </div>
                   <div className="entry-content">
                     <p>{review.comment}</p>
+                    {review.images && review.images.length > 0 && (
+                      <div className="flex gap-2 flex-wrap mt-2">
+                        {review.images.map((img, idx) => (
+                          <img key={idx} src={img} alt="review" className="w-20 h-20 object-cover rounded" />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </li>
@@ -156,6 +176,9 @@ const Review = ({ item, reloadFunction, reviewList }) => {
 
                 <div className="col-md-12 col-12">
                   <textarea name="message" rows="8" placeholder="Type Your Message" value={comment} onChange={e => setComment(e.target.value)}></textarea>
+                </div>
+                <div className="col-md-12 col-12">
+                  <input type="file" multiple onChange={handleImageChange} />
                 </div>
                 <div className="col-12">
                   <button onClick={(e) => submitRating(e, _id.toString())} type="submit" className="default-button">

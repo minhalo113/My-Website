@@ -7,7 +7,7 @@ class wishlistController {
     add_to_wishlist = async(req, res) => {
         try {
             const userId = req.user.id;
-            const {productId} = req.body;
+            const {productId, color = '', size = ''} = req.body;
 
             if (!mongoose.Types.ObjectId.isValid(productId)){
                 return responseReturn(res, 400, {message: "Invalid Product Id"})
@@ -19,16 +19,23 @@ class wishlistController {
             }
 
             const customer = await customerModel.findById(userId)
-            const alreadyExists = customer.wishlist.some(w => w.productId.equals(productId));
+            const alreadyExists = customer.wishlist.some(w => w.productId.equals(productId) && (w.color || '') === color && (w.size || '') === size);
 
             if (alreadyExists){
                 return responseReturn(res, 400, {message: "Already in wishlist"})
             }
 
+            let variantPrice = product.price;
+            if (color && product.colorPrices && product.colorPrices[color] !== undefined){
+                variantPrice = product.colorPrices[color];
+            }
+
             customer.wishlist.push({
                 productId: product._id,
                 name: product.name,
-                price: product.price,
+                price: variantPrice,
+                color,
+                size,
                 images: Array.isArray(product.images) ? product.images[0] : product.images
             })
 
@@ -44,7 +51,7 @@ class wishlistController {
     remove_from_wishlist = async(req, res) => {
         try{
             const userId = req.user.id;
-            const {productId} = req.body;
+            const {productId, color = '', size = ''} = req.body;
 
             const customer = await customerModel.findById(userId);
             if (!customer){
@@ -52,7 +59,7 @@ class wishlistController {
             }
 
             const newWishlist = customer.wishlist.filter(
-                (item) => !item.productId.equals(productId)
+                (item) => !(item.productId.equals(productId) && (item.color || '') === color && (item.size || '') === size)
             )
 
             customer.wishlist = newWishlist;

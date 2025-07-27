@@ -19,17 +19,19 @@ const ProductCards = ({GridList, products}) => {
         discount,
         colors = [],
         sizes = [],
+        colorPrices = {}
       } = _product;
 
       const defaultColor = colors[0] || "";
       const defaultSize = sizes[0] || "";
-      const defaultType = "";
+      const variantPrice = defaultColor && colorPrices[defaultColor] !== undefined ? colorPrices[defaultColor] : price;
+
     const product = {
       id: _id,
       cartId: `${_id}-${defaultColor}-${defaultSize}`,
       img: images,
       name: name,
-      price: price,
+      price: variantPrice,
       discount: discount,
       color: defaultColor,
       size: defaultSize,
@@ -58,8 +60,19 @@ const ProductCards = ({GridList, products}) => {
     <div className={`shop-product-wrap row justify-content-center ${GridList ? "grid" : "list"}`}>
         {
           products.map((product, i) => {
-            const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && product.colorPrices[product.colors[0]] !== undefined;
-            const variantPrice = hasVariant ? parseFloat(product.colorPrices[product.colors[0]]).toFixed(2) : null;
+            const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && Object.keys(product.colorPrices).length > 0;
+            let variantRange = null;
+            if(hasVariant){
+              const prices = product.colors.map(c => product.colorPrices[c]).filter(v => v !== undefined);
+              const min = Math.min(...prices);
+              const max = Math.max(...prices);
+              variantRange = {
+                minBase: min.toFixed(2),
+                maxBase: max.toFixed(2),
+                minDiscount: (min - (min * product.discount)/100).toFixed(2),
+                maxDiscount: (max - (max * product.discount)/100).toFixed(2)
+              };
+            }
             const discountedPrice = (!hasVariant && product.discount > 0) ? (product.price - (product.price * product.discount) / 100).toFixed(2) : null;
             return(
             <div key = {i} className='col-lg-4 col-md-6 col-12'>
@@ -97,7 +110,22 @@ const ProductCards = ({GridList, products}) => {
                       <Rating rating={product.averageRating} number_of_ratings={product.reviewCount}/>
                     </p>
                     <h6>
-                      {hasVariant ? (`$${variantPrice}`) : product.discount > 0 ? (
+                      {hasVariant ? (
+                        product.discount > 0 ? (
+                          <>
+                            ${variantRange.minDiscount} 
+                            <del className='text-sm text-gray-500 ml-1'>
+                              ${variantRange.minBase}
+                            </del>
+                            - ${variantRange.maxDiscount}
+                            <del className='text-sm text-gray-500 ml-1'>
+                              ${variantRange.maxBase}
+                            </del>
+                          </>
+                        ) : (
+                          variantRange.minBase === variantRange.maxBase ? `$${variantRange.minBase}` : `$${variantRange.minBase} - $${variantRange.maxBase}`
+                        )
+                      ) : product.discount > 0 ? (
                         <>
                           ${discountedPrice}{` `}
                           <del className='text-sm text-gray-500 ml-1'>
@@ -144,7 +172,20 @@ const ProductCards = ({GridList, products}) => {
                     </p>
                     <h6>
                       {hasVariant ? (
-                        `$${variantPrice}`
+                        product.discount > 0 ? (
+                          <>
+                            ${variantRange.minDiscount} 
+                            <del className='text-sm text-gray-500 ml-1'>
+                              ${variantRange.minBase}
+                            </del>
+                            - ${variantRange.maxDiscount}
+                            <del className='text-sm text-gray-500 ml-1'>
+                              ${variantRange.maxBase}
+                            </del>
+                          </>
+                        ) : (
+                          variantRange.minBase === variantRange.maxBase ? `$${variantRange.minBase}` : `$${variantRange.minBase} - $${variantRange.maxBase}`
+                        )
                       ) : product.discount > 0 ? (
                         <>
                         ${discountedPrice}{` `}
