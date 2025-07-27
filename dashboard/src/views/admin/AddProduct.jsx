@@ -162,6 +162,27 @@ const AddProduct = () => {
         setImageShow(filterImageUrl)
     }
 
+        const changeColorImage = (img, index) => {
+        if (img) {
+            let tempUrl = colorImageShow
+            let tempImages = colorImages
+
+            tempImages[index] = img
+            tempUrl[index] = {url: URL.createObjectURL(img)}
+            setColorImageShow([...tempUrl])
+            setColorImages([...tempImages])
+
+        }
+    }
+
+    const removeColorImage = (i) => {
+        const filterImage = colorImages.filter((img,index) => index !== i)
+        const filterImageUrl = colorImageShow.filter((img, index) => index !== i )
+
+        setColorImages(filterImage)
+        setColorImageShow(filterImageUrl)
+    }
+    
     const add = (e) => {
         e.preventDefault()
 
@@ -301,7 +322,7 @@ const AddProduct = () => {
 
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
                {
-                imageShow.map((img,i) => <div className='h-[180px] relative'>
+               imageShow.map((img,i) => <div key={i} className='h-[180px] relative'>
                     <label htmlFor={i}>
                         <img className='w-full h-full rounded-sm' src={img.url} alt="" />
                     </label>
@@ -320,9 +341,12 @@ const AddProduct = () => {
 
            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
               {
-               colorImageShow.map((img, i) => <div className='h-[120px] relative'>
-                   <img className='w-full h-full rounded-sm' src = {img.url} alt = ''>
-                   </img>
+                colorImageShow.map((img, i) => <div key={i} className='h-[120px] relative'>
+                   <label htmlFor={`color-${i}`}>
+                       <img className='w-full h-full rounded-sm' src = {img.url} alt = '' />
+                   </label>
+                   <input onChange={(e)=> changeColorImage(e.target.files[0], i)} type = 'file' id={`color-${i}`} className='hidden'/>
+                   <span onClick={()=> removeColorImage(i)} className='p-2 z-10 cursor-pointer bg-slate-700 hover:shadow-lg hover:shadow-slate-400/50 text-white absolute top-1 right-1 rounded-full'><IoMdCloseCircle /></span>
                </div>)
               }
 
