@@ -4,8 +4,14 @@ import authRouter from '../routes/authRoutes.js';
 import adminModel from '../models/adminModel.js';
 import bcrypt from 'bcrypt';
 
-jest.mock('../models/adminModel.js')
-jest.mock('bcrypt')
+jest.mock('../models/adminModel.js', () => ({
+    __esModule: true,
+    default: {findOne: jest.fn()}
+}));
+jest.mock('bcrypt', () => ({
+    __esModule: true,
+    default: {compare: jest.fn()}
+}))
 
 const app = express();
 app.use(express.json());
@@ -17,7 +23,7 @@ describe('POST /api/admin-login', () => {
     });
 
     it('returns 200 on successful login', async() =>{
-        adminModel.findOne.mockResolveValue({
+        adminModel.findOne.mockResolvedValue({
             id: '1',
             role: 'admin',
             name: 'Admin',
@@ -26,15 +32,15 @@ describe('POST /api/admin-login', () => {
             images: 'img'
         });
 
-        bcrypt.compare.mockResolveValue(true);
+        bcrypt.compare.mockResolvedValue(true);
 
-        const res = (await request(app).post('/api/admin-login')).send({email: 'admin@example.com', password: 'secret'});
+        const res = await request(app).post('/api/admin-login').send({email: 'admin@example.com', password: 'secret'});
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe('Login Success')
     });
 
     it('returns 500 when admin not found', async() => {
-        adminModel.findOne.mockResolveValue(null);
+        adminModel.findOne.mockResolvedValue(null);
 
         const res = await request(app).post('/api/admin-login').send({email: 'nouser@example.com', password: 'secret'});
         

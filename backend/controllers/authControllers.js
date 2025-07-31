@@ -40,7 +40,7 @@ class authControllers{
                     responseReturn(res, 401, {error: "Password Wrong"});
                 }
             }else{
-                responseReturn(res, 500, {error: "Email not Found"})
+                responseReturn(res, 500, {error: "Email Not Found"})
             }
         }catch(error){
             responseReturn(res, 500, {error: "Unknown error"})
