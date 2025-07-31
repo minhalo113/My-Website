@@ -188,16 +188,62 @@ const ProductDisplay = ({item}) => {
                     )}
                  </div>
 
-                <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}>
-                    <button type="submit" className='lab-btn'>
-                        <span>Add to Cart</span>
-                    </button>
-                    <button type="button" onClick={addWishlist} className='lab-btn bg-emerald-600 text-white'>
-                        <span>Add to Wishlist</span>
-                    </button>
-                    <Link href="/cart-page" className='lab-btn bg-primary'>
-                        <span>Check Out</span>
-                    </Link>
+                <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "0.75rem" }}>
+                <button type="submit" className='lab-btn'
+                style={{
+                    flex: 1,
+                    backgroundColor: '#059669', 
+                    color: 'white',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.375rem',
+                    border: 'none',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    }}>
+                    <span>Add to Cart</span>
+                </button>
+
+                <button
+                    type="button"
+                    onClick={addWishlist}
+                    className="lab-btn text-white"
+                    style={{
+                        flex: 1,
+                        backgroundColor: '#f97316', 
+                        color: 'white',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.375rem',
+                        border: 'none',
+                        fontWeight: '600',
+                        fontSize: '14px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        }}
+                >
+                    <span>Add to Wishlist</span>
+                </button>
+
+                <Link href="/cart-page" className='lab-btn bg-primary'     style={{
+                    flex: 1,
+                    backgroundColor: '#3b82f6', // Tailwind blue-500
+                    color: 'white',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.375rem',
+                    textDecoration: 'none',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    }}>
+                    <span>Check Out</span>
+                </Link>
                 </div>
             </form>
         </div>

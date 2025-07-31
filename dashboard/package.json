@@ -53,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
     "ajv": "^7.2.4"
   }
 }

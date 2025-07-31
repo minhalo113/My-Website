@@ -177,8 +177,14 @@ const Review = ({ item, reloadFunction, reviewList }) => {
                 <div className="col-md-12 col-12">
                   <textarea name="message" rows="8" placeholder="Type Your Message" value={comment} onChange={e => setComment(e.target.value)}></textarea>
                 </div>
-                <div className="col-md-12 col-12">
-                  <input type="file" multiple onChange={handleImageChange} />
+                <div className="col-md-12 col-12 flex flex-col gap-2">
+                  <label htmlFor="review-images" className="font-semibold text-slate-700">Add Images</label>
+                  <input
+                    id="review-images"
+                    type="file"
+                    multiple
+                    onChange={handleImageChange}
+                  />
                 </div>
                 <div className="col-12">
                   <button onClick={(e) => submitRating(e, _id.toString())} type="submit" className="default-button">
