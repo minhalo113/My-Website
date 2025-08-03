@@ -63,7 +63,7 @@ class wishlistController {
     remove_from_wishlist = async(req, res) => {
         try{
             const userId = req.user.id;
-            const {productId, color, size, type} = req.body;
+            const {productId, color, size} = req.body;
 
             const customer = await customerModel.findById(userId);
             if (!customer){
@@ -71,13 +71,12 @@ class wishlistController {
             }
 
             const newWishlist = customer.wishlist.filter(item => {
-                if (!item.productId.equals(productId)) return true;
-                if (color && (item.color || '') !== color) return true;
-                if (size && (item.size || '') !== size) return true;
-                if (type && (item.type || '') !== type) return true;
-                return false;
-            })
-
+                return !(
+                    item.productId.equals(productId) &&
+                    (item.color || '') === (color || '') &&
+                    (item.size || '') === (size || '')
+                );
+            });
 
             customer.wishlist = newWishlist;
             await customer.save();

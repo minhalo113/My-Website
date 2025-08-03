@@ -11,7 +11,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, description, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = {}} = item || {}
+    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = {}} = item || {}
     const getOriginalPrice = () => {
         return selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
     };
