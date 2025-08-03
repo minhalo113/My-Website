@@ -145,7 +145,12 @@ const ProductDisplay = ({item}) => {
                     {sizes.length > 0 && (
                         <div className="flex items-center gap-2">
                             <span className="font-medium">Size:</span>
-                            <select value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
+                           <select
+                                value={selectedSize}
+                                onChange={(e) => setSelectedSize(e.target.value)}
+                                className="border border-slate-300 rounded px-2 py-1 h-9 text-sm leading-tight"
+                                >
+
                                 {sizes.map(s => (
                                     <option key={s} value={s}>{s}</option>
                                 ))}
@@ -153,18 +158,33 @@ const ProductDisplay = ({item}) => {
                         </div>
                     )}
 
-                    <div className="cart-plus-minus">
-                        <div className="dec qtybutton" onClick={handleDecrease}>-</div>
-                        <input
-                        className="cart-plus-minus-box"
-                        type="text"
-                        name="qtybutton"
-                        id="qtybutton"
-                        value={prequantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
-                        />
-                        <div className="inc qtybutton" onClick={handleIncrease}>+</div>
-                    </div>
+<div className="flex items-center gap-2">
+  <span className="font-medium">Quantity:</span>
+  <div className="flex items-center border rounded overflow-hidden w-max">
+    <button
+      type="button"
+      onClick={handleDecrease}
+      className="w-8 h-8 flex justify-center items-center text-xl font-bold border-r"
+    >
+      -
+    </button>
+    <input
+      type="text"
+      name="qtybutton"
+      value={prequantity}
+      onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+      className="w-12 text-center border-none outline-none"
+    />
+    <button
+      type="button"
+      onClick={handleIncrease}
+      className="w-8 h-8 flex justify-center items-center text-xl font-bold border-l"
+    >
+      +
+    </button>
+  </div>
+</div>
+
 
                     {/* Stock display */}
                     {stock !== undefined && (

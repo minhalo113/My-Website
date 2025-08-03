@@ -39,13 +39,15 @@ const WishList = () => {
       }
 
       const handleSubmit = (e, _product) => {
-        const {productId, images, name, price} = _product;
+        const {productId, images, name, price, color = '', size = ''} = _product;
         const product = {
             id: productId,
-            cartId: `${productId}`,
+            cartId: `${productId}-${color || ''}-${size || ''}`,
             img: images,
             name: name,
-            price: price
+            price: price,
+            color,
+            size
         }
     
         e.preventDefault();
@@ -113,13 +115,19 @@ const WishList = () => {
                         <h6 className="line-clamp-2 break-words text-sm font-semibold leading-snug text-slate-900">
                           {product.name}
                         </h6>
-                        <p className="text-sm text-slate-800/80">
-                          {new Intl.NumberFormat("en-CA", {
-                            style: "currency",
-                            currency: "CAD",
-                          }).format(product.price)}
-                        </p>
-                        <div className="my-4 h-px w-full bg-slate-700" />
+                          <p className="text-sm text-slate-800/80">
+                            {new Intl.NumberFormat("en-CA", {
+                              style: "currency",
+                              currency: "CAD",
+                            }).format(product.price)}
+                          </p>
+                          {product.color && (
+                            <p className="text-xs text-slate-700">Color: {product.color}</p>
+                          )}
+                          {product.size && (
+                            <p className="text-xs text-slate-700">Size: {product.size}</p>
+                          )}
+                          <div className="my-4 h-px w-full bg-slate-700" />
                         <div className="flex flex-wrap gap-3 text-xs font-medium">
                             <a
                                 onClick={(e) => handleSubmit(e, product)}
