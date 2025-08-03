@@ -49,9 +49,11 @@ const ProductCards = ({GridList, products}) => {
 }
 
   const addWishlist = async(e, _product) => {
-    const {_id, images, name, price} = _product;
+    const {_id, images, name, colors = [], sizes = [],} = _product;
+      const defaultColor = colors[0] || "";
+      const defaultSize = sizes[0] || "";
     try{
-      const res = await api.post("/add-to-wishlist", {productId: _id}, {withCredentials: true});
+      const res = await api.post("/add-to-wishlist", {productId: _id, color: defaultColor, size: defaultSize}, {withCredentials: true});
       toast.success(res.data?.message)
     }catch(error){
       toast.error(error.response?.data?.message || "Error adding to wishlist")

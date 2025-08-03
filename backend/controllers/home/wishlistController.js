@@ -7,7 +7,7 @@ class wishlistController {
     add_to_wishlist = async(req, res) => {
         try {
             const userId = req.user.id;
-            const {productId, color = '', size = '', type = ''} = req.body;
+            const {productId, color = '', size = ''} = req.body;
 
             if (!mongoose.Types.ObjectId.isValid(productId)){
                 return responseReturn(res, 400, {message: "Invalid Product Id"})
@@ -22,8 +22,7 @@ class wishlistController {
             const alreadyExists = customer.wishlist.some(
                 w => w.productId.equals(productId) &&
                 (w.color || '') === color &&
-                (w.size || '') === size &&
-                (w.type || '') === type
+                (w.size || '') === size
             );
 
             if (alreadyExists){
@@ -49,7 +48,7 @@ class wishlistController {
                 price: variantPrice,
                 color,
                 size,
-                images: imagesToStore
+                images: imageToStore
             })
 
             await customer.save()
