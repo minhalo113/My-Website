@@ -5,7 +5,7 @@ import api from '../../src/api/api';
 import HomeImageSwiper from '../../components/HomeImageSwiper';
 
 const title = (
-    <h2>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h2>
+    <h3>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h3>
 )
 
 const desc = "🎲 Endless Fun, One Small Price!"
@@ -81,8 +81,9 @@ const Banner = () => {
     }, []);
 
     return (
+        <div>
         <div className = "banner-section style-4" style = {{overflow: 'hidden', flexWrap:'wrap', paddingBottom: "50px"}}>
-            <div className='container'>
+            <div className='container-fluid px-0'>
                 <div className='banner-content'>
                     {title}
                     <form style={{boxShadow: "0 0 0"}} ref={dropdownRef} onFocus={() => setShowDropdown(true)}>
@@ -112,10 +113,11 @@ const Banner = () => {
                     </form>
 
                     <p style={{marginBottom: "50px"}}>{desc}</p>
-                    <HomeImageSwiper />
                 </div>
             </div>
 
+        </div>
+            <HomeImageSwiper />
         </div>
     )
 }

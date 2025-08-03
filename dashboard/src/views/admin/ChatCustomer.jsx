@@ -8,6 +8,7 @@ if (typeof window !== 'undefined') {
   localStorage.setItem('chatUserId', customerId);
 }
 const socket = io(process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000');
+console.log(process.env.REACT_APP_SOCKET_URL)
 console.log('Socket URL:', process.env.REACT_APP_SOCKET_URL);
 
 const ChatCustomer = () => {
