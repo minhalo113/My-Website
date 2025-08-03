@@ -7,7 +7,7 @@ class wishlistController {
     add_to_wishlist = async(req, res) => {
         try {
             const userId = req.user.id;
-            const {productId, color = '', size = ''} = req.body;
+            const {productId, color = '', size = '', type = ''} = req.body;
 
             if (!mongoose.Types.ObjectId.isValid(productId)){
                 return responseReturn(res, 400, {message: "Invalid Product Id"})
@@ -19,7 +19,12 @@ class wishlistController {
             }
 
             const customer = await customerModel.findById(userId)
-            const alreadyExists = customer.wishlist.some(w => w.productId.equals(productId) && (w.color || '') === color && (w.size || '') === size);
+            const alreadyExists = customer.wishlist.some(
+                w => w.productId.equals(productId) &&
+                (w.color || '') === color &&
+                (w.size || '') === size &&
+                (w.type || '') === type
+            );
 
             if (alreadyExists){
                 return responseReturn(res, 400, {message: "Already in wishlist"})
@@ -30,13 +35,21 @@ class wishlistController {
                 variantPrice = product.colorPrices[color];
             }
 
+            let imageToStore = Array.isArray(product.images) ? product.images[0] : product.images;
+            if (color && Array.isArray(product.colorImages) && product.colors){
+                const idx = product.colors.indexOf(color);
+                if (idx != -1 && product.colorImages[idx]){
+                    imageToStore = product.colorImages[idx];
+                }
+            }
+
             customer.wishlist.push({
                 productId: product._id,
                 name: product.name,
                 price: variantPrice,
                 color,
                 size,
-                images: Array.isArray(product.images) ? product.images[0] : product.images
+                images: imagesToStore
             })
 
             await customer.save()
@@ -51,16 +64,21 @@ class wishlistController {
     remove_from_wishlist = async(req, res) => {
         try{
             const userId = req.user.id;
-            const {productId, color = '', size = ''} = req.body;
+            const {productId, color, size, type} = req.body;
 
             const customer = await customerModel.findById(userId);
             if (!customer){
                 return responseReturn(res, 404, {message: "User not found"})
             }
 
-            const newWishlist = customer.wishlist.filter(
-                (item) => !(item.productId.equals(productId) && (item.color || '') === color && (item.size || '') === size)
-            )
+            const newWishlist = customer.wishlist.filter(item => {
+                if (!item.productId.equals(productId)) return true;
+                if (color && (item.color || '') !== color) return true;
+                if (size && (item.size || '') !== size) return true;
+                if (type && (item.type || '') !== type) return true;
+                return false;
+            })
+
 
             customer.wishlist = newWishlist;
             await customer.save();

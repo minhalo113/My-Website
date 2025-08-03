@@ -57,13 +57,23 @@ const WishList = () => {
         );
     }
 
-      const removeProductFromWishlist = async(e, productId) => {
+      const removeProductFromWishlist = async(e, product) => {
         e.preventDefault();
         setLoading(true);
 
         try{
-            const res = await api.post("/remove-from-wishlist", {productId}, {withCredentials: true});
-            toast.success(res.data.message)
+            const res = await api.post(
+                "/remove-from-wishlist",
+                {
+                    productId: product.productId,
+                    color: product.color,
+                    size: product.size,
+                    type: product.type
+                },
+                {withCredentials: true}
+            );
+            toast.success(res.data.message);
+            setWishlist(w => w.filter(p => !(p.productId === product.productId && (p.color||'') === (product.color||'') && (p.size||'') === (product.size||'') && (p.type||'') === (product.type||''))));
         }catch(error){
             toast.error("Failed to remove product from wishlist");
             console.log(error)
@@ -126,7 +136,7 @@ const WishList = () => {
                             </a>
 
                             <a
-                                onClick={(e) => removeProductFromWishlist(e, product.productId)}
+                                onClick={(e) => removeProductFromWishlist(e, product)}
                                 className="text-red-500 hover:text-red-400 relative cursor-pointer transition-all duration-200 ease-in-out hover:scale-[1.05] after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-red-400 hover:after:w-full after:transition-all after:duration-300"
                             >
                                 Remove from Wishlist

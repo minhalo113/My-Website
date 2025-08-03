@@ -42,6 +42,10 @@ const customerSchema = new Schema({
                 type: String,
                 required: false
             },
+            type: {
+                type: String,
+                required: false
+            },
             images: {
                 type: Array,
                 required: true

@@ -19,17 +19,19 @@ const ProductCards = ({GridList, products}) => {
         discount,
         colors = [],
         sizes = [],
-        colorPrices = {}
+        colorPrices = {},
+        colorImages = []
       } = _product;
 
       const defaultColor = colors[0] || "";
       const defaultSize = sizes[0] || "";
       const variantPrice = defaultColor && colorPrices[defaultColor] !== undefined ? colorPrices[defaultColor] : price;
+      const variantImage = (colorImages.length > 0 && defaultColor) ? colorImages[colors.indexOf(defaultColor)] : images;
 
     const product = {
       id: _id,
       cartId: `${_id}-${defaultColor}-${defaultSize}`,
-      img: images,
+      img: variantImage,
       name: name,
       price: variantPrice,
       discount: discount,
