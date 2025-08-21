@@ -13,6 +13,18 @@ export const add_product = createAsyncThunk(
     }
 )
 
+export const import_aliexpress_product = createAsyncThunk(
+    'product/import_aliexpress_product',
+    async(url, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const {data} = await api.post('/product-import-aliexpress', {url}, {withCredentials: true})
+            return fulfillWithValue(data)
+        }catch(error){
+            return rejectWithValue(error.response.data)
+        }
+    }
+)
+
 export const get_products = createAsyncThunk(
     'product/get_products',
     async({parPage, page, searchValue}, {rejectWithValue, fulfillWithValue}) => {
@@ -90,12 +102,14 @@ export const productReducer = createSlice({
         loader: false,
         products: [],
         product: "",
-        totalProduct: 0
+        totalProduct: 0,
+        importedProduct: null
     },
     reducers: {
         messageClear: (state, _) => {
             state.errorMessage = ""
             state.successMessage = ""
+            state.importedProduct = null
         }
     },
     extraReducers: (builder) => {
@@ -113,6 +127,17 @@ export const productReducer = createSlice({
             state.successMessage = payload.message;
         })
 
+                .addCase(import_aliexpress_product.pending, (state) => {
+            state.loader = true;
+        })
+        .addCase(import_aliexpress_product.rejected, (state, {payload}) => {
+            state.loader = false;
+            state.errorMessage = payload.error;
+        })
+        .addCase(import_aliexpress_product.fulfilled, (state, {payload}) => {
+            state.loader = false;
+            state.importedProduct = payload;
+        })
         .addCase(get_products.fulfilled, (state, {payload}) => {
             state.loader = false;
             state.totalProduct = payload.totalProduct;

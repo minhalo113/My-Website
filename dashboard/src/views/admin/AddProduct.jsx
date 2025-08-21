@@ -4,7 +4,7 @@ import { IoMdImages } from "react-icons/io";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useDispatch, useSelector } from 'react-redux';
 import { get_category } from '../../store/Reducers/categoryReducer';
-import { add_product,messageClear } from '../../store/Reducers/productReducer';
+import { add_product, messageClear, import_aliexpress_product } from '../../store/Reducers/productReducer';
 import { PropagateLoader } from 'react-spinners';
 import { overrideStyle } from '../../utilis/utils';
 import toast from 'react-hot-toast';
@@ -13,7 +13,7 @@ const AddProduct = () => {
     const dispatch = useDispatch()
     const { categorys } = useSelector(state => state.category)
 
-    const { loader,successMessage,errorMessage } = useSelector(state => state.product)
+    const { loader,successMessage,errorMessage, importedProduct } = useSelector(state => state.product)
 
     useEffect(() => {
         dispatch(get_category({
@@ -37,12 +37,21 @@ const AddProduct = () => {
         colorPrices: ''
     })
 
+    const [importUrl, setImportUrl] = useState('')
+
     const inputHandle = (e) => {
         setState({
             ...state,
             [e.target.name] : e.target.value
         })
 
+    }
+
+    const importHandle = () => {
+        if(importUrl){
+            dispatch(import_aliexpress_product(importUrl))
+            setImportUrl('')
+        }
     }
 
     const [cateShow, setCateShow] = useState(false)
@@ -141,6 +150,20 @@ const AddProduct = () => {
         }
     },[successMessage,errorMessage])
 
+    useEffect(() => {
+        if(importedProduct){
+            setState(prev => ({
+                ...prev,
+                name: importedProduct.title || '',
+                description: importedProduct.description || '',
+                price: importedProduct.price || '',
+                colors: importedProduct.colors ? importedProduct.colors.join(', ') : ''
+            }))
+            setImageShow(importedProduct.image ? [{url: importedProduct.image}] : [])
+            setColorImageShow(importedProduct.colorImages ? importedProduct.colorImages.map(url => ({url})) : [])
+        }
+    }, [importedProduct])
+
     const changeImage = (img, index) => {
         if (img) {
             let tempUrl = imageShow
@@ -235,7 +258,14 @@ const AddProduct = () => {
                     <Link to='/admin/dashboard/products' className='bg-blue-500 hover:shadow-blue-500/50 hover:shadow-lg text-white rounded-sm px-7 py-2 my-2'>All Product</Link> 
                 </div>
 <div>
-    <form onSubmit={add}>
+<form onSubmit={add}>
+        <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
+            <label htmlFor='importUrl'>AliExpress Link</label>
+            <div className='flex gap-2'>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] w-full' value={importUrl} onChange={(e)=> setImportUrl(e.target.value)} type='text' id='importUrl' placeholder='https://www.aliexpress.com/item/...'/>
+                <button type='button' onClick={importHandle} className='bg-green-500 px-4 py-2 rounded-md'>Import</button>
+            </div>
+        </div>
         <div className='flex flex-col mb-3 md:flex-row gap-4 w-full text-[#d0d2d6]'>
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor="name">Product Name</label>

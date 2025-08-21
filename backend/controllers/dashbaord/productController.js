@@ -328,7 +328,62 @@ class productController{
             }
         });
     };
-    
+
+    import_aliexpress_product = async(req, res) => {
+        const { url } = req.body;
+        if(!url){
+            return responseReturn(res, 400, {error: 'URL is required'});
+        }
+        try{
+            const response = await fetch(url);
+            const html = await response.text();
+
+            const titleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["'][^>]*>/i) || html.match(/<title>([^<]*)<\/title>/i);
+            const descriptionMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+            const priceMatch = html.match(/"formatedActivityPrice":"([^"]+)"/);
+            const imageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+
+            const runParamsMatch = html.match(/window.runParams\s*=\s*({.*?});/s);
+            let colors = [];
+            let types = [];
+            let colorImages = [];
+            if(runParamsMatch){
+                try{
+                    const data = JSON.parse(runParamsMatch[1]);
+                    const props = data?.data?.skuModule?.productSKUPropertyList || [];
+                    props.forEach(p => {
+                        const name = (p.skuPropertyName || '').toLowerCase();
+                        p.skuPropertyValues.forEach(v => {
+                            if(name.includes('color')){
+                                colors.push(v.propertyValueDisplayName);
+                                if(v.skuPropertyImagePath){
+                                    colorImages.push('https:' + v.skuPropertyImagePath);
+                                }
+                            }else{
+                                types.push(v.propertyValueDisplayName);
+                            }
+                        });
+                    });
+                }catch(err){
+                    console.log(err.message);
+                }
+            }
+
+            return responseReturn(res, 200, {
+                title: titleMatch ? titleMatch[1] : '',
+                description: descriptionMatch ? descriptionMatch[1] : '',
+                price: priceMatch ? priceMatch[1] : '',
+                link: url,
+                image: imageMatch ? imageMatch[1] : '',
+                colors,
+                types,
+                colorImages
+            });
+        }catch(error){
+            return responseReturn(res, 500, {error: error.message});
+        }
+    }
+
     deleteProduct = async(req, res) => {
         try{
             const productId = req.params.id;

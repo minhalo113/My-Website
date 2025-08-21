@@ -10,5 +10,6 @@ productRouter.get('/product-get/:productId', authMiddleware, productController.p
 productRouter.post('/product-update', authMiddleware, productController.product_update)
 productRouter.post('/product-image-update', authMiddleware, productController.product_image_update)
 productRouter.delete('/product/:id', authMiddleware, productController.deleteProduct)
+productRouter.post('/product-import-aliexpress', authMiddleware, productController.import_aliexpress_product)
 
 export default productRouter
