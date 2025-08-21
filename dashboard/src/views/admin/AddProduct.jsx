@@ -269,16 +269,30 @@ const AddProduct = () => {
                         <input value={searchValue} onChange={categorySearch} className='px-3 py-1 w-full focus:border-indigo-500 outline-none bg-transparent border border-slate-700 rounded-md text-[#d0d2d6] overflow-hidden' type="text" placeholder='search' /> 
                     </div>
                     <div className='pt-14'></div>
-                    <div className='flex justify-start items-start flex-col h-[200px] overflow-x-scrool'>
-                        {
-                            allCategory.map((c,i) => <span className={`px-4 py-2 hover:bg-indigo-500 hover:text-white hover:shadow-lg w-full cursor-pointer ${category === c.name && 'bg-indigo-500'}`} onClick={()=> {
-                                setCateShow(false)
-                                setCategory(c.name)
-                                setSearchValue('')
-                                setAllCategory(categorys)
-                            }}>{c.name} </span> )
-                        } 
+                    <div className='max-h-[220px] overflow-y-auto'>
+                    {allCategory.map((c, i) => (
+                        <button
+                        type="button"
+                        key={c._id || c.name || i}
+                        className={`block w-full text-left px-4 py-2 
+                                    hover:bg-indigo-500 hover:text-white cursor-pointer
+                                    ${category === c.name ? 'bg-indigo-500 text-white' : 'text-[#d0d2d6]'}
+                                    whitespace-nowrap overflow-hidden text-ellipsis`}
+                        onClick={() => {
+                            setCateShow(false)
+                            setCategory(c.name)
+                            setSearchValue('')
+                            setAllCategory(categorys || [])
+                        }}
+                        >
+                        {c.name}
+                        </button>
+                    ))}
+                    {allCategory.length === 0 && (
+                        <div className='px-4 py-3 text-sm text-slate-300/80'>No results</div>
+                    )}
                     </div>
+
 
                 </div>
             </div>  
