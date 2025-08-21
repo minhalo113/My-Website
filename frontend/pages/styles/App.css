@@ -33,6 +33,18 @@ ul{
 .subtitle{
   color:#DCA54A !important;
 }
+.banner-section.style-4 .banner-content .toy-haven-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 2px 2px #000;
+  margin-bottom: 10px;
+}
+.category-section.style-4 .section-wrapper .category-item .category-inner .category-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
 .course-filter-group .lab-ul li:hover {
   background-color: #DCA54A !important;
   cursor: pointer; /* Optional: adds a pointer cursor on hover */

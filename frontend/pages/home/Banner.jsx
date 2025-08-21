@@ -5,7 +5,10 @@ import api from '../../src/api/api';
 import HomeImageSwiper from '../../components/HomeImageSwiper';
 
 const title = (
-    <h3>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h3>
+    <>
+        <h2 className="subtitle toy-haven-title">Toy Haven <span role="img" aria-label="teddy">🧸</span></h2>
+        <h3>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h3>
+    </>
 )
 
 const desc = "🎲 Endless Fun, One Small Price!"
