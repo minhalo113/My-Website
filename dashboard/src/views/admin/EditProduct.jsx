@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, parsePath, useParams } from 'react-router-dom';
-import { IoMdImages } from "react-icons/io";
-import { IoMdCloseCircle } from "react-icons/io";
+import { Link, useParams } from 'react-router-dom';
+import { IoMdImages, IoMdCloseCircle } from "react-icons/io";
 import { useDispatch, useSelector } from 'react-redux';
 import {get_category} from "../../store/Reducers/categoryReducer"
 import { get_product,update_product,messageClear,product_image_update } from '../../store/Reducers/productReducer';
@@ -67,30 +66,82 @@ const EditProduct = () => {
     }
     const [imageShow, setImageShow] = useState([])
     const [colorImageShow, setColorImageShow] = useState([])
+    const [videoShow, setVideoShow] = useState([])
   
     const changeImage = (img, files) => {
         if (files.length > 0) {
-            dispatch(product_image_update({
-                oldImage: img,
-                newImage: files[0],
-                productId,
-                imageType: 'product'
-            }))
+            if(img){
+                dispatch(product_image_update({
+                    oldImage: img,
+                    newImage: files[0],
+                    productId,
+                    imageType: 'product'
+                }))
+            }else{
+                for(let i = 0; i < files.length; i++){
+                    dispatch(product_image_update({
+                        oldImage: '',
+                        newImage: files[i],
+                        productId,
+                        imageType: 'product'
+                    }))
+                }
+            }
         }
        
     }
 
     const changeColorImage = (img, files) =>{
         if(files.length > 0){
-            dispatch(product_image_update({
-                oldImage: img,
-                newImage: files[0],
-                productId,
-                imageType: 'color'
-            }))
+            if(img){
+                dispatch(product_image_update({
+                    oldImage: img,
+                    newImage: files[0],
+                    productId,
+                    imageType: 'color'
+                }))
+            }else{
+                for(let i = 0; i < files.length; i++){
+                    dispatch(product_image_update({
+                        oldImage: '',
+                        newImage: files[i],
+                        productId,
+                        imageType: 'color'
+                    }))
+                }
+            }
         }
     }
 
+    const changeVideo = (vid, files) => {
+        if(files.length > 0){
+            if(vid){
+                dispatch(product_image_update({
+                    oldImage: vid,
+                    newImage: files[0],
+                    productId,
+                    imageType: 'video'
+                }))
+            }else{
+                for(let i = 0; i < files.length; i++){
+                    dispatch(product_image_update({
+                        oldImage: '',
+                        newImage: files[i],
+                        productId,
+                        imageType: 'video'
+                    }))
+                }
+            }
+        }
+    }
+    const removeMedia = (media, type) => {
+        dispatch(product_image_update({
+            oldImage: media,
+            productId,
+            imageType: type,
+            action: 'delete'
+        }))
+    }
     useEffect(() => {
         setState({
             name: product.name,
@@ -107,6 +158,7 @@ const EditProduct = () => {
         setCategory(product.category)
         setImageShow(product.images)
         setColorImageShow(product.colorImages || [])
+        setVideoShow(product.videos || [])
     },[product])
 
     useEffect(() => {
@@ -248,27 +300,60 @@ const EditProduct = () => {
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
                 <span>Product Image</span>
                 {
-                    imageShow && imageShow.length > 0 && imageShow.map((img, i) => <div>
+                    imageShow && imageShow.length > 0 && imageShow.map((img, i) => <div key={i} className='relative'>
                         <label htmlFor={i}>
                             <img src={img} alt="" />
                         </label>
                         <input onChange={(e) => changeImage(img, e.target.files)} type="file" id={i} className='hidden' />
+                        <span onClick={() => removeMedia(img,'product')} className='absolute top-2 right-2 text-xl cursor-pointer text-red-500'>
+                            <IoMdCloseCircle />
+                        </span>
                     </div> )
                 }
+                <label htmlFor='product-image' className='flex justify-center items-center h-[150px] border border-dashed hover:border-indigo-500 cursor-pointer'>
+                    <IoMdImages className='text-5xl'/>
+                </label>
+                <input onChange={(e)=>changeImage('', e.target.files)} type='file' multiple id='product-image' className='hidden'/>
 
             </div>
 
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
                 <span>Color Image</span>
                 {
-                    colorImageShow && colorImageShow.length > 0 && colorImageShow.map((img, i) => <div>
+                    colorImageShow && colorImageShow.length > 0 && colorImageShow.map((img, i) => <div key={i} className='relative'>
                         <label htmlFor={`c-${i}`}>
                             <img src={img} alt='' />
                         </label>
                         <input onChange={(e) => changeColorImage(img, e.target.files)} type="file" id={`c-${i}`} className='hidden' />
+                        <span onClick={() => removeMedia(img,'color')} className='absolute top-2 right-2 text-xl cursor-pointer text-red-500'>
+                            <IoMdCloseCircle />
+                        </span>
                     </div> )
                 }
+                <label htmlFor='color-image' className='flex justify-center items-center h-[150px] border border-dashed hover:border-indigo-500 cursor-pointer'>
+                    <IoMdImages className='text-5xl'/>
+                </label>
+                <input onChange={(e)=>changeColorImage('', e.target.files)} type='file' multiple id='color-image' className='hidden'/>
 
+            </div>
+
+                        <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+                <span>Product Video</span>
+                {
+                    videoShow && videoShow.length > 0 && videoShow.map((vid, i) => <div key={i} className='relative'>
+                        <label htmlFor={`v-${i}`}>
+                            <video src={vid} className='h-[150px]' controls></video>
+                        </label>
+                        <input onChange={(e) => changeVideo(vid, e.target.files)} type='file' id={`v-${i}`} className='hidden' accept='video/*' />
+                        <span onClick={() => removeMedia(vid,'video')} className='absolute top-2 right-2 text-xl cursor-pointer text-red-500'>
+                            <IoMdCloseCircle />
+                        </span>
+                    </div> )
+                }
+                <label htmlFor='product-video' className='flex justify-center items-center h-[150px] border border-dashed hover:border-indigo-500 cursor-pointer'>
+                    <IoMdImages className='text-5xl'/>
+                </label>
+                <input onChange={(e)=>changeVideo('', e.target.files)} type='file' multiple id='product-video' className='hidden' accept='video/*'/>
             </div>
 
             <div className='flex'>

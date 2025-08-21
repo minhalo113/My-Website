@@ -198,50 +198,137 @@ class productController{
         }
     }
 
-    product_image_update = async(req, res) => {
-        const form = new formidable.IncomingForm({mutiple: true})
+    product_image_update = async (req, res) => {
+        const form = formidable({
+            multiples: true,          // v3 option
+            keepExtensions: true,
+            allowEmptyFiles: false,
+        });
 
-        form.parse(req, async(err, field, files) => {
-            const {oldImage, productId, imageType} = field
-            const {newImage} = files
+        form.parse(req, async (err, fields, files) => {
+            if (err) return responseReturn(res, 400, { error: err.message });
 
-            if(err){
-                responseReturn(res, 400, {error: err.message})
-            }else{
-                try{
-                    cloudinary.config({
-                        cloud_name: process.env.cloud_name,
-                        api_key: process.env.api_key,
-                        api_secret: process.env.api_secret,
-                        secure: true
-                    })
-                    const result = await cloudinary.uploader.upload(newImage[0].filepath, {folder: 'products'})
-                    if(result){
+            const { oldImage = '', productId, imageType, action } = fields;
+            // In v3, fields are arrays when multiple values; normalize to string
+            const _oldImage  = Array.isArray(oldImage)  ? oldImage[0]  : oldImage;
+            const _productId = Array.isArray(productId) ? productId[0] : productId;
+            const _imageType = Array.isArray(imageType) ? imageType[0] : imageType;
+            const _action    = Array.isArray(action)    ? action[0]    : action;
 
-                        if (imageType == 'color'){
-                            let {colorImages} = await productModel.findById(productId)
-                            const index = colorImages.findIndex(img => img === oldImage)
-                            colorImages[index] = result.url;
-                            await productModel.findByIdAndUpdate(productId, {colorImages})
-                        } else{
-                            let {images} = await productModel.findById(productId)
-                            const index = images.findIndex(img => img === oldImage)
-                            images[index] = result.url;
-                            await productModel.findByIdAndUpdate(productId, {images})
-                        }
+            // file list (always array in v3)
+            const newImageFiles = Array.isArray(files.newImage) ? files.newImage : (files.newImage ? [files.newImage] : []);
 
-                        const product = await productModel.findById(productId)
-                        responseReturn(res, 200, {product, message: "Product Image Updated Successfully"})
-                    }else{
-                        responseReturn(res, 404, {error: "Image Upload Failed"})
-                    }
-                }catch(error){
-                    responseReturn(res, 404, {error: "Image Upload Failed"})
-                }
+            // quick helper: extract Cloudinary public_id from a URL
+            const getPublicId = (url) => {
+            const parts = url.split('/');
+            const uploadIndex = parts.indexOf('upload');
+            if (uploadIndex !== -1) {
+                const publicIdParts = parts.slice(uploadIndex + 2);
+                const publicIdWithExt = publicIdParts.join('/');
+                return publicIdWithExt.replace(/\.[^/.]+$/, '');
             }
-        })
-    }
+            return url.split('/').pop().split('.')[0];
+            };
 
+            try {
+            cloudinary.config({
+                cloud_name: process.env.cloud_name,
+                api_key: process.env.api_key,
+                api_secret: process.env.api_secret,
+                secure: true,
+            });
+
+            // --- DELETE path ---
+            if (_action === 'delete') {
+                let updateField = {};
+
+                if (_imageType === 'color') {
+                let { colorImages } = await productModel.findById(_productId).lean();
+                colorImages = (colorImages || []).filter((img) => img !== _oldImage);
+                updateField = { colorImages };
+
+                // delete from Cloudinary (image)
+                const publicId = getPublicId(_oldImage);
+                await cloudinary.uploader.destroy(publicId);
+                } else if (_imageType === 'video') {
+                let { videos } = await productModel.findById(_productId).lean();
+                videos = (videos || []).filter((v) => v !== _oldImage);
+                updateField = { videos };
+
+                // delete from Cloudinary (video)
+                const publicId = getPublicId(_oldImage);
+                await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+                } else {
+                // default: images
+                let { images } = await productModel.findById(_productId).lean();
+                images = (images || []).filter((img) => img !== _oldImage);
+                updateField = { images };
+
+                const publicId = getPublicId(_oldImage);
+                await cloudinary.uploader.destroy(publicId);
+                }
+
+                const product = await productModel.findByIdAndUpdate(_productId, updateField, { new: true });
+                const msg = _imageType === 'video' ? 'Product Video Deleted Successfully' : 'Product Image Deleted Successfully';
+                return responseReturn(res, 200, { product, message: msg });
+            }
+
+            // --- ADD/UPDATE path ---
+            // require a file when not deleting
+            if (!newImageFiles.length) {
+                return responseReturn(res, 400, { error: 'No file uploaded' });
+            }
+
+            const folder =
+                _imageType === 'color' ? 'products/colors' :
+                _imageType === 'video' ? 'products/videos' :
+                'products';
+
+            const uploadOpts =
+                _imageType === 'video'
+                ? { folder, resource_type: 'video' }
+                : { folder };
+
+            // take the first file (your UI uploads one at a time here)
+            const file = newImageFiles[0];
+            const localPath = file.filepath || file.path;
+
+            const result = await cloudinary.uploader.upload(localPath, uploadOpts);
+            if (!result) return responseReturn(res, 404, { error: 'Image Upload Failed' });
+
+            const url = result.secure_url || result.url;
+
+            if (_imageType === 'color') {
+                let { colorImages = [] } = await productModel.findById(_productId).lean();
+                const index = colorImages.findIndex((img) => img === _oldImage);
+                if (index > -1) colorImages[index] = url; else colorImages.push(url);
+                await productModel.findByIdAndUpdate(_productId, { colorImages });
+            } else if (_imageType === 'video') {
+                let { videos = [] } = await productModel.findById(_productId).lean();
+                const index = videos.findIndex((v) => v === _oldImage);
+                if (index > -1) videos[index] = url; else videos.push(url);
+                await productModel.findByIdAndUpdate(_productId, { videos });
+            } else {
+                let { images = [] } = await productModel.findById(_productId).lean();
+                const index = images.findIndex((img) => img === _oldImage);
+                if (index > -1) images[index] = url; else images.push(url);
+                await productModel.findByIdAndUpdate(_productId, { images });
+            }
+
+            const product = await productModel.findById(_productId);
+            const message =
+                _imageType === 'video'
+                ? (_oldImage ? 'Product Video Updated Successfully' : 'Product Video Added Successfully')
+                : (_oldImage ? 'Product Image Updated Successfully' : 'Product Image Added Successfully');
+
+            return responseReturn(res, 200, { product, message });
+            } catch (error) {
+            console.error('product_image_update error:', error);
+            return responseReturn(res, 500, { error: 'Image Upload Failed' });
+            }
+        });
+    };
+    
     deleteProduct = async(req, res) => {
         try{
             const productId = req.params.id;
