@@ -368,8 +368,7 @@ class productController{
                     console.log(err.message);
                 }
             }
-
-            return responseReturn(res, 200, {
+            const payload = {
                 title: titleMatch ? titleMatch[1] : '',
                 description: descriptionMatch ? descriptionMatch[1] : '',
                 price: priceMatch ? priceMatch[1] : '',
@@ -378,7 +377,11 @@ class productController{
                 colors,
                 types,
                 colorImages
-            });
+            };
+
+            console.log('🚀 response payload:', payload);
+
+            return responseReturn(res, 200, payload);
         }catch(error){
             return responseReturn(res, 500, {error: error.message});
         }
