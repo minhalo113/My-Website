@@ -245,10 +245,45 @@ class productController{
     deleteProduct = async(req, res) => {
         try{
             const productId = req.params.id;
-            const deleteProduct = await productModel.findByIdAndDelete(productId)
-            if(!deleteProduct){
-                responseReturn(res, 404, {error: "Product Not Found"})
+            const product = await productModel.findById(productId);
+            if(!product){
+                return responseReturn(res, 404, {error: "Product Not Found"})
             }
+
+            cloudinary.config({
+                cloud_name: process.env.cloud_name,
+                api_key: process.env.api_key,
+                api_secret: process.env.api_secret,
+                secure: true
+            })
+
+            const getPublicId = (url) => {
+                const parts = url.split('/');
+                const uploadIndex = parts.indexOf('upload')
+                if(uploadIndex !== -1){
+                    const publicIdParts = parts.slice(uploadIndex + 2);
+                    const publicIdWithExt = publicIdParts.join('/');
+                    return publicIdWithExt.replace(/\.[^/.]+$/, '');
+                }
+                return url.split('/').pop().split('.')[0];
+            };
+
+            if (product.images && product.images.length){
+                for (const img of product.images){
+                    const publicId = getPublicId(img);
+                    await cloudinary.uploader.destroy(publicId);
+                }
+            }
+
+            if (product.videos && product.videos.length){
+                for (const vid of product.videos){
+                    const publicId = getPublicId(vid);
+                    await cloudinary.uploader.destroy(publicId, {resource_type: 'video'})
+                }
+            }
+
+            await productModel.findByIdAndDelete(productId)
+
             responseReturn(res, 200, "Product deleted successfully")
         }catch(error){
             responseReturn(res, 500, {error: "Internal Server Error"})
