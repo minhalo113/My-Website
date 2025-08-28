@@ -266,6 +266,17 @@ const AddProduct = () => {
                 <button type='button' onClick={importHandle} className='bg-green-500 px-4 py-2 rounded-md'>Import</button>
             </div>
         </div>
+
+        {importedProduct && (
+            <div className='mb-3'>
+                <label className='text-[#d0d2d6]'>Import Response</label>
+                <textarea
+                    readOnly
+                    className='w-full h-[400px] p-2 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
+                    value={JSON.stringify(importedProduct, null, 2)}
+                />
+            </div>
+        )}
         <div className='flex flex-col mb-3 md:flex-row gap-4 w-full text-[#d0d2d6]'>
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor="name">Product Name</label>

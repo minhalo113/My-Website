@@ -109,10 +109,10 @@ const ProductDisplay = ({item}) => {
                 <div className="flex flex-col gap-4">
 
                     { (colorImages.length > 0 || colors.length > 0) && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start gap-2">
                             <span className="font-medium">Option:</span>
                             {colorImages.length > 0 ? (
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 flex-wrap flex-1">
                                     {colorImages.map((img,i) => (
                                         <div key={i} className="flex flex-col items-center w-10">
                                         <img
