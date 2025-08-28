@@ -268,14 +268,15 @@ const AddProduct = () => {
         </div>
 
         {importedProduct && (
-            <div className='mb-3'>
-                <label className='text-[#d0d2d6]'>Import Response</label>
-                <textarea
-                    readOnly
-                    className='w-full h-[400px] p-2 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
-                    value={JSON.stringify(importedProduct, null, 2)}
-                />
-            </div>
+        <div className="mb-3">
+            <label className="text-[#d0d2d6]">Import Response</label>
+            <textarea
+            readOnly
+            rows={28}
+            className="w-full min-h-[560px] md:min-h-[640px] p-3 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] font-mono text-sm leading-relaxed resize-y overflow-auto"
+            value={JSON.stringify(importedProduct, null, 2)}
+            />
+        </div>
         )}
         <div className='flex flex-col mb-3 md:flex-row gap-4 w-full text-[#d0d2d6]'>
             <div className='flex flex-col w-full gap-1'>
