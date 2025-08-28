@@ -34,7 +34,8 @@ const AddProduct = () => {
         colors: '',
         sizes: '',
         deliveryTime: '',
-        colorPrices: ''
+        colorPrices: '',
+        link: ''
     })
 
     const [importUrl, setImportUrl] = useState('')
@@ -50,6 +51,7 @@ const AddProduct = () => {
     const importHandle = () => {
         if(importUrl){
             dispatch(import_aliexpress_product(importUrl))
+            setState(prev => ({...prev, link: importUrl}))
             setImportUrl('')
         }
     }
@@ -134,7 +136,8 @@ const AddProduct = () => {
                 colors: '',
                 sizes: '',
                 deliveryTime: '',
-                colorPrices: ''
+                colorPrices: '',
+                link: ''
             }) 
             setImageShow([])
             setImages([])
@@ -157,7 +160,7 @@ const AddProduct = () => {
                 name: importedProduct.title || '',
                 description: importedProduct.description || '',
                 price: importedProduct.price || '',
-                colors: importedProduct.colors ? importedProduct.colors.join(', ') : ''
+                colors: importedProduct.colors ? importedProduct.colors.join(', ') : prev.colors
             }))
             setImageShow(importedProduct.image ? [{url: importedProduct.image}] : [])
             setColorImageShow(importedProduct.colorImages ? importedProduct.colorImages.map(url => ({url})) : [])
@@ -225,6 +228,7 @@ const AddProduct = () => {
         formData.append('deliveryTime', state.deliveryTime)
         formData.append('colorPrices', state.colorPrices)
         formData.append('brand',state.brand)
+        formData.append('link', state.link)
         formData.append('colors', state.colors)
         formData.append('sizes', state.sizes)
         formData.append('shopName','Toy Haven') 
@@ -278,6 +282,10 @@ const AddProduct = () => {
             />
         </div>
         )}
+        <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
+            <label htmlFor='link'>Product Link</label>
+            <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.link} type='text' name='link' id='link' placeholder='https://www.aliexpress.com/item/...'/>
+        </div>
         <div className='flex flex-col mb-3 md:flex-row gap-4 w-full text-[#d0d2d6]'>
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor="name">Product Name</label>

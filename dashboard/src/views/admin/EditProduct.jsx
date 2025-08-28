@@ -37,7 +37,8 @@ const EditProduct = () => {
         colors: '',
         sizes: '',
         deliveryTime: '',
-        colorPrices: ''
+        colorPrices: '',
+        link: ''
     })
 
     const inputHandle = (e) => {
@@ -153,7 +154,8 @@ const EditProduct = () => {
             colors: Array.isArray(product.colors) ? product.colors.join(',') : '',
             sizes: Array.isArray(product.sizes) ? product.sizes.join(',') : '',
             deliveryTime: product.deliveryTime || '',
-            colorPrices: product.colorPrices ? Object.entries(product.colorPrices).map(([k,v]) => `${k}:${v}`).join(',') : ''
+            colorPrices: product.colorPrices ? Object.entries(product.colorPrices).map(([k,v]) => `${k}:${v}`).join(',') : '',
+            link: product.link || ''
         })
         setCategory(product.category)
         setImageShow(product.images)
@@ -198,6 +200,7 @@ const EditProduct = () => {
             sizes: state.sizes,
             deliveryTime: state.deliveryTime,
             colorPrices: state.colorPrices,
+            link: state.link,
             category: category,
             productId: productId
         }
@@ -213,6 +216,10 @@ const EditProduct = () => {
                 </div>
 <div>
     <form onSubmit={update}>
+        <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
+            <label htmlFor='link'>Product Link</label>
+            <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.link} type='text' name='link' id='link' placeholder='https://www.aliexpress.com/item/...'/>
+        </div>
         <div className='flex flex-col mb-3 md:flex-row gap-4 w-full text-[#d0d2d6]'>
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor="name">Product Name</label>

@@ -96,6 +96,7 @@ const OrderDetails = () => {
                             <span className='text-lg'>Quantity: {p.qty}</span><br/>
                             <span className='text-lg'>Price: {p.price}</span><br/>
                             <span className='text-lg'>Product ID: {p.id}</span><br/>
+                            <span className='text-lg'>Link: {p.link ? <a href={p.link} target='_blank' rel='noreferrer' className='text-blue-300 underline break-all'>{p.link}</a> : 'N/A'}</span><br/>
                         </p>
 
                         </div>

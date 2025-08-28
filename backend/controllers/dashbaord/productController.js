@@ -12,7 +12,7 @@ class productController{
         const form = formidable({multiples: true});
 
         form.parse(req, async(err, field, files) => {
-            let {name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices} = field;
+            let {name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link} = field;
 
             shopName = String(shopName).trim()
 
@@ -97,6 +97,7 @@ class productController{
                     images: allImageUrl,
                     videos: allVideoUrl,
                     brand: String(brand).trim(),
+                    link: link ? String(link).trim() : '',
                     colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
@@ -158,7 +159,7 @@ class productController{
     }
 
     product_update = async(req, res) => {
-        let {name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId} = req.body;
+        let {name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link} = req.body;
 
         name = String(name).trim()
         const slug = name.split(' ').join('-')
@@ -189,6 +190,7 @@ class productController{
 
             await productModel.findByIdAndUpdate(productId, {
                 name, description, stock, price, category, discount, deliveryTime, brand,
+                link: link ? String(link).trim() : '',
                 colors: colorArr,
                 colorPrices: parseMap(colorPrices),
                 productId, slug

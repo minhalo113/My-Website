@@ -21,6 +21,10 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
+    link: {
+        type: String,
+        default: ''
+    },
     colors: {
         type: [String],
         default: []

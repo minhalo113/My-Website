@@ -57,6 +57,7 @@ const Products = () => {
                         <th scope='col' className='py-3 px-4'>Discount</th>
                         <th scope='col' className='py-3 px-4'>Stock</th>
                         <th scope='col' className='py-3 px-4'>Description</th>
+                        <th scope='col' className='py-3 px-4'>Link</th>
                         <th scope='col' className='py-3 px-4'>Action</th> 
                     </tr>
                 </thead>
@@ -80,10 +81,13 @@ const Products = () => {
                             </td>
                             <td scope = "row" className = "py-1 px-4 font-medium whitespace-nowrap">{d.stock}</td>
                             <td scope = "row" className = "py-1 px-4 font-medium whitespace-nowrap">{truncateText(d.description, 150)}</td>
+                             <td scope = "row" className = "py-1 px-4 font-medium whitespace-nowrap">
+                                {d.link ? <a href={d.link} target='_blank' rel='noreferrer' className='text-blue-400 underline break-all'>{truncateText(d.link,30)}</a> : 'N/A'}
+                            </td>
                             <td scope='row' className='py-1 px-4 font-medium whitespace-nowrap'>
                             <div className='flex justify-start items-center gap-4'>
-                                <Link to={`/admin/dashboard/edit-product/${d._id}`} className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50'> <FaEdit/> </Link> 
-                                <Link className='p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50' onClick={() => handleDelete(d._id)}> <FaTrash/> </Link> 
+                                <Link to={`/admin/dashboard/edit-product/${d._id}`} className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50'> <FaEdit/> </Link>
+                                <Link className='p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50' onClick={() => handleDelete(d._id)}> <FaTrash/> </Link>
                             </div>
                         </td>
                     </tr> )
