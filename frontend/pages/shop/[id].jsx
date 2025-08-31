@@ -14,6 +14,7 @@ const SingleProduct = () => {
     const [loading, setLoading] = useState(true);
     
     const [reviewList, setReviewList] = useState([])
+    const [previewImage, setPreviewImage] = useState(null)
     
     const router = useRouter();
     const {id} = router.query;
@@ -42,7 +43,7 @@ const SingleProduct = () => {
 
   return (
     <div>
-                <SEO
+        <SEO
             title={`${productData.name} | Toy Haven Store`}
             description={productData.description}
             canonical={`https://www.toyhaven.store/product/${productData._id}`}
@@ -61,14 +62,14 @@ const SingleProduct = () => {
                                         <div className='product-thumb relative'>
                                             <DiscountBadge discount={productData.discount} />
                                             <div className='swiper-container pro-single-top'>
-                                                <ProductSwiper images={productData.images}/>
+                                                <ProductSwiper images={productData.images} previewImage={previewImage} onPreviewEnd={() => setPreviewImage(null)}/>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className='col-md-6 col-12'>
                                         <div className='post-content'>
-                                            <ProductDisplay item = {productData}/>
+                                            <ProductDisplay item = {productData} onSelectImage={setPreviewImage}/>
                                         </div>
                                     </div>
                                 </div>

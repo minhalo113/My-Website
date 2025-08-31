@@ -10,7 +10,7 @@ import api from '../../src/api/api';
 const desc = "This is the detail of the product."
 
 
-const ProductDisplay = ({item}) => {
+const ProductDisplay = ({item, onSelectImage}) => {
     const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = {}} = item || {}
     const getOriginalPrice = () => {
         return selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
@@ -117,7 +117,10 @@ const ProductDisplay = ({item}) => {
                                         <div key={i} className="flex flex-col items-center w-10">
                                         <img
                                             src={img}
-                                            onClick={() => setSelectedColor(colors[i] || '')}
+                                            onClick={() => {
+                                                setSelectedColor(colors[i] || '')
+                                                onSelectImage && onSelectImage(img)
+                                            }}
                                             className={`w-10 h-10 rounded cursor-pointer transition-all duration-200 ease-in-out ${
                                             selectedColor === colors[i]
                                                 ? 'border-4 border-emerald-500 ring-2 ring-emerald-300'
@@ -287,6 +290,7 @@ ProductDisplay.propTypes = {
         colorImages: PropTypes.array,
         sizes: PropTypes.array
     }).isRequired,
+    onSelectImage: PropTypes.func
 };
 
 export default ProductDisplay;
