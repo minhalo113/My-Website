@@ -29,7 +29,7 @@ const AddProduct = () => {
         description: '',
         discount: '',
         price: "",
-        brand: "",
+        brand: "Toy Haven",
         stock: "",
         colors: '',
         sizes: '',
@@ -131,7 +131,7 @@ const AddProduct = () => {
                 description: '',
                 discount: '',
                 price: "",
-                brand: "",
+                brand: "Toy Haven",
                 stock: "",
                 colors: '',
                 sizes: '',
@@ -299,7 +299,15 @@ const AddProduct = () => {
 
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor='colors'>Color/Type Options (comma separated)</label>
-                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colors} type='text' name='colors' id = 'colors' placeholder='e.g. green plush, blue plush'/>
+                <textarea
+                    rows={4}
+                    className='px-4 py-2 h-32 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
+                    onChange={inputHandle}
+                    value={state.colors}
+                    name='colors'
+                    id='colors'
+                    placeholder='e.g. green plush, blue plush'
+                />
             </div>
 
             <div className='flex flex-col w-full gap-1'>
@@ -373,7 +381,15 @@ const AddProduct = () => {
 
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor='colorPrices'>Color Prices (color:price)</label>
-                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colorPrices} type='text' name='colorPrices' id='colorPrices' placeholder='red:20, blue:25'/>
+                <textarea
+                    rows={4}
+                    className='px-4 py-2 h-32 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
+                    onChange={inputHandle}
+                    value={state.colorPrices}
+                    name='colorPrices'
+                    id='colorPrices'
+                    placeholder='red:20, blue:25'
+                />
             </div>
 
         </div>

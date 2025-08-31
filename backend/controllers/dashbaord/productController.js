@@ -7,6 +7,14 @@ import crypto from 'crypto';
 import axios from 'axios';
 
 class productController{
+    checkDuplicateLink = async(link, excludeId = null) => {
+        const query = {link: String(link).trim()};
+        if(excludeId) {
+            query._id = { $ne: excludeId};
+        }
+        return await productModel.findOne(query);
+    }
+
     add_product = async(req, res) => {
         const {id} = req;
         const form = formidable({multiples: true});
@@ -29,6 +37,13 @@ class productController{
             })
 
             try {
+                if(link){
+                    const duplicate = await this.checkDuplicateLink(link);
+
+                    if(duplicate){
+                        responseReturn(res, 409, {error: 'Product link already exists'})
+                    }
+                }
 
                 const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
 
@@ -186,6 +201,13 @@ class productController{
             }
             if(colorArr.length !== (product.colorImages ? product.colorImages.length : 0)){
                 return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
+            }
+
+            if(link){
+                const duplicate = await this.checkDuplicateLink(link, productId);
+                if(duplicate){
+                    return responseReturn(res, 409, {error: 'Product link already exists'})
+                }
             }
 
             await productModel.findByIdAndUpdate(productId, {
