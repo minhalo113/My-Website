@@ -18,7 +18,7 @@ export default function useCart() {
             const parsed = raw ? JSON.parse(raw) : [];
             return parsed.map(item => ({
                 ...item,
-                cartId: item.cartId || `${item.id}-${item.color || ''}-${item.size || ''}-${item.type || ''}`
+                cartId: item.cartId || `${item.id}-${item.colorIndex ?? (item.color || '')}-${item.size || ''}-${item.type || ''}`
             }))
         }catch{
             return [];

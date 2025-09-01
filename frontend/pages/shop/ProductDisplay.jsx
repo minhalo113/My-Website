@@ -12,6 +12,14 @@ const desc = "This is the detail of the product."
 
 const ProductDisplay = ({item, onSelectImage}) => {
     const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = {}} = item || {}
+
+    const [prequantity, setQuantity] = useState(1);
+    const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+    const [selectedSize, setSelectedSize] = useState(sizes[0] || '');
+
+    const selectedColor = colors[selectedColorIndex] || '';
+
+
     const getOriginalPrice = () => {
         return selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
     };
@@ -20,10 +28,6 @@ const ProductDisplay = ({item, onSelectImage}) => {
         p = p - (p * discount) / 100;
         return p.toFixed(2);
     }
-
-    const [prequantity, setQuantity] = useState(1);
-    const [selectedColor, setSelectedColor] = useState(colors[0] || '')
-    const [selectedSize, setSelectedSize] = useState(sizes[0] || '')
 
     const {add} = useCart();
     const addWishlist = async(e) => {
@@ -52,16 +56,17 @@ const ProductDisplay = ({item, onSelectImage}) => {
 
     const handleSubmit = (e) => {
         const variantPrice = selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
-        const variantImage = (colorImages.length > 0 && selectedColor) ? colorImages[colors.indexOf(selectedColor)] : images;
+        const variantImage = (colorImages.length > 0 && selectedColor) ? colorImages[selectedColorIndex] : images;
 
         const product = {
             id: _id,
-            cartId: `${_id}-${selectedColor || ''}-${selectedSize || ''}`,
+            cartId: `${_id}-${selectedColorIndex}-${selectedSize || ''}`,
             img: variantImage,
             name: name,
             price: variantPrice,
             discount: discount,
             color: selectedColor,
+            colorIndex: selectedColorIndex,
             size: selectedSize,
         }
 
@@ -118,27 +123,27 @@ const ProductDisplay = ({item, onSelectImage}) => {
                                         <img
                                             src={img}
                                             onClick={() => {
-                                                setSelectedColor(colors[i] || '')
+                                                setSelectedColorIndex(i);
                                                 onSelectImage && onSelectImage(img)
                                             }}
                                             className={`w-10 h-10 rounded cursor-pointer transition-all duration-200 ease-in-out ${
-                                            selectedColor === colors[i]
+                                            selectedColorIndex === i
                                                 ? 'border-4 border-emerald-500 ring-2 ring-emerald-300'
                                                 : 'border border-gray-300'
                                             }`}
                                         />
                                         {selectedColor === colors[i] && (
                                             <span className="text-xs font-bold text-black mt-1">
-                                            {selectedColor}
+                                            {colors[i]}
                                             </span>
                                         )}
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <select value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} className="border border-slate-300 rounded px-2 py-1">
-                                    {colors.map(c => (
-                                        <option key={c} value={c}>{c}</option>
+                                <select value={selectedColorIndex} onChange={(e) => setSelectedColorIndex(parseInt(e.target.value, 10))} className="border border-slate-300 rounded px-2 py-1">
+                                    {colors.map((c,i) => (
+                                        <option key={i} value={i}>{c}</option>
                                     ))}
                                 </select>
                             )}
