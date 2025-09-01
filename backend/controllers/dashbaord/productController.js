@@ -5,6 +5,7 @@ import productModel from "../../models/productModel.js";
 import { response } from "express";
 import crypto from 'crypto';
 import axios from 'axios';
+import parseColorPrices from '../../utils/parseColorPrices.js';
 
 class productController{
     checkDuplicateLink = async(link, excludeId = null) => {
@@ -83,20 +84,6 @@ class productController{
                         const result = await cloudinary.uploader.upload(videos[i].filepath, {folder: 'products/videos', resource_type: 'video'});
                         allVideoUrl.push(result.url)
                     }
-                }
-
-                const parseColorPrices = (str) => {
-                    const arr = [];
-                    if (str){
-                        String(str).split(',').forEach((p, i) => {
-                            const [k, v] = p.split(':').map(s=> s.trim())
-
-                            if (v){
-                                arr[i] = parseFloat(v);
-                            }
-                        })
-                    }
-                    return arr;
                 }
 
                 await productModel.create({
@@ -184,18 +171,6 @@ class productController{
         const sizeArr = sizes ? String(sizes).split(',').map(s => s.trim()).filter(Boolean) : []
 
         try{
-            const parseColorPrices = (str) => {
-                const arr = [];
-                if (str) {
-                    String(str).split(',').forEach((p, i)=>{
-                        const [k, v] = p.split(':').map(s=>s.trim());
-                        if (v){
-                            arr[i] = parseFloat(v);
-                        }
-                    })
-                }
-                return arr;
-            };
             const product = await productModel.findById(productId)
             if(!product){
                 return responseReturn(res, 404, {error: 'Product not found'})
