@@ -105,12 +105,12 @@ const CategoryShowCase = () => {
                                                 const hasVariant =
                                                     product.colors &&
                                                     product.colors.length > 0 &&
-                                                    product.colorPrices &&
-                                                    Object.keys(product.colorPrices).length > 0;
+                                                    Array.isArray(product.colorPrices) &&
+                                                    product.colorPrices.length > 0;
 
                                                 if (hasVariant) {
                                                     const prices = product.colors
-                                                        .map(c => product.colorPrices[c])
+                                                        .map((c, idx) => product.colorPrices[idx])
                                                         .filter(v => v !== undefined);
                                                     const min = Math.min(...prices);
                                                     const max = Math.max(...prices);

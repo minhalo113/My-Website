@@ -38,6 +38,10 @@ const customerSchema = new Schema({
                 type: String,
                 required: false
             },
+            colorIndex: {
+                type: Number,
+                required: false
+            },
             size: {
                 type: String,
                 required: false

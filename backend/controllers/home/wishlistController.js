@@ -7,7 +7,7 @@ class wishlistController {
     add_to_wishlist = async(req, res) => {
         try {
             const userId = req.user.id;
-            const {productId, color = '', size = ''} = req.body;
+            const {productId, color = '', size = '', colorIndex = 0} = req.body;
 
             if (!mongoose.Types.ObjectId.isValid(productId)){
                 return responseReturn(res, 400, {message: "Invalid Product Id"})
@@ -19,9 +19,13 @@ class wishlistController {
             }
 
             const customer = await customerModel.findById(userId)
+            if(!customer){
+                return responseReturn(res, 404, {message: "User not found"})
+            }
+            const idx = parseInt(colorIndex, 10) || 0;
             const alreadyExists = customer.wishlist.some(
                 w => w.productId.equals(productId) &&
-                (w.color || '') === color &&
+                (w.colorIndex ?? 0) === idx &&
                 (w.size || '') === size
             );
 
@@ -30,23 +34,20 @@ class wishlistController {
             }
 
             let variantPrice = product.price;
-            if (color && product.colorPrices && product.colorPrices[color] !== undefined){
-                variantPrice = product.colorPrices[color];
+            if (product.colorPrices && Array.isArray(product.colorPrices) && product.colorPrices[idx] !== undefined){
+                variantPrice = product.colorPrices[idx];
             }
 
             let imageToStore = Array.isArray(product.images) ? product.images[0] : product.images;
-            if (color && Array.isArray(product.colorImages) && product.colors){
-                const idx = product.colors.indexOf(color);
-                if (idx != -1 && product.colorImages[idx]){
-                    imageToStore = product.colorImages[idx];
-                }
+            if (Array.isArray(product.colorImages) && product.colorImages[idx]){
+                imageToStore = product.colorImages[idx];
             }
 
             customer.wishlist.push({
                 productId: product._id,
                 name: product.name,
                 price: variantPrice,
-                color,
+                color, colorIndex: idx,
                 size,
                 images: imageToStore
             })
@@ -63,17 +64,18 @@ class wishlistController {
     remove_from_wishlist = async(req, res) => {
         try{
             const userId = req.user.id;
-            const {productId, color, size} = req.body;
+            const {productId, colorIndex = 0, size} = req.body;
 
             const customer = await customerModel.findById(userId);
             if (!customer){
                 return responseReturn(res, 404, {message: "User not found"})
             }
 
+            const idx = parseInt(colorIndex, 10) || 0;
             const newWishlist = customer.wishlist.filter(item => {
                 return !(
                     item.productId.equals(productId) &&
-                    (item.color || '') === (color || '') &&
+                    (item.colorIndex ?? 0) === idx &&
                     (item.size || '') === (size || '')
                 );
             });

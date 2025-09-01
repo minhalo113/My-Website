@@ -70,8 +70,8 @@ const productSchema = new Schema({
         default: []
     },
     colorPrices: {
-        type: Object,
-        default: {}
+        type: [Number],
+        default: []
     },
     ratings: [
         {

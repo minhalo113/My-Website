@@ -85,17 +85,18 @@ class productController{
                     }
                 }
 
-                const parseMap = (str) => {
-                    const obj = {};
+                const parseColorPrices = (str) => {
+                    const arr = [];
                     if (str){
-                        String(str).split(',').forEach(p=>{
-                            const [k,v] = p.split(':').map(s=>s.trim());
-                            if (k && v){
-                                obj[k] = parseFloat(v);
+                        String(str).split(',').forEach((p, i) => {
+                            const [k, v] = p.split(':').map(s=> s.trim())
+
+                            if (v){
+                                arr[i] = parseFloat(v);
                             }
                         })
                     }
-                    return obj;
+                    return arr;
                 }
 
                 await productModel.create({
@@ -113,10 +114,10 @@ class productController{
                     videos: allVideoUrl,
                     brand: String(brand).trim(),
                     link: link ? String(link).trim() : '',
-                    colors: colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : [],
+                    colors: colorArr,
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
-                    colorPrices: parseMap(colorPrices)
+                    colorPrices: parseColorPrices(colorPrices)
                 })
                 responseReturn(res, 201, {message: "Product Added Successfully"})
             }catch(error){
@@ -183,17 +184,17 @@ class productController{
         const sizeArr = sizes ? String(sizes).split(',').map(s => s.trim()).filter(Boolean) : []
 
         try{
-            const parseMap = (str) => {
-                const obj = {};
+            const parseColorPrices = (str) => {
+                const arr = [];
                 if (str) {
-                    String(str).split(',').forEach(p=>{
+                    String(str).split(',').forEach((p, i)=>{
                         const [k, v] = p.split(':').map(s=>s.trim());
-                        if (k && v){
-                            obj[k] = parseFloat(v);
+                        if (v){
+                            arr[i] = parseFloat(v);
                         }
                     })
                 }
-                return obj
+                return arr;
             };
             const product = await productModel.findById(productId)
             if(!product){
@@ -214,7 +215,7 @@ class productController{
                 name, description, stock, price, category, discount, deliveryTime, brand,
                 link: link ? String(link).trim() : '',
                 colors: colorArr,
-                colorPrices: parseMap(colorPrices),
+                colorPrices: parseColorPrices(colorPrices),
                 productId, slug
             })
             const updatedProduct = await productModel.findById(productId)

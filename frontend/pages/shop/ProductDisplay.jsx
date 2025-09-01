@@ -11,7 +11,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item, onSelectImage}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = {}} = item || {}
+    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = []} = item || {}
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -21,7 +21,7 @@ const ProductDisplay = ({item, onSelectImage}) => {
 
 
     const getOriginalPrice = () => {
-        return selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
+        return colorPrices[selectedColorIndex] !== undefined ? colorPrices[selectedColorIndex] : price;
     };
     const getVariantPrice = () => {
         let p = getOriginalPrice();
@@ -36,6 +36,7 @@ const ProductDisplay = ({item, onSelectImage}) => {
             const res = await api.post('/add-to-wishlist', {
                 productId: _id,
                 color: selectedColor,
+                colorIndex: selectedColorIndex,
                 size: selectedSize
             }, {withCredentials: true});
             toast.success(res.data?.message || 'Added to wishlist');
@@ -55,7 +56,7 @@ const ProductDisplay = ({item, onSelectImage}) => {
     }
 
     const handleSubmit = (e) => {
-        const variantPrice = selectedColor && colorPrices[selectedColor] !== undefined ? colorPrices[selectedColor] : price;
+        const variantPrice = colorPrices[selectedColorIndex] !== undefined ? colorPrices[selectedColorIndex] : price;
         const variantImage = (colorImages.length > 0 && selectedColor) ? colorImages[selectedColorIndex] : images;
 
         const product = {
@@ -132,7 +133,7 @@ const ProductDisplay = ({item, onSelectImage}) => {
                                                 : 'border border-gray-300'
                                             }`}
                                         />
-                                        {selectedColor === colors[i] && (
+                                        {selectedColorIndex === i && (
                                             <span className="text-xs font-bold text-black mt-1">
                                             {colors[i]}
                                             </span>

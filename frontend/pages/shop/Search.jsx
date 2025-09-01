@@ -43,10 +43,10 @@ const Search = ({products}) => {
         <div  style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY :"auto"}}>
             {
                 searchTerm && showDropdown && filteredProducts.slice(0, 20).map((product) => {
-                    const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && Object.keys(product.colorPrices).length > 0;
+                    const hasVariant = product.colors && product.colors.length > 0 && Array.isArray(product.colorPrices) && product.colorPrices.length > 0;
                     let variantRange = null;
                     if(hasVariant){
-                        const prices = product.colors.map(c => product.colorPrices[c]).filter(v=>v!==undefined);
+                        const prices = product.colors.map((c, idx) => product.colorPrices[idx]).filter(v=>v!==undefined);
                         const min = Math.min(...prices);
                         const max = Math.max(...prices);
                         variantRange = {

@@ -154,7 +154,7 @@ const EditProduct = () => {
             colors: Array.isArray(product.colors) ? product.colors.join(',') : '',
             sizes: Array.isArray(product.sizes) ? product.sizes.join(',') : '',
             deliveryTime: product.deliveryTime || '',
-            colorPrices: product.colorPrices ? Object.entries(product.colorPrices).map(([k,v]) => `${k}:${v}`).join(',') : '',
+            colorPrices: Array.isArray(product.colorPrices) ? product.colors.map((c,i) => `${c}:${product.colorPrices[i] ?? ''}`).join(',') : '',
             link: product.link || ''
         })
         setCategory(product.category)

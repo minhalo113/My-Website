@@ -69,14 +69,14 @@ const WishList = () => {
                 "/remove-from-wishlist",
                 {
                     productId: product.productId,
-                    color: product.color,
+                    colorIndex: product.colorIndex ?? 0,
                     size: product.size,
                     type: product.type
                 },
                 {withCredentials: true}
             );
             toast.success(res.data.message);
-            setWishlist(w => w.filter(p => !(p.productId === product.productId && (p.color||'') === (product.color||'') && (p.size||'') === (product.size||'') && (p.type||'') === (product.type||''))));
+            setWishlist(w => w.filter(p => !(p.productId === product.productId && (p.colorIndex ?? 0) === (product.colorIndex ?? 0) && (p.size||'') === (product.size||'') && (p.type||'') === (product.type||''))));
         }catch(error){
             toast.error("Failed to remove product from wishlist");
             console.log(error)

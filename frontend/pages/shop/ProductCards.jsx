@@ -19,14 +19,14 @@ const ProductCards = ({GridList, products}) => {
         discount,
         colors = [],
         sizes = [],
-        colorPrices = {},
+        colorPrices = [],
         colorImages = []
       } = _product;
 
       const defaultColorIndex = 0;
       const defaultColor = colors[defaultColorIndex] || '';
       const defaultSize = sizes[0] || "";
-      const variantPrice = defaultColor && colorPrices[defaultColor] !== undefined ? colorPrices[defaultColor] : price;
+      const variantPrice = colorPrices[defaultColorIndex] !== undefined ? colorPrices[defaultColorIndex] : price;
       const variantImage = (colorImages.length > 0 && defaultColor) ? colorImages[defaultColorIndex] : images;
 
     const product = {
@@ -51,28 +51,29 @@ const ProductCards = ({GridList, products}) => {
 }
 
   const addWishlist = async(e, _product) => {
-    const {_id, images, name, colors = [], sizes = [],} = _product;
-      const defaultColor = colors[0] || "";
-      const defaultSize = sizes[0] || "";
-    try{
-      const res = await api.post("/add-to-wishlist", {productId: _id, color: defaultColor, size: defaultSize}, {withCredentials: true});
-      toast.success(res.data?.message)
-    }catch(error){
-      toast.error(error.response?.data?.message || "Error adding to wishlist")
-    }
+      const {_id, images, name, colors = [], sizes = [],} = _product;
+        const defaultColorIndex = 0;
+        const defaultColor = colors[defaultColorIndex] || "";
+        const defaultSize = sizes[0] || "";
+      try{
+        const res = await api.post("/add-to-wishlist", {productId: _id, color: defaultColor, colorIndex: defaultColorIndex, size: defaultSize}, {withCredentials: true});
+        toast.success(res.data?.message)
+      }catch(error){
+        toast.error(error.response?.data?.message || "Error adding to wishlist")
+      }
   }
 
   return (
     <div className={`shop-product-wrap row justify-content-center ${GridList ? "grid" : "list"}`}>
         {
-          products.map((product, i) => {
-            const hasVariant = product.colors && product.colors.length > 0 && product.colorPrices && Object.keys(product.colorPrices).length > 0;
-            let variantRange = null;
-            if(hasVariant){
-              const prices = product.colors.map(c => product.colorPrices[c]).filter(v => v !== undefined);
-              const min = Math.min(...prices);
-              const max = Math.max(...prices);
-              variantRange = {
+            products.map((product, i) => {
+              const hasVariant = product.colors && product.colors.length > 0 && Array.isArray(product.colorPrices) && product.colorPrices.length > 0;
+              let variantRange = null;
+              if(hasVariant){
+                const prices = product.colors.map((c, idx) => product.colorPrices[idx]).filter(v => v !== undefined);
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                variantRange = {
                 minBase: min.toFixed(2),
                 maxBase: max.toFixed(2),
                 minDiscount: (min - (min * product.discount)/100).toFixed(2),
