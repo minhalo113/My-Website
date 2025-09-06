@@ -6,13 +6,11 @@ export default function extractSkuImagesAndPrices(data) {
     data;
 
   const rawSkus = result?.ae_item_sku_info_dtos?.ae_item_sku_info_d_t_o ?? [];
-
   const skus = toArray(rawSkus).flatMap((sku) => {
-    const priceStr = sku?.sku_price ?? null; // keep sku_price only
+    const priceStr = sku?.sku_price ?? null;  
     const sku_price = priceStr != null ? parseFloat(priceStr) : null;
 
     const props = toArray(sku?.ae_sku_property_dtos?.ae_sku_property_d_t_o);
-
     return props.map((p) => ({
       property_value_definition_name: p?.property_value_definition_name ?? null,
       sku_image: p?.sku_image ?? null,
@@ -26,36 +24,28 @@ export default function extractSkuImagesAndPrices(data) {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const priceMap = new Map();
-  const imageMap = new Map();
-
-  for (const row of skus) {
-    const name = row.property_value_definition_name;
-    if (!name) continue;
-    if (row.sku_price != null) priceMap.set(name, row.sku_price);
-    if (row.sku_image) imageMap.set(name, row.sku_image);
-  }
-
-  const summaryPriceLine = Array.from(priceMap.entries())
-    .map(([name, price]) => `${name}: ${price}`)
+  const summaryPriceLine = skus
+    .map((row) => `${row.property_value_definition_name}: ${row.sku_price}`)
     .join(", ");
 
-  const summaryImageLine = Array.from(imageMap.entries())
-    .map(([name, url]) => `${name}: ${url}`)
+  const summaryImageLine = skus
+    .map((row) => `${row.property_value_definition_name}: ${row.sku_image}`)
     .join(", ");
 
-  const summaryNamesLine = Array.from(priceMap.keys()).join(", ");
+  const summaryNamesLine = skus
+    .map((row) => row.property_value_definition_name)
+    .join(", ");
 
-  const summaryPricePlus15Line = Array.from(priceMap.entries())
-    .map(([name, price]) => `${name}: ${price + 15}`)
+  const summaryPricePlus15Line = skus
+    .map((row) => `${row.property_value_definition_name}: ${row.sku_price != null ? row.sku_price + 15 : row.sku_price}`)
     .join(", ");
 
   return {
-    skus,
-    image_urls,
-    summaryPriceLine,
-    summaryImageLine,
-    summaryNamesLine,
-    summaryPricePlus15Line,
+    skus,                 
+    image_urls,   
+    summaryPriceLine,  
+    summaryImageLine,      
+    summaryNamesLine,        
+    summaryPricePlus15Line,  
   };
 }
