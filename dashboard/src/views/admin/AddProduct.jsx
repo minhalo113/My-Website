@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IoMdImages } from "react-icons/io";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -55,6 +55,16 @@ const AddProduct = () => {
             setImportUrl('')
         }
     }
+
+    const formattedImportResponse = useMemo(() => {
+        if (!importedProduct) return '';
+        const jsonString = JSON.stringify(importedProduct, null, 2)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        const urlRegex = /(https?:\/\/[^\s",]+)/g;
+        return jsonString.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline break-all">${url}</a>`);
+    }, [importedProduct]);
 
     const [cateShow, setCateShow] = useState(false)
     const [category, setCategory] = useState('')
@@ -260,11 +270,9 @@ const AddProduct = () => {
         {importedProduct && (
         <div className="mb-3">
             <label className="text-[#d0d2d6]">Import Response</label>
-            <textarea
-            readOnly
-            rows={28}
-            className="w-full min-h-[560px] md:min-h-[640px] p-3 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] font-mono text-sm leading-relaxed resize-y overflow-auto"
-            value={JSON.stringify(importedProduct, null, 2)}
+            <pre
+                className="w-full min-h-[560px] md:min-h-[640px] p-3 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] font-mono text-sm leading-relaxed whitespace-pre-wrap break-all overflow-auto"
+                dangerouslySetInnerHTML={{ __html: formattedImportResponse }}
             />
         </div>
         )}
