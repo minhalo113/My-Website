@@ -153,20 +153,6 @@ const AddProduct = () => {
         }
     },[successMessage,errorMessage])
 
-    useEffect(() => {
-        if(importedProduct){
-            setState(prev => ({
-                ...prev,
-                name: importedProduct.title || '',
-                description: importedProduct.description || '',
-                price: importedProduct.price || '',
-                colors: importedProduct.colors ? importedProduct.colors.join(', ') : prev.colors
-            }))
-            setImageShow(importedProduct.image ? [{url: importedProduct.image}] : [])
-            setColorImageShow(importedProduct.colorImages ? importedProduct.colorImages.map(url => ({url})) : [])
-        }
-    }, [importedProduct])
-
     const changeImage = (img, index) => {
         if (img) {
             let tempUrl = imageShow

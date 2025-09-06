@@ -6,6 +6,7 @@ import { response } from "express";
 import crypto from 'crypto';
 import axios from 'axios';
 import parseColorPrices from '../../utils/parseColorPrices.js';
+import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
 
 class productController{
     checkDuplicateLink = async(link, excludeId = null) => {
@@ -431,10 +432,8 @@ class productController{
             const accessToken = await refreshAccessToken();
             const productResp = await getProduct({ accessToken, productId, shipTo: 'CA', currency: 'CAD' });
 
-            res.setHeader('Content-Type', 'application/json');
-            res.setHeader('Content-Disposition', 'attachment; filename="aliexpress-product.json"');
-            console.log(JSON.stringify(productResp))
-            return res.status(200).send(JSON.stringify(productResp));
+            const extracted = extractSkuImagesAndPrices(productResp);
+            return res.status(200).json(extracted);
         }catch(error){
             console.error('import_aliexpress_product error:', error);
             return responseReturn(res, 500, {error: 'Failed to import product'});
