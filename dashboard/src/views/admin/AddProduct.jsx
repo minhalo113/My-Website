@@ -271,7 +271,7 @@ const AddProduct = () => {
         <div className="mb-3">
             <label className="text-[#d0d2d6]">Import Response</label>
             <pre
-                className="w-full min-h-[560px] md:min-h-[640px] p-3 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] font-mono text-sm leading-relaxed whitespace-pre-wrap break-all overflow-auto"
+                className="w-full h-[560px] md:h-[640px] p-3 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] font-mono text-sm leading-relaxed whitespace-pre-wrap break-all overflow-auto"
                 dangerouslySetInnerHTML={{ __html: formattedImportResponse }}
             />
         </div>

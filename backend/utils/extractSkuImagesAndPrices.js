@@ -26,19 +26,15 @@ export default function extractSkuImagesAndPrices(data) {
 
   const summaryPriceLine = skus
     .map((row) => `${row.property_value_definition_name}: ${row.sku_price}`)
-    .join(", ");
 
   const summaryImageLine = skus
     .map((row) => `${row.property_value_definition_name}: ${row.sku_image}`)
-    .join(", ");
 
   const summaryNamesLine = skus
     .map((row) => row.property_value_definition_name)
-    .join(", ");
 
   const summaryPricePlus15Line = skus
     .map((row) => `${row.property_value_definition_name}: ${row.sku_price != null ? row.sku_price + 15 : row.sku_price}`)
-    .join(", ");
 
   return {
     skus,                 
