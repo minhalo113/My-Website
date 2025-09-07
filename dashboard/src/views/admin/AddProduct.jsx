@@ -337,6 +337,64 @@ const AddProduct = () => {
             />
         </div>
         )}
+            
+            <div className='flex flex-col w-full gap-1'>
+                <label htmlFor='colorPrices'>Color/Type Option Prices (option:price)</label>
+                <textarea
+                    rows={4}
+                    className='px-4 py-2 h-32 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
+                    onChange={inputHandle}
+                    value={state.colorPrices}
+                    name='colorPrices'
+                    id='colorPrices'
+                    placeholder='20cm With Retail Box: 54.62'
+                />
+            </div>
+
+            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+               {
+               imageShow.map((img,i) => <div key={i} className='h-[180px] relative'>
+                    <label htmlFor={i}>
+                        <img className='w-full h-full rounded-sm' src={img.url} alt="" />
+                    </label>
+                    <input onChange={(e)=> changeImage(e.target.files[0],i) } type="file" id={i} className='hidden'/>
+                    <span onClick={()=>removeImage(i)} className='p-2 z-10 cursor-pointer bg-slate-700 hover:shadow-lg hover:shadow-slate-400/50 text-white absolute top-1 right-1 rounded-full'><IoMdCloseCircle /></span>
+                </div> )
+               }
+               
+                <label className='flex justify-center items-center flex-col h-[180px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor="image">
+                    <span><IoMdImages /></span>
+                    <span>Select Image </span>
+                </label>
+                <input className='hidden' onChange={imageHandle} multiple type="file" id='image' />
+
+           </div>
+
+           <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+              {
+                colorImageShow.map((img, i) => <div key={i} className='h-[120px] relative'>
+                   <label htmlFor={`color-${i}`}>
+                       <img className='w-full h-full rounded-sm' src = {img.url} alt = '' />
+                   </label>
+                   <input onChange={(e)=> changeColorImage(e.target.files[0], i)} type = 'file' id={`color-${i}`} className='hidden'/>
+                   <span onClick={()=> removeColorImage(i)} className='p-2 z-10 cursor-pointer bg-slate-700 hover:shadow-lg hover:shadow-slate-400/50 text-white absolute top-1 right-1 rounded-full'><IoMdCloseCircle /></span>
+               </div>)
+              }
+
+              <label className='flex justify-center items-center flex-col h-[120px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor='colorImage'>
+                   <span><IoMdImages/></span>
+                   <span>Color Image</span>
+              </label>
+              <input className='hidden' onChange={colorImageHandle} multiple type = 'file' id = 'colorImage'/>
+           </div>
+
+            <div className='flex flex-col w-full gap-1 mb-4 text-[#d0d2d6]'>
+                <label htmlFor='video'>Product Videos</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={videoHandle} multiple type='file' id='video' />
+                <div className='mt-2'>
+                    {videoNames.map((n,i) => <p key={i}>{n}</p>)}
+                </div>
+           </div>
         <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
             <label htmlFor='link'>Product Link</label>
             <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.link} type='text' name='link' id='link' placeholder='https://www.aliexpress.com/item/...'/>
@@ -416,65 +474,10 @@ const AddProduct = () => {
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.deliveryTime} type="text" name='deliveryTime' id='deliveryTime' placeholder='e.g. 3-5 days' />
             </div>
 
-            <div className='flex flex-col w-full gap-1'>
-                <label htmlFor='colorPrices'>Color/Type Option Prices (option:price)</label>
-                <textarea
-                    rows={4}
-                    className='px-4 py-2 h-32 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
-                    onChange={inputHandle}
-                    value={state.colorPrices}
-                    name='colorPrices'
-                    id='colorPrices'
-                    placeholder='20cm With Retail Box: 54.62'
-                />
-            </div>
 
         </div>
 
-            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
-               {
-               imageShow.map((img,i) => <div key={i} className='h-[180px] relative'>
-                    <label htmlFor={i}>
-                        <img className='w-full h-full rounded-sm' src={img.url} alt="" />
-                    </label>
-                    <input onChange={(e)=> changeImage(e.target.files[0],i) } type="file" id={i} className='hidden'/>
-                    <span onClick={()=>removeImage(i)} className='p-2 z-10 cursor-pointer bg-slate-700 hover:shadow-lg hover:shadow-slate-400/50 text-white absolute top-1 right-1 rounded-full'><IoMdCloseCircle /></span>
-                </div> )
-               }
-               
-                <label className='flex justify-center items-center flex-col h-[180px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor="image">
-                    <span><IoMdImages /></span>
-                    <span>Select Image </span>
-                </label>
-                <input className='hidden' onChange={imageHandle} multiple type="file" id='image' />
 
-           </div>
-
-           <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
-              {
-                colorImageShow.map((img, i) => <div key={i} className='h-[120px] relative'>
-                   <label htmlFor={`color-${i}`}>
-                       <img className='w-full h-full rounded-sm' src = {img.url} alt = '' />
-                   </label>
-                   <input onChange={(e)=> changeColorImage(e.target.files[0], i)} type = 'file' id={`color-${i}`} className='hidden'/>
-                   <span onClick={()=> removeColorImage(i)} className='p-2 z-10 cursor-pointer bg-slate-700 hover:shadow-lg hover:shadow-slate-400/50 text-white absolute top-1 right-1 rounded-full'><IoMdCloseCircle /></span>
-               </div>)
-              }
-
-              <label className='flex justify-center items-center flex-col h-[120px] cursor-pointer border border-dashed hover:border-red-500 w-full text-[#d0d2d6]' htmlFor='colorImage'>
-                   <span><IoMdImages/></span>
-                   <span>Color Image</span>
-              </label>
-              <input className='hidden' onChange={colorImageHandle} multiple type = 'file' id = 'colorImage'/>
-           </div>
-
-            <div className='flex flex-col w-full gap-1 mb-4 text-[#d0d2d6]'>
-                <label htmlFor='video'>Product Videos</label>
-                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={videoHandle} multiple type='file' id='video' />
-                <div className='mt-2'>
-                    {videoNames.map((n,i) => <p key={i}>{n}</p>)}
-                </div>
-           </div>
 
             <div className='flex'>
             <button disabled={loader ? true : false}  className='bg-red-500 w-[280px] hover:shadow-red-300/50 hover:shadow-lg text-white rounded-md px-7 py-2 mb-3'>
