@@ -17,9 +17,7 @@ const ProductSwiper = ({ images, previewImage, onPreviewEnd }) => {
         if (!previewImage || !swiperRef.current?.swiper) return;
         const swiper = swiperRef.current.swiper;
         swiper.slideTo(0);
-        const timer = setTimeout(() => {
-            onPreviewEnd && onPreviewEnd();
-        }, 10000);
+
         const handleSlideChange = () => {
             if (swiper.activeIndex !== 0) {
                 onPreviewEnd && onPreviewEnd();
@@ -27,7 +25,6 @@ const ProductSwiper = ({ images, previewImage, onPreviewEnd }) => {
         };
         swiper.on('slideChange', handleSlideChange);
         return () => {
-            clearTimeout(timer);
             swiper.off('slideChange', handleSlideChange);
         };
     }, [previewImage, onPreviewEnd]);
