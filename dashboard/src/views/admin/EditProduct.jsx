@@ -214,15 +214,17 @@ const EditProduct = () => {
                 </div>
 <div>
     <form onSubmit={update}>
+                <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
+                <label htmlFor="name">Product Name</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.name} type="text" name='name' id='name' placeholder='Product Name' />
+                <label htmlFor="description" className='text-[#d0d2d6] mt-2'>Description</label>
+                <textarea className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.description} name='description' id='description' placeholder='Description' rows="4"></textarea>
+            </div>
         <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
             <label htmlFor='link'>Product Link</label>
             <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.link} type='text' name='link' id='link' placeholder='https://www.aliexpress.com/item/...'/>
         </div>
         <div className='flex flex-col mb-3 md:flex-row gap-4 w-full text-[#d0d2d6]'>
-            <div className='flex flex-col w-full gap-1'>
-                <label htmlFor="name">Product Name</label>
-                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.name} type="text" name='name' id='name' placeholder='Product Name' />
-            </div>  
 
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor="brand">Product Brand</label>
@@ -290,12 +292,6 @@ const EditProduct = () => {
             </div>
 
         </div>
-
-        <div className='flex flex-col w-full gap-1 mb-5'>
-                <label htmlFor="description" className='text-[#d0d2d6]'>Description</label>
-                <textarea className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.description} name='description' id='description' placeholder='Description' cols="10" rows="4"></textarea> 
-                
-            </div> 
 
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
                 <span>Product Image</span>

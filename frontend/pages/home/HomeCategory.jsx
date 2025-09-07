@@ -1,7 +1,5 @@
-import React from 'react'
-import Banner from './Banner'
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '../../src/api/api.js'
 
 const subTitle = "Discover the Joy of Play!";
@@ -24,6 +22,16 @@ const HomeCategory = () => {
         fetchData();
     }, [])
 
+
+    const uniqueProducts = useMemo(() => {
+        const seen = new Set();
+        return productData.filter(product => {
+            if (seen.has(product.category)) return false;
+            seen.add(product.category);
+            return true;
+        });
+    }, [productData]);
+
   return (
     <div className='category-section style-4 padding-tb'>
         <div className = "container">
@@ -35,8 +43,8 @@ const HomeCategory = () => {
             <div className='section-wrapper' style={{display:"flex", justifyContent: 'center'}}>
                 <div className='row g-4 justify-content-center row-cols-md-3 row-cols-sm-2 row-cols-1'>
                     {
-                        productData.slice(0, 6).map((val, i) => (
-                        <div key={i} className='col' style={{display:"flex", justifyContent: 'center'}}>
+                        uniqueProducts.slice(0, 6).map((val) => (
+                        <div key={val._id} className='col' style={{display:"flex", justifyContent: 'center'}}>
                             <Link href = "/shop" className='category-item'>
                                 <div className='category-inner'>
                                     <div className='category-thumb'>

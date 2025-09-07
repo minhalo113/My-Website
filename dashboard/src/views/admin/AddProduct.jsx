@@ -8,6 +8,7 @@ import { add_product, messageClear, import_aliexpress_product } from '../../stor
 import { PropagateLoader } from 'react-spinners';
 import { overrideStyle, extractColors } from '../../utilis/utils';
 import toast from 'react-hot-toast';
+import JSZip from 'jszip';
 
 const AddProduct = () => {
     const dispatch = useDispatch()
@@ -64,6 +65,57 @@ const AddProduct = () => {
         const urlRegex = /(https?:\/\/[^\s",]+)/g;
         return jsonString.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline break-all">${url}</a>`);
     }, [importedProduct]);
+
+    const parseImportImages = (product) => {
+        const entries = [];
+        if (Array.isArray(product?.summaryImageLine)) {
+            const digits = String(product.summaryImageLine.length).length;
+            product.summaryImageLine.forEach((line, idx) => {
+                const [name, url] = line.split(/:\s+/);
+                if (name && url) {
+                    const numbered = `(${String(idx + 1).padStart(digits, '0')}) ${name}`;
+                    entries.push({ name: numbered, url });
+                }
+            });
+        }
+        if (Array.isArray(product?.image_urls)) {
+            product.image_urls.forEach((url, index) => {
+                entries.push({ name: `images(${index + 1})`, url });
+            });
+        }
+        return entries;
+    };
+
+    const hasImportImages = useMemo(() => {
+        if (!importedProduct) return false;
+        return parseImportImages(importedProduct).length > 0;
+    }, [importedProduct]);
+
+    const sanitizeFileName = (name) => name.replace(/[<>:"/\\|?*]+/g, '');
+
+    const handleDownloadImages = async () => {
+        if (!importedProduct) return;
+        const entries = parseImportImages(importedProduct);
+        const zip = new JSZip();
+
+        await Promise.all(
+            entries.map(async ({ name, url }) => {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const match = url.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+                const ext = match ? match[1] : 'jpg';
+                zip.file(`${sanitizeFileName(name)}.${ext}`, blob);
+            })
+        );
+
+        const content = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.setAttribute('download', 'images.zip');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     const [cateShow, setCateShow] = useState(false)
     const [category, setCategory] = useState('')
@@ -258,6 +310,12 @@ const AddProduct = () => {
 <div>
 <form onSubmit={add}>
         <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
+            <label htmlFor="name">Product Name</label>
+            <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.name} type="text" name='name' id='name' placeholder='Product Name' />
+            <label htmlFor="description" className='text-[#d0d2d6] mt-2'>Description</label>
+            <textarea className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.description} name='description' id='description' placeholder='Description' rows="4"></textarea>
+        </div>
+        <div className='flex flex-col mb-3 w-full text-[#d0d2d6]'>
             <label htmlFor='importUrl'>AliExpress Link</label>
             <div className='flex gap-2'>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] w-full' value={importUrl} onChange={(e)=> setImportUrl(e.target.value)} type='text' id='importUrl' placeholder='https://www.aliexpress.com/item/...'/>
@@ -268,6 +326,11 @@ const AddProduct = () => {
         {importedProduct && (
         <div className="mb-3">
             <label className="text-[#d0d2d6]">Import Response</label>
+            {hasImportImages && (
+                <div className="my-2">
+                    <button type="button" onClick={handleDownloadImages} className="bg-blue-500 text-white px-4 py-2 rounded-md">Download Images</button>
+                </div>
+            )}
             <pre
                 className="w-full h-[560px] md:h-[640px] p-3 bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6] font-mono text-sm leading-relaxed whitespace-pre-wrap break-all overflow-auto"
                 dangerouslySetInnerHTML={{ __html: formattedImportResponse }}
@@ -279,11 +342,6 @@ const AddProduct = () => {
             <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.link} type='text' name='link' id='link' placeholder='https://www.aliexpress.com/item/...'/>
         </div>
         <div className='flex flex-col mb-3 md:flex-row gap-4 w-full text-[#d0d2d6]'>
-            <div className='flex flex-col w-full gap-1'>
-                <label htmlFor="name">Product Name</label>
-                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.name} type="text" name='name' id='name' placeholder='Product Name' />
-            </div>  
-
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor="brand">Product Brand</label>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.brand} type="text" name='brand' id='brand' placeholder='Brand Name' />
@@ -372,12 +430,6 @@ const AddProduct = () => {
             </div>
 
         </div>
-
-        <div className='flex flex-col w-full gap-1 mb-5'>
-                <label htmlFor="description" className='text-[#d0d2d6]'>Description</label>
-                <textarea className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.description} name='description' id='description' placeholder='Description' cols="10" rows="4"></textarea> 
-                
-            </div> 
 
             <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
                {
