@@ -7,9 +7,10 @@ const ItemTitle = "Categories";
 const quickTitle = "Quick Links"; 
 // const blogTitle = "Recent Blogs";
 
-const addressList = [ { iconName: 'icofont-google-map', text: ' Edmonton, Canada.', }, 
-    { iconName: 'icofont-phone', text: ' +780 655 6756', }, 
-    { iconName: 'icofont-envelope', text: ' ahistoryfactaday@gmail.com', }, ]
+const addressList = [
+    { iconName: 'icofont-google-map', text: ' Edmonton, Canada.', },
+    { iconName: 'icofont-envelope', text: ' ahistoryfactaday@gmail.com', },
+]
 
 const socialList = [ 
     { iconName: 'icofont-facebook', siteLink: 'https://www.facebook.com/profile.php?id=61569962775709', className: 'facebook', }, 

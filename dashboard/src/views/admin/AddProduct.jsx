@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { get_category } from '../../store/Reducers/categoryReducer';
 import { add_product, messageClear, import_aliexpress_product } from '../../store/Reducers/productReducer';
 import { PropagateLoader } from 'react-spinners';
-import { overrideStyle } from '../../utilis/utils';
+import { overrideStyle, extractColors } from '../../utilis/utils';
 import toast from 'react-hot-toast';
 
 const AddProduct = () => {
@@ -31,7 +31,6 @@ const AddProduct = () => {
         price: "",
         brand: "Toy Haven",
         stock: "",
-        colors: '',
         sizes: '',
         deliveryTime: '',
         colorPrices: '',
@@ -143,7 +142,6 @@ const AddProduct = () => {
                 price: "",
                 brand: "Toy Haven",
                 stock: "",
-                colors: '',
                 sizes: '',
                 deliveryTime: '',
                 colorPrices: '',
@@ -208,7 +206,7 @@ const AddProduct = () => {
     const add = (e) => {
         e.preventDefault()
 
-        const colorArr = state.colors.split(',').map(c => c.trim()).filter(Boolean)
+        const colorArr = extractColors(state.colorPrices)
 
         if(colorArr.length !== colorImages.length){
             toast.error('Number of colors and color images must match')
@@ -225,7 +223,7 @@ const AddProduct = () => {
         formData.append('colorPrices', state.colorPrices)
         formData.append('brand',state.brand)
         formData.append('link', state.link)
-        formData.append('colors', state.colors)
+        formData.append('colors', colorArr.join(','))
         formData.append('sizes', state.sizes)
         formData.append('shopName','Toy Haven') 
         formData.append('category',category)
@@ -290,19 +288,6 @@ const AddProduct = () => {
                 <label htmlFor="brand">Product Brand</label>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.brand} type="text" name='brand' id='brand' placeholder='Brand Name' />
             </div>   
-
-            <div className='flex flex-col w-full gap-1'>
-                <label htmlFor='colors'>Color/Type Options (comma separated)</label>
-                <textarea
-                    rows={4}
-                    className='px-4 py-2 h-32 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
-                    onChange={inputHandle}
-                    value={state.colors}
-                    name='colors'
-                    id='colors'
-                    placeholder='e.g. green plush, blue plush'
-                />
-            </div>
 
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor='sizes'>Sizes (comma seperated)</label>
@@ -374,7 +359,7 @@ const AddProduct = () => {
             </div>
 
             <div className='flex flex-col w-full gap-1'>
-                <label htmlFor='colorPrices'>Color Prices (color:price)</label>
+                <label htmlFor='colorPrices'>Color/Type Option Prices (option:price)</label>
                 <textarea
                     rows={4}
                     className='px-4 py-2 h-32 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]'
@@ -382,7 +367,7 @@ const AddProduct = () => {
                     value={state.colorPrices}
                     name='colorPrices'
                     id='colorPrices'
-                    placeholder='red:20, blue:25'
+                    placeholder='20cm With Retail Box: 54.62'
                 />
             </div>
 

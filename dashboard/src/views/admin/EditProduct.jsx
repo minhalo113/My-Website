@@ -6,7 +6,7 @@ import {get_category} from "../../store/Reducers/categoryReducer"
 import { get_product,update_product,messageClear,product_image_update } from '../../store/Reducers/productReducer';
 import toast from 'react-hot-toast';
 import { PropagateLoader } from 'react-spinners';
-import { overrideStyle } from './../../utilis/utils';
+import { overrideStyle, extractColors } from './../../utilis/utils';
 
 const EditProduct = () => {
     const {productId} = useParams()
@@ -34,7 +34,6 @@ const EditProduct = () => {
         price: "",
         brand: "",
         stock: "",
-        colors: '',
         sizes: '',
         deliveryTime: '',
         colorPrices: '',
@@ -151,7 +150,6 @@ const EditProduct = () => {
             price: product.price,
             brand: product.brand,
             stock: product.stock,
-            colors: Array.isArray(product.colors) ? product.colors.join(',') : '',
             sizes: Array.isArray(product.sizes) ? product.sizes.join(',') : '',
             deliveryTime: product.deliveryTime || '',
             colorPrices: Array.isArray(product.colorPrices) ? product.colors.map((c,i) => `${c}:${product.colorPrices[i] ?? ''}`).join(',') : '',
@@ -183,7 +181,7 @@ const EditProduct = () => {
     const update = (e) =>{
         e.preventDefault()
 
-        const colorArr = state.colors.split(',').map(c => c.trim()).filter(Boolean)
+        const colorArr = extractColors(state.colorPrices)
         if(colorArr.length !== (colorImageShow ? colorImageShow.length : 0)){
             toast.error('Number of colors and color images must match')
             return
@@ -196,7 +194,7 @@ const EditProduct = () => {
             price: state.price,
             brand: state.brand,
             stock: state.stock,
-            colors: state.colors,
+            colors: colorArr.join(','),
             sizes: state.sizes,
             deliveryTime: state.deliveryTime,
             colorPrices: state.colorPrices,
@@ -230,11 +228,6 @@ const EditProduct = () => {
                 <label htmlFor="brand">Product Brand</label>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.brand} type="text" name='brand' id='brand' placeholder='Brand Name' />
             </div>   
-
-            <div className='flex flex-col w-full gap-1'>
-                <label htmlFor= "colors">Color/Type Options (comma separated)</label>
-                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colors} type="text" name='colors' id='colors' placeholder='e.g. green plush, blue plush' />
-            </div>
 
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor="sizes">Sizes (comma seperated)</label>
@@ -292,8 +285,8 @@ const EditProduct = () => {
             </div>
 
             <div className='flex flex-col w-full gap-1'>
-                <label htmlFor='colorPrices'>Color Prices (color:price)</label>
-                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colorPrices} type='text' name='colorPrices' id='colorPrices' placeholder='red:20, blue:25'/>
+                <label htmlFor='colorPrices'>Color/Type Option Prices (option:price)</label>
+                <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colorPrices} type='text' name='colorPrices' id='colorPrices' placeholder='20cm With Retail Box: 54.62'/>
             </div>
 
         </div>

@@ -40,7 +40,6 @@ const Contact = () => {
     }
 
     const contactList = [ 
-        { imgUrl: "/images/icon/02.png", imgAlt: "contact icon", title: "Phone number",desc: "+780 655 6756", },
         { imgUrl: "/images/icon/03.png", imgAlt: "contact icon", title: "Send email", desc: "ahistoryfactaday@gmail.com", }
         ];
 
