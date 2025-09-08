@@ -14,19 +14,27 @@ const ProductSwiper = ({ images, previewImage, onPreviewEnd }) => {
     }, []);
 
     useEffect(() => {
-        if (!previewImage || !swiperRef.current?.swiper) return;
-        const swiper = swiperRef.current.swiper;
-        swiper.slideTo(0);
+        const swiper = swiperRef.current?.swiper;
+        if (!swiper) return;
 
-        const handleSlideChange = () => {
-            if (swiper.activeIndex !== 0) {
-                onPreviewEnd && onPreviewEnd();
-            }
-        };
-        swiper.on('slideChange', handleSlideChange);
-        return () => {
-            swiper.off('slideChange', handleSlideChange);
-        };
+        if (previewImage) {
+            swiper.autoplay?.stop();
+            swiper.slideTo(0);
+
+            const handleSlideChange = () => {
+                if (swiper.activeIndex !== 0) {
+                    onPreviewEnd && onPreviewEnd();
+                }
+            };
+
+            swiper.on('slideChange', handleSlideChange);
+
+            return () => {
+                swiper.off('slideChange', handleSlideChange);
+            };
+        } else {
+            swiper.autoplay?.start();
+        }
     }, [previewImage, onPreviewEnd]);
 
     const displayImages = previewImage ? [previewImage, ...images] : images;
