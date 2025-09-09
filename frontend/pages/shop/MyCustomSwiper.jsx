@@ -3,7 +3,7 @@ import { Autoplay, Navigation } from "swiper/modules";
 import { useRef, useEffect } from "react";
 import PropTypes from 'prop-types';
 
-const ProductSwiper = ({ images, previewImage, onPreviewEnd }) => {
+const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
     const swiperRef = useRef(null);
 
     useEffect(() => {
@@ -38,6 +38,9 @@ const ProductSwiper = ({ images, previewImage, onPreviewEnd }) => {
     }, [previewImage, onPreviewEnd]);
 
     const displayImages = previewImage ? [previewImage, ...images] : images;
+    const autoplayConfig = videos.length > 0 ? false : {
+        delay: 2000, disableOnInteraction: false,
+    }
 
     return (
         <div className="swiper-container pro-single-top">
@@ -58,9 +61,22 @@ const ProductSwiper = ({ images, previewImage, onPreviewEnd }) => {
                 className="mySwiper"
             >
                 {displayImages.map((image, index) => (
-                    <SwiperSlide key={index}> 
+                    <SwiperSlide key={`img-${index}`}>
                         <div className="single-thumb flex items-center justify-center min-h-[400px] py-4">
-                        <img src={image} alt={`Product Image ${index + 1}`} className="max-h-[500px] object-contain" />
+                            <img
+                                src={image}
+                                alt={`Product Image ${index + 1}`}
+                                className="max-h-[500px] object-contain"
+                            />
+                        </div>
+                    </SwiperSlide>
+                ))}
+                {videos.map((video, index) => (
+                    <SwiperSlide key={`vid-${index}`}>
+                        <div className="single-thumb flex items-center justify-center min-h-[400px] py-4">
+                            <video controls className="max-h-[500px] object-contain">
+                                <source src={video} type="video/mp4" />
+                            </video>
                         </div>
                     </SwiperSlide>
                 ))}
@@ -78,12 +94,13 @@ const ProductSwiper = ({ images, previewImage, onPreviewEnd }) => {
 
 ProductSwiper.propTypes = {
     images: PropTypes.arrayOf(PropTypes.string).isRequired,
+    videos: PropTypes.arrayOf(PropTypes.string),
     previewImage: PropTypes.string,
     onPreviewEnd: PropTypes.func,
 };
 
 ProductSwiper.defaultProps = {
-    images: [],
+    images: [], videos: [],
     previewImage: null,
     onPreviewEnd: undefined,
 };

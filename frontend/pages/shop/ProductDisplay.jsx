@@ -11,7 +11,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({item, onSelectImage}) => {
-    const {name, _id, price, discount, seller, reviewCount, images, videos = [], stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = []} = item || {}
+    const {name, _id, price, discount, seller, reviewCount, images, stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = []} = item || {}
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -101,16 +101,6 @@ const ProductDisplay = ({item, onSelectImage}) => {
             <h6>{seller}</h6>
             {/* <p style={{ whiteSpace: 'pre-line' }}>{description}</p> */}
         </div>
-
-        {videos.length > 0 && (
-            <div className="my-4">
-                {videos.map((v,i) => (
-                    <video key={i} controls className="w-full mb-2">
-                        <source src={v} type="video/mp4" />
-                    </video>
-                ))}
-            </div>
-        )}
 
         <div>
             <form onSubmit={handleSubmit}>

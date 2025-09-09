@@ -62,7 +62,7 @@ const SingleProduct = () => {
                                         <div className='product-thumb relative'>
                                             <DiscountBadge discount={productData.discount} />
                                             <div className='swiper-container pro-single-top'>
-                                                <ProductSwiper images={productData.images} previewImage={previewImage} onPreviewEnd={() => setPreviewImage(null)}/>
+                                                                                                <ProductSwiper images={productData.images} videos={productData.videos} previewImage={previewImage} onPreviewEnd={() => setPreviewImage(null)}/>
                                             </div>
                                         </div>
                                     </div>
