@@ -7,16 +7,12 @@ import Paginations from './Paginations';
 import Search from './Search';
 import ShopCategory from './ShopCategory';
 import PopularPost from './PopularPost';
-import Tags from './Tags';
 import api from '../../src/api/api';
-
-const showResults = "Showing 01 - 12 of 139 Results"
 
 const Shop = () => {
   // const [Data, setData] = useState([]);
   const [products, setproducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
-  const [totalProducts, setTotalProducts] = useState(0);
   const [categories, setAllCategories] = useState([]);
   // useEffect(() => {
   //     fetch("/data/products.json")
@@ -33,7 +29,6 @@ const Shop = () => {
             const allCategories = await api.get('/customers-category-get', {withCredentials: true})
 
             setproducts(allProducts.data.products);
-            setTotalProducts(allProducts.data.totalProduct);
             setAllProducts(allProducts.data.products);
             setAllCategories(allCategories.data.categorys);
         }catch(err){
@@ -54,6 +49,9 @@ const Shop = () => {
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const startResult = indexOfFirstProduct + 1;
+  const endResult = Math.min(indexOfLastProduct, products.length);
 
   const paginate = (pageNumber) =>{
     setCurrentPage(pageNumber)
@@ -85,7 +83,7 @@ const Shop = () => {
               <div className='col-lg-8 col-12'>
                 <article>
                   <div className='shop-title d-flex flex-warp justify-content-between'>
-                    <p>{`Showing 01 - 12 of ${totalProducts} Results`}</p>
+                    <p>{`Showing ${String(startResult).padStart(2, '0')} - ${String(endResult).padStart(2, '0')} of ${products.length} Results`}</p>
                     <div className={`product-view-mode ${GridList ? "gridActive" : "listActive"}`}>
                       <a className='grid' onClick = {() => setGridList(!GridList)}>
                         <i className='icofont-ghost'></i>

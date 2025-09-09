@@ -59,15 +59,18 @@ const ProductDisplay = ({item, onSelectImage}) => {
         const variantPrice = colorPrices[selectedColorIndex] !== undefined ? colorPrices[selectedColorIndex] : price;
         const variantImage = (colorImages.length > 0 && selectedColor) ? colorImages[selectedColorIndex] : images;
 
+        const variantId = selectedColorIndex;
+
         const product = {
             id: _id,
-            cartId: `${_id}-${selectedColorIndex}-${selectedSize || ''}`,
+            cartId: `${_id}-${variantId}-${selectedSize || ''}`,
             img: variantImage,
             name: name,
             price: variantPrice,
             discount: discount,
             color: selectedColor,
             colorIndex: selectedColorIndex,
+            variantId,
             size: selectedSize,
         }
 

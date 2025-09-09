@@ -9,6 +9,7 @@ productRouter.get('/products-get', authMiddleware, productController.products_ge
 productRouter.get('/product-get/:productId', authMiddleware, productController.product_get)
 productRouter.post('/product-update', authMiddleware, productController.product_update)
 productRouter.post('/product-image-update', authMiddleware, productController.product_image_update)
+productRouter.post('/product-visibility', authMiddleware, productController.product_visibility)
 productRouter.delete('/product/:id', authMiddleware, productController.deleteProduct)
 productRouter.post('/product-import-aliexpress', authMiddleware, productController.import_aliexpress_product)
 

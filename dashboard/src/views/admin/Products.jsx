@@ -2,9 +2,9 @@ import React, {useEffect, useState } from 'react';
 import Search from '../components/Search';
 import { Link } from 'react-router-dom';
 import Pagination from '../Pagination'; 
-import { FaEdit, FaEye, FaTrash } from 'react-icons/fa'; 
+import { FaEdit, FaEye, FaEyeSlash, FaTrash } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { get_products, deleteProduct } from '../../store/Reducers/productReducer';
+import { get_products, deleteProduct, product_visibility } from '../../store/Reducers/productReducer';
 
 const Products = () => {
 
@@ -34,6 +34,10 @@ const Products = () => {
         if (window.confirm("Are you sure to delete this product?")) {
             dispatch(deleteProduct(id))
         }
+    }
+
+    const handleVisibility = (id, isHidden) => {
+        dispatch(product_visibility({productId: id, isHidden}))
     }
 
     return (
@@ -86,6 +90,12 @@ const Products = () => {
                             </td>
                             <td scope='row' className='py-1 px-4 font-medium whitespace-nowrap'>
                             <div className='flex justify-start items-center gap-4'>
+                                {
+                                    d.isHidden ?
+                                    <button className='p-[6px] bg-green-500 rounded hover:shadow-lg hover:shadow-green-500/50' onClick={() => handleVisibility(d._id, false)}><FaEye/></button>
+                                    :
+                                    <button className='p-[6px] bg-blue-500 rounded hover:shadow-lg hover:shadow-blue-500/50' onClick={() => handleVisibility(d._id, true)}><FaEyeSlash/></button>
+                                }
                                 <Link to={`/admin/dashboard/edit-product/${d._id}`} className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50'> <FaEdit/> </Link>
                                 <Link className='p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50' onClick={() => handleDelete(d._id)}> <FaTrash/> </Link>
                             </div>

@@ -40,14 +40,16 @@ const WishList = () => {
 
       const handleSubmit = (e, _product) => {
         const {productId, images, name, price, color = '', size = '', colorIndex} = _product;
+        const variantId = colorIndex ?? 0;
         const product = {
             id: productId,
-            cartId: `${productId}-${colorIndex ?? color}-${size || ''}`,
+            cartId: `${productId}-${variantId}-${size || ''}`,
             img: images,
             name: name,
             price: price,
             color,
             colorIndex,
+            variantId,
             size
         }
     

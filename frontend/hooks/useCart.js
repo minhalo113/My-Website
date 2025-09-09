@@ -16,10 +16,14 @@ export default function useCart() {
         try{
             const raw = localStorage.getItem(STORAGE_KEY)
             const parsed = raw ? JSON.parse(raw) : [];
-            return parsed.map(item => ({
-                ...item,
-                cartId: item.cartId || `${item.id}-${item.colorIndex ?? (item.color || '')}-${item.size || ''}-${item.type || ''}`
-            }))
+            return parsed.map(item => {
+                const variantId = item.variantId ?? item.colorIndex ?? 0;
+                return {
+                    ...item,
+                    variantId,
+                    cartId: item.cartId || `${item.id}-${variantId}-${item.size || ''}-${item.type || ''}`
+                };
+            })
         }catch{
             return [];
         }

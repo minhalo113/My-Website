@@ -440,6 +440,24 @@ class productController{
         }
     }
 
+    product_visibility = async(req, res) => {
+        const {productId, isHidden} = req.body;
+        try{
+            const product = await productModel.findByIdAndUpdate(
+                productId,
+                {isHidden},
+                {new: true}
+            );
+            if (!product){
+                return responseReturn(res, 404, {error: "Product not found"});
+            }
+            const message = isHidden ? "Product hidden successfully" : "Product unhidden successfully"
+            return responseReturn(res, 200, {message, produt});
+        }catch(error){
+            return responseReturn(res, 500, {error: error.message});
+        }
+    }
+
     deleteProduct = async(req, res) => {
         try{
             const productId = req.params.id;

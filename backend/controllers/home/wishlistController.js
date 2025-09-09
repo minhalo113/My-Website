@@ -14,7 +14,7 @@ class wishlistController {
             }
 
             const product = await productModel.findById(productId);
-            if(!product){
+            if(!product || product.isHidden){
                 return responseReturn(res, 404, {message: "Product Not Found"})
             }
 

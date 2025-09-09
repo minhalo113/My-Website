@@ -81,6 +81,18 @@ export const product_image_update = createAsyncThunk(
     }
 )
 
+export const product_visibility = createAsyncThunk(
+    'product/product_visibility',
+    async({productId, isHidden}, {rejectWithValue, fulfillWithValue})=>{
+        try{
+            const {data} = await api.post('/product-visibility', {productId, isHidden}, {withCredentials: true})
+            return fulfillWithValue(data)
+        }catch(error){
+            return rejectWithValue(error.response.data)
+        }
+    }
+)
+
 export const deleteProduct = createAsyncThunk(
     'product/deleteProduct',
     async(id, {rejectWithValue}) => {
@@ -188,7 +200,18 @@ export const productReducer = createSlice({
             state.loader = false;
             state.errorMessage = payload.errorMessage;
         })
-
+        .addCase(product_visibility.fulfilled, (state, {payload}) => {
+            state.loader = false;
+            state.successMessage = payload.message;
+            state.products = state.products.map(p => p._id === payload.product._id ? payload.product : p);
+        })
+        .addCase(product_visibility.pending, (state) => {
+            state.loader = true;
+        })
+        .addCase(product_visibility.rejected, (state, {payload}) => {
+            state.loader = false;
+            state.errorMessage = payload.error;
+        })
         .addCase(deleteProduct.pending, (state, {payload}) => {
             state.loader = true
         })

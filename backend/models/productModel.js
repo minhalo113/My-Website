@@ -88,7 +88,11 @@ const productSchema = new Schema({
         }
     ],
     averageRating: {type: Number, default: 0},
-    reviewCount: {type: Number, default: 0}
+    reviewCount: {type: Number, default: 0},
+    isHidden: {
+        type: Boolean,
+        default: false
+    }
 }, {timestamps: true})
 
 productSchema.index({

@@ -65,27 +65,29 @@ class homeControllers{
             if (searchValue) {
                 const products = await productModel.find({
                     $text: {$search: searchValue},
-                    sellerId: id
+                    isHidden: false
                 }).skip(skipPage).limit(parPage).sort({createAt: -1})
 
                 const totalProduct = await productModel.find({
                     $text: {$search: searchValue},
-                    sellerId: id
+                    isHidden: false
                 }).countDocuments()
 
 
                 responseReturn(res, 200, {products, totalProduct})
             }else if(parPage && page){
                 const products = await productModel.find({
+                    isHidden: false
                 }).skip(skipPage).limit(parPage).sort({createdAt: -1})
 
                 const totalProduct = await productModel.find({
+                    isHidden: false
                 }).countDocuments()
                 
                 responseReturn(res, 200, {products, totalProduct})
             }else{
-                const products = await productModel.find({ }).sort({createdAt: -1})
-                const totalProduct = await productModel.find({ }).countDocuments()
+                const products = await productModel.find({ isHidden: false }).sort({createdAt: -1})
+                const totalProduct = await productModel.find({ isHidden: false }).countDocuments()
 
                 responseReturn(res, 200, {products, totalProduct})
             }
@@ -97,7 +99,10 @@ class homeControllers{
     product_get = async(req, res) => {
         const {productId} = req.params;
         try{
-            const product = await productModel.findById(productId)
+            const product = await productModel.findOne({_id: productId, isHidden: false})
+            if(!product){
+                return responseReturn(res, 404, {error: 'Product not found'})
+            }
             responseReturn(res, 200, {product})
         }catch(error){
             responseReturn(res, 500, {error: error.message})
