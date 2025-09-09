@@ -10,7 +10,11 @@ import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js'
 
 class productController{
     checkDuplicateLink = async(link, excludeId = null) => {
-        const query = {link: String(link).trim()};
+        const trimmed = String(link).trim();
+        if(!trimmed) {
+            return null;
+        }
+        const query = {link: trimmed};
         if(excludeId) {
             query._id = { $ne: excludeId};
         }
@@ -39,7 +43,7 @@ class productController{
             })
 
             try {
-                if(link){
+                if(link && String(link).trim()){
                     const duplicate = await this.checkDuplicateLink(link);
 
                     if(duplicate){
@@ -180,7 +184,7 @@ class productController{
                 return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
             }
 
-            if(link){
+            if(link && String(link).trim()){
                 const duplicate = await this.checkDuplicateLink(link, productId);
                 if(duplicate){
                     return responseReturn(res, 409, {error: 'Product link already exists'})
@@ -500,7 +504,7 @@ class productController{
 
             await productModel.findByIdAndDelete(productId)
 
-            return responseReturn(res, 200, "Product deleted successfully")
+            return responseReturn(res, 200, {message: "Product deleted successfully"})
         }catch(error){
             return responseReturn(res, 500, {error: "Internal Server Error"})
         }

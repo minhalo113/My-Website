@@ -100,7 +100,6 @@ export const deleteProduct = createAsyncThunk(
             const response = await api.delete(`/product/${id}`, {withCredentials: true})
             return response.data
         }catch(error){
-            console.log(error)
             return rejectWithValue(error.response.data.message)
         }
     }
