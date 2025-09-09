@@ -49,10 +49,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                 spaceBetween={30}
                 slidesPerView={1}
                 loop={true} 
-                autoplay={{
-                    delay: 2000,
-                    disableOnInteraction: false
-                }}
+                autoplay={autoplayConfig}
                 navigation={{
                     prevEl: ".pro-single-next", 
                     nextEl: ".pro-single-prev"  
