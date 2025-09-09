@@ -28,11 +28,11 @@ class orderController {
             const orders = await customerOrder.find(query).skip(skipPage).limit(parPage).sort({createdAt: -1});
             const totalOrder = await customerOrder.countDocuments(query);
 
-            responseReturn(res, 200, {orders, totalOrder})
+            return responseReturn(res, 200, {orders, totalOrder})
 
         }catch(error){
             console.log('get seller Order error: ' + error.message);
-            responseReturn(res, 500, {message: "Internal server error"});
+            return responseReturn(res, 500, {message: "Internal server error"});
         }
     }
 
@@ -41,7 +41,7 @@ class orderController {
 
         try{
             const order = await customerOrder.findById(orderId)
-            responseReturn(res, 200, {order})
+            return responseReturn(res, 200, {order})
         }catch(error){
             console.log('get seller details error' + error.message)
         }
@@ -55,10 +55,10 @@ class orderController {
             await customerOrder.findByIdAndUpdate(orderId,{
                 delivery_status: delivery_status
             })
-            responseReturn(res, 200, {message: 'order delivery status updated successfully'})
+            return responseReturn(res, 200, {message: 'order delivery status updated successfully'})
         }catch(error){
             console.log("get seller Order error" + error.message)
-            responseReturn(res, 500, {message: 'internal server error'})
+            return responseReturn(res, 500, {message: 'internal server error'})
         }
     }
 
@@ -70,10 +70,10 @@ class orderController {
             await customerOrder.findByIdAndUpdate(orderId, {
                 order_status: order_status
             })
-            responseReturn(res, 200, {message: 'order status updated successfully'})
+            return responseReturn(res, 200, {message: 'order status updated successfully'})
         }catch(error){
             console.log('get seller order error' + error.message)
-            responseReturn(res, 500, {message: 'internal server error'})
+            return responseReturn(res, 500, {message: 'internal server error'})
         }
     }
 
@@ -85,10 +85,10 @@ class orderController {
             await customerOrder.findByIdAndUpdate(orderId, {
                 payment_status: payment_status
             })
-            responseReturn(res, 200, {message: 'payment status updated successfully'})
+            return responseReturn(res, 200, {message: 'payment status updated successfully'})
         }catch(error){
             console.log('get payment order error' + error.message)
-            responseReturn(res, 500, {message: 'internal server error'})
+            return responseReturn(res, 500, {message: 'internal server error'})
         }
     }
 
@@ -112,10 +112,10 @@ class orderController {
 
         try {
             const orders = await customerOrder.find({customerId: id}).sort({createdAt: -1});
-            responseReturn(res, 200, {orders: orders})
+            return responseReturn(res, 200, {orders: orders})
         }catch(err){
             console.error(err);
-            responseReturn(res, 500, {message: 'internal server error'})
+            return responseReturn(res, 500, {message: 'internal server error'})
         }
     }
 }

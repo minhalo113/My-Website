@@ -38,21 +38,21 @@ class homeControllers{
                 const totalCategory = await categoryModel.find({
                     $text: { $search: searchValue }
                 }).countDocuments()
-                responseReturn(res, 200, {categorys, totalCategory})
+                return responseReturn(res, 200, {categorys, totalCategory})
             }else if (searchValue === '' && page && parPage){
                 const categorys = await categoryModel.find({ }).skip(skipPage).limit(parPage).sort({createdAt: -1})
                 const totalCategory = await categoryModel.find({ }).countDocuments()
-                responseReturn(res, 200, {categorys, totalCategory})
+                return responseReturn(res, 200, {categorys, totalCategory})
             }
             else{
                 const categorys = await categoryModel.find({ }).sort({createdAt: -1})
                 const totalCategory = await categoryModel.find({ }).countDocuments()
-                responseReturn(res, 200, {categorys, totalCategory})
+                return responseReturn(res, 200, {categorys, totalCategory})
             }
             
         }catch(error){
             console.log(error)
-            responseReturn(res, 500, {error: "Internal Server Error"})
+            return responseReturn(res, 500, {error: "Internal Server Error"})
         }
     }
 
@@ -74,7 +74,7 @@ class homeControllers{
                 }).countDocuments()
 
 
-                responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products, totalProduct})
             }else if(parPage && page){
                 const products = await productModel.find({
                     isHidden: false
@@ -84,15 +84,15 @@ class homeControllers{
                     isHidden: false
                 }).countDocuments()
                 
-                responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products, totalProduct})
             }else{
                 const products = await productModel.find({ isHidden: false }).sort({createdAt: -1})
                 const totalProduct = await productModel.find({ isHidden: false }).countDocuments()
 
-                responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products, totalProduct})
             }
         }catch(error){
-            responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 500, {error: error.message})
         }
     }
 
@@ -103,9 +103,9 @@ class homeControllers{
             if(!product){
                 return responseReturn(res, 404, {error: 'Product not found'})
             }
-            responseReturn(res, 200, {product})
+            return responseReturn(res, 200, {product})
         }catch(error){
-            responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 500, {error: error.message})
         }
     }
 

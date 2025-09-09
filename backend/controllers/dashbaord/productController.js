@@ -43,7 +43,7 @@ class productController{
                     const duplicate = await this.checkDuplicateLink(link);
 
                     if(duplicate){
-                        responseReturn(res, 409, {error: 'Product link already exists'})
+                        return responseReturn(res, 409, {error: 'Product link already exists'})
                     }
                 }
 
@@ -107,10 +107,10 @@ class productController{
                     colorImages: allColorImageUrl,
                     colorPrices: parseColorPrices(colorPrices)
                 })
-                responseReturn(res, 201, {message: "Product Added Successfully"})
+                return responseReturn(res, 201, {message: "Product Added Successfully"})
             }catch(error){
                 console.log(error.message)
-                responseReturn(res, 500, {error: error.message})
+                return responseReturn(res, 500, {error: error.message})
             }
         })
     }
@@ -132,7 +132,7 @@ class productController{
                 }).countDocuments()
 
 
-                responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products, totalProduct})
             }else if(parPage && page){
                 const products = await productModel.find({
                 }).skip(skipPage).limit(parPage).sort({createdAt: -1})
@@ -140,15 +140,15 @@ class productController{
                 const totalProduct = await productModel.find({
                 }).countDocuments()
                 
-                responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products, totalProduct})
             }else{
                 const products = await productModel.find({ }).sort({createdAt: -1})
                 const totalProduct = await productModel.find({ }).countDocuments()
 
-                responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products, totalProduct})
             }
         }catch(error){
-            responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 500, {error: error.message})
         }
     }
 
@@ -156,9 +156,9 @@ class productController{
         const {productId} = req.params;
         try{
             const product = await productModel.findById(productId)
-            responseReturn(res, 200, {product})
+            return responseReturn(res, 200, {product})
         }catch(error){
-            responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 500, {error: error.message})
         }
     }
 
@@ -195,9 +195,9 @@ class productController{
                 productId, slug
             })
             const updatedProduct = await productModel.findById(productId)
-            responseReturn(res, 200, {product: updatedProduct, message: "Product Updated Successfully"})
+            return responseReturn(res, 200, {product: updatedProduct, message: "Product Updated Successfully"})
         }catch(error){
-            responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 500, {error: error.message})
         }
     }
 
@@ -452,7 +452,7 @@ class productController{
                 return responseReturn(res, 404, {error: "Product not found"});
             }
             const message = isHidden ? "Product hidden successfully" : "Product unhidden successfully"
-            return responseReturn(res, 200, {message, produt});
+            return responseReturn(res, 200, {message, product});
         }catch(error){
             return responseReturn(res, 500, {error: error.message});
         }
@@ -500,9 +500,9 @@ class productController{
 
             await productModel.findByIdAndDelete(productId)
 
-            responseReturn(res, 200, "Product deleted successfully")
+            return responseReturn(res, 200, "Product deleted successfully")
         }catch(error){
-            responseReturn(res, 500, {error: "Internal Server Error"})
+            return responseReturn(res, 500, {error: "Internal Server Error"})
         }
     }
 }

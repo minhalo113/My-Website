@@ -8,7 +8,7 @@ class categoryController{
         const form = formidable()
         form.parse(req, async(err, fields, files) => {
             if(err){
-                responseReturn(res, 404, {error: "something went wrong"})
+                return responseReturn(res, 404, {error: "something went wrong"})
             }else{
                 let name = fields.name[0]
                 let image = files.image[0]
@@ -29,13 +29,13 @@ class categoryController{
                         const category = await categoryModel.create({
                             name, slug, image: result.url
                         })
-                        responseReturn(res, 201, {category, message: 'Category Added Successfully'})
+                        return responseReturn(res, 201, {category, message: 'Category Added Successfully'})
                     }else{
-                        responseReturn(res, 404, {error: 'Image Upload File'})
+                        return responseReturn(res, 404, {error: 'Image Upload File'})
                     }
 
                 }catch(error){
-                    responseReturn(res, 500, {error: 'Internal Server Error'})
+                    return responseReturn(res, 500, {error: 'Internal Server Error'})
                 }
             }
         })
@@ -58,21 +58,21 @@ class categoryController{
                 const totalCategory = await categoryModel.find({
                     $text: { $search: searchValue }
                 }).countDocuments()
-                responseReturn(res, 200, {categorys, totalCategory})
+                return responseReturn(res, 200, {categorys, totalCategory})
             }else if (searchValue === '' && page && parPage){
                 const categorys = await categoryModel.find({ }).skip(skipPage).limit(parPage).sort({createdAt: -1})
                 const totalCategory = await categoryModel.find({ }).countDocuments()
-                responseReturn(res, 200, {categorys, totalCategory})
+                return responseReturn(res, 200, {categorys, totalCategory})
             }
             else{
                 const categorys = await categoryModel.find({ }).sort({createdAt: -1})
                 const totalCategory = await categoryModel.find({ }).countDocuments()
-                responseReturn(res, 200, {categorys, totalCategory})
+                return responseReturn(res, 200, {categorys, totalCategory})
             }
             
         }catch(error){
             console.log(error)
-            responseReturn(res, 500, {error: "Internal Server Error"})
+            return responseReturn(res, 500, {error: "Internal Server Error"})
         }
     }
 
@@ -80,7 +80,7 @@ class categoryController{
         const form = formidable()
         form.parse(req, async(err, fields, files) => {
             if(err) {
-                responseReturn(res, 404, {error: "something went wrong"})
+                return responseReturn(res, 404, {error: "something went wrong"})
             }else{
                 let name = fields.name[0]
 
@@ -114,10 +114,10 @@ class categoryController{
                     }
 
                     const category = await categoryModel.findByIdAndUpdate(id, updateData, {new: true});
-                    responseReturn(res, 200, {category, message: 'Category Updated Successfully'})
+                    return responseReturn(res, 200, {category, message: 'Category Updated Successfully'})
                 }catch(error){
                     console.log(error)
-                    responseReturn(res, 500, {error: "Internal Server Error"})
+                    return responseReturn(res, 500, {error: "Internal Server Error"})
                 }
             }
         })
@@ -155,9 +155,9 @@ class categoryController{
             }
 
             await categoryModel.findByIdAndDelete(categoryId);
-            responseReturn(res, 200, "Category deleted successfully")
+            return responseReturn(res, 200, "Category deleted successfully")
         }catch(error){
-            responseReturn(res, 500, {error: "Internal Server Error"})
+            return responseReturn(res, 500, {error: "Internal Server Error"})
         }
     }
 }

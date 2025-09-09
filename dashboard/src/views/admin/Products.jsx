@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import Pagination from '../Pagination'; 
 import { FaEdit, FaEye, FaEyeSlash, FaTrash } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { get_products, deleteProduct, product_visibility } from '../../store/Reducers/productReducer';
+import { get_products, deleteProduct, product_visibility, messageClear } from '../../store/Reducers/productReducer';
+import toast from 'react-hot-toast';
 
 const Products = () => {
 
     const dispatch = useDispatch()
-    const {products, totalProduct} = useSelector(state => state.product)
+    const {products, totalProduct, successMessage, errorMessage} = useSelector(state => state.product)
     console.log(products)
  
     const [currentPage, setCurrentPage] = useState(1)
@@ -39,6 +40,17 @@ const Products = () => {
     const handleVisibility = (id, isHidden) => {
         dispatch(product_visibility({productId: id, isHidden}))
     }
+
+    useEffect(() => {
+        if (successMessage) {
+            toast.success(successMessage)
+            dispatch(messageClear())
+        }
+        if(errorMessage){
+            toast.error(errorMessage)
+            dispatch(messageClear())
+        }
+    }, [successMessage,errorMessage])
 
     return (
         <div className='px-2 lg:px-7 pt-5'>

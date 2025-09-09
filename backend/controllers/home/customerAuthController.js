@@ -80,12 +80,12 @@ class customerAuthController {
                         maxAge: ONE_WEEK,
                     })
 
-                    responseReturn(res, 201, {message: "User Login Success", token})
+                    return responseReturn(res, 201, {message: "User Login Success", token})
                 }else{
-                    responseReturn(res, 404, {error: "Password Wrong"})
+                    return responseReturn(res, 404, {error: "Password Wrong"})
                 }
             }else{
-                responseReturn(res, 404, {error: "Email Not Found"})
+                return responseReturn(res, 404, {error: "Email Not Found"})
             }         
         }catch(error){
             console.log(error.message)
@@ -102,7 +102,7 @@ class customerAuthController {
             expires: new Date(0),
         });
 
-        responseReturn(res, 200, { message: 'Logout Success' });
+        return responseReturn(res, 200, { message: 'Logout Success' });
     };
 
     customer_get_info = async(req, res) => {
