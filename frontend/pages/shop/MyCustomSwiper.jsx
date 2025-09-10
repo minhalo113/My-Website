@@ -33,9 +33,11 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                 swiper.off('slideChange', handleSlideChange);
             };
         } else {
-            swiper.autoplay?.start();
+            if (videos.length === 0) {
+                swiper.autoplay?.start();
+            }
         }
-    }, [previewImage, onPreviewEnd]);
+    }, [previewImage, onPreviewEnd, videos]);
 
     const displayImages = previewImage ? [previewImage, ...images] : images;
     const autoplayConfig = videos.length > 0 ? false : {
