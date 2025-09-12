@@ -97,10 +97,10 @@ class customerAuthController {
             ...BASE_COOKIE_PROPS,
             expires: new Date(0),       
         });
-        res.cookie('accessToken', '', {
-            ...BASE_COOKIE_PROPS,
-            expires: new Date(0),
-        });
+        // res.cookie('accessToken', '', {
+        //     ...BASE_COOKIE_PROPS,
+        //     expires: new Date(0),
+        // });
 
         return responseReturn(res, 200, { message: 'Logout Success' });
     };
