@@ -436,6 +436,7 @@ class productController{
             const accessToken = await refreshAccessToken();
             const productResp = await getProduct({ accessToken, productId, shipTo: 'CA', currency: 'CAD' });
 
+            console.log(productResp)
             const extracted = extractSkuImagesAndPrices(productResp);
             return res.status(200).json(extracted);
         }catch(error){
