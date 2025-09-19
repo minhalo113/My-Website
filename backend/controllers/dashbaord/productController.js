@@ -7,6 +7,109 @@ import crypto from 'crypto';
 import axios from 'axios';
 import parseColorPrices from '../../utils/parseColorPrices.js';
 import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
+import {
+    extractPublicId,
+    fingerprintFromUploadResult,
+    hammingDistance,
+    fingerprintSimilarity
+} from '../../utils/imageFingerprint.js';
+
+const SEARCHABLE_PRODUCTS_QUERY = {
+    $or: [
+        { imageFingerprints: { $exists: true, $ne: [] } },
+        { colorImageFingerprints: { $exists: true, $ne: [] } },
+    ],
+};
+
+const SEARCHABLE_PRODUCTS_FIELDS =
+    'name brand category images imageFingerprints colorImages colorImageFingerprints colors shopName sellerId slug price discount stock link';
+
+const normalizeUploadList = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) {
+        return value.filter(Boolean);
+    }
+    return value ? [value] : [];
+};
+
+const fetchProductsForImageSearch = async () => {
+    return await productModel
+        .find(SEARCHABLE_PRODUCTS_QUERY)
+        .select(SEARCHABLE_PRODUCTS_FIELDS)
+        .lean();
+};
+
+const collectMatchesForFingerprint = ({ products = [], queryFingerprint, threshold }) => {
+    if (!queryFingerprint) {
+        return [];
+    }
+
+    const matches = [];
+
+    const pushMatch = ({ product, imageUrl, distance, matchType, fingerprint, colorLabel, index }) => {
+        if (!Number.isFinite(distance) || distance > threshold) return;
+        matches.push({
+            productId: product._id.toString(),
+            productName: product.name,
+            brand: product.brand,
+            category: product.category,
+            imageUrl,
+            matchType,
+            distance,
+            similarity: fingerprintSimilarity(distance),
+            fingerprint,
+            colorLabel: colorLabel || null,
+            index,
+            shopName: product.shopName,
+            sellerId: product.sellerId?.toString?.() || product.sellerId,
+            slug: product.slug,
+            price: product.price,
+            discount: product.discount,
+            stock: product.stock,
+            link: product.link,
+        });
+    };
+
+    for (const product of products) {
+        const images = Array.isArray(product.images) ? product.images : [];
+        const imageFingerprints = Array.isArray(product.imageFingerprints) ? product.imageFingerprints : [];
+        const colorImages = Array.isArray(product.colorImages) ? product.colorImages : [];
+        const colorFingerprints = Array.isArray(product.colorImageFingerprints) ? product.colorImageFingerprints : [];
+        const colorLabels = Array.isArray(product.colors) ? product.colors : [];
+
+        images.forEach((imgUrl, idx) => {
+            const fingerprint = imageFingerprints[idx];
+            if (!fingerprint || !imgUrl) return;
+            const distance = hammingDistance(queryFingerprint, fingerprint);
+            pushMatch({
+                product,
+                imageUrl: imgUrl,
+                distance,
+                matchType: 'primary',
+                fingerprint,
+                index: idx,
+            });
+        });
+
+        colorImages.forEach((imgUrl, idx) => {
+            const fingerprint = colorFingerprints[idx];
+            if (!fingerprint || !imgUrl) return;
+            const distance = hammingDistance(queryFingerprint, fingerprint);
+            pushMatch({
+                product,
+                imageUrl: imgUrl,
+                distance,
+                matchType: 'color',
+                fingerprint,
+                colorLabel: colorLabels[idx],
+                index: idx,
+            });
+        });
+    }
+
+    matches.sort((a, b) => a.distance - b.distance);
+    return matches;
+};
 
 class productController{
     checkDuplicateLink = async(link, excludeId = null) => {
@@ -58,7 +161,9 @@ class productController{
                 }
 
                 let allImageUrl = [];
+                let imageFingerprints = [];
                 let allColorImageUrl = [];
+                let colorImageFingerprints = [];
 
                 let allVideoUrl = [];
                 if (!Array.isArray(images)){
@@ -73,14 +178,18 @@ class productController{
                 }
 
                 for (let i = 0; i < images.length; ++i){
-                    const result = await cloudinary.uploader.upload(images[i].filepath, {folder: 'products'});
-                    allImageUrl.push(result.url)
+                    const result = await cloudinary.uploader.upload(images[i].filepath, {folder: 'products', phash: true});
+                    const url = result.secure_url || result.url;
+                    allImageUrl.push(url);
+                    imageFingerprints.push(fingerprintFromUploadResult(result) || '');
                 }
 
                 if (colorImages){
                     for (let i = 0; i < colorImages.length; ++i){
-                        const result = await cloudinary.uploader.upload(colorImages[i].filepath, {folder: 'products/colors'});
-                        allColorImageUrl.push(result.url)
+                        const result = await cloudinary.uploader.upload(colorImages[i].filepath, {folder: 'products/colors', phash: true});
+                        const url = result.secure_url || result.url;
+                        allColorImageUrl.push(url);
+                        colorImageFingerprints.push(fingerprintFromUploadResult(result) || '');
                     }
                 }
 
@@ -103,12 +212,14 @@ class productController{
                     discount: parseInt(discount),
                     deliveryTime: deliveryTime ? String(deliveryTime).trim() : '',
                     images: allImageUrl,
+                    imageFingerprints,
                     videos: allVideoUrl,
                     brand: String(brand).trim(),
                     link: link ? String(link).trim() : '',
                     colors: colorArr,
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
+                    colorImageFingerprints,
                     colorPrices: parseColorPrices(colorPrices)
                 })
                 return responseReturn(res, 201, {message: "Product Added Successfully"})
@@ -207,7 +318,7 @@ class productController{
 
     product_image_update = async (req, res) => {
         const form = formidable({
-            multiples: true,          // v3 option
+            multiples: true,          
             keepExtensions: true,
             allowEmptyFiles: false,
         });
@@ -216,28 +327,202 @@ class productController{
             if (err) return responseReturn(res, 400, { error: err.message });
 
             const { oldImage = '', productId, imageType, action } = fields;
-            // In v3, fields are arrays when multiple values; normalize to string
-            const _oldImage  = Array.isArray(oldImage)  ? oldImage[0]  : oldImage;
+            const _oldImage = Array.isArray(oldImage) ? oldImage[0] : oldImage;
             const _productId = Array.isArray(productId) ? productId[0] : productId;
             const _imageType = Array.isArray(imageType) ? imageType[0] : imageType;
-            const _action    = Array.isArray(action)    ? action[0]    : action;
+            const _action = Array.isArray(action) ? action[0] : action;
 
-            // file list (always array in v3)
-            const newImageFiles = Array.isArray(files.newImage) ? files.newImage : (files.newImage ? [files.newImage] : []);
+            const newImageFiles = Array.isArray(files.newImage)
+                ? files.newImage
+                : files.newImage
+                    ? [files.newImage]
+                    : [];
 
-            // quick helper: extract Cloudinary public_id from a URL
-            const getPublicId = (url) => {
-            const parts = url.split('/');
-            const uploadIndex = parts.indexOf('upload');
-            if (uploadIndex !== -1) {
-                const publicIdParts = parts.slice(uploadIndex + 2);
-                const publicIdWithExt = publicIdParts.join('/');
-                return publicIdWithExt.replace(/\.[^/.]+$/, '');
-            }
-            return url.split('/').pop().split('.')[0];
+            const normalizeArray = (value) => (Array.isArray(value) ? [...value] : []);
+            const removeByValue = (imagesArr = [], fingerprintsArr = [], target) => {
+                const images = normalizeArray(imagesArr);
+                const fingerprints = normalizeArray(fingerprintsArr);
+                const updatedImages = [];
+                const updatedFingerprints = [];
+                let removed = false;
+                images.forEach((img, idx) => {
+                    if (!removed && target && img === target) {
+                        removed = true;
+                        return;
+                    }
+                    updatedImages.push(img);
+                    const fp = fingerprints[idx] || '';
+                    updatedFingerprints.push(fp);
+                });
+                return { images: updatedImages, fingerprints: updatedFingerprints };
+            };
+            const upsertValue = (imagesArr = [], fingerprintsArr = [], oldValue, newValue, fingerprintValue) => {
+                const images = normalizeArray(imagesArr);
+                const fingerprints = normalizeArray(fingerprintsArr);
+                const fingerprint = fingerprintValue || '';
+                if (oldValue) {
+                    const index = images.findIndex((img) => img === oldValue);
+                    if (index > -1) {
+                        images[index] = newValue;
+                        if (fingerprints.length > index) {
+                            fingerprints[index] = fingerprint;
+                        } else {
+                            while (fingerprints.length < index) fingerprints.push('');
+                            fingerprints[index] = fingerprint;
+                        }
+                        return { images, fingerprints };
+                    }
+                }
+                images.push(newValue);
+                fingerprints.push(fingerprint);
+                return { images, fingerprints };
             };
 
             try {
+                cloudinary.config({
+                    cloud_name: process.env.cloud_name,
+                    api_key: process.env.api_key,
+                    api_secret: process.env.api_secret,
+                    secure: true,
+                });
+
+                const product = await productModel.findById(_productId);
+                if (!product) {
+                    return responseReturn(res, 404, { error: 'Product not found' });
+                }
+
+                if (_action === 'delete') {
+                    let updateField = {};
+                    if (_imageType === 'color') {
+                        const { images, fingerprints } = removeByValue(product.colorImages, product.colorImageFingerprints, _oldImage);
+                        updateField = { colorImages: images, colorImageFingerprints: fingerprints };
+                        const publicId = extractPublicId(_oldImage);
+                        if (publicId) {
+                            await cloudinary.uploader.destroy(publicId);
+                        }
+                    } else if (_imageType === 'video') {
+                        const videos = normalizeArray(product.videos).filter((v) => v !== _oldImage);
+                        updateField = { videos };
+                        const publicId = extractPublicId(_oldImage);
+                        if (publicId) {
+                            await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+                        }
+                    } else {
+                        const { images, fingerprints } = removeByValue(product.images, product.imageFingerprints, _oldImage);
+                        updateField = { images, imageFingerprints: fingerprints };
+                        const publicId = extractPublicId(_oldImage);
+                        if (publicId) {
+                            await cloudinary.uploader.destroy(publicId);
+                        }
+                    }
+
+                    const updatedProduct = await productModel.findByIdAndUpdate(_productId, updateField, { new: true });
+                    const msg = _imageType === 'video'
+                        ? 'Product Video Deleted Successfully'
+                        : 'Product Image Deleted Successfully';
+                    return responseReturn(res, 200, { product: updatedProduct, message: msg });
+                }
+
+                if (!newImageFiles.length) {
+                    return responseReturn(res, 400, { error: 'No file uploaded' });
+                }
+
+                const isVideo = _imageType === 'video';
+                const folder =
+                    _imageType === 'color' ? 'products/colors' :
+                    isVideo ? 'products/videos' :
+                    'products';
+
+                const uploadOpts = isVideo
+                    ? { folder, resource_type: 'video' }
+                    : { folder, phash: true };
+
+                const file = newImageFiles[0];
+                const localPath = file.filepath || file.path;
+                const result = await cloudinary.uploader.upload(localPath, uploadOpts);
+
+                if (!result) {
+                    return responseReturn(res, 404, { error: 'Image Upload Failed' });
+                }
+
+                const url = result.secure_url || result.url;
+                let updateField = {};
+
+                if (_imageType === 'color') {
+                    const { images, fingerprints } = upsertValue(
+                        product.colorImages,
+                        product.colorImageFingerprints,
+                        _oldImage,
+                        url,
+                        fingerprintFromUploadResult(result)
+                    );
+                    updateField = { colorImages: images, colorImageFingerprints: fingerprints };
+                } else if (isVideo) {
+                    const videos = normalizeArray(product.videos);
+                    if (_oldImage) {
+                        const index = videos.findIndex((v) => v === _oldImage);
+                        if (index > -1) {
+                            videos[index] = url;
+                        } else {
+                            videos.push(url);
+                        }
+                    } else {
+                        videos.push(url);
+                    }
+                    updateField = { videos };
+                } else {
+                    const { images, fingerprints } = upsertValue(
+                        product.images,
+                        product.imageFingerprints,
+                        _oldImage,
+                        url,
+                        fingerprintFromUploadResult(result)
+                    );
+                    updateField = { images, imageFingerprints: fingerprints };
+                }
+
+                await productModel.findByIdAndUpdate(_productId, updateField);
+                const productAfterUpdate = await productModel.findById(_productId);
+                const message = isVideo
+                    ? (_oldImage ? 'Product Video Updated Successfully' : 'Product Video Added Successfully')
+                    : (_oldImage ? 'Product Image Updated Successfully' : 'Product Image Added Successfully');
+
+                return responseReturn(res, 200, { product: productAfterUpdate, message });
+            } catch (error) {
+                console.error('product_image_update error:', error);
+                return responseReturn(res, 500, { error: 'Image Upload Failed' });
+            }
+        });
+    };
+
+    product_image_search = async (req, res) => {
+        const form = formidable({
+            multiples: false,
+            keepExtensions: true,
+            allowEmptyFiles: false,
+        });
+
+        form.parse(req, async (err, fields, files) => {
+            if (err) return responseReturn(res, 400, { error: err.message });
+
+            const thresholdField = Array.isArray(fields.threshold) ? fields.threshold[0] : fields.threshold;
+            const parsedThreshold = thresholdField ? parseInt(thresholdField, 10) : 10;
+            const threshold = Number.isNaN(parsedThreshold)
+                ? 10
+                : Math.max(0, Math.min(64, parsedThreshold));
+
+            const potentialFiles = [files.image, files.file, files.queryImage];
+            const fallbackFiles = Object.values(files || {});
+            const combined = potentialFiles.concat(fallbackFiles);
+            const fileEntry = combined.find((item) => item) || null;
+            const fileList = Array.isArray(fileEntry) ? fileEntry : fileEntry ? [fileEntry] : [];
+
+            if (!fileList.length) {
+                return responseReturn(res, 400, { error: 'Image file is required' });
+            }
+
+            const file = fileList[0];
+
             cloudinary.config({
                 cloud_name: process.env.cloud_name,
                 api_key: process.env.api_key,
@@ -245,96 +530,188 @@ class productController{
                 secure: true,
             });
 
-            // --- DELETE path ---
-            if (_action === 'delete') {
-                let updateField = {};
+            let temporaryPublicId = null;
+            try {
+                const uploadResult = await cloudinary.uploader.upload(file.filepath || file.path, {
+                    folder: 'products/search-temp',
+                    phash: true,
+                });
+                temporaryPublicId = uploadResult?.public_id || null;
+                const queryFingerprint = fingerprintFromUploadResult(uploadResult);
 
-                if (_imageType === 'color') {
-                let { colorImages } = await productModel.findById(_productId).lean();
-                colorImages = (colorImages || []).filter((img) => img !== _oldImage);
-                updateField = { colorImages };
-
-                // delete from Cloudinary (image)
-                const publicId = getPublicId(_oldImage);
-                await cloudinary.uploader.destroy(publicId);
-                } else if (_imageType === 'video') {
-                let { videos } = await productModel.findById(_productId).lean();
-                videos = (videos || []).filter((v) => v !== _oldImage);
-                updateField = { videos };
-
-                // delete from Cloudinary (video)
-                const publicId = getPublicId(_oldImage);
-                await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
-                } else {
-                // default: images
-                let { images } = await productModel.findById(_productId).lean();
-                images = (images || []).filter((img) => img !== _oldImage);
-                updateField = { images };
-
-                const publicId = getPublicId(_oldImage);
-                await cloudinary.uploader.destroy(publicId);
+                if (!queryFingerprint) {
+                    return responseReturn(res, 422, { error: 'Unable to generate fingerprint for the provided image' });
                 }
-
-                const product = await productModel.findByIdAndUpdate(_productId, updateField, { new: true });
-                const msg = _imageType === 'video' ? 'Product Video Deleted Successfully' : 'Product Image Deleted Successfully';
-                return responseReturn(res, 200, { product, message: msg });
-            }
-
-            // --- ADD/UPDATE path ---
-            // require a file when not deleting
-            if (!newImageFiles.length) {
-                return responseReturn(res, 400, { error: 'No file uploaded' });
-            }
-
-            const folder =
-                _imageType === 'color' ? 'products/colors' :
-                _imageType === 'video' ? 'products/videos' :
-                'products';
-
-            const uploadOpts =
-                _imageType === 'video'
-                ? { folder, resource_type: 'video' }
-                : { folder };
-
-            // take the first file (your UI uploads one at a time here)
-            const file = newImageFiles[0];
-            const localPath = file.filepath || file.path;
-
-            const result = await cloudinary.uploader.upload(localPath, uploadOpts);
-            if (!result) return responseReturn(res, 404, { error: 'Image Upload Failed' });
-
-            const url = result.secure_url || result.url;
-
-            if (_imageType === 'color') {
-                let { colorImages = [] } = await productModel.findById(_productId).lean();
-                const index = colorImages.findIndex((img) => img === _oldImage);
-                if (index > -1) colorImages[index] = url; else colorImages.push(url);
-                await productModel.findByIdAndUpdate(_productId, { colorImages });
-            } else if (_imageType === 'video') {
-                let { videos = [] } = await productModel.findById(_productId).lean();
-                const index = videos.findIndex((v) => v === _oldImage);
-                if (index > -1) videos[index] = url; else videos.push(url);
-                await productModel.findByIdAndUpdate(_productId, { videos });
-            } else {
-                let { images = [] } = await productModel.findById(_productId).lean();
-                const index = images.findIndex((img) => img === _oldImage);
-                if (index > -1) images[index] = url; else images.push(url);
-                await productModel.findByIdAndUpdate(_productId, { images });
-            }
-
-            const product = await productModel.findById(_productId);
-            const message =
-                _imageType === 'video'
-                ? (_oldImage ? 'Product Video Updated Successfully' : 'Product Video Added Successfully')
-                : (_oldImage ? 'Product Image Updated Successfully' : 'Product Image Added Successfully');
-
-            return responseReturn(res, 200, { product, message });
+                
+                const products = await fetchProductsForImageSearch();
+                const matches = collectMatchesForFingerprint({
+                    products,
+                    queryFingerprint,
+                    threshold,
+                });
+                
+                return responseReturn(res, 200, {
+                    matches: matches.slice(0, 20),
+                    totalMatches: matches.length,
+                    queryFingerprint,
+                    threshold,
+                });
             } catch (error) {
-            console.error('product_image_update error:', error);
-            return responseReturn(res, 500, { error: 'Image Upload Failed' });
+                console.error('product_image_search error:', error);
+                return responseReturn(res, 500, { error: 'Failed to search similar product images' });
+            } finally {
+                if (temporaryPublicId) {
+                    try {
+                        await cloudinary.uploader.destroy(temporaryPublicId);
+                    } catch (cleanupError) {
+                        console.error('Failed to clean up temporary search image:', cleanupError.message);
+                    }
+                }
             }
         });
-    };
+    }
+
+    product_image_batch_check = async (req, res) => {
+        const form = formidable({
+            multiples: true,
+            keepExtensions: true,
+            allowEmptyFiles: false,
+        });
+
+        form.parse(req, async (err, fields, files) => {
+            if (err) return responseReturn(res, 400, { error: err.message });
+
+            const thresholdField = Array.isArray(fields.threshold) ? fields.threshold[0] : fields.threshold;
+            const parsedThreshold = thresholdField ? parseInt(thresholdField, 10) : 10;
+            const threshold = Number.isNaN(parsedThreshold)
+                ? 10
+                : Math.max(0, Math.min(64, parsedThreshold));
+
+            const primaryUploads = normalizeUploadList(files.images);
+            const colorUploads = normalizeUploadList(files.colorImages);
+            const queries = [];
+
+            primaryUploads.forEach((file, index) => {
+                if (file) {
+                    queries.push({ file, sourceType: 'primary', sourceIndex: index });
+                }
+            });
+
+            colorUploads.forEach((file, index) => {
+                if (file) {
+                    queries.push({ file, sourceType: 'color', sourceIndex: index });
+                }
+            });
+
+            if (!queries.length) {
+                return responseReturn(res, 400, { error: 'At least one image is required for duplicate checking' });
+            }
+
+            const temporaryUploads = [];
+            const processedQueries = [];
+
+            const resolveFilename = (file) =>
+                file?.originalFilename || file?.newFilename || file?.filepath?.split?.('/')?.pop() || 'image';
+
+            cloudinary.config({
+                cloud_name: process.env.cloud_name,
+                api_key: process.env.api_key,
+                api_secret: process.env.api_secret,
+                secure: true,
+            });
+
+            try {
+                for (const query of queries) {
+                    const { file } = query;
+                    const responseData = {
+                        ...query,
+                        filename: resolveFilename(file),
+                        queryFingerprint: null,
+                        error: null,
+                    };
+
+                    try {
+                        const uploadResult = await cloudinary.uploader.upload(file.filepath || file.path, {
+                            folder: 'products/search-temp',
+                            phash: true,
+                        });
+                        if (uploadResult?.public_id) {
+                            temporaryUploads.push(uploadResult.public_id);
+                        }
+                        const queryFingerprint = fingerprintFromUploadResult(uploadResult);
+                        if (!queryFingerprint) {
+                            responseData.error = 'Unable to generate fingerprint for this image';
+                        } else {
+                            responseData.queryFingerprint = queryFingerprint;
+                        }
+                    } catch (uploadError) {
+                        responseData.error = uploadError?.message || 'Failed to analyze image';
+                    }
+
+                    processedQueries.push(responseData);
+                }
+
+                const successfulQueries = processedQueries.filter((item) => item.queryFingerprint).length;
+                let products = [];
+
+                if (successfulQueries) {
+                    products = await fetchProductsForImageSearch();
+                }
+
+                const results = processedQueries.map((item) => {
+                    if (!item.queryFingerprint) {
+                        return {
+                            sourceType: item.sourceType,
+                            sourceIndex: item.sourceIndex,
+                            filename: item.filename,
+                            matches: [],
+                            totalMatches: 0,
+                            queryFingerprint: null,
+                            error: item.error || 'Unable to analyze this image',
+                        };
+                    }
+
+                    const matches = collectMatchesForFingerprint({
+                        products,
+                        queryFingerprint: item.queryFingerprint,
+                        threshold,
+                    });
+
+                    return {
+                        sourceType: item.sourceType,
+                        sourceIndex: item.sourceIndex,
+                        filename: item.filename,
+                        matches: matches.slice(0, 15),
+                        totalMatches: matches.length,
+                        queryFingerprint: item.queryFingerprint,
+                        error: null,
+                    };
+                });
+
+                const totalMatches = results.reduce((sum, entry) => sum + (entry.matches?.length || 0), 0);
+
+                return responseReturn(res, 200, {
+                    threshold,
+                    totalQueries: queries.length,
+                    successfulQueries,
+                    results,
+                    totalMatches,
+                });
+            }catch(error){
+                console.error('product_image_batch_check error:', error);
+                return responseReturn(res, 500, { error: 'Failed to check images for duplicates' });
+            } finally {
+                for (const publicId of temporaryUploads) {
+                    if (!publicId) continue;
+                    try {
+                        await cloudinary.uploader.destroy(publicId);
+                    } catch (cleanupError) {
+                        console.error('Failed to clean up temporary search image:', cleanupError.message);
+                    }
+                }
+            }
+        });
+    }    
 
     import_aliexpress_product = async(req, res) => {
         const { url, productId: bodyProductId } = req.body;
@@ -443,6 +820,7 @@ class productController{
             console.error('import_aliexpress_product error:', error);
             return responseReturn(res, 500, {error: 'Failed to import product'});
         }
+
     }
 
     product_visibility = async(req, res) => {

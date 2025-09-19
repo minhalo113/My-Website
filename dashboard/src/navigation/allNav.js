@@ -1,6 +1,6 @@
 import { AiOutlineDashboard, AiOutlineShoppingCart } from "react-icons/ai";
 import { BiCategory } from "react-icons/bi";
-import { FaTags } from "react-icons/fa";
+import { FaTags, FaSearch } from "react-icons/fa";
 import { MdPayment } from "react-icons/md";
 import { FaCodePullRequest } from "react-icons/fa6";
 import { IoIosChatbubbles } from "react-icons/io";
@@ -34,6 +34,13 @@ export const allNav = [
         icon : <MdViewList />,
         role : 'admin',
         path: '/admin/dashboard/products'
+    },
+    {
+        id : 4,
+        title : 'Image Search',
+        icon : <FaSearch />,
+        role : 'admin',
+        path: '/admin/dashboard/product-image-search'
     },
     // {
     //     id : 4,

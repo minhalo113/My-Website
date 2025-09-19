@@ -4,7 +4,7 @@ import { IoMdImages } from "react-icons/io";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useDispatch, useSelector } from 'react-redux';
 import { get_category } from '../../store/Reducers/categoryReducer';
-import { add_product, messageClear, import_aliexpress_product } from '../../store/Reducers/productReducer';
+import { add_product, messageClear, import_aliexpress_product, check_product_images_for_duplicates } from '../../store/Reducers/productReducer';
 import { PropagateLoader } from 'react-spinners';
 import { overrideStyle, extractColors } from '../../utilis/utils';
 import toast from 'react-hot-toast';
@@ -14,8 +14,18 @@ const AddProduct = () => {
     const dispatch = useDispatch()
     const { categorys } = useSelector(state => state.category)
 
-    const { loader,successMessage,errorMessage, importedProduct } = useSelector(state => state.product)
-
+    const {
+        loader,
+        successMessage,
+        errorMessage,
+        importedProduct,
+        preflightCheckLoading,
+        preflightCheckResults,
+        preflightCheckMessage,
+        preflightCheckThreshold,
+        preflightCheckMatches,
+    } = useSelector(state => state.product)
+    
     useEffect(() => {
         dispatch(get_category({
             searchValue: '',
@@ -117,6 +127,17 @@ const AddProduct = () => {
         document.body.removeChild(link);
     };
 
+    const handleImageDuplicateCheck = () => {
+        if (images.length === 0 && colorImages.length === 0) {
+            toast.error('Please upload images before running the duplicate check');
+            return;
+        }
+        const formData = new FormData();
+        images.forEach((file) => formData.append('images', file));
+        colorImages.forEach((file) => formData.append('colorImages', file));
+        dispatch(check_product_images_for_duplicates(formData));
+    };
+    
     const [cateShow, setCateShow] = useState(false)
     const [category, setCategory] = useState('')
     const [allCategory, setAllCategory] = useState([])
@@ -370,7 +391,7 @@ const AddProduct = () => {
 
            </div>
 
-           <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
+            <div className='grid lg:grid-cols-4 grid-cols-1 md:grid-cols-3 sm:grid-cols-2 sm:gap-4 md:gap-4 gap-3 w-full text-[#d0d2d6] mb-4'>
               {
                 colorImageShow.map((img, i) => <div key={i} className='h-[120px] relative'>
                    <label htmlFor={`color-${i}`}>
@@ -386,7 +407,122 @@ const AddProduct = () => {
                    <span>Color Image</span>
               </label>
               <input className='hidden' onChange={colorImageHandle} multiple type = 'file' id = 'colorImage'/>
-           </div>
+          </div>
+
+            <div className='mb-6 text-[#d0d2d6]'>
+                <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-3'>
+                    <button
+                        type='button'
+                        onClick={handleImageDuplicateCheck}
+                        disabled={preflightCheckLoading || (images.length === 0 && colorImages.length === 0)}
+                        className={`px-4 py-2 rounded-md w-full lg:w-auto transition-colors ${
+                            preflightCheckLoading || (images.length === 0 && colorImages.length === 0)
+                                ? 'bg-slate-600 cursor-not-allowed text-slate-300'
+                                : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                        }`}
+                    >
+                        {preflightCheckLoading ? 'Checking images...' : 'Check for Existing Images'}
+                    </button>
+                    {preflightCheckMessage && (
+                        <p className='text-sm text-slate-200/90'>{preflightCheckMessage}</p>
+                    )}
+                    {preflightCheckMatches > 0 && (
+                        <span className='text-xs text-indigo-200 bg-indigo-600/30 border border-indigo-400/40 px-2 py-1 rounded-full'>
+                            Threshold {preflightCheckThreshold}
+                        </span>
+                    )}
+                </div>
+
+                {preflightCheckResults.length > 0 && (
+                    <div className='space-y-4'>
+                        {preflightCheckResults.map((result, idx) => {
+                            const previewUrl =
+                                result.sourceType === 'color'
+                                    ? colorImageShow[result.sourceIndex]?.url
+                                    : imageShow[result.sourceIndex]?.url;
+                            const key = `${result.sourceType}-${result.sourceIndex}-${idx}`;
+                            return (
+                                <div key={key} className='bg-[#5a51df] border border-slate-600/70 rounded-md p-4 shadow-sm'>
+                                    <div className='flex flex-col lg:flex-row gap-4'>
+                                        <div className='flex flex-col items-start gap-2 w-full lg:w-44'>
+                                            <span className='text-xs uppercase tracking-wide bg-indigo-600/40 border border-indigo-400/50 px-2 py-1 rounded-full'>
+                                                {result.sourceType === 'color' ? 'Variant Image' : 'Primary Image'}
+                                            </span>
+                                            <p className='text-sm text-slate-200/80 break-all'>{result.filename}</p>
+                                            {previewUrl && (
+                                                <img
+                                                    src={previewUrl}
+                                                    alt={result.filename || 'preview'}
+                                                    className='w-full lg:w-40 h-40 object-cover rounded-md border border-slate-500/70'
+                                                />
+                                            )}
+                                        </div>
+                                        <div className='flex-1 space-y-3'>
+                                            {result.error && (
+                                                <p className='text-sm text-red-200 bg-red-500/20 border border-red-400/40 px-3 py-2 rounded-md'>
+                                                    {result.error}
+                                                </p>
+                                            )}
+                                            {!result.error && result.matches.length === 0 && (
+                                                <p className='text-sm text-slate-200/80 bg-slate-700/40 border border-slate-500/60 px-3 py-2 rounded-md'>
+                                                    No similar product images were found for this upload.
+                                                </p>
+                                            )}
+                                            {result.matches.length > 0 && (
+                                                <div className='space-y-3'>
+                                                    <p className='text-sm text-slate-100'>
+                                                        Potential matches ({result.matches.length}{result.totalMatches > result.matches.length ? ` of ${result.totalMatches}` : ''})
+                                                    </p>
+                                                    <ul className='space-y-3 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar'>
+                                                        {result.matches.map((match, matchIdx) => (
+                                                            <li
+                                                                key={`${match.productId}-${matchIdx}`}
+                                                                className='bg-[#4c44c7] border border-indigo-400/40 rounded-md p-3 text-sm text-slate-100'
+                                                            >
+                                                                <div className='flex gap-3'>
+                                                                    <img
+                                                                        src={match.imageUrl}
+                                                                        alt={match.productName}
+                                                                        className='w-20 h-20 object-cover rounded-md border border-slate-600/70 flex-shrink-0'
+                                                                    />
+                                                                    <div className='flex-1 space-y-1'>
+                                                                        <p className='font-semibold text-white leading-snug'>
+                                                                            {match.productName}
+                                                                        </p>
+                                                                        <p className='text-xs text-slate-200/80'>
+                                                                            Similarity: {match.similarity}% (distance {match.distance})
+                                                                        </p>
+                                                                        {match.category && (
+                                                                            <p className='text-xs text-slate-200/70'>Category: {match.category}</p>
+                                                                        )}
+                                                                        {match.shopName && (
+                                                                            <p className='text-xs text-slate-200/70'>Shop: {match.shopName}</p>
+                                                                        )}
+                                                                        {match.link && (
+                                                                            <a
+                                                                                href={match.link}
+                                                                                target='_blank'
+                                                                                rel='noopener noreferrer'
+                                                                                className='inline-flex text-xs text-indigo-200 underline hover:text-indigo-100'
+                                                                            >
+                                                                                View source link
+                                                                            </a>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
 
             <div className='flex flex-col w-full gap-1 mb-4 text-[#d0d2d6]'>
                 <label htmlFor='video'>Product Videos</label>

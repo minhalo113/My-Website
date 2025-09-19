@@ -33,6 +33,10 @@ const productSchema = new Schema({
         type: [String],
         default: []
     },
+    colorImageFingerprints: {
+        type: [String],
+        default: []
+    },
     sizes: {
         type: [String],
         default: []
@@ -66,6 +70,10 @@ const productSchema = new Schema({
         required: true
     },
     videos: {
+        type: [String],
+        default: []
+    },
+    imageFingerprints: {
         type: [String],
         default: []
     },

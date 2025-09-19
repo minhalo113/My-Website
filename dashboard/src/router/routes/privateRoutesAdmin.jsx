@@ -7,6 +7,7 @@ import ChatCustomer from "../../views/admin/ChatCustomer";
 import PaymentRequest from "../../views/admin/PaymentRequest";
 import AddProduct from './../../views/admin/AddProduct';
 import Products from './../../views/admin/Products';
+import ProductImageSearch from './../../views/admin/ProductImageSearch';
 import DiscountProducts from './../../views/admin/DiscountProducts';
 import EditProduct from './../../views/admin/EditProduct';
 import OrderDetails from './../../views/admin/OrderDetails';
@@ -51,6 +52,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/products',
         element : <Products/> ,
+        role : 'admin'
+    },
+    {
+        path: 'admin/dashboard/product-image-search',
+        element : <ProductImageSearch/> ,
         role : 'admin'
     },
     {

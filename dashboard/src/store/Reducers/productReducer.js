@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../../api/api";
+import { MdImageSearch } from "react-icons/md";
 
 export const add_product = createAsyncThunk(
     'product/add_product',
@@ -80,6 +81,40 @@ export const product_image_update = createAsyncThunk(
         }
     }
 )
+export const search_product_by_image = createAsyncThunk(
+    'product/search_product_by_image',
+    async({imageFile, threshold}, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const formData = new FormData();
+            formData.append('image', imageFile);
+            const numericThreshold = Number(threshold);
+            if(!Number.isNaN(numericThreshold)){
+                formData.append('threshold', numericThreshold);
+            }
+            const {data} = await api.post('/product-image-search', formData, {withCredentials: true})
+            return fulfillWithValue(data)
+        }catch(error){
+            const payload = error?.response?.data || {error: 'Failed to search product images'}
+            return rejectWithValue(payload)
+        }
+    }
+)
+
+export const check_product_images_for_duplicates = createAsyncThunk(
+    'product/check_product_images_for_duplicates',
+    async(formData, {rejectWithValue, fulfillWithValue}) => {
+        try{
+            const {data} = await api.post('/product-image-precheck', formData, {
+                withCredentials: true,
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            return fulfillWithValue(data)
+        }catch(error){
+            const payload = error?.response?.data || {error: 'Failed to check product images'}
+            return rejectWithValue(payload)
+        }
+    }
+)
 
 export const product_visibility = createAsyncThunk(
     'product/product_visibility',
@@ -114,13 +149,27 @@ export const productReducer = createSlice({
         products: [],
         product: "",
         totalProduct: 0,
-        importedProduct: null
+        importedProduct: null,
+        imageSearchResults: [],
+        imageSearchMeta: null,
+        imageSearchLoading: false,
+        imageSearchMessage: '',
+        preflightCheckLoading: false,
+        preflightCheckResults: [],
+        preflightCheckMessage: '',
+        preflightCheckThreshold: 10,
+        preflightCheckMatches: 0,
     },
     reducers: {
         messageClear: (state, _) => {
             state.errorMessage = ""
             state.successMessage = ""
             state.importedProduct = null
+            state.imageSearchMessage = ''
+            state.preflightCheckMessage = ''
+            state.preflightCheckResults = []
+            state.preflightCheckMatches = 0
+            state.preflightCheckLoading = false
         }
     },
     extraReducers: (builder) => {
@@ -138,7 +187,7 @@ export const productReducer = createSlice({
             state.successMessage = payload.message;
         })
 
-                .addCase(import_aliexpress_product.pending, (state) => {
+            .addCase(import_aliexpress_product.pending, (state) => {
             state.loader = true;
         })
         .addCase(import_aliexpress_product.rejected, (state, {payload}) => {
@@ -197,7 +246,63 @@ export const productReducer = createSlice({
         })
         .addCase(product_image_update.rejected, (state, {payload}) => {
             state.loader = false;
-            state.errorMessage = payload.errorMessage;
+            state.errorMessage = payload?.errorMessage || payload?.error || 'Failed to update product image';
+        })
+        .addCase(search_product_by_image.pending, (state) => {
+            state.imageSearchLoading = true;
+            state.errorMessage = '';
+            state.imageSearchMessage = '';
+        })
+        .addCase(search_product_by_image.fulfilled, (state, {payload}) => {
+            state.imageSearchLoading = false;
+            state.imageSearchResults = payload.matches || [];
+            state.imageSearchMeta = {
+                queryFingerprint: payload.queryFingerprint || '',
+                threshold: payload.threshold,
+                totalMatches: payload.totalMatches || 0,
+                returnedMatches: (payload.matches || []).length,
+            };
+            const returned = state.imageSearchMeta.returnedMatches;
+            const total = state.imageSearchMeta.totalMatches;
+            if (returned) {
+                state.imageSearchMessage = `Found ${returned} matching product${returned > 1 ? 's' : ''}${total && total > returned ? ` (showing top ${returned} of ${total})` : ''}.`;
+            } else {
+                state.imageSearchMessage = 'No matching products found.';
+            }
+        })
+        .addCase(search_product_by_image.rejected, (state, {payload}) => {
+            state.imageSearchLoading = false;
+            state.errorMessage = payload?.error || 'Failed to search product images';
+        })
+        .addCase(check_product_images_for_duplicates.pending, (state) => {
+            state.preflightCheckLoading = true;
+            state.preflightCheckResults = [];
+            state.preflightCheckMessage = '';
+            state.preflightCheckMatches = 0;
+            state.errorMessage = '';
+        })
+        .addCase(check_product_images_for_duplicates.fulfilled, (state, {payload}) => {
+            state.preflightCheckLoading = false;
+            state.preflightCheckResults = payload?.results || [];
+            state.preflightCheckThreshold = payload?.threshold ?? 10;
+            state.preflightCheckMatches = payload?.totalMatches || 0;
+            const successful = payload?.successfulQueries || 0;
+            const total = payload?.totalQueries || 0;
+            const matches = state.preflightCheckMatches;
+            if (matches > 0) {
+                state.preflightCheckMessage = `Found ${matches} possible match${matches === 1 ? '' : 'es'} across ${successful || total} image${(successful || total) === 1 ? '' : 's'}.`;
+            } else if (successful) {
+                state.preflightCheckMessage = 'No matching products found for the uploaded images.';
+            } else {
+                state.preflightCheckMessage = 'Unable to analyze the uploaded images.';
+            }
+        })
+        .addCase(check_product_images_for_duplicates.rejected, (state, {payload}) => {
+            state.preflightCheckLoading = false;
+            state.preflightCheckResults = [];
+            state.preflightCheckMatches = 0;
+            state.preflightCheckMessage = '';
+            state.errorMessage = payload?.error || 'Failed to check product images';
         })
         .addCase(product_visibility.fulfilled, (state, {payload}) => {
             state.loader = false;
