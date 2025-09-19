@@ -73,7 +73,13 @@ const Paginations = ({productsPerPage, totalProducts, paginate, activePage}) => 
       </li>
       {showLeftEllipsis && (
         <li className='ellipsis'>
-          <span>…</span>
+          <a
+            href=''
+            className={`page-item`}
+            onClick={(e) => e.preventDefault()}
+          >
+            ...
+          </a>
         </li>
       )}
       {visiblePages.map((pageNumber) => (
@@ -93,7 +99,13 @@ const Paginations = ({productsPerPage, totalProducts, paginate, activePage}) => 
       ))}
       {showRightEllipsis && (
         <li className='ellipsis'>
-          <span>…</span>
+          <a
+            href=''
+            className={`page-item`}
+            onClick={(e) => e.preventDefault()}
+          >
+                     ...
+          </a>
         </li>
       )}
       <li>
