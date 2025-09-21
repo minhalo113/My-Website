@@ -492,6 +492,11 @@ const AddProduct = () => {
                                                                         <p className='text-xs text-slate-200/80'>
                                                                             Similarity: {match.similarity}% (distance {match.distance})
                                                                         </p>
+                                                                        {match.similarOptions?.length ? (
+                                                                            <p className='text-xs text-slate-200/70'>
+                                                                                Similar options: {match.similarOptions.join(', ')}
+                                                                            </p>
+                                                                        ) : null}
                                                                         {match.category && (
                                                                             <p className='text-xs text-slate-200/70'>Category: {match.category}</p>
                                                                         )}

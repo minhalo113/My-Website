@@ -9,5 +9,6 @@ homeRouter.get('/customers-products-get', homeController.products_get)
 homeRouter.get('/customers-product-get/:productId', homeController.product_get)
 homeRouter.post('/rate-product/:productId', authMiddleware, homeController.rate_product)
 homeRouter.get('/get-reviews/:productId', homeController.get_reviews)
+homeRouter.post('/customers-product-image-search', homeController.product_image_search)
 
 export default homeRouter;

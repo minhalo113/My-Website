@@ -1,6 +1,13 @@
+import formidable from 'formidable';
+import {v2 as cloudinary} from 'cloudinary';
 import productModel from "../../models/productModel.js";
-import categoryModel from "../../models/categoryModel.js"
+import categoryModel from "../../models/categoryModel.js";
 import responseReturn from "../../utils/response.js";
+import { fingerprintFromUploadResult } from "../../utils/imageFingerprint.js";
+import {
+    fetchProductsForImageSearch,
+    collectMatchesForFingerprint,
+} from "../../utils/productImageSearch.js";
 
 class homeControllers{
     formateProduct = (products) => {
@@ -150,6 +157,83 @@ class homeControllers{
             console.log(error)
             return responseReturn(res, 500, {message: error.message})
         }
+    }
+
+    product_image_search = async (req, res) => {
+        const form = formidable({
+            multiples: false,
+            keepExtensions: true,
+            allowEmptyFiles: false,
+        });
+
+        form.parse(req, async (err, fields, files) => {
+            if (err) return responseReturn(res, 400, { error: err.message });
+
+            const thresholdField = Array.isArray(fields.threshold) ? fields.threshold[0] : fields.threshold;
+            const parsedThreshold = thresholdField ? parseInt(thresholdField, 10) : 64;
+            const threshold = Number.isNaN(parsedThreshold)
+                ? 10
+                : Math.max(0, Math.min(64, parsedThreshold));
+
+            const potentialFiles = [files.image, files.file, files.queryImage];
+            const fallbackFiles = Object.values(files || {});
+            const combined = potentialFiles.concat(fallbackFiles);
+            const fileEntry = combined.find((item) => item) || null;
+            const fileList = Array.isArray(fileEntry) ? fileEntry : fileEntry ? [fileEntry] : [];
+
+            if (!fileList.length) {
+                return responseReturn(res, 400, { error: 'Image file is required' });
+            }
+
+            const file = fileList[0];
+
+            cloudinary.config({
+                cloud_name: process.env.cloud_name,
+                api_key: process.env.api_key,
+                api_secret: process.env.api_secret,
+                secure: true,
+            });
+
+            let temporaryPublicId = null;
+            try {
+                const uploadResult = await cloudinary.uploader.upload(file.filepath || file.path, {
+                    folder: 'products/search-temp',
+                    phash: true,
+                });
+                temporaryPublicId = uploadResult?.public_id || null;
+                const queryFingerprint = fingerprintFromUploadResult(uploadResult);
+
+                if (!queryFingerprint) {
+                    return responseReturn(res, 422, { error: 'Unable to generate fingerprint for the provided image' });
+                }
+
+                const products = await fetchProductsForImageSearch();
+                const { groupedMatches, rawMatches } = collectMatchesForFingerprint({
+                    products,
+                    queryFingerprint,
+                    threshold,
+                });
+
+                return responseReturn(res, 200, {
+                    matches: groupedMatches.slice(0, 20),
+                    totalMatches: groupedMatches.length,
+                    rawMatchCount: rawMatches.length,
+                    queryFingerprint,
+                    threshold,
+                });
+            } catch (error) {
+                console.error('customer product_image_search error:', error);
+                return responseReturn(res, 500, { error: 'Failed to search similar product images' });
+            } finally {
+                if (temporaryPublicId) {
+                    try {
+                        await cloudinary.uploader.destroy(temporaryPublicId);
+                    } catch (cleanupError) {
+                        console.error('Failed to clean up temporary search image:', cleanupError.message);
+                    }
+                }
+            }
+        });
     }
 
 }

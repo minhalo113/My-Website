@@ -260,12 +260,17 @@ export const productReducer = createSlice({
                 queryFingerprint: payload.queryFingerprint || '',
                 threshold: payload.threshold,
                 totalMatches: payload.totalMatches || 0,
+                rawMatchCount: payload.rawMatchCount || 0,
                 returnedMatches: (payload.matches || []).length,
             };
             const returned = state.imageSearchMeta.returnedMatches;
             const total = state.imageSearchMeta.totalMatches;
+            const raw = state.imageSearchMeta.rawMatchCount;
             if (returned) {
-                state.imageSearchMessage = `Found ${returned} matching product${returned > 1 ? 's' : ''}${total && total > returned ? ` (showing top ${returned} of ${total})` : ''}.`;
+                const base = `Found ${returned} matching product${returned > 1 ? 's' : ''}`;
+                const capped = total && total > returned ? ` (showing top ${returned} of ${total})` : '';
+                const imageInfo = raw && raw > total ? ` across ${raw} similar image${raw === 1 ? '' : 's'}` : '';
+                state.imageSearchMessage = `${base}${capped}${imageInfo}.`;
             } else {
                 state.imageSearchMessage = 'No matching products found.';
             }

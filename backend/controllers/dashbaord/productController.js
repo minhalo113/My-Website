@@ -9,20 +9,12 @@ import parseColorPrices from '../../utils/parseColorPrices.js';
 import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
 import {
     extractPublicId,
-    fingerprintFromUploadResult,
-    hammingDistance,
-    fingerprintSimilarity
+    fingerprintFromUploadResult
 } from '../../utils/imageFingerprint.js';
-
-const SEARCHABLE_PRODUCTS_QUERY = {
-    $or: [
-        { imageFingerprints: { $exists: true, $ne: [] } },
-        { colorImageFingerprints: { $exists: true, $ne: [] } },
-    ],
-};
-
-const SEARCHABLE_PRODUCTS_FIELDS =
-    'name brand category images imageFingerprints colorImages colorImageFingerprints colors shopName sellerId slug price discount stock link';
+import {
+    fetchProductsForImageSearch,
+    collectMatchesForFingerprint,
+} from '../../utils/productImageSearch.js';
 
 const normalizeUploadList = (value) => {
     if (!value) return [];
@@ -30,86 +22,7 @@ const normalizeUploadList = (value) => {
         return value.filter(Boolean);
     }
     return value ? [value] : [];
-};
-
-const fetchProductsForImageSearch = async () => {
-    return await productModel
-        .find(SEARCHABLE_PRODUCTS_QUERY)
-        .select(SEARCHABLE_PRODUCTS_FIELDS)
-        .lean();
-};
-
-const collectMatchesForFingerprint = ({ products = [], queryFingerprint, threshold }) => {
-    if (!queryFingerprint) {
-        return [];
-    }
-
-    const matches = [];
-
-    const pushMatch = ({ product, imageUrl, distance, matchType, fingerprint, colorLabel, index }) => {
-        if (!Number.isFinite(distance) || distance > threshold) return;
-        matches.push({
-            productId: product._id.toString(),
-            productName: product.name,
-            brand: product.brand,
-            category: product.category,
-            imageUrl,
-            matchType,
-            distance,
-            similarity: fingerprintSimilarity(distance),
-            fingerprint,
-            colorLabel: colorLabel || null,
-            index,
-            shopName: product.shopName,
-            sellerId: product.sellerId?.toString?.() || product.sellerId,
-            slug: product.slug,
-            price: product.price,
-            discount: product.discount,
-            stock: product.stock,
-            link: product.link,
-        });
-    };
-
-    for (const product of products) {
-        const images = Array.isArray(product.images) ? product.images : [];
-        const imageFingerprints = Array.isArray(product.imageFingerprints) ? product.imageFingerprints : [];
-        const colorImages = Array.isArray(product.colorImages) ? product.colorImages : [];
-        const colorFingerprints = Array.isArray(product.colorImageFingerprints) ? product.colorImageFingerprints : [];
-        const colorLabels = Array.isArray(product.colors) ? product.colors : [];
-
-        images.forEach((imgUrl, idx) => {
-            const fingerprint = imageFingerprints[idx];
-            if (!fingerprint || !imgUrl) return;
-            const distance = hammingDistance(queryFingerprint, fingerprint);
-            pushMatch({
-                product,
-                imageUrl: imgUrl,
-                distance,
-                matchType: 'primary',
-                fingerprint,
-                index: idx,
-            });
-        });
-
-        colorImages.forEach((imgUrl, idx) => {
-            const fingerprint = colorFingerprints[idx];
-            if (!fingerprint || !imgUrl) return;
-            const distance = hammingDistance(queryFingerprint, fingerprint);
-            pushMatch({
-                product,
-                imageUrl: imgUrl,
-                distance,
-                matchType: 'color',
-                fingerprint,
-                colorLabel: colorLabels[idx],
-                index: idx,
-            });
-        });
-    }
-
-    matches.sort((a, b) => a.distance - b.distance);
-    return matches;
-};
+}
 
 class productController{
     checkDuplicateLink = async(link, excludeId = null) => {
@@ -506,7 +419,7 @@ class productController{
             if (err) return responseReturn(res, 400, { error: err.message });
 
             const thresholdField = Array.isArray(fields.threshold) ? fields.threshold[0] : fields.threshold;
-            const parsedThreshold = thresholdField ? parseInt(thresholdField, 10) : 10;
+            const parsedThreshold = thresholdField ? parseInt(thresholdField, 10) : 64;
             const threshold = Number.isNaN(parsedThreshold)
                 ? 10
                 : Math.max(0, Math.min(64, parsedThreshold));
@@ -544,17 +457,16 @@ class productController{
                 }
                 
                 const products = await fetchProductsForImageSearch();
-                const matches = collectMatchesForFingerprint({
+                const { groupedMatches, rawMatches } = collectMatchesForFingerprint({
                     products,
                     queryFingerprint,
                     threshold,
                 });
                 
                 return responseReturn(res, 200, {
-                    matches: matches.slice(0, 20),
-                    totalMatches: matches.length,
-                    queryFingerprint,
-                    threshold,
+                    matches: groupedMatches.slice(0, 20),
+                    totalMatches: groupedMatches.length,
+                    rawMatchCount: rawMatches.length,
                 });
             } catch (error) {
                 console.error('product_image_search error:', error);
@@ -582,7 +494,7 @@ class productController{
             if (err) return responseReturn(res, 400, { error: err.message });
 
             const thresholdField = Array.isArray(fields.threshold) ? fields.threshold[0] : fields.threshold;
-            const parsedThreshold = thresholdField ? parseInt(thresholdField, 10) : 10;
+            const parsedThreshold = thresholdField ? parseInt(thresholdField, 10) : 64;
             const threshold = Number.isNaN(parsedThreshold)
                 ? 10
                 : Math.max(0, Math.min(64, parsedThreshold));
@@ -671,7 +583,7 @@ class productController{
                         };
                     }
 
-                    const matches = collectMatchesForFingerprint({
+                    const { groupedMatches, rawMatches } = collectMatchesForFingerprint({
                         products,
                         queryFingerprint: item.queryFingerprint,
                         threshold,
@@ -681,14 +593,16 @@ class productController{
                         sourceType: item.sourceType,
                         sourceIndex: item.sourceIndex,
                         filename: item.filename,
-                        matches: matches.slice(0, 15),
-                        totalMatches: matches.length,
+                        matches: groupedMatches.slice(0, 15),
+                        totalMatches: groupedMatches.length,
+                        rawMatchCount: rawMatches.length,
                         queryFingerprint: item.queryFingerprint,
                         error: null,
                     };
                 });
 
-                const totalMatches = results.reduce((sum, entry) => sum + (entry.matches?.length || 0), 0);
+                const totalMatches = results.reduce((sum, entry) => sum + (entry.totalMatches || 0), 0);
+                const totalRawMatches = results.reduce((sum, entry) => sum + (entry.rawMatchCount || 0), 0);
 
                 return responseReturn(res, 200, {
                     threshold,
@@ -696,6 +610,7 @@ class productController{
                     successfulQueries,
                     results,
                     totalMatches,
+                    totalRawMatches,
                 });
             }catch(error){
                 console.error('product_image_batch_check error:', error);
@@ -820,6 +735,7 @@ class productController{
             console.error('import_aliexpress_product error:', error);
             return responseReturn(res, 500, {error: 'Failed to import product'});
         }
+
 
     }
 

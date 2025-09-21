@@ -37,11 +37,21 @@ const computeFingerprints = async (urls = [], existing = []) => {
       results.push('');
       continue;
     }
+
+    let fetchError = null;
     const fingerprint = await fetchFingerprintForUrl(url, {
       onError: (error, failingUrl) => {
+        fetchError = error;
         console.error(`Failed to fetch fingerprint for ${failingUrl}:`, error.message);
       },
     });
+
+    if(fetchError) {
+      throw fetchError;
+    }
+    if(!fingerprint){
+      throw new Error(`Missing fingerprint for ${url}. Stopping backfill`);
+    }
     results.push(fingerprint || '');
   }
   return results;

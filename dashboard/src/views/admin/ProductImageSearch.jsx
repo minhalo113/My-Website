@@ -22,7 +22,7 @@ const ProductImageSearch = () => {
 
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
-    const [threshold, setThreshold] = useState(10);
+    const [threshold, setThreshold] = useState(64);
 
     useEffect(() => {
         if (!selectedFile) {
@@ -132,7 +132,8 @@ const ProductImageSearch = () => {
                             {imageSearchMeta && (
                                 <p className='text-xs text-slate-200 mt-1'>
                                     Threshold ≤ {imageSearchMeta.threshold ?? 10}. Showing {imageSearchMeta.returnedMatches || 0}
-                                    {imageSearchMeta.totalMatches ? ` of ${imageSearchMeta.totalMatches}` : ''} matches.
+                                    {imageSearchMeta.totalMatches ? ` of ${imageSearchMeta.totalMatches}` : ''} product match
+                                    {imageSearchMeta.rawMatchCount ? ` (${imageSearchMeta.rawMatchCount} image hit${imageSearchMeta.rawMatchCount === 1 ? '' : 's'})` : ''}.
                                 </p>
                             )}
                         </div>
@@ -149,10 +150,11 @@ const ProductImageSearch = () => {
                                 <tr>
                                     <th className='py-3 px-4 whitespace-nowrap'>Image</th>
                                     <th className='py-3 px-4 whitespace-nowrap'>Product</th>
-                                    <th className='py-3 px-4 whitespace-nowrap'>Match Type</th>
+                                    <th className='py-3 px-4 whitespace-nowrap'>Best Match</th>
                                     <th className='py-3 px-4 whitespace-nowrap'>Similarity</th>
                                     <th className='py-3 px-4 whitespace-nowrap'>Distance</th>
-                                    <th className='py-3 px-4 whitespace-nowrap'>Color</th>
+                                    <th className='py-3 px-4 whitespace-nowrap'>Similar Options</th>
+                                    <th className='py-3 px-4 whitespace-nowrap'>Total Matches</th>
                                     <th className='py-3 px-4 whitespace-nowrap'>Stock</th>
                                     <th className='py-3 px-4 whitespace-nowrap'>Price</th>
                                     <th className='py-3 px-4 whitespace-nowrap'>Action</th>
@@ -161,7 +163,7 @@ const ProductImageSearch = () => {
                             <tbody>
                                 {hasResults ? (
                                     imageSearchResults.map((match) => (
-                                        <tr key={`${match.productId}-${match.matchType}-${match.index}`} className='border-b border-white/10 last:border-b-0'>
+                                        <tr key={match.productId} className='border-b border-white/10 last:border-b-0'>
                                             <td className='py-3 px-4'>
                                                 <img
                                                     src={match.imageUrl}
@@ -174,11 +176,50 @@ const ProductImageSearch = () => {
                                                     <span className='font-semibold text-white'>{match.productName}</span>
                                                     <span className='text-[11px] text-slate-200'>Brand: {match.brand || '—'}</span>
                                                     <span className='text-[11px] text-slate-200'>Category: {match.category || '—'}</span>
+                                                    {match.shopName && (
+                                                        <span className='text-[11px] text-slate-200'>Shop: {match.shopName}</span>
+                                                    )}
                                                 </div>
                                             </td>
-                                            <td className='py-3 px-4 capitalize'>{match.matchType === 'color' ? 'Color Variant' : 'Primary Image'}</td>
+                                            <td className='py-3 px-4'>
+                                                <div className='flex flex-col gap-1 text-xs'>
+                                                    <span className='capitalize text-white'>
+                                                        {match.matchType === 'color' ? 'Color Variant' : 'Primary Image'}
+                                                    </span>
+                                                    {match.colorLabel && (
+                                                        <span className='text-slate-200'>Color: {match.colorLabel}</span>
+                                                    )}
+                                                </div>
+                                            </td>
                                             <td className='py-3 px-4'>{match.similarity != null ? `${match.similarity}%` : '—'}</td>
                                             <td className='py-3 px-4'>{match.distance ?? '—'}</td>
+                                            <td className='py-3 px-4'>
+                                                {match.similarOptions?.length ? (
+                                                    <div className='flex flex-wrap gap-2'>
+                                                        {match.similarOptions.map((option) => (
+                                                            <span
+                                                                key={option}
+                                                                className='inline-flex text-[11px] px-2 py-1 rounded-full bg-[#4f46c5] text-white'
+                                                            >
+                                                                {option}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <span>—</span>
+                                                )}
+                                            </td>
+                                            <td className='py-3 px-4 text-xs'>
+                                                <div className='flex flex-col gap-1'>
+                                                    <span>{match.matches?.length || 0} total</span>
+                                                    {match.primaryMatches?.length ? (
+                                                        <span className='text-slate-200'>Primary: {match.primaryMatches.length}</span>
+                                                    ) : null}
+                                                    {match.variantMatches?.length ? (
+                                                        <span className='text-slate-200'>Variants: {match.variantMatches.length}</span>
+                                                    ) : null}
+                                                </div>
+                                            </td>
                                             <td className='py-3 px-4'>{match.colorLabel || '—'}</td>
                                             <td className='py-3 px-4'>{match.stock ?? '—'}</td>
                                             <td className='py-3 px-4'>
@@ -208,6 +249,7 @@ const ProductImageSearch = () => {
                                     ))
                                 ) : (
                                     <tr>
+                                        <td colSpan='10' className='py-8 px-4 text-center text-sm text-slate-200'></td>
                                         <td colSpan='9' className='py-8 px-4 text-center text-sm text-slate-200'>
                                             {imageSearchLoading
                                                 ? 'Looking for similar products…'
