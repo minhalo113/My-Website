@@ -20,7 +20,7 @@ const ProfilePage = () => {
             setName(user.name || '');
             setEmail(user.email || '');
             setPreviewUrl(user?.image?.url || '');
-            console.log(user?.image)
+            // console.log(user?.image)
         }
     }, [user])
 
@@ -81,7 +81,7 @@ const ProfilePage = () => {
         return (
             <div className="min-h-screen bg-slate-700 text-slate-100">
                 <PageHeader title="Your Profile" curPage="Your Profile" />
-                <p className="text-slate-400">Please Logiin First To Check Your Profile</p>
+                <p className="text-slate-400">Please Login First To Check Your Profile</p>
             </div>
         )
     }
