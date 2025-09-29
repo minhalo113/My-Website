@@ -1,6 +1,47 @@
 import productModel from "../models/productModel.js";
 import { fingerprintSimilarity, hammingDistance } from "./imageFingerprint.js";
 
+const HEX_PER_UINT32 = 8;
+
+const popcnt32 = (value) => {
+    let v = value >>> 0;
+    v -= (v >>> 1) & 0x55555555;
+    v = (v & 0x33333333) + ((v >>> 2) & 0x33333333);
+    return (((v + (v >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24;
+};
+
+const hexToUint32Array = (hex) => {
+    if (typeof hex !== 'string') return null;
+    const normalized = hex.trim().toLowerCase();
+    if (!normalized || normalized.length % HEX_PER_UINT32 !== 0) return null;
+    const result = new Uint32Array(normalized.length / HEX_PER_UINT32);
+    for (let i = 0; i < normalized.length; i += HEX_PER_UINT32) {
+        const chunk = normalized.slice(i, i + HEX_PER_UINT32);
+        const value = Number.parseInt(chunk, 16);
+        if (!Number.isFinite(value)) {
+            return null;
+        }
+        result[i / HEX_PER_UINT32] = value >>> 0;
+    }
+    return result;
+};
+
+const vectorizeFingerprintList = (fingerprints) => {
+    if (!Array.isArray(fingerprints)) return [];
+    return fingerprints.map((fingerprint) => hexToUint32Array(fingerprint));
+};
+
+const vectorHammingDistance = (vectorA, vectorB) => {
+    if (!vectorA || !vectorB || vectorA.length !== vectorB.length) {
+        return Number.POSITIVE_INFINITY;
+    }
+    let distance = 0;
+    for (let i = 0; i < vectorA.length; i += 1) {
+        distance += popcnt32(vectorA[i] ^ vectorB[i]);
+    }
+    return distance;
+};
+
 export const SEARCHABLE_PRODUCTS_QUERY = {
     $or: [
         { imageFingerprints: { $exists: true, $ne: [] } },
@@ -11,11 +52,55 @@ export const SEARCHABLE_PRODUCTS_QUERY = {
 export const SEARCHABLE_PRODUCTS_FIELDS =
     "name brand category images imageFingerprints colorImages colorImageFingerprints colors shopName sellerId slug price discount stock link";
 
+const DEFAULT_CACHE_TTL = 5 * 60 * 1000;
+
+let cachedProducts = null;
+let cacheExpiry = 0;
+let inflightPromise = null;
+
+export const clearImageSearchCache = () => {
+    cachedProducts = null;
+    cacheExpiry = 0;
+    inflightPromise = null;
+};
+
+const getCacheTtl = () => {
+    const envTtl = parseInt(process.env.IMAGE_SEARCH_CACHE_TTL, 10);
+    if (Number.isFinite(envTtl) && envTtl > 0) {
+        return envTtl;
+    }
+    return DEFAULT_CACHE_TTL;
+};
+
 export const fetchProductsForImageSearch = async () => {
-    return await productModel
+    const now = Date.now();
+    if(cachedProducts && now < cacheExpiry){
+        return cachedProducts;
+    }
+
+    if (inflightPromise){
+        return inflightPromise;
+    }
+
+    inflightPromise = productModel
         .find(SEARCHABLE_PRODUCTS_QUERY)
         .select(SEARCHABLE_PRODUCTS_FIELDS)
-        .lean();
+        .lean()
+        .then((products) => {
+            const normalizedProducts = products.map((product) => ({
+                ...product,
+                vectorImageFingerprints: vectorizeFingerprintList(product.imageFingerprints),
+                vectorColorImageFingerprints: vectorizeFingerprintList(product.colorImageFingerprints),
+            }));
+            cachedProducts = normalizedProducts;
+            cacheExpiry = Date.now() + getCacheTtl();
+            return normalizedProducts;
+        })
+        .finally(() => {
+            inflightPromise = null;
+        });
+
+    return inflightPromise;
 };
 
 const formatMatchSummary = (match) => ({
@@ -34,9 +119,12 @@ export const collectMatchesForFingerprint = ({ products = [], queryFingerprint, 
     }
 
     const rawMatches = [];
+    const numericThreshold = Number.isFinite(threshold) ? threshold : 64;
+    const queryVector = hexToUint32Array(queryFingerprint);
+    const canUseVector = Boolean(queryVector && queryVector.length);
 
     const pushMatch = ({ product, imageUrl, distance, matchType, fingerprint, colorLabel, index }) => {
-        if (!Number.isFinite(distance) || distance > threshold) return;
+        if (!Number.isFinite(distance) || distance > numericThreshold) return;
         rawMatches.push({
             productId: product._id.toString(),
             productName: product.name,
@@ -63,13 +151,23 @@ export const collectMatchesForFingerprint = ({ products = [], queryFingerprint, 
         const images = Array.isArray(product.images) ? product.images : [];
         const imageFingerprints = Array.isArray(product.imageFingerprints) ? product.imageFingerprints : [];
         const colorImages = Array.isArray(product.colorImages) ? product.colorImages : [];
+        const vectorImageFingerprints = Array.isArray(product.vectorImageFingerprints)
+            ? product.vectorImageFingerprints
+            : [];
         const colorFingerprints = Array.isArray(product.colorImageFingerprints) ? product.colorImageFingerprints : [];
+        const vectorColorFingerprints = Array.isArray(product.vectorColorImageFingerprints)
+            ? product.vectorColorImageFingerprints
+            : [];
         const colorLabels = Array.isArray(product.colors) ? product.colors : [];
 
         images.forEach((imgUrl, idx) => {
             const fingerprint = imageFingerprints[idx];
             if (!fingerprint || !imgUrl) return;
-            const distance = hammingDistance(queryFingerprint, fingerprint);
+            const vectorFingerprint = vectorImageFingerprints[idx];
+            const distance = canUseVector && vectorFingerprint
+                ? vectorHammingDistance(queryVector, vectorFingerprint)
+                : hammingDistance(queryFingerprint, fingerprint);
+
             pushMatch({
                 product,
                 imageUrl: imgUrl,
@@ -83,7 +181,10 @@ export const collectMatchesForFingerprint = ({ products = [], queryFingerprint, 
         colorImages.forEach((imgUrl, idx) => {
             const fingerprint = colorFingerprints[idx];
             if (!fingerprint || !imgUrl) return;
-            const distance = hammingDistance(queryFingerprint, fingerprint);
+            const vectorFingerprint = vectorColorFingerprints[idx];
+            const distance = canUseVector && vectorFingerprint
+                ? vectorHammingDistance(queryVector, vectorFingerprint)
+                : hammingDistance(queryFingerprint, fingerprint);
             pushMatch({
                 product,
                 imageUrl: imgUrl,

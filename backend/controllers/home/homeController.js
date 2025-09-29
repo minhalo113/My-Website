@@ -4,6 +4,8 @@ import productModel from "../../models/productModel.js";
 import categoryModel from "../../models/categoryModel.js";
 import responseReturn from "../../utils/response.js";
 import { fingerprintFromUploadResult } from "../../utils/imageFingerprint.js";
+import {searchCatalogProducts} from "../../services/productSearchService.js"
+import { response } from 'express';
 import {
     fetchProductsForImageSearch,
     collectMatchesForFingerprint,
@@ -64,42 +66,106 @@ class homeControllers{
     }
 
     products_get = async(req, res) => {
-        const {page, searchValue, parPage} = req.query
+        const {page, searchValue, parPage, category} = req.query
 
-        const skipPage = parseInt(parPage) * (parseInt(page) - 1)
+        const trimmedSearch = typeof searchValue === 'string' ? searchValue.trim() : ''
+        const shouldUseSearchServie = Boolean(trimmedSearch) || (page && parPage) || (category && category !== 'all')
+
+        if (shouldUseSearchServie) {
+            try{
+                const searchResponse = await searchCatalogProducts({
+                    term: trimmedSearch,
+                    category,
+                    page,
+                    limit: parPage,
+                    includeFacets: Boolean(trimmedSearch),
+                    includeSuggestions: Boolean(trimmedSearch)
+                })
+
+                const payload = {
+                    products: searchResponse.results,
+                    totalProduct: searchResponse.total,
+                    page: searchResponse.page,
+                    parPage: searchResponse.perPage,
+                }
+
+                if (searchResponse.facets){
+                    payload.facets = searchResponse.facets
+                }
+
+                if (Array.isArray(searchResponse.suggestions)){
+                    payload.suggestions = searchResponse.suggestions
+                }
+                
+                if(searchResponse.metrics){
+                    payload.metrics = searchResponse.metrics
+                }
+                return responseReturn(res, 200, payload)
+            }catch(error){
+                console.log(error)
+                return responseReturn(res, 500, {error: "Unable to load products right now."})
+            }
+        }
 
         try{
-            if (searchValue) {
-                const products = await productModel.find({
-                    $text: {$search: searchValue},
-                    isHidden: false
-                }).skip(skipPage).limit(parPage).sort({createAt: -1})
+            const products = await productModel.find({ isHidden: false }).sort({createdAt: -1})
+            const totalProduct = await productModel.countDocuments({isHidden: false})
 
-                const totalProduct = await productModel.find({
-                    $text: {$search: searchValue},
-                    isHidden: false
-                }).countDocuments()
-
-
-                return responseReturn(res, 200, {products, totalProduct})
-            }else if(parPage && page){
-                const products = await productModel.find({
-                    isHidden: false
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
-
-                const totalProduct = await productModel.find({
-                    isHidden: false
-                }).countDocuments()
-                
-                return responseReturn(res, 200, {products, totalProduct})
-            }else{
-                const products = await productModel.find({ isHidden: false }).sort({createdAt: -1})
-                const totalProduct = await productModel.find({ isHidden: false }).countDocuments()
-
-                return responseReturn(res, 200, {products, totalProduct})
-            }
+            return responseReturn(res, 200, {products, totalProduct})
         }catch(error){
             return responseReturn(res, 500, {error: error.message})
+        }
+    }
+
+    products_search = async(req, res) => {
+        const {q, searchValue, page, limit, parPage, category} = req.query
+
+        const rawTerm = typeof q === 'string' ? q : searchValue
+        const trimmedTerm = typeof rawTerm === 'string' ? rawTerm.trim() : ''
+        const sizeParam = limit ?? parPage
+        const fallbackPerPage = Math.max(parseInt(sizeParam, 10) || 10, 1)
+
+        if (!trimmedTerm) {
+            return responseReturn(res, 200, {
+                searchTerm: '',
+                results: [],
+                totalResults: 0,
+                page: 1,
+                perPage: fallbackPerPage,
+                totalPages: 0,
+                suggestions: [],
+                facets: {
+                    categories: [],
+                    brands: []
+                },
+                filters: {
+                    category: (category && category !== 'all') ? category : null,
+                },
+                metrics: {
+                    queryTimeMs: 0,
+                    servedFromCache: false,
+                    cacheKeyHit: false
+                },
+            })
+        }
+        
+        try{
+            const searchResponse = await searchCatalogProducts({
+                term: trimmedTerm,
+                category,
+                page,
+                limit: sizeParam,
+                includeFacets: true,
+                includeSuggestions,
+            })
+
+            return responseReturn(res, 200, {
+                ...searchResponse,
+                totalResults: searchResponse.total,
+            })
+        }catch(error){
+            console.log(error)
+            return responseReturn(res, 500, {error: 'Unable to search products right now'})
         }
     }
 

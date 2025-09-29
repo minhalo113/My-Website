@@ -489,6 +489,11 @@ const AddProduct = () => {
                                                                         <p className='font-semibold text-white leading-snug'>
                                                                             {match.productName}
                                                                         </p>
+                                                                        {match.productId && (
+                                                                            <Link to = {`/admin/dashboard/edit-product/${match.productId}`} className='inline-flex text-xs text-indigo-200 underline hover:text-indigo-100'>
+                                                                                Edit this product
+                                                                            </Link>
+                                                                        )}
                                                                         <p className='text-xs text-slate-200/80'>
                                                                             Similarity: {match.similarity}% (distance {match.distance})
                                                                         </p>

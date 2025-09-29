@@ -1,13 +1,13 @@
-import React from 'react'
-import { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import api from '../../src/api/api';
 
 const DEFAULT_THRESHOLD = 64;
+const TEXT_SEARCH_DEBOUNCE = 300;
 
-const Search = ({products}) => {
-    const [searchTerm, setSearchTerm] = useState("");
+const Search = ({searchTerm, onSearchTermChange}) => {
+    const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
 
     const [showDropdown, setShowDropdown] = useState(true)
     const dropdownRef = useRef(null)
@@ -19,9 +19,14 @@ const Search = ({products}) => {
     const [imageThreshold, setImageThreshold] = useState(DEFAULT_THRESHOLD);
     const [queryPreview, setQueryPreview] = useState(null);
 
-    const filteredProducts = (products || []).filter((product) => {
-        return product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    });
+    const [textResults, setTextResults] = useState([]);
+    const [isTextSearching, setIsTextSearching] = useState(false);
+    const [textSearchError, setTextSearchError] = useState('');
+    const [textSuggestions, setTextSuggestions] = useState([]);
+
+    useEffect(() => {
+        setLocalSearchTerm(searchTerm || "");
+    }, [searchTerm]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -88,16 +93,78 @@ const Search = ({products}) => {
         };
     }, [imageFile, imageThreshold]);
 
-    const resetPreview = () => {
+    useEffect(() => {
+        if (!onSearchTermChange) return undefined;
+
+        const handler = setTimeout(() => {
+            onSearchTermChange(localSearchTerm);
+        }, TEXT_SEARCH_DEBOUNCE);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [localSearchTerm, onSearchTermChange]);
+
+    useEffect(() => {
+        setTextResults([]);
+        setTextSuggestions([]);
+        setTextSearchError('');
+
+        const trimmed = localSearchTerm.trim();
+        if (!trimmed) {
+            setIsTextSearching(false);
+            return undefined;
+        }
+
+        let ignore = false;
+        const timer = setTimeout(async () => {
+            setIsTextSearching(true);
+            try {
+                const { data } = await api.get('/customers-products-search', {
+                    params: {
+                        q: trimmed,
+                        limit: 12,
+                    },
+                    withCredentials: true,
+                });
+
+                if (ignore) return;
+
+                setTextResults(Array.isArray(data?.results) ? data.results : []);
+                setTextSuggestions(Array.isArray(data?.suggestions) ? data.suggestions : []);
+                setTextSearchError('');
+            } catch (error) {
+                if (ignore) return;
+                console.log(error);
+                setTextResults([]);
+                setTextSuggestions([]);
+                const message = error?.response?.data?.error || 'Unable to search products.';
+                setTextSearchError(message);
+            } finally {
+                if (!ignore) {
+                    setIsTextSearching(false);
+                }
+            }
+        }, TEXT_SEARCH_DEBOUNCE);
+
+        return () => {
+            ignore = true;
+            clearTimeout(timer);
+        };
+    }, [localSearchTerm]);
+
+    const resetPreview = useCallback(() => {
         setQueryPreview((prev) => {
             if (prev) URL.revokeObjectURL(prev);
             return null;
         });
-    };
+    }, []);
 
-    const handleSearchChange = (e) => {
-        const value = e.target.value;
-        setSearchTerm(value);
+    const switchToTextSearch = useCallback((value) => {
+        setLocalSearchTerm(value);
+        setTextResults([]);
+        setTextSuggestions([]);
+        setTextSearchError('');
         setImageFile(null);
         setImageMatches([]);
         setImageSearchError('');
@@ -105,7 +172,18 @@ const Search = ({products}) => {
         setImageThreshold(DEFAULT_THRESHOLD);
         resetPreview();
         setShowDropdown(true);
+    }, [resetPreview]);
+
+    const handleSearchChange = (e) => {
+        switchToTextSearch(e.target.value);
     };
+
+    const handleSuggestionSelect = useCallback((suggestion) => {
+        if (!suggestion) return;
+        const value = typeof suggestion === 'string' ? suggestion : suggestion.text;
+        if (!value) return;
+        switchToTextSearch(value);
+    }, [switchToTextSearch]);
 
     const handleImageChange = (event) => {
         const file = event.target.files && event.target.files[0];
@@ -117,7 +195,10 @@ const Search = ({products}) => {
             return;
         }
 
-        setSearchTerm('');
+        setLocalSearchTerm('');
+        setTextResults([]);
+        setTextSearchError('');
+        setTextSuggestions([]);
         setImageMatches([]);
         setImageSearchError('');
         setImageThreshold(DEFAULT_THRESHOLD);
@@ -134,6 +215,15 @@ const Search = ({products}) => {
         event.target.value = '';
     };
 
+    const handleImageThresholdChange = useCallback((event) => {
+        const value = Number(event.target.value);
+        if (Number.isFinite(value)) {
+            setImageThreshold(value);
+        } else {
+            setImageThreshold(DEFAULT_THRESHOLD);
+        }
+    }, []);
+
     const clearImageSearch = () => {
         setImageFile(null);
         setImageMatches([]);
@@ -142,9 +232,10 @@ const Search = ({products}) => {
         setImageThreshold(DEFAULT_THRESHOLD);
         resetPreview();
         setShowDropdown(false);
+        setTextSuggestions([]);
     };
 
-    const formatPriceDisplay = (price, discount) => {
+    const formatPriceDisplay = useCallback((price, discount) => {
         const base = Number(price);
         if (!Number.isFinite(base)) return null;
         const roundedBase = base.toFixed(2);
@@ -159,11 +250,11 @@ const Search = ({products}) => {
             );
         }
         return `$${roundedBase}`;
-    };
+    }, []);
 
-    const showTextResults = Boolean(searchTerm && showDropdown);
-    const showImageResults = Boolean(!searchTerm && showDropdown && (imageMatches.length > 0 || imageSearchError || isImageSearching || queryPreview));
-
+    const showTextResults = Boolean(localSearchTerm.trim() && showDropdown);
+    const showImageResults = Boolean(!localSearchTerm && showDropdown && (imageMatches.length > 0 || imageSearchError || isImageSearching || queryPreview));
+    
     const getMatchPreview = (match) => {
         if (!match || typeof match !== 'object') {
             return { previewUrl: null, previewAlt: 'Matched product', bestMatch: null };
@@ -187,11 +278,69 @@ const Search = ({products}) => {
         return { previewUrl, previewAlt, bestMatch };
     };
 
-  return (
+      const renderTextResultPrice = useCallback((product) => {
+        const hasVariant = product.colors && product.colors.length > 0 && Array.isArray(product.colorPrices) && product.colorPrices.length > 0;
+        let variantRange = null;
+        if(hasVariant){
+            const prices = product.colors.map((c, idx) => product.colorPrices[idx]).filter(v=>v!==undefined);
+            if (prices.length) {
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                variantRange = {
+                    minBase: min.toFixed(2),
+                    maxBase: max.toFixed(2),
+                    minDiscount: (min - (min * product.discount)/100).toFixed(2),
+                    maxDiscount: (max - (max * product.discount)/100).toFixed(2)
+                };
+            }
+        }
+        const oneVariant = product.colors && product.colors.length == 1 && Array.isArray(product.colorPrices) && product.colorPrices.length == 1;
+        const discountedPrice = (!hasVariant && product.discount > 0) ? (product.price - (product.price * product.discount) / 100).toFixed(2) : null;
+
+        if (!oneVariant) {
+            if (hasVariant && variantRange) {
+                if (product.discount > 0) {
+                    return (
+                    <>
+                        ${variantRange.minDiscount}
+                        <del className="text-sm text-gray-500 ml-1">${variantRange.minBase}</del>
+                        - ${variantRange.maxDiscount}
+                        <del className="text-sm text-gray-500 ml-1">${variantRange.maxBase}</del>
+                    </>
+                    );
+                }
+                return variantRange.minBase === variantRange.maxBase
+                    ? `$${variantRange.minBase}`
+                    : `$${variantRange.minBase} - $${variantRange.maxBase}`;
+            }
+            if (!hasVariant) {
+                return product.discount > 0 ? (
+                    <>
+                    ${discountedPrice}{' '}
+                    <del className="text-sm text-gray-500 ml-1">${product.price}</del>
+                    </>
+                ) : (
+                    `$${product.price}`
+                );
+            }
+        } else if (variantRange) {
+            return product.discount > 0
+            ?
+                <>
+                    ${variantRange.minDiscount}{' '}
+                    <del className="text-sm text-gray-500 ml-1">${variantRange.minBase}</del>
+                </>
+            : `$${variantRange.minBase}`;
+        }
+
+        return formatPriceDisplay(product.price, product.discount);
+    }, [formatPriceDisplay]);
+  
+    return (
     <div className='widget widget-search' ref={dropdownRef}>
         <form className='search-wrapper mb-3' onSubmit={(e) => e.preventDefault()}>
             <input type='text' name= "search" id = "search" placeholder='Search...'
-            value={searchTerm}
+            value={localSearchTerm}
             onChange={handleSearchChange}/>
 
             <button type='submit'>
@@ -217,109 +366,96 @@ const Search = ({products}) => {
                         alt='Selected reference'
                         style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #dee2e6' }}
                     />
-                    <div className='flex-grow-1'>
-                        {/* <label htmlFor='image-threshold' className='form-label small text-muted mb-1'>Similarity threshold ({imageThreshold})</label>
-                        <input
-                            id='image-threshold'
-                            type='range'
-                            min='0'
-                            max='64'
-                            value={imageThreshold}
-                            className='form-range'
-                            onChange={(e) => setImageThreshold(Number(e.target.value))}
-                        /> */}
-                        {/* <div className='d-flex justify-content-between small text-muted'>
-                            <span>More results</span>
-                            <span>Closer matches</span>
-                        </div> */}
-                    </div>
                     <button type='button' className='btn btn-outline-secondary btn-sm' onClick={clearImageSearch}>
                         Clear
                     </button>
                 </div>
             )}
+
+            <div className='mt-3'>
+                <label htmlFor='image-threshold-input' className='form-label small text-muted mb-1'>Match strictness</label>
+                <input
+                    id='image-threshold-input'
+                    type='range'
+                    min='0'
+                    max='64'
+                    step='1'
+                    value={imageThreshold}
+                    className='form-range'
+                    onChange={handleImageThresholdChange}
+                    disabled={!imageFile}
+                />
+                <p className='small text-muted mb-0'>Maximum Hamming distance: {imageThreshold}. Lower values return only near-identical matches.</p>
+            </div>
         </div>
 
         <div  style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY :"auto"}}>
             {
-                showTextResults && filteredProducts.slice(0, 20).map((product) => {
-                    const hasVariant = product.colors && product.colors.length > 0 && Array.isArray(product.colorPrices) && product.colorPrices.length > 0;
-                    let variantRange = null;
-                    if(hasVariant){
-                        const prices = product.colors.map((c, idx) => product.colorPrices[idx]).filter(v=>v!==undefined);
-                        const min = Math.min(...prices);
-                        const max = Math.max(...prices);
-                        variantRange = {
-                            minBase: min.toFixed(2),
-                            maxBase: max.toFixed(2),
-                            minDiscount: (min - (min * product.discount)/100).toFixed(2),
-                            maxDiscount: (max - (max * product.discount)/100).toFixed(2)
-                        };
-                    }
-                    const oneVariant = product.colors && product.colors.length == 1 && Array.isArray(product.colorPrices) && product.colorPrices.length == 1;
-                    const discountedPrice = (!hasVariant && product.discount > 0) ? (product.price - (product.price * product.discount) / 100).toFixed(2) : null;
-                    
-                    const renderPrice = () => {
-                        if (!oneVariant) {
-                            if (hasVariant) {
-                            if (product.discount > 0) {
-                                return (
-                                <>
-                                    ${variantRange.minDiscount}
-                                    <del className="text-sm text-gray-500 ml-1">${variantRange.minBase}</del>
-                                    - ${variantRange.maxDiscount}
-                                    <del className="text-sm text-gray-500 ml-1">${variantRange.maxBase}</del>
-                                </>
-                                );
-                            } else {
-                                return variantRange.minBase === variantRange.maxBase
-                                ? `$${variantRange.minBase}`
-                                : `$${variantRange.minBase} - $${variantRange.maxBase}`;
-                            }
-                            } else {
-                            return product.discount > 0 ? (
-                                <>
-                                ${discountedPrice}{' '}
-                                <del className="text-sm text-gray-500 ml-1">${product.price}</del>
-                                </>
-                            ) : (
-                                `$${product.price}`
-                            );
-                            }
-                        } else {
-                            return product.discount > 0
-                            ? 
-                                <>
-                                    ${variantRange.minDiscount}{' '}
-                                    <del className="text-sm text-gray-500 ml-1">${variantRange.minBase}</del>
-                                </>
-                            : `$${variantRange.minBase}`;
-                        }
-                        };
-
-                    return(
-                    <Link key = {product._id.toString()} href = {`/shop/${product._id.toString()}`}>
-                        <div className='d-flex gap-3 p-2'>
-                            <div>
-                                <div className='pro-thumb h-25'>
-                                    <img src = {product.images[0]} alt = "" className='flex-shrink-0'/>
+                showTextResults && (
+                    <>
+                        {isTextSearching && (
+                            <div className='p-2 text-center text-muted small'>Searching...</div>
+                        )}
+                        {!isTextSearching && textSearchError && (
+                            <div className='p-2 text-center text-danger small'>{textSearchError}</div>
+                        )}
+                        {!isTextSearching && !textSearchError && textResults.length === 0 && textSuggestions.length === 0 && (
+                            <div className='p-2 text-center text-muted small'>No products found.</div>
+                        )}
+                        {!isTextSearching && textSuggestions.length > 0 && (
+                            <div className='px-2'>
+                                <p className='small text-uppercase text-muted fw-semibold mb-2'>Top suggestions</p>
+                                {textSuggestions.map((suggestion) => {
+                                    const suggestionKey = suggestion.productId || suggestion.slug || suggestion.text;
+                                    const meta = [suggestion.brand, suggestion.category].filter(Boolean).join(' • ');
+                                    const relevanceLabel = suggestion.relevance?.label;
+                                    const relevanceScore = suggestion.relevance?.score;
+                                    return (
+                                        <button
+                                            type='button'
+                                            key={suggestionKey}
+                                            className='w-100 text-start btn btn-outline-secondary mb-2'
+                                            onClick={() => handleSuggestionSelect(suggestion)}
+                                        >
+                                            <span className='d-block fw-semibold text-truncate'>{suggestion.text}</span>
+                                            <span className='d-flex justify-content-between small text-muted'>
+                                                <span>{meta || 'View matching results'}</span>
+                                                {relevanceLabel && (
+                                                    <span className='text-capitalize'>
+                                                        {relevanceLabel} match
+                                                        {Number.isFinite(relevanceScore) ? ` • ${relevanceScore}%` : ''}
+                                                    </span>
+                                                )}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                                <hr className='my-2' />
+                            </div>
+                        )}
+                        {textResults.slice(0, 20).map((product) => (
+                            <Link key={product._id?.toString() || product._id} href={`/shop/${product._id?.toString() || product._id}`}>
+                                <div className='d-flex gap-3 p-2'>
+                                    <div className='pro-thumb h-25'>
+                                        <img src={product.coverImage || product.images?.[0]} alt={product.name} className='flex-shrink-0'/>
+                                    </div>
+                                                            <div className='product-content flex-grow-1'>
+                                        <p className='mb-1 fw-semibold text-truncate'>{product.name}</p>
+                                        {product.relevance?.label && (
+                                            <p className='small text-muted mb-1 text-capitalize'>
+                                                {product.relevance.label} relevance
+                                                {Number.isFinite(product.relevance?.score) ? ` • ${product.relevance.score}% match` : ''}
+                                            </p>
+                                        )}
+                                        <h6 className='mb-0'>
+                                            {renderTextResultPrice(product)}
+                                        </h6>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className='product-content'>
-                                <p>
-                                    <Link href = {`/shop/${product._id.toString()}`}>
-                                    {product.name}
-                                    </Link>
-                                </p>
-                                <h6>
-                                    {renderPrice()}
-                                </h6>
-                            </div>
-                        </div>
-                    </Link>
-                    )
-                })
+                            </Link>
+                        ))}
+                    </>
+                )
             }
 
             {showImageResults && (
@@ -332,13 +468,8 @@ const Search = ({products}) => {
                     )}
                     {imageMatches.slice(0, 10).map((match) => {
                         const { previewUrl, previewAlt, bestMatch } = getMatchPreview(match);
-                        const variantMatches = Array.isArray(match.variantMatches) ? match.variantMatches : [];
-                        const similarOptions = Array.isArray(match.similarOptions) ? match.similarOptions : [];
-                        const hasVariantMatches = variantMatches.length > 0;
                         const matchSimilarity = Number(bestMatch?.similarity ?? match.similarity);
                         const matchKey = match.productId || `${match.productName}-${match.slug || ''}`;
-
-                        console.log(match)
                         return (
                             <Link key={matchKey} href={`/shop/${match.productId}`}>
                                 <div className='d-flex flex-column gap-2 p-2'>
@@ -364,72 +495,9 @@ const Search = ({products}) => {
                                             {Number.isFinite(matchSimilarity) && (
                                                 <p className='small text-muted mb-0'>{Math.round(matchSimilarity)}% visual match</p>
                                             )}
-                                            {/* {bestMatch?.matchType && (
-                                                <p className='small text-muted mb-0'>
-                                                    {bestMatch.matchType === 'color'
-                                                        ? `Matches option${bestMatch.colorLabel ? `: ${bestMatch.colorLabel}` : ''}`
-                                                        : 'Matches primary product photo'}
-                                                </p>
-                                            )} */}
-                                            {/* {!bestMatch?.matchType && hasVariantMatches && similarOptions.length > 0 && (
-                                                <p className='small text-muted mb-0'>
-                                                    Matches option{similarOptions.length > 1 ? 's' : ''}: {similarOptions[0]}
-                                                </p>
-                                            )} */}
                                         </div>
                                     </div>
-                                    {/* {hasVariantMatches && (
-                                        <div className='d-flex flex-wrap gap-2 ps-1'>
-                                            {variantMatches.map((variant) => {
-                                                const variantKey = `${variant.fingerprint || variant.index}-${variant.imageUrl}`;
-                                                return (
-                                                    <div key={variantKey} className='d-flex flex-column align-items-center small text-muted'>
-                                                        <img
-                                                            src={variant.imageUrl}
-                                                            alt={variant.colorLabel ? `${variant.colorLabel} option` : 'Variant match'}
-                                                            style={{
-                                                                width: '48px',
-                                                                height: '48px',
-                                                                objectFit: 'cover',
-                                                                borderRadius: '6px',
-                                                                border:
-                                                                    variant.fingerprint === bestMatch?.fingerprint
-                                                                        ? '2px solid #28a745'
-                                                                        : '1px solid #dee2e6',
-                                                            }}
-                                                        />
-                                                        {variant.colorLabel && (
-                                                            <span className='text-capitalize mt-1'>{variant.colorLabel}</span>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )} */}
-                                {/* {!hasVariantMatches && bestMatch?.matchType === 'primary' && Array.isArray(match.primaryMatches) && match.primaryMatches.length > 1 && (
-                                        <div className='d-flex flex-wrap gap-2 ps-1'>
-                                            {match.primaryMatches.map((primary) => {
-                                                const primaryKey = `${primary.fingerprint || primary.index}-${primary.imageUrl}`;
-                                                return (
-                                                    <img
-                                                        key={primaryKey}
-                                                        src={primary.imageUrl}
-                                                        alt='Primary match'
-                                                        style={{
-                                                            width: '48px',
-                                                            height: '48px',
-                                                            objectFit: 'cover',
-                                                            borderRadius: '6px',
-                                                            border:
-                                                                primary.fingerprint === bestMatch?.fingerprint
-                                                                    ? '2px solid #28a745'
-                                                                    : '1px solid #dee2e6',
-                                                        }}
-                                                    />
-                                                );
-                                            })}
-                                        </div>
-                                    )} */}
+  
                                 </div>
                             </Link>
                         );
@@ -445,17 +513,13 @@ const Search = ({products}) => {
 }
 
 Search.propTypes = {
-    products: PropTypes.arrayOf(
-        PropTypes.shape({
-            _id: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
-            name: PropTypes.string.isRequired,
-            images: PropTypes.arrayOf(PropTypes.string),
-            price: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-            discount: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-            colors: PropTypes.arrayOf(PropTypes.string),
-            colorPrices: PropTypes.arrayOf(PropTypes.number),
-        })
-    ).isRequired,
+    searchTerm: PropTypes.string,
+    onSearchTermChange: PropTypes.func,
+};
+
+Search.defaultProps = {
+    searchTerm: '',
+    onSearchTermChange: undefined,
 };
 
 export default Search

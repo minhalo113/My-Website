@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import PageHeader from '../../components/PageHeader'
-import { useState } from 'react';
 
 import ProductCards from './ProductCards';
 import Paginations from './Paginations';
@@ -10,68 +9,111 @@ import PopularPost from './PopularPost';
 import api from '../../src/api/api';
 
 const Shop = () => {
-  // const [Data, setData] = useState([]);
-  const [products, setproducts] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [categories, setAllCategories] = useState([]);
-  // useEffect(() => {
-  //     fetch("/data/products.json")
-  //     .then(res => res.json())
-  //     .then(data => {setData(data); setproducts(data)})
-  //     .catch(error => console.error("Error fetching prodcuts:", error))
-    
-  // }, [])
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState('');
+  const [searchFacets, setSearchFacets] = useState(null);
 
   useEffect(() =>{
-    const fetchData = async() => {
+    let ignore = false;
+    const fetchCategories = async() => {
         try{
-            const allProducts = await api.get('/customers-products-get', {withCredentials: true})
             const allCategories = await api.get('/customers-category-get', {withCredentials: true})
-
-            setproducts(allProducts.data.products);
-            setAllProducts(allProducts.data.products);
-            setAllCategories(allCategories.data.categorys);
+            if (!ignore) {
+              setAllCategories(allCategories.data.categorys || []);
+            }
         }catch(err){
             console.log(err)
-        }finally{
-            // setLoading(false);
         }
     };
 
-    fetchData();
+    fetchCategories();
+    return () => {
+      ignore = true;
+    };
 }, [])
 
   const [GridList, setGridList] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
+  const [searchValue, setSearchValue] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("all")
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+  useEffect(() => {
+    let ignore = false;
+        const fetchProducts = async () => {
+      setIsLoadingProducts(true);
+      setProductsError('');
+      try {
+        const params = {
+          page: currentPage,
+          parPage: productsPerPage,
+        };
 
-  const startResult = indexOfFirstProduct + 1;
-  const endResult = Math.min(indexOfLastProduct, products.length);
+        if (searchValue) {
+          params.searchValue = searchValue;
+        }
+
+        if (selectedCategory && selectedCategory !== 'all') {
+          params.category = selectedCategory;
+        }
+
+        const { data } = await api.get('/customers-products-get', {
+          params,
+          withCredentials: true,
+        });
+
+        if (ignore) return;
+
+        setProducts(Array.isArray(data?.products) ? data.products : []);
+        const totalCount = Number(data?.totalProduct);
+        setTotalProducts(Number.isFinite(totalCount) ? totalCount : 0);
+        setSearchFacets(data?.facets || null);
+      } catch (err) {
+        if (ignore) return;
+        console.log(err);
+        setProducts([]);
+        setTotalProducts(0);
+        setProductsError('Failed to load products. Please try again.');
+        setSearchFacets(null);
+      } finally {
+        if (!ignore) {
+          setIsLoadingProducts(false);
+        }
+      }
+    };
+
+    fetchProducts();
+
+    return () => {
+      ignore = true;
+    };
+  }, [currentPage, productsPerPage, searchValue, selectedCategory]);
+
+  const currentProducts = products;
+
+  const startResult = totalProducts === 0 ? 0 : (currentPage - 1) * productsPerPage + 1;
+  const endResult = Math.min(currentPage * productsPerPage, totalProducts);
 
   const paginate = (pageNumber) =>{
     setCurrentPage(pageNumber)
   }
 
-  const [selectedCategory, setSelectedCategory] = useState("all")
   const menuItems = [...new Set(categories.map((category) => category.name))];
 
   const filterItem = (curcat) => {
-    if (curcat === 'all'){
-      setproducts(allProducts);
-    }else{
-      const newItem = allProducts.filter((newVal) =>{
-        return newVal.category === curcat;
-      })
-      setproducts(newItem);
-    }
-  
     setSelectedCategory(curcat);
+    setCurrentPage(1);
   }
+
+  const handleSearchTermChange = useCallback((value) => {
+    setSearchValue(value);
+    setCurrentPage(1);
+    setSelectedCategory('all');
+  }, [])
 
   return (
     <div>
@@ -83,7 +125,7 @@ const Shop = () => {
               <div className='col-lg-8 col-12'>
                 <article>
                   <div className='shop-title d-flex flex-warp justify-content-between'>
-                    <p>{`Showing ${String(startResult).padStart(2, '0')} - ${String(endResult).padStart(2, '0')} of ${products.length} Results`}</p>
+                    <p>{`Showing ${String(startResult).padStart(2, '0')} - ${String(endResult).padStart(2, '0')} of ${totalProducts} Results`}</p>
                     <div className={`product-view-mode ${GridList ? "gridActive" : "listActive"}`}>
                       <a className='grid' onClick = {() => setGridList(!GridList)}>
                         <i className='icofont-ghost'></i>
@@ -97,12 +139,22 @@ const Shop = () => {
 
                   {/* product cards */}
                   <div>
-                    <ProductCards GridList= {GridList} products = {currentProducts}/>
+                    {productsError && (
+                      <div className='alert alert-danger' role='alert'>
+                        {productsError}
+                      </div>
+                    )}
+                    {!productsError && isLoadingProducts && (
+                      <div className='py-4 text-center text-muted'>Loading products...</div>
+                    )}
+                    {!isLoadingProducts && !productsError && (
+                      <ProductCards GridList= {GridList} products = {currentProducts}/>
+                    )}
                   </div>
 
                   <Paginations
                   productsPerPage = {productsPerPage}
-                  totalProducts = {products.length}
+                  totalProducts = {totalProducts}
                   paginate = {paginate}
                   activePage = {currentPage}/>
                   </article>
@@ -110,10 +162,18 @@ const Shop = () => {
 
               <div className='col-lg-4 col-12'>
                 <aside>
-                  <Search products={products}/>
+                  <Search
+                    searchTerm={searchValue}
+                    onSearchTermChange={handleSearchTermChange}
+                  />
                   {/* {console.log(menuItems === undefined)} */}
-                  <ShopCategory filterItem ={filterItem} menuItems={menuItems} setProducts = {setproducts}
-                  selectedCategory = {selectedCategory} setSelectedCategory = {setSelectedCategory}/>
+                  <ShopCategory                     
+                    filterItem ={filterItem}
+                    menuItems={menuItems}
+                    selectedCategory = {selectedCategory}
+                    categoryFacets={searchFacets?.categories}
+                    totalProducts={totalProducts}
+                  />
                   <PopularPost/>
                 </aside>
               </div>
