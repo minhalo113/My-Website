@@ -41,6 +41,8 @@ const Shop = () => {
   const productsPerPage = 12;
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
 
   useEffect(() => {
     let ignore = false;
@@ -59,6 +61,14 @@ const Shop = () => {
 
         if (selectedCategory && selectedCategory !== 'all') {
           params.category = selectedCategory;
+        }
+
+        if (minPrice != null) {
+          params.minPrice = minPrice;
+        }
+
+        if (maxPrice != null) {
+          params.maxPrice = maxPrice;
         }
 
         const { data } = await api.get('/customers-products-get', {
@@ -91,7 +101,7 @@ const Shop = () => {
     return () => {
       ignore = true;
     };
-  }, [currentPage, productsPerPage, searchValue, selectedCategory]);
+  }, [currentPage, productsPerPage, searchValue, selectedCategory, minPrice, maxPrice]);
 
   const currentProducts = products;
 
@@ -114,6 +124,29 @@ const Shop = () => {
     setCurrentPage(1);
     setSelectedCategory('all');
   }, [])
+
+  const handlePriceFilterChange = useCallback(({ min, max }) => {
+    const normalizedMin = Number.isFinite(min) ? Number(min.toFixed(2)) : null;
+    const normalizedMax = Number.isFinite(max) ? Number(max.toFixed(2)) : null;
+
+    let didChange = false;
+
+    setMinPrice((prev) => {
+      if (prev === normalizedMin) return prev;
+      didChange = true;
+      return normalizedMin;
+    });
+
+    setMaxPrice((prev) => {
+      if (prev === normalizedMax) return prev;
+      didChange = true;
+      return normalizedMax;
+    });
+
+    if (didChange) {
+      setCurrentPage(1);
+    }
+  }, []);
 
   return (
     <div>
@@ -165,6 +198,9 @@ const Shop = () => {
                   <Search
                     searchTerm={searchValue}
                     onSearchTermChange={handleSearchTermChange}
+                    minPrice = {minPrice}
+                    maxPrice = {maxPrice}
+                    onPriceRangeChange= {handlePriceFilterChange}
                   />
                   {/* {console.log(menuItems === undefined)} */}
                   <ShopCategory                     

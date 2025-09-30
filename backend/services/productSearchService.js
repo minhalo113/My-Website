@@ -1,4 +1,5 @@
 import productModel from '../models/productModel.js';
+import { createEffectivePriceExpression, computeEffectivePrice } from '../utils/effectivePrice.js';
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 60;
@@ -77,6 +78,13 @@ const sanitizeCategory = (value) => {
     return trimmed;
 };
 
+const sanitizePrice = (value) => {
+    if (value === undefined || value === null || value === '') return null;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) return null;
+    return Number(parsed.toFixed(2));
+};
+
 const mapFacetEntries = (entries = []) => {
     if (!Array.isArray(entries)) return [];
     return entries
@@ -115,6 +123,8 @@ const normalizeResults = (docs, { sanitizedTerm }) => {
             colorPrices,
             coverImage: images[0] || null,
         };
+
+        product.price = computeEffectivePrice(product);
 
         delete product.score;
 
@@ -260,12 +270,23 @@ export const searchCatalogProducts = async ({
     limit,
     includeFacets = true,
     includeSuggestions = false,
+    minPrice,
+    maxPrice,
 } = {}) => {
     const sanitizedTerm = sanitizeTerm(term);
     const sanitizedCategory = sanitizeCategory(category);
     const normalizedPage = toPositiveInt(page, 1, { min: 1 });
     const normalizedLimit = toPositiveInt(limit, DEFAULT_PAGE_SIZE, { min: 1, max: MAX_PAGE_SIZE });
     const skip = normalizedLimit * (normalizedPage - 1);
+
+    let sanitizedMinPrice = sanitizePrice(minPrice);
+    let sanitizedMaxPrice = sanitizePrice(maxPrice);
+
+    if (sanitizedMinPrice != null && sanitizedMaxPrice != null && sanitizedMaxPrice < sanitizedMinPrice) {
+        const temp = sanitizedMinPrice;
+        sanitizedMinPrice = sanitizedMaxPrice;
+        sanitizedMaxPrice = temp;
+    }
 
     const shouldCache = Boolean(sanitizedTerm);
     const cacheKey = shouldCache
@@ -276,6 +297,8 @@ export const searchCatalogProducts = async ({
             limit: normalizedLimit,
             includeFacets,
             includeSuggestions,
+            minPrice: sanitizedMinPrice,
+            maxPrice: sanitizedMaxPrice,
         })
         : null;
 
@@ -292,17 +315,31 @@ export const searchCatalogProducts = async ({
         }
     }
 
-    const matchStage = { isHidden: false };
+    const initialMatchStage = { isHidden: false };
 
     if (sanitizedCategory) {
-        matchStage.category = sanitizedCategory;
+        initialMatchStage.category = sanitizedCategory;
     }
+
+    const pipeline = [
+        { $match: initialMatchStage },
+        { $addFields: { effectivePrice: createEffectivePriceExpression() } },
+    ];
 
     if (sanitizedTerm) {
-        matchStage.$text = { $search: sanitizedTerm };
+        pipeline.push({ $match: { $text: { $search: sanitizedTerm } } });
     }
 
-    const pipeline = [{ $match: matchStage }];
+    if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
+        const priceMatch = {};
+        if (sanitizedMinPrice != null) {
+            priceMatch.$gte = sanitizedMinPrice;
+        }
+        if (sanitizedMaxPrice != null) {
+            priceMatch.$lte = sanitizedMaxPrice;
+        }
+        pipeline.push({ $match: { effectivePrice: priceMatch } });
+    }
 
     if (sanitizedTerm) {
         pipeline.push({ $addFields: { score: { $meta: 'textScore' } } });
@@ -316,7 +353,7 @@ export const searchCatalogProducts = async ({
         name: 1,
         brand: 1,
         category: 1,
-        price: 1,
+        price: '$effectivePrice',
         discount: 1,
         images: { $slice: ['$images', 5] },
         slug: 1,
@@ -391,6 +428,10 @@ export const searchCatalogProducts = async ({
         searchTerm: sanitizedTerm,
         filters: {
             category: sanitizedCategory || null,
+            price: {
+                min: sanitizedMinPrice,
+                max: sanitizedMaxPrice,
+            },
         },
         results,
         total,

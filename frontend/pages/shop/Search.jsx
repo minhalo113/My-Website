@@ -5,9 +5,34 @@ import api from '../../src/api/api';
 
 const DEFAULT_THRESHOLD = 64;
 const TEXT_SEARCH_DEBOUNCE = 300;
+const PRICE_FILTER_DEBOUNCE = 400;
+const PRICE_INPUT_REGEX = /^\d*(\.\d{0,2})?$/;
 
-const Search = ({searchTerm, onSearchTermChange}) => {
+const parsePriceInput = (value) => {
+    if (value === undefined || value === null) return null;
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed || trimmed === '.') return null;
+        const parsedFromString = Number(trimmed);
+        if (!Number.isFinite(parsedFromString) || parsedFromString < 0) return null;
+        return parsedFromString;
+    }
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) return null;
+    return parsed;
+};
+
+const Search = ({
+    searchTerm,
+    onSearchTermChange,
+    minPrice,
+    maxPrice,
+    onPriceRangeChange,
+}) => {
     const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
+
+    const [localMinPrice, setLocalMinPrice] = useState(minPrice != null ? String(minPrice) : '');
+    const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice != null ? String(maxPrice) : '');
 
     const [showDropdown, setShowDropdown] = useState(true)
     const dropdownRef = useRef(null)
@@ -27,6 +52,24 @@ const Search = ({searchTerm, onSearchTermChange}) => {
     useEffect(() => {
         setLocalSearchTerm(searchTerm || "");
     }, [searchTerm]);
+
+        useEffect(() => {
+        const parsed = parsePriceInput(minPrice);
+        if (parsed != null) {
+            setLocalMinPrice((prev) => (prev === String(parsed) ? prev : String(parsed)));
+        } else if (minPrice === null || minPrice === undefined || minPrice === '') {
+            setLocalMinPrice((prev) => (prev === '' ? prev : ''));
+        }
+    }, [minPrice]);
+
+    useEffect(() => {
+        const parsed = parsePriceInput(maxPrice);
+        if (parsed != null) {
+            setLocalMaxPrice((prev) => (prev === String(parsed) ? prev : String(parsed)));
+        } else if (maxPrice === null || maxPrice === undefined || maxPrice === '') {
+            setLocalMaxPrice((prev) => (prev === '' ? prev : ''));
+        }
+    }, [maxPrice]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -105,12 +148,29 @@ const Search = ({searchTerm, onSearchTermChange}) => {
         };
     }, [localSearchTerm, onSearchTermChange]);
 
+        useEffect(() => {
+        if (!onPriceRangeChange) return undefined;
+
+        const handler = setTimeout(() => {
+            const min = parsePriceInput(localMinPrice);
+            const max = parsePriceInput(localMaxPrice);
+            onPriceRangeChange({ min, max });
+        }, PRICE_FILTER_DEBOUNCE);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [localMinPrice, localMaxPrice, onPriceRangeChange]);
+
     useEffect(() => {
         setTextResults([]);
         setTextSuggestions([]);
         setTextSearchError('');
 
         const trimmed = localSearchTerm.trim();
+        const parsedMin = parsePriceInput(localMinPrice);
+        const parsedMax = parsePriceInput(localMaxPrice);
+
         if (!trimmed) {
             setIsTextSearching(false);
             return undefined;
@@ -124,6 +184,8 @@ const Search = ({searchTerm, onSearchTermChange}) => {
                     params: {
                         q: trimmed,
                         limit: 12,
+                        ...(parsedMin != null ? { minPrice: parsedMin } : {}),
+                        ...(parsedMax != null ? { maxPrice: parsedMax } : {}),
                     },
                     withCredentials: true,
                 });
@@ -151,7 +213,26 @@ const Search = ({searchTerm, onSearchTermChange}) => {
             ignore = true;
             clearTimeout(timer);
         };
-    }, [localSearchTerm]);
+    }, [localSearchTerm, localMinPrice, localMaxPrice]);
+
+    const handleMinPriceInputChange = useCallback((event) => {
+        const value = event.target.value.trim();
+        if (value === '' || PRICE_INPUT_REGEX.test(value)) {
+            setLocalMinPrice(value);
+        }
+    }, []);
+
+    const handleMaxPriceInputChange = useCallback((event) => {
+        const value = event.target.value.trim();
+        if (value === '' || PRICE_INPUT_REGEX.test(value)) {
+            setLocalMaxPrice(value);
+        }
+    }, []);
+
+    const handleClearPriceFilters = useCallback(() => {
+        setLocalMinPrice('');
+        setLocalMaxPrice('');
+    }, []);
 
     const resetPreview = useCallback(() => {
         setQueryPreview((prev) => {
@@ -252,6 +333,10 @@ const Search = ({searchTerm, onSearchTermChange}) => {
         return `$${roundedBase}`;
     }, []);
 
+    const parsedMinPrice = parsePriceInput(localMinPrice);
+    const parsedMaxPrice = parsePriceInput(localMaxPrice);
+    const showPriceRangeNotice = parsedMinPrice != null && parsedMaxPrice != null && parsedMaxPrice < parsedMinPrice;
+
     const showTextResults = Boolean(localSearchTerm.trim() && showDropdown);
     const showImageResults = Boolean(!localSearchTerm && showDropdown && (imageMatches.length > 0 || imageSearchError || isImageSearching || queryPreview));
     
@@ -347,6 +432,55 @@ const Search = ({searchTerm, onSearchTermChange}) => {
                 <i className='icofont-search-2'></i>
             </button>
         </form>
+
+        <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
+            <h6 className='fw-semibold mb-2'>Filter by price</h6>
+            <div className='row g-2 align-items-end'>
+                <div className='col'>
+                    <label className='form-label small text-muted mb-1' htmlFor='min-price-input'>Min price</label>
+                    <input
+                        id='min-price-input'
+                        type='text'
+                        inputMode='decimal'
+                        className='form-control form-control-sm'
+                        value={localMinPrice}
+                        onChange={handleMinPriceInputChange}
+                        placeholder='0.00'
+                        aria-describedby='price-filter-help'
+                    />
+                </div>
+                <div className='col'>
+                    <label className='form-label small text-muted mb-1' htmlFor='max-price-input'>Max price</label>
+                    <input
+                        id='max-price-input'
+                        type='text'
+                        inputMode='decimal'
+                        className='form-control form-control-sm'
+                        value={localMaxPrice}
+                        onChange={handleMaxPriceInputChange}
+                        placeholder='0.00'
+                        aria-describedby='price-filter-help'
+                    />
+                </div>
+            </div>
+            <div className='d-flex justify-content-between align-items-center mt-2'>
+                <small id='price-filter-help' className='text-muted'>Enter prices in CAD.</small>
+                <button
+                    type='button'
+                    className='btn btn-link btn-sm p-0'
+                    onClick={handleClearPriceFilters}
+                    disabled={!localMinPrice && !localMaxPrice}
+                >
+                    Clear
+                </button>
+            </div>
+            {showPriceRangeNotice && (
+                <p className='small text-warning mb-0 mt-2'>
+                    Max price is lower than min price. Results will swap the values automatically.
+                </p>
+            )}
+        </div>
+
 
         <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
             <label htmlFor='image-search-input' className='d-block fw-semibold mb-2'>Search with an image</label>
@@ -515,11 +649,17 @@ const Search = ({searchTerm, onSearchTermChange}) => {
 Search.propTypes = {
     searchTerm: PropTypes.string,
     onSearchTermChange: PropTypes.func,
+    minPrice: PropTypes.number,
+    maxPrice: PropTypes.number,
+    onPriceRangeChange: PropTypes.func,
 };
 
 Search.defaultProps = {
     searchTerm: '',
     onSearchTermChange: undefined,
+    minPrice: null,
+    maxPrice: null,
+    onPriceRangeChange: undefined,
 };
 
 export default Search

@@ -28,9 +28,28 @@ export const import_aliexpress_product = createAsyncThunk(
 
 export const get_products = createAsyncThunk(
     'product/get_products',
-    async({parPage, page, searchValue}, {rejectWithValue, fulfillWithValue}) => {
+    async({parPage, page, searchValue, minPrice, maxPrice}, {rejectWithValue, fulfillWithValue}) => {
         try{
-            const {data} = await api.get(`/products-get?page=${page}&&searchValue=${searchValue}&&parPage=${parPage}`, {withCredentials: true})
+            const params = new URLSearchParams()
+            if (page !== undefined && page !== null) {
+                params.append('page', page)
+            }
+            if (searchValue !== undefined && searchValue !== null) {
+                params.append('searchValue', searchValue)
+            }
+            if (parPage !== undefined && parPage !== null) {
+                params.append('parPage', parPage)
+            }
+            if (minPrice !== undefined && minPrice !== null) {
+                params.append('minPrice', minPrice)
+            }
+            if (maxPrice !== undefined && maxPrice !== null) {
+                params.append('maxPrice', maxPrice)
+            }
+
+            const query = params.toString()
+            const url = query ? `/products-get?${query}` : '/products-get'
+            const {data} = await api.get(url, {withCredentials: true})
             return fulfillWithValue(data)
         }catch(error){
             return rejectWithValue(error.response.data)

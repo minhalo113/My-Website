@@ -4,7 +4,8 @@ import productModel from "../../models/productModel.js";
 import categoryModel from "../../models/categoryModel.js";
 import responseReturn from "../../utils/response.js";
 import { fingerprintFromUploadResult } from "../../utils/imageFingerprint.js";
-import {searchCatalogProducts} from "../../services/productSearchService.js"
+import {searchCatalogProducts} from "../../services/productSearchService.js";
+import { computeEffectivePrice } from "../../utils/effectivePrice.js";
 import { response } from 'express';
 import {
     fetchProductsForImageSearch,
@@ -66,10 +67,11 @@ class homeControllers{
     }
 
     products_get = async(req, res) => {
-        const {page, searchValue, parPage, category} = req.query
+        const {page, searchValue, parPage, category, minPrice, maxPrice} = req.query
 
         const trimmedSearch = typeof searchValue === 'string' ? searchValue.trim() : ''
-        const shouldUseSearchServie = Boolean(trimmedSearch) || (page && parPage) || (category && category !== 'all')
+        const hasPriceFilter = minPrice !== undefined || maxPrice !== undefined
+        const shouldUseSearchServie = Boolean(trimmedSearch) || (page && parPage) || (category && category !== 'all') || hasPriceFilter
 
         if (shouldUseSearchServie) {
             try{
@@ -79,7 +81,9 @@ class homeControllers{
                     page,
                     limit: parPage,
                     includeFacets: Boolean(trimmedSearch),
-                    includeSuggestions: Boolean(trimmedSearch)
+                    includeSuggestions: Boolean(trimmedSearch),
+                    minPrice,
+                    maxPrice,
                 })
 
                 const payload = {
@@ -100,6 +104,9 @@ class homeControllers{
                 if(searchResponse.metrics){
                     payload.metrics = searchResponse.metrics
                 }
+                if (searchResponse.filters){
+                    payload.filters = searchResponse.filters
+                }
                 return responseReturn(res, 200, payload)
             }catch(error){
                 console.log(error)
@@ -109,16 +116,27 @@ class homeControllers{
 
         try{
             const products = await productModel.find({ isHidden: false }).sort({createdAt: -1})
+            const normalizedProducts = products.map((product) => {
+                const effectivePrice = computeEffectivePrice(product)
+                if (typeof product?.set === 'function') {
+                    product.set('price', effectivePrice)
+                    return product
+                }
+                return {
+                    ...product,
+                    price: effectivePrice
+                }
+            })
             const totalProduct = await productModel.countDocuments({isHidden: false})
 
-            return responseReturn(res, 200, {products, totalProduct})
+            return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
         }catch(error){
             return responseReturn(res, 500, {error: error.message})
         }
     }
 
     products_search = async(req, res) => {
-        const {q, searchValue, page, limit, parPage, category} = req.query
+        const {q, searchValue, page, limit, parPage, category, minPrice, maxPrice} = req.query
 
         const rawTerm = typeof q === 'string' ? q : searchValue
         const trimmedTerm = typeof rawTerm === 'string' ? rawTerm.trim() : ''
@@ -156,7 +174,9 @@ class homeControllers{
                 page,
                 limit: sizeParam,
                 includeFacets: true,
-                includeSuggestions,
+                includeSuggestions: true,
+                minPrice,
+                maxPrice,
             })
 
             return responseReturn(res, 200, {

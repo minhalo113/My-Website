@@ -6,6 +6,7 @@ import { response } from "express";
 import crypto from 'crypto';
 import axios from 'axios';
 import parseColorPrices from '../../utils/parseColorPrices.js';
+import { createEffectivePriceExpression, computeEffectivePrice } from '../../utils/effectivePrice.js';
 import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
 import {
     extractPublicId,
@@ -23,6 +24,21 @@ const normalizeUploadList = (value) => {
     }
     return value ? [value] : [];
 }
+
+const applyEffectivePriceToDocs = (items = []) => {
+    if (!Array.isArray(items)) return [];
+    return items.map((product) => {
+        const effectivePrice = computeEffectivePrice(product);
+        if (product && typeof product.set === 'function') {
+            product.set('price', effectivePrice);
+            return product;
+        }
+        return {
+            ...product,
+            price: effectivePrice,
+        };
+    });
+};
 
 class productController{
     checkDuplicateLink = async(link, excludeId = null) => {
@@ -144,36 +160,72 @@ class productController{
     }
 
     products_get = async(req, res) => {
-        const {page, searchValue, parPage} = req.query
+        const {page, searchValue, parPage, minPrice, maxPrice} = req.query
         const {id} = req;
 
-        const skipPage = parseInt(parPage) * (parseInt(page) - 1)
+        const parsedParPage = parseInt(parPage)
+        const parsedPage = parseInt(page)
+        const limitValue = Number.isFinite(parsedParPage) && parsedParPage > 0 ? parsedParPage : 0
+        const skipPage = limitValue && Number.isFinite(parsedPage) ? limitValue * (parsedPage - 1) : 0
+
+        const parsedMinPrice = Number(minPrice)
+        const parsedMaxPrice = Number(maxPrice)
+
+        let normalizedMin = Number.isFinite(parsedMinPrice) && parsedMinPrice >= 0 ? Number(parsedMinPrice.toFixed(2)) : null
+        let normalizedMax = Number.isFinite(parsedMaxPrice) && parsedMaxPrice >= 0 ? Number(parsedMaxPrice.toFixed(2)) : null
+
+        if (normalizedMin != null && normalizedMax != null && normalizedMax < normalizedMin) {
+            const temp = normalizedMin
+            normalizedMin = normalizedMax
+            normalizedMax = temp
+        }
+        const priceConditions = []
+        if (normalizedMin != null) {
+            priceConditions.push({ $gte: [createEffectivePriceExpression(), normalizedMin] })
+        }
+
+        if (normalizedMax != null) {
+            priceConditions.push({ $lte: [createEffectivePriceExpression(), normalizedMax] })
+        }
+
+        const baseQuery = {}
+        if (priceConditions.length === 1) {
+            baseQuery.$expr = priceConditions[0]
+        } else if (priceConditions.length === 2) {
+            baseQuery.$expr = { $and: priceConditions }
+        }
 
         try{
             if (searchValue) {
-                const products = await productModel.find({
+                const searchQuery = {
+                    ...baseQuery,
                     $text: {$search: searchValue}
-                }).skip(skipPage).limit(parPage).sort({createAt: -1})
+                }
 
-                const totalProduct = await productModel.find({
-                    $text: {$search: searchValue}
-                }).countDocuments()
+                const products = await productModel.find(searchQuery).skip(skipPage).limit(limitValue).sort({createAt: -1})
+                const normalizedProducts = applyEffectivePriceToDocs(products)
+
+                const totalProduct = await productModel.find(searchQuery).countDocuments()
 
 
-                return responseReturn(res, 200, {products, totalProduct})
-            }else if(parPage && page){
-                const products = await productModel.find({
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
+                return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
+            }else if(limitValue && Number.isFinite(parsedPage)){
+                const products = await productModel.find(baseQuery)
+                    .skip(skipPage)
+                    .limit(limitValue)
+                    .sort({createdAt: -1})
 
-                const totalProduct = await productModel.find({
-                }).countDocuments()
+                    const normalizedProducts = applyEffectivePriceToDocs(products)
+
+                    const totalProduct = await productModel.find(baseQuery).countDocuments()
                 
-                return responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
             }else{
-                const products = await productModel.find({ }).sort({createdAt: -1})
-                const totalProduct = await productModel.find({ }).countDocuments()
+                const products = await productModel.find(baseQuery).sort({createdAt: -1})
+                const normalizedProducts = applyEffectivePriceToDocs(products)                
+                const totalProduct = await productModel.find(baseQuery).countDocuments()
 
-                return responseReturn(res, 200, {products, totalProduct})
+                return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
             }
         }catch(error){
             return responseReturn(res, 500, {error: error.message})

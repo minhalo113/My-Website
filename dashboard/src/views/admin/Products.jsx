@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react'; 
+import React, {useCallback, useEffect, useState } from 'react';
 import Search from '../components/Search';
 import { Link } from 'react-router-dom';
 import Pagination from '../Pagination'; 
@@ -25,6 +25,8 @@ const Products = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [searchValue, setSearchValue] = useState('')
     const [parPage, setParPage] = useState(5)
+    const [minPrice, setMinPrice] = useState(null)
+    const [maxPrice, setMaxPrice] = useState(null)
 
     useEffect(() => {
         const obj = {
@@ -32,8 +34,14 @@ const Products = () => {
             page: parseInt(currentPage),
             searchValue
         }
+        if (minPrice != null) {
+            obj.minPrice = minPrice
+        }
+        if (maxPrice != null) {
+            obj.maxPrice = maxPrice
+        }
         dispatch(get_products(obj))
-    }, [searchValue, currentPage, parPage])
+    }, [searchValue, currentPage, parPage, minPrice, maxPrice])
 
     const truncateText = (text, maxLength)=>{
         if (!text || text.length < maxLength) return text;
@@ -54,6 +62,29 @@ const Products = () => {
         if (!file) return;
         dispatch(search_product_by_image({ imageFile: file }));
     };
+
+    const handlePriceFilterChange = useCallback(({ min, max }) => {
+        const normalizedMin = Number.isFinite(min) ? Number(min.toFixed(2)) : null
+        const normalizedMax = Number.isFinite(max) ? Number(max.toFixed(2)) : null
+
+        let changed = false
+
+        setMinPrice((prev) => {
+            if (prev === normalizedMin) return prev
+            changed = true
+            return normalizedMin
+        })
+
+        setMaxPrice((prev) => {
+            if (prev === normalizedMax) return prev
+            changed = true
+            return normalizedMax
+        })
+
+        if (changed) {
+            setCurrentPage(1)
+        }
+    }, [])
 
     useEffect(() => {
         if (successMessage) {
@@ -90,6 +121,9 @@ const Products = () => {
             onImageSearch={handleImageSearch}
             imageSearchLoading={imageSearchLoading}
             enableImageSearch
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            onPriceChange={handlePriceFilterChange}
          />
 
         {(imageSearchLoading || (imageSearchResults && imageSearchResults.length > 0)) && (
