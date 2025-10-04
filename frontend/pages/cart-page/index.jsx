@@ -68,6 +68,7 @@ const CartPage = () => {
             if (user){
                 is_login = user
             }
+
             const {data} = await api.post("/create-payment-session", {
                 cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount
             });

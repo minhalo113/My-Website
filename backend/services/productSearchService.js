@@ -321,14 +321,15 @@ export const searchCatalogProducts = async ({
         initialMatchStage.category = sanitizedCategory;
     }
 
-    const pipeline = [
-        { $match: initialMatchStage },
-        { $addFields: { effectivePrice: createEffectivePriceExpression() } },
-    ];
+    const pipeline = [];
 
     if (sanitizedTerm) {
-        pipeline.push({ $match: { $text: { $search: sanitizedTerm } } });
+        pipeline.push({ $match: { ...initialMatchStage, $text: { $search: sanitizedTerm } } });
+    } else {
+        pipeline.push({ $match: initialMatchStage });
     }
+
+    pipeline.push({ $addFields: { effectivePrice: createEffectivePriceExpression() } });
 
     if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
         const priceMatch = {};
