@@ -12,7 +12,7 @@ class paymentController {
         try{
             const {cartItems, shipping, is_login, couponId, discount} = req.body;
 
-            if (!cartItems) {
+            if (!cartItems || !shipping) {
                 return responseReturn(res, 400, {error: "Missing cart or shipping information."})
             }
 
@@ -46,10 +46,13 @@ class paymentController {
                 return responseReturn(res, 400, { error: "Invalid final price after discount.", message: "Invalid final price after discount." });
             }
 
-            const order = await customerOrder.create({
-                customerId: is_login ? is_login.id : 'guest',
-                customerEmail: is_login ? is_login.email : '',
-                customerName: is_login ? is_login.name : '',
+            const customerId = is_login?.id || null;
+            const customerEmail = is_login?.email || shipping?.email || null;
+            const customerName = is_login?.name || shipping?.name || 'Guest';
+
+            const orderPayload = {
+                customerEmail,
+                customerName,
                 shippingInfo: shipping,
                 products: cartItems,
                 price: finalPrice,
@@ -57,7 +60,13 @@ class paymentController {
                 delivery_status: 'Pending',
                 order_status: 'Pending',
                 date: moment(Date.now()).format('LLL')
-            })
+            }
+
+            if (customerId) {
+                orderPayload.customerId = customerId;
+            }
+
+            const order = await customerOrder.create(orderPayload)
 
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
@@ -99,13 +108,21 @@ class paymentController {
             const sess = event.data.object;
 
             const email = sess.customer_details?.email || sess.customer_email;
+            const name = sess.customer_details?.name
 
             const orderId = sess.metadata?.orderId;
             const couponId = sess.metadata?.couponId;
 
             if(orderId) {
                 try{
-                    await customerOrder.findByIdAndUpdate(orderId, {payment_status: 'Uncaptured'})
+                    const updatePayload = {payment_status: 'Uncaptured'};
+                    if(email){
+                        updatePayload.customerEmail = email;
+                    }
+                    if (name) {
+                        updatePayload.customerName = name;
+                    }
+                    await customerOrder.findByIdAndUpdate(orderId, updatePayload);
                 }catch(err){
                     console.error('Order updated failed', err.message);
                 }
