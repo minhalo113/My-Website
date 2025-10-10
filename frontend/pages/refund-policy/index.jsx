@@ -6,23 +6,111 @@ const RefundPolicy = () => {
     <div>
         <PageHeader title="Refund Policy" curPage="Refund Plicy"></PageHeader>
         <div className='container'>
-        <p><strong>Refund Policy</strong></p>
-        <p>We have a 30-day return policy, which means you have 30 days after receiving your item to request a return. To be eligible for a return, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You’ll also need the receipt or proof of purchase. To start a return, you can contact us at <a href="mailto:ahistoryfactaday@gmail.com">ahistoryfactaday@gmail.com</a>. Items sent back to us without first requesting a return will not be accepted. You can always contact us for any return question at <a href="mailto:ahistoryfactaday@gmail.com">ahistoryfactaday@gmail.com</a>. </p>
-        <p><strong>Damages and issues</strong></p>
-        <p>Please inspect your order upon reception and contact us immediately if the item is defective, damaged or if you receive the wrong item, so that we can evaluate the issue and make it right.</p>
-        <p><strong>Exceptions / non-returnable items</strong></p> 
-        <p>Certain types of items cannot be returned. Please get in touch if you have questions or concerns about your specific item. Unfortunately, we cannot accept returns on sale items or gift cards.</p>
-        <p><strong>Exchanges</strong> </p>
-        <p>The fastest way to ensure you get what you want is to return the item you have, and once the return is accepted, make a separate purchase for the new item.</p>
+        <h2>Cancellations and Returns</h2>
+        <p><strong>About Cancellations</strong></p>
+        <p>We understand that during the online shopping process, you may change your mind. In order to provide you with an unparalleled shopping experience, below is our detailed policy on order cancellations, returns and refunds.</p>
+        <div style={{ margin: "20px 0" }}>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            <li
+              style={{
+                position: "relative",
+                paddingLeft: "22px",
+                margin: "10px 0",
+                lineHeight: "1.6",
+              }}
+            >
+              <span
+                style={{ color: "#cc0000", fontWeight: "bold", position: "absolute", left: 0 }}
+              >
+                •
+              </span>
+              <span style={{ color: "#cc0000", fontWeight: "bold" }}>
+                Cancellation period:
+              </span>{" "}
+              Ordered products can be canceled unconditionally before the payment was captured.
+            </li>
 
-        <p><strong>European Union 14 day cooling off period</strong> </p>
-        <p>Notwithstanding the above, if the merchandise is being shipped into the European Union, you have the right to cancel or return your order within 14 days, for any reason and without a justification. As above, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You’ll also need the receipt or proof of purchase.</p>
+            <li
+              style={{
+                position: "relative",
+                paddingLeft: "22px",
+                margin: "10px 0",
+                lineHeight: "1.6",
+              }}
+            >
+              <span
+                style={{ color: "#cc0000", fontWeight: "bold", position: "absolute", left: 0 }}
+              >
+                •
+              </span>
+              <span style={{ color: "#cc0000", fontWeight: "bold" }}>
+                After the payment was captured:
+              </span>{" "}
+              We will not be able to accept the refund because the payment and quota of reserved products have
+              been submitted to the studio and have entered the preparation stage.
+            </li>
+          </ul>
+        </div>
+        <p><strong>About Cancellations</strong></p>
+        <p>
+          We will undoubtedly carefully select and carefully package the items you order to ensure that your items are not only of the highest possible quality, but also arrive safely at your designated shipping address. However, sometimes items do become damaged in transit, or have some form of manufacturing defect that renders the item unfit for its intended use. If this happens to your product, please immediately contact us through email to handle it.
+        </p>
+            <div style={{ margin: "20px 0" }}>
+      {/* Red Note Section */}
+      <p
+        style={{
+          color: "#cc0000",
+          fontWeight: "bold",
+          fontStyle: "italic",
+          marginBottom: "8px",
+        }}
+      >
+        *Note* :
+      </p>
+      <p
+        style={{
+          color: "#cc0000",
+          lineHeight: "1.6",
+          margin: "0 0 20px",
+        }}
+      >
+Customers who purchase goods from us should note that all return, exchange, or compensation requests must be made within 72 hours of receiving the goods at their designated shipping address. Our professional assistants will help you process your application immediately after receiving it. If you receive a damaged or defective product, we will request photographic evidence of the package or the specific product in question. We will review the photo and discuss it with you as soon as possible.
+      </p>
+    </div>
+        
+            <div style={{ margin: "30px 0", border: "1px solid #ddd" }}>
+      {/* Header with yellow background */}
+      <div
+        style={{
+          backgroundColor: "yellow",
+          padding: "10px",
+          fontWeight: "bold",
+          fontSize: "16px",
+          borderBottom: "1px solid #ddd",
+        }}
+      >
+        Instructions for taking photographic evidence of damaged products:
+      </div>
 
-        <p><strong>Refunds</strong></p> 
-        <p>We will notify you once we’ve received and inspected your return, and let you know if the refund was approved or not. If approved, you’ll be automatically refunded on your original payment method within 10 business days. Please remember it can take some time for your bank or credit card company to process and post the refund too. If more than 15 business days have passed since we’ve approved your return, please contact us at ahistoryfactaday@gmail.com.</p>
-
+      {/* Step 1 */}
+      <div style={{ padding: "15px", fontSize: "15px", lineHeight: "1.6" }}>
+        <p>
+          <strong>1.</strong> After receiving the product, it is required to
+          record the unboxing video and take photos of the damaged product
+          together with the express delivery list.
+        </p>
+    
+        {/* Step 2 */}
+        <p>
+          <strong>2.</strong> Once the damage information is
+          approved, we will transfer compensation
+          to the customer&apos;s account within 3–7 business days.
+        </p>
+      </div>
     </div>
     </div>
+    </div>
+    
   )
 }
 

@@ -1,5 +1,6 @@
 import responseReturn from "../../utils/response.js";
 import customerOrder from '../../models/orderModel.js';
+import mongoose from "mongoose";
 
 class orderController {
     get_seller_orders = async(req, res) => {
@@ -116,6 +117,37 @@ class orderController {
         }catch(err){
             console.error(err);
             return responseReturn(res, 500, {message: 'internal server error'})
+        }
+    }
+
+    lookup_guest_order = async(req, res) => {
+        const {orderRef, email} = req.body;
+
+        const trimmedOrderRef = orderRef?.trim();
+        const trimmedEmail = email?.trim();
+
+        if(!trimmedOrderRef || !trimmedEmail){
+            return responseReturn(res, 400, {message: 'Order reference and email are required.'});
+        }
+
+        if(!mongoose.Types.ObjectId.isValid(trimmedOrderRef)){
+            return responseReturn(res, 400, {message: 'Invalid order reference provided.'});
+        }
+
+        try {
+            const order = await customerOrder.findOne({
+                _id: trimmedOrderRef,
+                customerEmail: { $regex: new RegExp(`^${trimmedEmail}$`, 'i') }
+            });
+
+            if(!order){
+                return responseReturn(res, 404, {message: 'No order found for the provided details.'});
+            }
+
+            return responseReturn(res, 200, {order});
+        }catch(error){
+            console.error('Guest order lookup error:', error.message);
+            return responseReturn(res, 500, {message: 'internal server error'});
         }
     }
 }
