@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { ChevronDown, Clock, Package, Truck, CheckCircle2 } from "lucide-react";
+import { ChevronDown, Clock, Package, Truck, CheckCircle2, XCircle } from "lucide-react";
 
 const BRAND = "#DCA54A";
 
@@ -8,7 +8,6 @@ const OrderCard = ({ order, expanded, onToggle }) => {
   const shippingInfo = order.shippingInfo || {};
 
   const currentStep = getCurrentStep(order); 
-
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
       {/* Header */}
@@ -17,41 +16,38 @@ const OrderCard = ({ order, expanded, onToggle }) => {
           <span className="m-1 text-xs uppercase tracking-wider text-slate-500">
             Order #{order._id?.slice(-6) || ""}
           </span>
-          {order.date && (
-            <span className="m-1 text-xs text-slate-500">{order.date}</span>
-          )}
+          {order.date && <span className="m-1 text-xs text-slate-500">{order.date}</span>}
         </div>
 
         <div className="m-1 flex flex-wrap items-end gap-4 md:gap-6">
           <InfoPair label="Total" value={formatCurrency(order.price)} />
           {order.payment_status && (
-            <InfoPair label="Payment" value={<Badge tone="brand">{titleCase(order.payment_status)}</Badge>} />
-          )}
-          {order.delivery_status && (
-            <InfoPair label="Delivery" value={<Badge tone="soft">{titleCase(order.delivery_status)}</Badge>} />
+            <InfoPair label="Payment" value={<StatusBadge group="payment" value={order.payment_status} />} />
           )}
           {order.order_status && (
-            <InfoPair label="Order" value={<Badge>{titleCase(order.order_status)}</Badge>} />
+            <InfoPair label="Order" value={<StatusBadge group="order" value={order.order_status} />} />
+          )}
+          {order.delivery_status && (
+            <InfoPair label="Delivery" value={<StatusBadge group="delivery" value={order.delivery_status} />} />
           )}
         </div>
       </div>
 
-      {/* Progress */}
       <div className="mt-5">
-        <ProgressSteps current={currentStep} />
+        <ProgressSteps current={currentStep} terminalLabel={terminalLabel(order)} />
       </div>
 
       <div className="my-5 h-px w-full bg-slate-200" />
 
-      {/* Ship to */}
       {(shippingInfo.address || shippingInfo.phoneNumber || shippingInfo.postalCode) && (
         <div className="m-1 text-sm leading-6 text-slate-600">
           <span className="font-medium text-slate-900">Ship to:</span>{" "}
-          {[shippingInfo.address, shippingInfo.phoneNumber, shippingInfo.postalCode].filter(Boolean).join(" • ")}
+          {[shippingInfo.address, shippingInfo.phoneNumber, shippingInfo.postalCode]
+            .filter(Boolean)
+            .join(" • ")}
         </div>
       )}
 
-      {/* Toggle details */}
       <div className="mt-4 flex">
         <button
           type="button"
@@ -92,15 +88,25 @@ const OrderCard = ({ order, expanded, onToggle }) => {
   );
 };
 
+const StatusBadge = ({ group, value }) => {
+  const tone = pickTone(group, value);
+  const text = titleCase(value);
 
-const Badge = ({ children, tone }) => {
+  if (tone === "bad") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700">
+        <XCircle size={12} />
+        {text}
+      </span>
+    );
+  }
   if (tone === "brand") {
     return (
       <span
-        className="rounded-full px-2 py-0.5 text-xs font-semibold"
-        style={{ backgroundColor: BRAND, color: "white" }}
+        className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+        style={{ backgroundColor: BRAND }}
       >
-        {children}
+        {text}
       </span>
     );
   }
@@ -110,23 +116,16 @@ const Badge = ({ children, tone }) => {
         className="rounded-full px-2 py-0.5 text-xs font-semibold"
         style={{ backgroundColor: "rgba(220,165,74,0.12)", color: "#8f6a23" }}
       >
-        {children}
+        {text}
       </span>
     );
   }
   return (
     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
-      {children}
+      {text}
     </span>
   );
 };
-
-const InfoPair = ({ label, value }) => (
-  <div className="flex flex-col text-center md:text-left">
-    <span className="text-xs uppercase tracking-wide text-slate-500">{label}</span>
-    <span className="font-semibold text-slate-900">{value}</span>
-  </div>
-);
 
 const Steps = [
   { key: "placed", label: "Placed", icon: Clock },
@@ -135,44 +134,130 @@ const Steps = [
   { key: "delivered", label: "Delivered", icon: CheckCircle2 },
 ];
 
-const ProgressSteps = ({ current }) => {
+const ProgressSteps = ({ current, terminalLabel }) => {
+  const total = Steps.length - 1;
+  const step = Math.max(0, Math.min(current, total));
+
+  const DOT = 32;            // dot size (h-8 w-8)
+  const PAD = DOT / 2;       // 16px (center inset)
+  const GUTTER = 40;         // << shorter bar — was 12px, now 40px
+
+  const trackExpr = `calc(100% - ${(PAD + GUTTER) * 2}px)`;
+  const ratio = step / total;
+  const fillExpr  = `calc(${trackExpr} * ${ratio})`;
+
   return (
-    <div className="flex items-center justify-between gap-2">
-      {Steps.map((s, idx) => {
-        const active = idx <= current;
-        const Icon = s.icon;
-        return (
-          <div key={s.key} className="flex flex-1 items-center">
+    <div className="w-full overflow-hidden">
+      <div className="relative my-3" style={{ height: 2 }}>
+        {/* Base track */}
+        <div
+          className="absolute top-0 h-2 rounded-full bg-slate-200"
+          style={{ left: PAD + GUTTER, right: PAD + GUTTER }}
+        />
+        {/* Filled segment */}
+        <div
+          className="absolute top-0 h-2 rounded-full transition-all duration-700 ease-in-out"
+          style={{ left: PAD + GUTTER, width: fillExpr, backgroundColor: BRAND }}
+        />
+
+        {Steps.map((s, idx) => {
+          const Icon = s.icon;
+          const t = idx / total;
+          const active = idx <= step;
+          const label = idx === total && terminalLabel ? terminalLabel : s.label;
+          const leftExpr = `calc(${PAD + GUTTER}px + (${trackExpr}) * ${t})`;
+
+          return (
             <div
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${
-                active ? "border-transparent" : "border-slate-200"
-              }`}
-              style={active ? { backgroundColor: "rgba(220,165,74,0.12)", color: "#8f6a23" } : {}}
+              key={s.key}
+              className="absolute -top-3 flex flex-col items-center"
+              style={{ left: leftExpr, transform: "translateX(-50%)" }}
             >
               <div
-                className="flex h-6 w-6 items-center justify-center rounded-full"
-                style={active ? { backgroundColor: BRAND, color: "white" } : { backgroundColor: "#e2e8f0", color: "#475569" }}
+                className="flex h-8 w-8 items-center justify-center rounded-full ring-2 transition-all"
+                style={{
+                  zIndex: 1,
+                  backgroundColor: active ? BRAND : "#ffffff",
+                  color: active ? "#ffffff" : "#475569",
+                  borderColor: active ? "transparent" : "#e2e8f0",
+                  boxShadow: active ? "0 2px 6px rgba(0,0,0,0.15)" : "none",
+                }}
               >
-                <Icon size={14} />
+                <Icon size={16} />
               </div>
-              <span className="font-medium">{s.label}</span>
-            </div>
-
-            {/* connector */}
-            {idx < Steps.length - 1 && (
               <div
-                className="mx-2 h-0.5 flex-1 rounded"
-                style={{ backgroundColor: idx < current ? BRAND : "#e2e8f0" }}
-              />
-            )}
-          </div>
-        );
-      })}
+                className={`mt-2 text-xs font-medium ${
+                  active ? "text-slate-900" : "text-slate-600"
+                }`}
+                style={{ minWidth: 64, textAlign: "center" }}
+              >
+                {label}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ height: 34 }} />
     </div>
   );
 };
 
-/* ---------- utils ---------- */
+
+
+function getCurrentStep(order) {
+  const ds = (order?.delivery_status || "").toLowerCase();
+  const os = (order?.order_status || "").toLowerCase();
+  const ps = (order?.payment_status || "").toLowerCase();
+
+  if (["delivered", "returned", "cancelled"].includes(ds)) return 3;
+
+  if (["shipped", "out for delivery"].includes(ds)) return 2;
+  if (["processing", "warehouse"].includes(ds)) return 1;
+
+  if (ds === "pending") {
+    if (["accepted"].includes(os) || ["captured"].includes(ps)) return 1;
+    return 0; 
+  }
+
+  if (["accepted"].includes(os)) return 1;
+  if (["pending"].includes(os) || ["pending"].includes(ps) || ["uncaptured"].includes(ps)) return 0;
+
+  if (os === "rejected" || ps === "rejected") return 3;
+
+  return 0;
+}
+
+function terminalLabel(order) {
+  const ds = (order?.delivery_status || "").toLowerCase();
+  const os = (order?.order_status || "").toLowerCase();
+  const ps = (order?.payment_status || "").toLowerCase();
+
+  if (ds === "returned") return "Returned";
+  if (ds === "cancelled") return "Cancelled";
+  if (os === "rejected" || ps === "rejected") return "Rejected";
+  return undefined;
+}
+
+function pickTone(group, raw) {
+  const v = String(raw || "").toLowerCase();
+
+  if (group === "payment") {
+    if (v === "captured") return "brand";
+    if (v === "pending" || v === "uncaptured") return "soft";
+    if (v === "rejected") return "bad";
+  }
+  if (group === "order") {
+    if (v === "accepted") return "brand";
+    if (v === "pending") return "soft";
+    if (v === "rejected") return "bad";
+  }
+  if (group === "delivery") {
+    if (["delivered"].includes(v)) return "brand";
+    if (["pending", "processing", "warehouse", "shipped", "out for delivery"].includes(v)) return "soft";
+    if (["returned", "cancelled"].includes(v)) return "bad";
+  }
+  return "soft";
+}
 
 function formatCurrency(amount) {
   if (typeof amount !== "number") return amount ?? "-";
@@ -185,27 +270,30 @@ function formatCurrency(amount) {
 
 function titleCase(s) {
   if (!s) return s;
-return String(s)
-  .replace(/[_-]+/g, " ")
-  .replace(/\b\w/g, (c) => c.toUpperCase());
+  return String(s).replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** Map your existing order fields to a progress step index (no backend change). */
-function getCurrentStep(order) {
-  const ds = (order?.delivery_status || "").toLowerCase();
-  const os = (order?.order_status || "").toLowerCase();
+const InfoPair = ({ label, value }) => (
+  <div className="flex flex-col text-center md:text-left">
+    <span className="text-xs uppercase tracking-wide text-slate-500">{label}</span>
+    <span className="font-semibold text-slate-900">{value}</span>
+  </div>
+);
 
-  if (ds.includes("delivered")) return 3;
-  if (ds.includes("shipped")) return 2;
-  if (os.includes("processing") || ds.includes("in transit")) return 1;
-  if (os.includes("placed") || os.includes("created") || os.includes("paid")) return 0;
+InfoPair.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.node]).isRequired,
+};
 
-  // default: if we have any status, assume at least placed
-  if (order?.payment_status || order?.order_status || order?.delivery_status) return 0;
-  return 0;
-}
+StatusBadge.propTypes = {
+  group: PropTypes.oneOf(["payment", "order", "delivery"]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+};
 
-/* ---------- prop types ---------- */
+ProgressSteps.propTypes = {
+  current: PropTypes.number.isRequired,
+  terminalLabel: PropTypes.string,
+};
 
 OrderCard.propTypes = {
   order: PropTypes.shape({
@@ -213,8 +301,8 @@ OrderCard.propTypes = {
     date: PropTypes.string,
     price: PropTypes.number,
     payment_status: PropTypes.string,
-    delivery_status: PropTypes.string,
-    order_status: PropTypes.string,
+    order_status: PropTypes.string,  
+    delivery_status: PropTypes.string, 
     shippingInfo: PropTypes.shape({
       address: PropTypes.string,
       phoneNumber: PropTypes.string,
@@ -233,21 +321,6 @@ OrderCard.propTypes = {
   }).isRequired,
   expanded: PropTypes.string,
   onToggle: PropTypes.func.isRequired,
-};
-
-InfoPair.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.node]).isRequired,
-};
-
-
-Badge.propTypes = {
-  children: PropTypes.node.isRequired,
-  tone: PropTypes.oneOf(["brand", "soft"]),
-};
-
-ProgressSteps.propTypes = {
-  current: PropTypes.number.isRequired,
 };
 
 OrderCard.defaultProps = { expanded: null };

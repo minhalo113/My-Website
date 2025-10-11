@@ -121,13 +121,12 @@ class orderController {
     }
 
     lookup_guest_order = async(req, res) => {
-        const {orderRef, email} = req.body;
+        const {orderRef} = req.body;
 
         const trimmedOrderRef = orderRef?.trim();
-        const trimmedEmail = email?.trim();
 
-        if(!trimmedOrderRef || !trimmedEmail){
-            return responseReturn(res, 400, {message: 'Order reference and email are required.'});
+        if(!trimmedOrderRef){
+            return responseReturn(res, 400, {message: 'Order reference is required.'});
         }
 
         if(!mongoose.Types.ObjectId.isValid(trimmedOrderRef)){
@@ -135,13 +134,10 @@ class orderController {
         }
 
         try {
-            const order = await customerOrder.findOne({
-                _id: trimmedOrderRef,
-                customerEmail: { $regex: new RegExp(`^${trimmedEmail}$`, 'i') }
-            });
+            const order = await customerOrder.findById(trimmedOrderRef);
 
             if(!order){
-                return responseReturn(res, 404, {message: 'No order found for the provided details.'});
+                return responseReturn(res, 404, {message: 'No order found for the provided reference.'});
             }
 
             return responseReturn(res, 200, {order});

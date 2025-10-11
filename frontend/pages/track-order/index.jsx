@@ -7,7 +7,7 @@ import api from "../../src/api/api";
 const BRAND = "#DCA54A";
 
 const TrackOrderPage = () => {
-  const [lookupForm, setLookupForm] = useState({ orderRef: "", email: "" });
+  const [lookupForm, setLookupForm] = useState({ orderRef: "" });
   const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -28,7 +28,6 @@ const TrackOrderPage = () => {
     try {
       const payload = {
         orderRef: lookupForm.orderRef.trim(),
-        email: lookupForm.email.trim(),
       };
       const { data } = await api.post("/guest/orders/lookup", payload);
       setOrder(data.order || null);
@@ -36,7 +35,7 @@ const TrackOrderPage = () => {
     } catch (err) {
       const message =
         err?.response?.data?.message ||
-        "We couldn't find an order with those details. Please confirm your reference number and email.";
+        "We couldn't find an order with that reference. Please confirm the number from your confirmation email.";
       setLookupError(message);
       setOrder(null);
       setExpanded(null);
@@ -55,11 +54,11 @@ const TrackOrderPage = () => {
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-10">
           <h1 className="text-3xl font-semibold text-slate-900">Track your order</h1>
           <p className="mt-3 text-sm text-slate-600">
-            Enter the order reference from your confirmation email along with the email address used at checkout.
+            Enter the order reference from your confirmation email to check the latest status.
           </p>
 
-          <form onSubmit={handleLookup} className="mt-8 grid gap-6 md:grid-cols-3">
-            <div className="md:col-span-2">
+          <form onSubmit={handleLookup} className="mt-8 grid gap-6 md:grid-cols-[2fr_auto] md:items-end">
+            <div>
               <label className="block text-xs uppercase tracking-wide text-slate-500" htmlFor="orderRef">
                 Order reference
               </label>
@@ -75,27 +74,9 @@ const TrackOrderPage = () => {
               />
             </div>
 
-            <div className="md:col-span-1">
-              <label className="block text-xs uppercase tracking-wide text-slate-500" htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={lookupForm.email}
-                onChange={handleLookupChange}
-                placeholder="you@example.com"
-                className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2"
-                style={{ boxShadow: "none", outline: "none", ringColor: BRAND }}
-                required
-              />
-            </div>
-
             <button
               type="submit"
-              className="md:col-span-3 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ backgroundColor: BRAND }}
+                            className="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
               onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#c5923f")}
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = BRAND)}
               disabled={lookupLoading}
@@ -121,8 +102,7 @@ const TrackOrderPage = () => {
 
             {hasSearched && !order && !lookupLoading && !lookupError && (
               <p className="mt-4 text-sm text-slate-600">
-                We could not locate an order with that combination. Double-check the reference number and email address from your
-                confirmation email.
+                We could not locate an order with that reference. Double-check the number from your confirmation email.
               </p>
             )}
 
