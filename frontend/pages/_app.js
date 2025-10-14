@@ -36,18 +36,27 @@ function MyApp({ Component, pageProps }) {
     <>
     <Suspense>
     <Head>
-        <title>Toy Haven Store | Great Deals On Toys & More</title>
+        <title>A Figure A Day | Daily Deals on Collectible Figures</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta charSet="UTF-8" />
-        <meta name="description" content="Toy Haven Store offers a wide selection of toys with great deals and fast shipping." />
-        <meta name="keywords" content="toys, kids, games, Toy Haven, online store" />
+        <meta
+          name="description"
+          content="A Figure A Day curates anime statues and collectible figures with fresh deals, secure shipping, and responsive collector support."
+        />
+        <meta
+          name="keywords"
+          content="anime figures, collectible statues, a figure a day, scale figures, anime merch"
+        />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://www.toyhaven.store/" />
-        <meta property="og:title" content="Toy Haven Store | Great Deals On Toys & More" />
-        <meta property="og:description" content="Find the perfect toys for any occasion at Toy Haven Store." />
+        <link rel="canonical" href="https://www.afigureaday.com/" />
+        <meta property="og:title" content="A Figure A Day | Daily Deals on Collectible Figures" />
+        <meta
+          property="og:description"
+          content="Discover handpicked anime figures, statues, and collectibles with trustworthy sourcing and collector-friendly service."
+        />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.toyhaven.store/" />
-        <meta property="og:image" content="/cropped-cropped-DALL·E-2024-11-21-11.20.10-A-vintage-style-logo-featuring-an-open-book-in-the-center-with-an-hourglass-above-it-a-globe-on-the-left-and-a-ships-wheel-on-the-right.-The-logo-i-1.webp" />
+        <meta property="og:url" content="https://www.afigureaday.com/" />
+        <meta property="og:image" content="/images/about-figures.jpg" />
         <link rel="icon" href="/cropped-cropped-DALL·E-2024-11-21-11.20.10-A-vintage-style-logo-featuring-an-open-book-in-the-center-with-an-hourglass-above-it-a-globe-on-the-left-and-a-ships-wheel-on-the-right.-The-logo-i-1.webp" />
     </Head>
       <CartProvider>

@@ -1,8 +1,8 @@
 
 <link rel="stylesheet" href="myProjects/webProject/icofont/css/icofont.min.css"></link>
 
-const title = "About The Toy Haven"; 
-const desc = "Welcome to Toy Haven, your ultimate destination for fun, creativity, and adventure! Explore a world of exciting toys designed to spark imagination and endless joy.";
+const title = "About A Figure A Day";
+const desc = "Welcome to A Figure A Day, your daily source for anime statues, scale figures, and collectibles that bring your favorite characters to life.";
 const ItemTitle = "Categories"; 
 const quickTitle = "Quick Links"; 
 // const blogTitle = "Recent Blogs";
@@ -12,12 +12,12 @@ const addressList = [
     { iconName: 'icofont-envelope', text: ' ahistoryfactaday@gmail.com', },
 ]
 
-const socialList = [ 
-    { iconName: 'icofont-facebook', siteLink: 'https://www.facebook.com/profile.php?id=61569962775709', className: 'facebook', }, 
-    { iconName: 'icofont-x', siteLink: 'https://x.com/fact_a8206', className: 'twitter', }, 
-    { iconName: 'icofont-tiktok', siteLink: 'https://www.tiktok.com/@ahistoryfactaday', className: 'tiktok', },
-    { iconName: 'icofont-instagram', siteLink: 'https://www.instagram.com/ahistoryfactaday/?hl=en', className: 'instagram', }, 
-    { iconName: 'icofont-youtube', siteLink: 'https://www.youtube.com/@RandoHistoryFacts_', className: 'youtube', }, ]
+// const socialList = [ 
+//     { iconName: 'icofont-facebook', siteLink: 'https://www.facebook.com/profile.php?id=61569962775709', className: 'facebook', }, 
+//     { iconName: 'icofont-x', siteLink: 'https://x.com/fact_a8206', className: 'twitter', }, 
+//     { iconName: 'icofont-tiktok', siteLink: 'https://www.tiktok.com/@ahistoryfactaday', className: 'tiktok', },
+//     { iconName: 'icofont-instagram', siteLink: 'https://www.instagram.com/ahistoryfactaday/?hl=en', className: 'instagram', }, 
+//     { iconName: 'icofont-youtube', siteLink: 'https://www.youtube.com/@RandoHistoryFacts_', className: 'youtube', }, ]
 
 const ItemList = [ { text: 'All Products', link: '/shop', }, 
     { text: 'Shop', link: '/shop', }, { text: 'Blog', link: '/blog', }, 
@@ -76,7 +76,7 @@ const Footer = () => {
                                         }
                                         </ul>
                                         
-                                        <ul className='lab-ul social-icons justify-content-center'>
+                                        {/* <ul className='lab-ul social-icons justify-content-center'>
                                         {
                                             socialList.map((val, i) => (
                                                 <li key = {i}>
@@ -86,7 +86,7 @@ const Footer = () => {
                                                 </li>
                                                 ))
                                         }
-                                        </ul>
+                                        </ul> */}
                                     </div>
                                 </div>
                             </div>

@@ -6,12 +6,12 @@ import HomeImageSwiper from '../../components/HomeImageSwiper';
 
 const title = (
     <>
-        <h2 className="subtitle toy-haven-title">Toy Haven <span role="img" aria-label="teddy">🧸</span></h2>
-        <h3>Toys You <span>Love</span>, Prices You Won’t <span>Believe</span>!</h3>
+        <h2 className="subtitle a-figure-a-day-title">A Figure A Day <span role="img" aria-label="figure">🤖</span></h2>
+        <h3>Figures You <span>Love</span>, Deals You <span>Watch Daily</span>!</h3>
     </>
 )
 
-const desc = "🎲 Endless Fun, One Small Price!"
+const desc = "✨ Fresh collectible highlights, carefully packed for your shelf."
 
 const Banner = () => {
     const [productData, setProductData] = useState([])

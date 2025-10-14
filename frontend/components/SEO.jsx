@@ -27,10 +27,10 @@ SEO.propTypes = {
 }
 
 SEO.defaultProps = {
-  title: 'Toy Haven Store',
-  description: 'Toy Haven Store offers a wide selection of toys with great deals and fast shipping.',
-  keywords: 'toys, kids, games, Toy Haven, online store',
-  canonical: 'https://www.toyhaven.store/',
+  title: 'A Figure A Day',
+  description: 'A Figure A Day curates anime statues and collectibles with daily deals and dependable support.',
+  keywords: 'anime figures, collectible statues, a figure a day, scale figures, anime merch',
+  canonical: 'https://www.afigureaday.com/',
 }
 
 export default SEO

@@ -40,7 +40,7 @@ const AddProduct = () => {
         description: '',
         discount: '',
         price: "",
-        brand: "Toy Haven",
+        brand: "A Figure A Day",
         stock: "",
         sizes: '',
         deliveryTime: '',
@@ -213,7 +213,7 @@ const AddProduct = () => {
                 description: '',
                 discount: '',
                 price: "",
-                brand: "Toy Haven",
+                brand: "A Figure A Day",
                 stock: "",
                 sizes: '',
                 deliveryTime: '',
@@ -298,7 +298,7 @@ const AddProduct = () => {
         formData.append('link', state.link)
         formData.append('colors', colorArr.join(','))
         formData.append('sizes', state.sizes)
-        formData.append('shopName','Toy Haven') 
+        formData.append('shopName','A Figure A Day') 
         formData.append('category',category)
 
         for (let i = 0; i < images.length; i++) {

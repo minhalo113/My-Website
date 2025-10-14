@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 const subTitle = "Why Choose Us"; 
 const title = "Explore Our Collection"; 
-const desc = "Browse our vast collection of exciting toys on any device with ease. Discover the latest playtime innovations, fun accessories, and must-have toys at your fingertips. Just explore, shop, and bring joy to every adventure!"; 
+const desc = "Browse our growing collection of anime statues, scale figures, and desk companions with ease. Discover limited drops, everyday essentials, and display-ready pieces curated for collectors."; 
 const btnText = "Shop Now";
 
 const countList = [ 

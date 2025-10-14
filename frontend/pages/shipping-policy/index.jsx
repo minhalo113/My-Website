@@ -7,7 +7,7 @@ const ShippingPolicy = () => {
         <PageHeader title = "Shipping Policy" curPage="Shipping Policy"></PageHeader>
         <div className='container'>
         <p><strong>Shipping Policy</strong></p>
-        <p>Thank you for choosing Toy Haven! We are committed to providing you with a seamless shopping experience. Please review the following information regarding our shipping and delivery policies:</p>
+        <p>Thank you for choosing A Figure A Day! We are committed to providing you with a seamless shopping experience. Please review the following information regarding our shipping and delivery policies:</p>
 
         <p><strong>Shipping Methods and Timelines:</strong></p>
         <p>We offer flat-rate shipping for a fixed cost and free shipping on orders over $100 CAD.</p>

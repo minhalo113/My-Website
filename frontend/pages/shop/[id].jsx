@@ -44,9 +44,9 @@ const SingleProduct = () => {
   return (
     <div>
         <SEO
-            title={`${productData.name} | Toy Haven Store`}
+            title={`${productData.name} | A Figure A Day`}
             description={productData.description}
-            canonical={`https://www.toyhaven.store/product/${productData._id}`}
+            canonical={`https://www.afigureaday.com/product/${productData._id}`}
             keywords={productData.name}
             image={productData?.images?.[0]}
         />

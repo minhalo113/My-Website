@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import api from '../../src/api/api.js'
 
-const subTitle = "Discover the Joy of Play!";
-const title = "Find the Perfect Toy for Every Adventure";
+const subTitle = "Celebrate Your Fandom";
+const title = "Find the Perfect Figure for Every Collection";
 
 const HomeCategory = () => {
     const [productData, setProductData] = useState([])

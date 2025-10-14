@@ -11,9 +11,9 @@ export const Home = () => {
   return (
     <>
         <SEO
-            title="Toy Haven Store | Home"
-            description="Discover the latest toys and deals at Toy Haven Store."
-            canonical="https://www.toyhaven.store/"
+            title="A Figure A Day | Home"
+            description="Discover daily deals on curated anime figures and collectibles from A Figure A Day."
+            canonical="https://www.afigureaday.com/"
         />
         <div>
             <Banner/>
