@@ -9,7 +9,7 @@ const quickTitle = "Quick Links";
 
 const addressList = [
     { iconName: 'icofont-google-map', text: ' Edmonton, Canada.', },
-    { iconName: 'icofont-envelope', text: ' ahistoryfactaday@gmail.com', },
+    { iconName: 'icofont-envelope', text: ' figureaday.store@gmail.com', },
 ]
 
 // const socialList = [ 

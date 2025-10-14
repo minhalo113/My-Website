@@ -134,7 +134,7 @@ export const TermsOfService = () => {
           <p>We reserve the right, at our sole discretion, to update, change or replace any part of these Terms of Service by posting updates and changes to our website. It is your responsibility to check our website periodically for changes. Your continued use of or access to our website or the Service following the posting of any changes to these Terms of Service constitutes acceptance of those changes. </p>
 
           <p><strong>SECTION 20 - CONTACT INFORMATION</strong></p>
-          <p>Questions about the Terms of Service should be sent to us at ahistoryfactaday@gmail.com.</p>
+          <p>Questions about the Terms of Service should be sent to us at figureaday.store@gmail.com.</p>
       </div>
     </div>
   )

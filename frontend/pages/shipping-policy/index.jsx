@@ -32,7 +32,7 @@ const ShippingPolicy = () => {
         <p>For information about returns and exchanges, please refer to our <a title="Refund Policy" href="/refund-policy" target="_blank">Refund Policy</a>.</p>
 
         <p><strong>Contact Us:</strong></p>
-        <p>If you have any further questions or need assistance, please don&apos;t hesitate to contact our customer support team at ahistoryfactaday@gmail.com.</p>
+        <p>If you have any further questions or need assistance, please don&apos;t hesitate to contact our customer support team at figureaday.store@gmail.com.</p>
         </div>
     </div>
   )
