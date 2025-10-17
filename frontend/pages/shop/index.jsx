@@ -38,7 +38,7 @@ const Shop = () => {
   const [GridList, setGridList] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 12;
+  const productsPerPage = 30;
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [minPrice, setMinPrice] = useState(null);
