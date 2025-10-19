@@ -18,7 +18,8 @@ export const initSocket = (server) => {
                 'http://localhost:3001',
                 DASHBOARD_URL,
                 WEB_URL,
-                GIT_WEB_URL
+                GIT_WEB_URL,
+                REAL_WEB_URL_1, REAL_WEB_URL_2
             ],
             credentials: true
         }
