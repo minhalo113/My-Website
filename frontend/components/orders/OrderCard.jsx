@@ -9,7 +9,7 @@ const OrderCard = ({ order, expanded, onToggle }) => {
 
   const currentStep = getCurrentStep(order); 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+    <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:shadow-md">
       {/* Header */}
       <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-1">
@@ -44,7 +44,7 @@ const OrderCard = ({ order, expanded, onToggle }) => {
           <span className="font-medium text-slate-900">Ship to:</span>{" "}
           {[shippingInfo.address, shippingInfo.phoneNumber, shippingInfo.postalCode]
             .filter(Boolean)
-            .join(" • ")}
+            .join("   •   ")}
         </div>
       )}
 
@@ -147,7 +147,7 @@ const ProgressSteps = ({ current, terminalLabel }) => {
   const fillExpr  = `calc(${trackExpr} * ${ratio})`;
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full p-2 overflow-hidden">
       <div className="relative my-3" style={{ height: 2 }}>
         {/* Base track */}
         <div

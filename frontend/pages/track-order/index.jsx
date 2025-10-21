@@ -50,8 +50,8 @@ const TrackOrderPage = () => {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <PageHeader title="Track Order" curPage="Track Order" />
 
-      <div className="mx-auto w-full max-w-4xl px-4 py-10 lg:px-8">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:p-10">
+      <div className="px-4 py-4">
+        <section className="rounded-3xl border border-slate-200 bg-white p-4">
           <h1 className="text-3xl font-semibold text-slate-900">Track your order</h1>
           <p className="mt-3 text-sm text-slate-600">
             Enter the order reference from your confirmation email to check the latest status.
@@ -87,7 +87,7 @@ const TrackOrderPage = () => {
 
           {lookupError && <p className="mt-4 text-sm text-rose-500">{lookupError}</p>}
 
-          <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <h2 className="text-xl font-semibold text-slate-900">Results</h2>
 
             {!hasSearched && (

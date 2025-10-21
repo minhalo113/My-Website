@@ -1,6 +1,7 @@
 import axios from "axios"
+const API_CALL = process.env.API_CALL
 
 const api = axios.create({
-    baseURL: "https://api.ahistoryfactaday.org/api"
+    baseURL: API_CALL
 })
 export default api

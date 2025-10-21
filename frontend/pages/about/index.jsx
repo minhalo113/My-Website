@@ -92,8 +92,8 @@ export default function AboutUsPage() {
                     Contact support
                 </Link>
                 </div>
-          <h2 className="text-2xl font-semibold">Connect with us</h2>
-          <p className="mt-3 text-slate-600">Follow our journey for restocks, highlights and behind-the-scenes:</p>
+          {/* <h2 className="text-2xl font-semibold">Connect with us</h2>
+          <p className="mt-3 text-slate-600">Follow our journey for restocks, highlights and behind-the-scenes:</p> */}
 {/* 
           <div className="mt-6 grid gap-4 text-center sm:grid-cols-2 lg:grid-cols-3">
             <Social href="https://www.instagram.com/afigureaday" label="Instagram" />
