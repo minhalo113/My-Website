@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../../api/api"
 import {jwtDecode} from 'jwt-decode'
 
-// decode token to check role
 const returnInfo = (token) => {
     if(typeof window !== "undefined"){
         if (token){
