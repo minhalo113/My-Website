@@ -10,7 +10,7 @@ const BASE_COOKIE_PROPS = {
     httpOny: true,
     secure: process.env.NODE_ENV !== 'development',
     sameSite: 'none',
-    domain: '.ahistoryfactaday.org',
+    domain: '.afigureaday.com',
     path: '/',
 }
 

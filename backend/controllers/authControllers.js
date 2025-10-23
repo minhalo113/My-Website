@@ -31,7 +31,7 @@ class authControllers{
                         httpOnly: true,
                         secure: process.env.NODE_ENV !== 'development',
                         sameSite: 'none',
-                        domain: '.ahistoryfactaday.org',
+                        domain: '.afigureaday.com',
                         path: '/',
                         maxAge: ONE_WEEK,
                     });
