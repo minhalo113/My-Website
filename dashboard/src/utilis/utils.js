@@ -11,3 +11,18 @@ export const extractColors = (str = '') =>
         .split(',')
         .map(p => p.split(':')[0].trim())
         .filter(Boolean);
+
+export const parseColorPriceEntries = (value = '') =>
+    String(value)
+        .split(',')
+        .map(entry => entry.trim())
+        .filter(Boolean)
+        .map(entry => {
+            const [option, price = ''] = entry.split(':');
+
+            return {
+                option: option ? option.trim() : '',
+                price: price ? price.trim() : '',
+                raw: entry
+            };
+        });

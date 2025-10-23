@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { IoMdImages, IoMdCloseCircle } from "react-icons/io";
 import { useDispatch, useSelector } from 'react-redux';
@@ -6,7 +6,7 @@ import {get_category} from "../../store/Reducers/categoryReducer"
 import { get_product,update_product,messageClear,product_image_update } from '../../store/Reducers/productReducer';
 import toast from 'react-hot-toast';
 import { PropagateLoader } from 'react-spinners';
-import { overrideStyle, extractColors } from './../../utilis/utils';
+import { overrideStyle, parseColorPriceEntries } from './../../utilis/utils';
 
 const EditProduct = () => {
     const {productId} = useParams()
@@ -40,6 +40,11 @@ const EditProduct = () => {
         link: ''
     })
 
+    const colorPriceEntries = useMemo(
+        () => parseColorPriceEntries(state.colorPrices),
+        [state.colorPrices]
+    );
+
     const inputHandle = (e) => {
         setState({
             ...state,
@@ -47,6 +52,49 @@ const EditProduct = () => {
         })
 
     }
+
+    const handleColorEntryChange = (index, field, value) => {
+        setState(prev => {
+            const entries = parseColorPriceEntries(prev.colorPrices);
+            if (!entries[index]) return prev;
+
+            const updatedEntries = entries.map((entry, idx) =>
+                idx === index ? { ...entry, [field]: value } : entry
+            );
+
+            const normalizedColorPrices = updatedEntries
+                .map(({ option = '', price = '' }) => `${option}:${price}`)
+                .join(',');
+
+            return {
+                ...prev,
+                colorPrices: normalizedColorPrices
+            };
+        });
+    };
+
+    const handleAddColorEntry = () => {
+        setState(prev => ({
+            ...prev,
+            colorPrices: prev.colorPrices ? `${prev.colorPrices},:` : ':'
+        }));
+    };
+
+    const handleRemoveColorEntry = (index) => {
+        setState(prev => {
+            const entries = parseColorPriceEntries(prev.colorPrices);
+            const filtered = entries.filter((_, idx) => idx !== index);
+            const normalizedColorPrices = filtered
+                .map(({ option = '', price = '' }) => `${option}:${price}`)
+                .join(',');
+
+            return {
+                ...prev,
+                colorPrices: normalizedColorPrices
+            };
+        });
+    };
+
 
     const [cateShow, setCateShow] = useState(false)
     const [category, setCategory] = useState('')
@@ -181,11 +229,22 @@ const EditProduct = () => {
     const update = (e) =>{
         e.preventDefault()
 
-        const colorArr = extractColors(state.colorPrices)
-        if(colorArr.length !== (colorImageShow ? colorImageShow.length : 0)){
+        const colorEntries = parseColorPriceEntries(state.colorPrices);
+        if(colorEntries.length !== (colorImageShow ? colorImageShow.length : 0)){
             toast.error('Number of colors and color images must match')
             return
         }
+
+        if(colorEntries.some(entry => !entry.option)){
+            toast.error('Each color price entry must include a color or type name')
+            return
+        }
+
+        const normalizedColorPrices = typeof state.colorPrices === 'string'
+            ? state.colorPrices
+            : Array.isArray(state.colorPrices)
+                ? state.colorPrices.join(',')
+                : '';
 
         const obj = {
             name: state.name,
@@ -194,10 +253,10 @@ const EditProduct = () => {
             price: state.price,
             brand: state.brand,
             stock: state.stock,
-            colors: colorArr.join(','),
+            colors: colorEntries.map(entry => entry.option).join(','),
             sizes: state.sizes,
             deliveryTime: state.deliveryTime,
-            colorPrices: state.colorPrices,
+            colorPrices: normalizedColorPrices,
             link: state.link,
             category: category,
             productId: productId
@@ -289,6 +348,61 @@ const EditProduct = () => {
             <div className='flex flex-col w-full gap-1'>
                 <label htmlFor='colorPrices'>Color/Type Option Prices (option:price)</label>
                 <input className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.colorPrices} type='text' name='colorPrices' id='colorPrices' placeholder='20cm With Retail Box: 54.62'/>
+                               {
+                    colorPriceEntries.length > 0 && (
+                        <div className='mt-2 flex flex-col gap-3'>
+                            {
+                                colorPriceEntries.map((entry, idx) => (
+                                    <div
+                                        key={`color-price-${idx}`}
+                                        className='rounded-md border border-slate-700 bg-[#5a51c4] px-3 py-3 text-sm shadow-sm'
+                                    >
+                                        <div className='mb-3 flex items-center justify-between gap-2'>
+                                            <div className='flex items-center gap-2'>
+                                                <span className='inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs font-semibold text-white'>{idx + 1}</span>
+                                                <span className='text-xs uppercase tracking-wide text-[#c7c9e2]'>Color / Type Option</span>
+                                            </div>
+                                            <button
+                                                type='button'
+                                                onClick={() => handleRemoveColorEntry(idx)}
+                                                className='text-xs font-semibold uppercase tracking-wide text-red-300 hover:text-red-200'
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <div className='flex flex-col gap-3 sm:flex-row'>
+                                            <div className='flex-1'>
+                                                <label className='mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[#d0d2d6]'>Option</label>
+                                                <input
+                                                    className='w-full rounded-md border border-slate-600 bg-[#6a5fdf] px-3 py-2 text-sm text-[#d0d2d6] outline-none focus:border-indigo-300'
+                                                    value={entry.option}
+                                                    onChange={(e) => handleColorEntryChange(idx, 'option', e.target.value)}
+                                                    placeholder='Color name'
+                                                />
+                                            </div>
+                                            <div className='flex-1'>
+                                                <label className='mb-1 block text-[11px] font-semibold uppercase tracking-wide text-[#d0d2d6]'>Price</label>
+                                                <input
+                                                    className='w-full rounded-md border border-slate-600 bg-[#6a5fdf] px-3 py-2 text-sm text-[#d0d2d6] outline-none focus:border-indigo-300'
+                                                    value={entry.price}
+                                                    onChange={(e) => handleColorEntryChange(idx, 'price', e.target.value)}
+                                                    placeholder='Price'
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    )
+                }
+                <button
+                    type='button'
+                    onClick={handleAddColorEntry}
+                    className='mt-3 w-full rounded-md border border-dashed border-indigo-300 py-2 text-sm font-semibold uppercase tracking-wide text-indigo-100 transition hover:border-indigo-200 hover:text-white'
+                >
+                    Add Color Price Entry
+                </button>
             </div>
 
         </div>
@@ -297,6 +411,9 @@ const EditProduct = () => {
                 <span>Product Image</span>
                 {
                     imageShow && imageShow.length > 0 && imageShow.map((img, i) => <div key={i} className='relative'>
+                        <span className='absolute top-2 left-2 bg-black/60 text-white text-xs font-semibold px-2 py-1 rounded-full'>
+                            {i + 1}
+                        </span>
                         <label htmlFor={i}>
                             <img src={img} alt="" />
                         </label>
@@ -317,6 +434,9 @@ const EditProduct = () => {
                 <span>Color Image</span>
                 {
                     colorImageShow && colorImageShow.length > 0 && colorImageShow.map((img, i) => <div key={i} className='relative'>
+                        <span className='absolute top-2 left-2 bg-black/60 text-white text-xs font-semibold px-2 py-1 rounded-full'>
+                            {i + 1}
+                        </span>
                         <label htmlFor={`c-${i}`}>
                             <img src={img} alt='' />
                         </label>
