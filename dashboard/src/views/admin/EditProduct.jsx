@@ -83,10 +83,16 @@ const EditProduct = () => {
     const handleRemoveColorEntry = (index) => {
         setState(prev => {
             const entries = parseColorPriceEntries(prev.colorPrices);
+            if (!entries[index]) {
+                toast.error('Color option not found');
+                return prev;
+            }
             const filtered = entries.filter((_, idx) => idx !== index);
             const normalizedColorPrices = filtered
                 .map(({ option = '', price = '' }) => `${option}:${price}`)
                 .join(',');
+            
+            toast.success(`Removed color option #${index + 1}`);
 
             return {
                 ...prev,
