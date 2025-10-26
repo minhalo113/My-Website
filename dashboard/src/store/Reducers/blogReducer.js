@@ -63,12 +63,13 @@ export const get_blogs = createAsyncThunk(
 
 export const automate_create_blog = createAsyncThunk(
     'blog/create_auto_blog',
-    async(aiTitleInput, {rejectWithValue, fulfillWithValue}) => {
+    async(payload, {rejectWithValue, fulfillWithValue}) => {
         try{
-            const {data} = await api.get('/automate_create_blog', aiTitleInput, {withCredentials: true});
+            const {data} = await api.post('/automate_create_blog', payload, {withCredentials: true});
             return fulfillWithValue(data)
         }catch(err){
-            return rejectWithValue(err.response.data)
+            const errorData = err.response?.data || { message: err.message };
+            return rejectWithValue(errorData)
         }
     }
 )
@@ -93,12 +94,16 @@ export const blogReducer = createSlice({
         loader: false,
         blogs: [],
         blog: {},
-        totalBlog: 0
+        totalBlog: 0,
+        aiBlogData: null,
     },
     reducers: {
         messageClear: (state, _) => {
             state.errorMessage = ""
             state.successMessage = ""
+        },
+        clearAiBlogData: (state) => {
+            state.aiBlogData = null;
         }
     },
     extraReducers: (builder) => {
@@ -140,11 +145,19 @@ export const blogReducer = createSlice({
             state.blogs = payload.blogs
         })
 
+        .addCase(automate_create_blog.pending, (state) => {
+            state.loader = true;
+            state.errorMessage = "";
+            state.successMessage = "";
+        })
         .addCase(automate_create_blog.rejected, (state, {payload}) => {
-            //
+            state.loader = false;
+            state.errorMessage = payload?.message || 'Failed to generate AI blog content';
         })
         .addCase(automate_create_blog.fulfilled, (state, {payload}) => {
-            //
+            state.loader = false;
+            state.aiBlogData = payload.blog;
+            state.successMessage = payload.message;
         })
 
         .addCase(update_blog.rejected, (state, {payload}) => {
@@ -159,5 +172,5 @@ export const blogReducer = createSlice({
     }
 })
 
-export const {messageClear} = blogReducer.actions
+export const {messageClear, clearAiBlogData} = blogReducer.actions
 export default blogReducer.reducer;

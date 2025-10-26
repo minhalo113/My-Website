@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { add_blog, automate_create_blog } from '../../store/Reducers/blogReducer';
 import toast from "react-hot-toast";
-import { messageClear } from "../../store/Reducers/blogReducer";
+import { clearAiBlogData, messageClear } from "../../store/Reducers/blogReducer";
 
 const AddBlog = () => {
     const dispatch = useDispatch();
@@ -18,12 +18,10 @@ const AddBlog = () => {
     tags: '',
   });
 
-  const {loader, successMessage, errorMessage} = useSelector(state => state.blog)
+  const {loader, successMessage, errorMessage, aiBlogData} = useSelector(state => state.blog)
 
   const [previewImage, setPreviewImage] = useState(null);
   const [previewYoutubeThumbnail, setPreviewYoutubeThumbnail] = useState(null);
-  const [showPromptInput, setShowPromptInput] = useState(false);
-  const [aiTitleInput, setAiTitleInput] = useState('');
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -49,7 +47,21 @@ const AddBlog = () => {
         toast.error(errorMessage);
         dispatch(messageClear());
     }
-  }, [successMessage, errorMessage, dispatch]) 
+  }, [successMessage, errorMessage, dispatch])
+
+  useEffect(() => {
+    if (aiBlogData){
+        setFormData((prev) => ({
+            ...prev,
+            title: aiBlogData.title || prev.title,
+            content: aiBlogData.content || prev.content,
+            description: aiBlogData.description || prev.description,
+            blockQuote: aiBlogData.blockQuote || prev.blockQuote,
+            tags: Array.isArray(aiBlogData.tags) ? aiBlogData.tags.join(', ') : prev.tags,
+        }));
+        dispatch(clearAiBlogData());
+    }
+  }, [aiBlogData, dispatch])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -62,13 +74,17 @@ const AddBlog = () => {
   };
 
   const handleAutoGenerate = async () => {
-    if (!aiTitleInput.trim()) return;
+    const trimmedTitle = formData.title.trim();
+    const trimmedContent = formData.content.trim();
 
-    try {
-        dispatch(automate_create_blog(aiTitleInput))
-    } catch (error) {
-      console.error("Failed to generate blog:", error);
+    if (!trimmedTitle || !trimmedContent){
+        toast.error('Please add a title and content before requesting AI suggestions.');
+        return;
     }
+    dispatch(automate_create_blog({
+      title: trimmedTitle,
+      content: trimmedContent,
+    }));
   };
 
   return (
@@ -124,28 +140,16 @@ const AddBlog = () => {
 
         <div className="flex gap-4 items-center">
           <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Blog</button>
-          <button type="button" onClick={() => setShowPromptInput(prev => !prev)} className="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Auto Generate with AI</button>
+          <button
+            type="button"
+            onClick={handleAutoGenerate}
+            disabled={loader}
+            className={`px-6 py-2 rounded text-white ${loader ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+          >
+            {loader ? 'Generating…' : 'Auto Generate with AI'}
+          </button>
         </div>
 
-        {showPromptInput && (
-          <div className="mt-4 bg-gray-100 p-4 rounded border">
-            <label className="block text-sm font-medium mb-1">Enter Blog Title for AI:</label>
-            <input
-              type="text"
-              value={aiTitleInput}
-              onChange={(e) => setAiTitleInput(e.target.value)}
-              placeholder="e.g., Best Laptops for Students in 2025"
-              className="w-full p-2 border rounded mb-2"
-            />
-            <button
-              onClick={handleAutoGenerate}
-              type="button"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Generate Now
-            </button>
-          </div>
-        )}
       </form>
     </div>
   );

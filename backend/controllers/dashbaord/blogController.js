@@ -3,6 +3,7 @@ import responseReturn from '../../utils/response.js';
 import { v2 as cloudinary } from 'cloudinary';
 import blogModel from "../../models/blogModel.js"
 import slugify from 'slugify'
+import { generateBlogEnhancement } from './../../services/aiBlogService.js';
 
 class blogController{
     add_blog = async(req, res) => {
@@ -169,9 +170,31 @@ class blogController{
 
     automate_create_blog = async(req, res) => {
         try{
-            //
+            const { title, content, instructions } = req.body || {};
+
+            const trimmedTitle = typeof title === 'string' ? title.trim() : '';
+            const trimmedContent = typeof content === 'string' ? content.trim() : '';
+
+            if(!trimmedTitle || !trimmedContent){
+                return responseReturn(res, 400, { message: 'Title and content are required to generate AI suggestions' });
+            }
+
+            const aiResult = await generateBlogEnhancement({
+                title: trimmedTitle,
+                content: trimmedContent,
+                instructions,
+            });
+
+            return responseReturn(res, 200, {
+                message: 'AI blog suggestions generated successfully',
+                blog: aiResult,
+            });
         }catch(err){
-            //
+            console.error('Failed to automate blog creation', err);
+            const errorMessage = err?.response?.data?.message || err?.response?.data?.error?.message || err?.message || 'Failed to generate AI blog content';
+            return responseReturn(res, 500, {
+                message: errorMessage,
+            });
         }
     }
 
