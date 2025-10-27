@@ -40,7 +40,53 @@ const applyEffectivePriceToDocs = (items = []) => {
     });
 };
 
+const computeAverageRatingValue = (ratings = []) => {
+    if (!Array.isArray(ratings) || ratings.length === 0) {
+        return 0;
+    }
+    const total = ratings.reduce((sum, review) => {
+        const numeric = Number(review?.rating);
+        return sum + (Number.isFinite(numeric) ? numeric : 0);
+    }, 0);
+    return Math.round((total / ratings.length) * 10) / 10;
+};
+
+const formatProductReviewForResponse = (review) => {
+    if (!review) return null;
+    const plain = typeof review.toObject === 'function' ? review.toObject() : review;
+    const toStringSafe = (value) => {
+        if (!value) return null;
+        if (typeof value === 'string') return value;
+        if (typeof value.toString === 'function') return value.toString();
+        return null;
+    };
+
+    return {
+        _id: toStringSafe(plain._id) || plain._id,
+        user: toStringSafe(plain.user),
+        name: plain.name || 'Anonymous',
+        rating: plain.rating ?? null,
+        comment: plain.comment || '',
+        images: Array.isArray(plain.images) ? plain.images : [],
+        userImage: plain.userImage || null,
+        createdAt: plain.createdAt || null,
+        updatedAt: plain.updatedAt || plain.createdAt || null,
+        isEdited: Boolean(plain.isEdited),
+    };
+};
+
 class productController{
+    canManageProduct(product, req){
+        if (!product || !req) return false;
+        if (req.role === 'admin') {
+            return true;
+        }
+        // const sellerId = product.sellerId ? product.sellerId.toString() : null;
+        // const requesterId = req.id ? req.id.toString() : null;
+        // return Boolean(sellerId && requesterId && sellerId === requesterId);
+        return false;
+    }
+    
     checkDuplicateLink = async(link, excludeId = null) => {
         const trimmed = String(link).trim();
         if(!trimmed) {
@@ -256,6 +302,9 @@ class productController{
             if(!product){
                 return responseReturn(res, 404, {error: 'Product not found'})
             }
+            if(!this.canManageProduct(product, req)){
+                return responseReturn(res, 403, {error: 'You are not authorized to update this product'});
+            }
             if(colorArr.length !== (product.colorImages ? product.colorImages.length : 0)){
                 return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
             }
@@ -354,6 +403,9 @@ class productController{
                 const product = await productModel.findById(_productId);
                 if (!product) {
                     return responseReturn(res, 404, { error: 'Product not found' });
+                }
+                if(!this.canManageProduct(product, req)){
+                    return responseReturn(res, 403, {error: 'You are not authorized to update this product images'});
                 }
 
                 if (_action === 'delete') {
@@ -790,7 +842,166 @@ class productController{
 
 
     }
+   get_product_reviews = async (req, res) => {
+        if (req.role !== 'admin') {
+            return responseReturn(res, 403, { error: 'Only administrators can manage product reviews.' });
+        }
 
+        const { productId } = req.params;
+        try {
+            const product = await productModel.findById(productId).select('ratings name');
+            if (!product) {
+                return responseReturn(res, 404, { error: 'Product not found.' });
+            }
+
+            const reviews = (product.ratings || [])
+                .map((review) => formatProductReviewForResponse(review))
+                .sort((a, b) => {
+                    const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+                    const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+                    return bTime - aTime;
+                });
+
+            const averageRating = computeAverageRatingValue(product.ratings);
+            const reviewCount = reviews.length;
+
+            return responseReturn(res, 200, {
+                product: {
+                    _id: typeof product._id?.toString === 'function' ? product._id.toString() : product._id,
+                    name: product.name,
+                },
+                reviews,
+                averageRating,
+                reviewCount,
+            });
+        } catch (error) {
+            console.error('get_product_reviews error:', error);
+            return responseReturn(res, 500, { error: 'Failed to load product reviews.' });
+        }
+    };
+
+    update_product_review = async (req, res) => {
+        if (req.role !== 'admin') {
+            return responseReturn(res, 403, { error: 'Only administrators can manage product reviews.' });
+        }
+
+        const { productId, reviewId } = req.params;
+        const { comment, rating } = req.body || {};
+        const hasComment = Object.prototype.hasOwnProperty.call(req.body || {}, 'comment');
+        const hasRating = Object.prototype.hasOwnProperty.call(req.body || {}, 'rating');
+
+        const trimmedComment = hasComment && typeof comment === 'string' ? comment.trim() : undefined;
+        if (hasComment && (!trimmedComment || trimmedComment.length === 0)) {
+            return responseReturn(res, 400, { error: 'Comment message cannot be empty.' });
+        }
+
+        let normalizedRating;
+        if (hasRating) {
+            const parsed = Number(rating);
+            if (!Number.isFinite(parsed) || parsed < 1 || parsed > 5) {
+                return responseReturn(res, 400, { error: 'Rating must be a number between 1 and 5.' });
+            }
+            normalizedRating = parsed;
+        }
+
+        if (!hasComment && !hasRating) {
+            return responseReturn(res, 400, { error: 'No review changes were provided.' });
+        }
+
+        try {
+            const product = await productModel.findById(productId).select('ratings');
+            if (!product) {
+                return responseReturn(res, 404, { error: 'Product not found.' });
+            }
+
+            const review = product.ratings.id(reviewId) || product.ratings.find((item) => item._id.toString() === reviewId);
+            if (!review) {
+                return responseReturn(res, 404, { error: 'Review not found.' });
+            }
+
+            let changed = false;
+
+            if (hasComment && trimmedComment !== review.comment) {
+                review.comment = trimmedComment;
+                review.isEdited = true;
+                changed = true;
+            }
+
+            if (hasRating && normalizedRating !== review.rating) {
+                review.rating = normalizedRating;
+                review.isEdited = true;
+                changed = true;
+            }
+
+            if (!review.createdAt) {
+                review.createdAt = new Date();
+            }
+
+            if (!changed) {
+                return responseReturn(res, 200, {
+                    message: 'No changes were applied.',
+                    review: formatProductReviewForResponse(review),
+                    averageRating: computeAverageRatingValue(product.ratings),
+                    reviewCount: product.ratings.length,
+                });
+            }
+
+            review.updatedAt = new Date();
+
+            product.averageRating = computeAverageRatingValue(product.ratings);
+            product.reviewCount = product.ratings.length;
+            await product.save();
+
+            return responseReturn(res, 200, {
+                message: 'Review updated successfully.',
+                review: formatProductReviewForResponse(review),
+                averageRating: product.averageRating,
+                reviewCount: product.reviewCount,
+            });
+        } catch (error) {
+            console.error('update_product_review error:', error);
+            return responseReturn(res, 500, { error: 'Failed to update review.' });
+        }
+    };
+
+    delete_product_review = async (req, res) => {
+        if (req.role !== 'admin') {
+            return responseReturn(res, 403, { error: 'Only administrators can manage product reviews.' });
+        }
+
+        const { productId, reviewId } = req.params;
+        try {
+            const product = await productModel.findById(productId).select('ratings averageRating reviewCount');
+            if (!product) {
+                return responseReturn(res, 404, { error: 'Product not found.' });
+            }
+
+            const initialLength = product.ratings.length;
+            const filtered = product.ratings.filter((item) => item._id.toString() !== reviewId);
+            if (filtered.length === initialLength) {
+                return responseReturn(res, 404, { error: 'Review not found.' });
+            }
+
+            product.ratings = filtered;
+            product.markModified('ratings');
+
+            product.averageRating = computeAverageRatingValue(filtered);
+            product.reviewCount = filtered.length;
+
+            await product.save();
+
+            return responseReturn(res, 200, {
+                message: 'Review deleted successfully.',
+                deletedReviewId: reviewId,
+                averageRating: product.averageRating,
+                reviewCount: product.reviewCount,
+            });
+        } catch (error) {
+            console.error('delete_product_review error:', error);
+            return responseReturn(res, 500, { error: 'Failed to delete review.' });
+        }
+    };
+    
     product_visibility = async(req, res) => {
         const {productId, isHidden} = req.body;
         try{

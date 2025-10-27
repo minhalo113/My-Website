@@ -12,6 +12,9 @@ productRouter.post('/product-image-update', authMiddleware, productController.pr
 productRouter.post('/product-image-search', authMiddleware, productController.product_image_search)
 productRouter.post('/product-image-precheck', authMiddleware, productController.product_image_batch_check)
 productRouter.post('/product-visibility', authMiddleware, productController.product_visibility)
+productRouter.get('/product/:productId/reviews', authMiddleware, productController.get_product_reviews)
+productRouter.patch('/product/:productId/reviews/:reviewId', authMiddleware, productController.update_product_review)
+productRouter.delete('/product/:productId/reviews/:reviewId', authMiddleware, productController.delete_product_review)
 productRouter.delete('/product/:id', authMiddleware, productController.deleteProduct)
 productRouter.post('/product-import-aliexpress', authMiddleware, productController.import_aliexpress_product)
 

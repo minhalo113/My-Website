@@ -159,6 +159,45 @@ export const deleteProduct = createAsyncThunk(
     }
 )
 
+export const fetch_product_reviews = createAsyncThunk(
+    'product/fetch_product_reviews',
+    async(productId, { rejectWithValue, fulfillWithValue }) => {
+        try{
+            const { data } = await api.get(`/product/${productId}/reviews`, { withCredentials: true });
+            return fulfillWithValue({ productId, ...data });
+        }catch(error){
+            const payload = error?.response?.data || { error: 'Failed to load product reviews' };
+            return rejectWithValue(payload);
+        }
+    }
+);
+
+export const update_product_review = createAsyncThunk(
+    'product/update_product_review',
+    async({ productId, reviewId, payload }, { rejectWithValue, fulfillWithValue }) => {
+        try{
+            const { data } = await api.patch(`/product/${productId}/reviews/${reviewId}`, payload, { withCredentials: true });
+            return fulfillWithValue({ productId, reviewId, ...data });
+        }catch(error){
+            const responsePayload = error?.response?.data || { error: 'Failed to update review' };
+            return rejectWithValue(responsePayload);
+        }
+    }
+);
+
+export const delete_product_review = createAsyncThunk(
+    'product/delete_product_review',
+    async({ productId, reviewId }, { rejectWithValue, fulfillWithValue }) => {
+        try{
+            const { data } = await api.delete(`/product/${productId}/reviews/${reviewId}`, { withCredentials: true });
+            return fulfillWithValue({ productId, reviewId, ...data });
+        }catch(error){
+            const payload = error?.response?.data || { error: 'Failed to delete review' };
+            return rejectWithValue(payload);
+        }
+    }
+);
+
 export const productReducer = createSlice({
     name: 'product',
     initialState: {
@@ -178,6 +217,11 @@ export const productReducer = createSlice({
         preflightCheckMessage: '',
         preflightCheckThreshold: 10,
         preflightCheckMatches: 0,
+        reviewList: [],
+        reviewLoader: false,
+        selectedProductName: '',
+        averageProductRating: 0,
+        reviewCount: 0,
     },
     reducers: {
         messageClear: (state, _) => {
@@ -339,6 +383,63 @@ export const productReducer = createSlice({
         .addCase(product_visibility.rejected, (state, {payload}) => {
             state.loader = false;
             state.errorMessage = payload.error;
+        })
+        .addCase(fetch_product_reviews.pending, (state) => {
+            state.reviewLoader = true;
+        })
+        .addCase(fetch_product_reviews.fulfilled, (state, { payload }) => {
+            state.reviewLoader = false;
+            state.reviewList = payload?.reviews || [];
+            state.selectedProductName = payload?.product?.name || '';
+            state.averageProductRating = payload?.averageRating ?? 0;
+            state.reviewCount = payload?.reviewCount ?? state.reviewList.length;
+        })
+        .addCase(fetch_product_reviews.rejected, (state, { payload }) => {
+            state.reviewLoader = false;
+            state.errorMessage = typeof payload === 'string' ? payload : (payload?.error || 'Failed to load product reviews');
+        })
+        .addCase(update_product_review.pending, (state) => {
+            state.reviewLoader = true;
+        })
+        .addCase(update_product_review.fulfilled, (state, { payload }) => {
+            state.reviewLoader = false;
+            if (payload?.review) {
+                state.reviewList = state.reviewList.map((item) =>
+                    item._id === payload.review._id ? payload.review : item
+                );
+            }
+            state.successMessage = payload?.message || 'Review updated successfully.';
+            if (payload?.averageRating !== undefined) {
+                state.averageProductRating = payload.averageRating;
+            }
+            if (payload?.reviewCount !== undefined) {
+                state.reviewCount = payload.reviewCount;
+            }
+        })
+        .addCase(update_product_review.rejected, (state, { payload }) => {
+            state.reviewLoader = false;
+            state.errorMessage = typeof payload === 'string' ? payload : (payload?.error || 'Failed to update review');
+        })
+        .addCase(delete_product_review.pending, (state) => {
+            state.reviewLoader = true;
+        })
+        .addCase(delete_product_review.fulfilled, (state, { payload, meta }) => {
+            state.reviewLoader = false;
+            const removedId = payload?.deletedReviewId || meta?.arg?.reviewId;
+            if (removedId) {
+                state.reviewList = state.reviewList.filter((item) => item._id !== removedId);
+            }
+            state.successMessage = payload?.message || 'Review deleted successfully.';
+            if (payload?.averageRating !== undefined) {
+                state.averageProductRating = payload.averageRating;
+            }
+            if (payload?.reviewCount !== undefined) {
+                state.reviewCount = payload.reviewCount;
+            }
+        })
+        .addCase(delete_product_review.rejected, (state, { payload }) => {
+            state.reviewLoader = false;
+            state.errorMessage = typeof payload === 'string' ? payload : (payload?.error || 'Failed to delete review');
         })
         .addCase(deleteProduct.pending, (state, {payload}) => {
             state.loader = true

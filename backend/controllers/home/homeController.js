@@ -218,11 +218,24 @@ class homeControllers{
                 existing.rating = rating;
                 existing.comment = comment;
                 existing.images = images;
-                existing.createdAt = new Date();
-                existing.name = curUser.name;
+                existing.updatedAt = new Date();
+                existing.isEdited = true;
                 existing.userImage = curUser.image;
+                if (!existing.createdAt) {
+                    existing.createdAt = new Date();
+                }
             }else{
-                product.ratings.push({user: userId, rating, comment, images, name: curUser.name, userImage: curUser.image})
+                product.ratings.push({
+                    user: userId,
+                    rating,
+                    comment,
+                    images,
+                    name: curUser.name,
+                    userImage: curUser.image,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    isEdited: false
+                })
             }
             product.averageRating = Math.round(product.ratings.reduce((acc, r) => acc + r.rating, 0) / product.ratings.length * 10) / 10;
             product.reviewCount = product.ratings.length;

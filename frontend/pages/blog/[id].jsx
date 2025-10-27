@@ -1,200 +1,363 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import PageHeader from '../../components/PageHeader';
 import PopularPost from '../shop/PopularPost';
-import Tags from '../shop/Tags';
 import api from '../../src/api/api';
 import { toast } from 'react-hot-toast';
 
 const SingleBlog = () => {
-    const [blog, setBlog] = useState([]);
+    const [blog, setBlog] = useState(null);
     const [adjacentBlogs, setAdjacentBlogs] = useState({ prev: null, next: null });
+    const [comments, setComments] = useState([]);
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [commentError, setCommentError] = useState('');
+    const [formValues, setFormValues] = useState({ name: '', email: '', message: '' });
+    const [submitting, setSubmitting] = useState(false);
+    const [moderationNotice, setModerationNotice] = useState('');
 
     const router = useRouter();
-    const {id} = router.query;
-
-    const fetchData = async (id) => {
+    const { id } = router.query;
+    const fetchData = useCallback(async (blogId) => {
         try {
-            const response = await api.get(`/get_blog/${id}`, {
-            withCredentials: true
+            const response = await api.get(`/get_blog/${blogId}`, {
+                withCredentials: true
             });
-    
-            setBlog([response.data.blog]);
-            console.log('Fetched blogs:', response.data.blog);
+            setBlog(response.data.blog);
         } catch (err) {
-            console.log('Error fetching blogs:', err);
+            const message = err.response?.data?.message || 'Error fetching the blog.';
+            toast.error(message);
         }
-        };
+    }, []);
     
-    const fetchAdjacent = async(id) => {
-        try{
-            const { data } = await api.get(`/blog/adjacent/${id}`, { withCredentials: true });
+    const fetchAdjacent = useCallback(async (blogId) => {
+        try {
+            const { data } = await api.get(`/blog/adjacent/${blogId}`, { withCredentials: true });
             setAdjacentBlogs(data);
-        }catch(err){
-            console.log('Failed to fetch adjacent blogs:', err.response?.data?.message || err.message);
+        } catch (err) {
+            const message = err.response?.data?.message || err.message;
+            console.error('Failed to fetch adjacent blogs:', message);
         }
-    }
+    }, []);
+
+    const fetchComments = useCallback(async (blogId) => {
+        try {
+            setLoadingComments(true);
+            setCommentError('');
+            const { data } = await api.get(`/blog/${blogId}/comments`);
+            setComments(Array.isArray(data.comments) ? data.comments : []);
+        } catch (err) {
+            const message = err.response?.data?.message || 'Failed to load comments.';
+            setCommentError(message);
+        } finally {
+            setLoadingComments(false);
+        }
+    }, []);
 
     useEffect(() => {
         if(!id) return;
         fetchData(id);
-        fetchAdjacent(id)
+        fetchAdjacent(id);
+        fetchComments(id);
+    }, [id, fetchAdjacent, fetchComments, fetchData]);
 
-      }, [id]);    
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setFormValues((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-      if (!blog) return <p>Loading blog...</p>;
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setModerationNotice('');
 
-  return (
-    <div>
-        <PageHeader title = {"Single Blog Pages"} curPage = {"Blog Details"} additionalLink={[{label: "Blog", path : "/blog"}]}/>
+        const trimmedName = formValues.name.trim();
+        const trimmedEmail = formValues.email.trim();
+        const trimmedMessage = formValues.message.trim();
 
-        <div className='blog-section blog-single padding-tb section-bg'>
-            <div className='container'>
-                <div className="row justify-content-center">
-                    <div className='col-lg-8 col-12'>
-                        <article>
-                            <div className='section-wrapper'>
-                                <div className="row row-cols-1 justify-content-center g-4">
-                                    <div className='col'>
-                                        <div className='post-item style-2'>
-                                            <div className="post-inner">
-                                                {
-                                                    blog.map((item) => (
-                                                        <div key = {item._id}>
-                                                            <div className='post-thumb'>
-                                                                <img src = {item.image.url} alt = "" className='w-100'/>
+        if (!trimmedName || !trimmedEmail || !trimmedMessage) {
+            toast.error('Please complete all fields before submitting your comment.');
+            return;
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(trimmedEmail)) {
+            toast.error('Please provide a valid email address.');
+            return;
+        }
+
+        if (!id) {
+            toast.error('Unable to determine the blog post.');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const { data } = await api.post(`/blog/${id}/comments`, {
+                name: trimmedName,
+                email: trimmedEmail,
+                message: trimmedMessage
+            });
+
+            if (data?.comment) {
+                if (data.comment.status === 'approved') {
+                    setComments((prev) => [data.comment, ...prev]);
+                    setBlog((prev) => prev ? {
+                        ...prev,
+                        commentCount: (prev.commentCount || 0) + 1
+                    } : prev);
+                    toast.success(data?.message || 'Your comment has been posted.');
+                } else {
+                    setModerationNotice(data?.message || 'Thank you! Your comment is awaiting moderation.');
+                }
+            } else if (data?.message) {
+                setModerationNotice(data.message);
+            }
+
+            setFormValues({ name: '', email: '', message: '' });
+        } catch (err) {
+            const message = err.response?.data?.message || err.message || 'Failed to submit your comment.';
+            toast.error(message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const renderComments = () => {
+        if (loadingComments) {
+            return <p>Loading comments...</p>;
+        }
+
+        if (commentError) {
+            return <p className="text-danger">{commentError}</p>;
+        }
+
+        if (!comments.length) {
+            return <p>No comments yet. Be the first to share your thoughts!</p>;
+        }
+
+        return (
+            <ul className="lab-ul">
+                {comments.map((comment) => (
+                    <li key={comment._id} className="mb-4">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                            <h6 className="mb-0">{comment.name}</h6>
+                            <span className="text-muted small">
+                                {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                }) : ''}
+                            </span>
+                        </div>
+                        <p className="mb-1" style={{ whiteSpace: 'pre-wrap' }}>{comment.message}</p>
+                        {comment.isEdited && (
+                            <span className="badge bg-light text-dark">Edited</span>
+                        )}
+                    </li>
+                ))}
+            </ul>
+        );
+    };
+
+    const commentCountLabel = `${comments.length} Comment${comments.length === 1 ? '' : 's'}`;
+
+    return (
+        <div>
+            <PageHeader title={"Single Blog Pages"} curPage={"Blog Details"} additionalLink={[{ label: "Blog", path: "/blog" }]} />
+
+            <div className='blog-section blog-single padding-tb section-bg'>
+                <div className='container'>
+                    <div className="row justify-content-center">
+                        <div className='col-lg-8 col-12'>
+                            <article>
+                                {blog ? (
+                                    <div className='section-wrapper'>
+                                        <div className="row row-cols-1 justify-content-center g-4">
+                                            <div className='col'>
+                                                <div className='post-item style-2'>
+                                                    <div className="post-inner">
+                                                        <div className='post-thumb'>
+                                                            {blog.image?.url && (
+                                                                <img src={blog.image.url} alt={blog.title} className='w-100' />
+                                                            )}
+                                                        </div>
+
+                                                        <div className='post-content'>
+                                                            <h3>{blog.title}</h3>
+                                                            <div className='d-flex flex-wrap gap-3 text-muted mb-3'>
+                                                                <span>
+                                                                    🕓 Created: {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString('en-US', {
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        day: 'numeric'
+                                                                    }) : 'N/A'}
+                                                                </span>
+                                                                <span>
+                                                                    🔄 Updated: {blog.updatedAt ? new Date(blog.updatedAt).toLocaleDateString('en-US', {
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        day: 'numeric'
+                                                                    }) : 'N/A'}
+                                                                </span>
+                                                                <span>💬 {commentCountLabel}</span>
                                                             </div>
 
-                                                            <div className='post-content'>
-                                                                <h3>{item.title}</h3>
-                                                                <span>
-                                                                🕓 Created: {new Date(item.createdAt).toLocaleString('en-US', {
-                                                                    year: 'numeric',
-                                                                    month: 'short',
-                                                                    day: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
-                                                                })}
-                                                                </span>
-                                                                <span style={{ marginLeft: '1rem' }}>
-                                                                🔄 Updated: {new Date(item.updatedAt).toLocaleString('en-US', {
-                                                                    year: 'numeric',
-                                                                    month: 'short',
-                                                                    day: 'numeric',
-                                                                    hour: '2-digit',
-                                                                    minute: '2-digit'
-                                                                })}
-                                                                </span>
-
+                                                            {Array.isArray(blog.metaList) && blog.metaList.length > 0 && (
                                                                 <div className='meta-post'>
                                                                     <ul className='lab-ul'>
-                                                                        {
-                                                                            item.metaList.map((val, i) => (
-                                                                                <li key = {i}><i className={val.iconName}></i>{val.text}</li>
-                                                                            ))
-                                                                        }
+                                                                        {blog.metaList.map((val, i) => (
+                                                                            <li key={i}>
+                                                                                <i className={val.iconName}></i>{val.text}
+                                                                            </li>
+                                                                        ))}
                                                                     </ul>
                                                                 </div>
+                                                            )}
 
-                                                                <p style={{ whiteSpace: 'pre-wrap' }}>{item.content}</p>
-                                                                
-                                                                {
-                                                                    item.blockquote && item.citation ? 
-                                                                    <blockquote>
-                                                                        <p>{item.blockquote}</p>
-                                                                        <cite>{item.citation}</cite>
-                                                                    </blockquote> : <></>
-                                                                }
-                                                                
-                                                                {
-                                                                    item.youtubeThumbnail.url && item.youtubeLink ? 
-                                                                    <div className='video-thumb'>
-                                                                        <img src ={item.youtubeThumbnail.url} alt = ""/>
-                                                                        <a href={item.youtubeLink} target="_blank" rel="noopener noreferrer" className='video-button popup'>
-                                                                            <i className='icofont-ui-play'></i>
-                                                                        </a>
-                                                                    </div> : <></>
-                                                                }
-                                                            
+                                                            <p style={{ whiteSpace: 'pre-wrap' }}>{blog.content}</p>
+
+                                                            {blog.blockquote && blog.citation && (
+                                                                <blockquote>
+                                                                    <p>{blog.blockquote}</p>
+                                                                    <cite>{blog.citation}</cite>
+                                                                </blockquote>
+                                                            )}
+
+                                                            {blog.youtubeThumbnail?.url && blog.youtubeLink && (
+                                                                <div className='video-thumb'>
+                                                                    <img src={blog.youtubeThumbnail.url} alt="Video thumbnail" />
+                                                                    <a href={blog.youtubeLink} target="_blank" rel="noopener noreferrer" className='video-button popup'>
+                                                                        <i className='icofont-ui-play'></i>
+                                                                    </a>
+                                                                </div>
+                                                            )}
+
+                                                            {Array.isArray(blog.tags) && blog.tags.length > 0 && (
                                                                 <div className='tags-section'>
                                                                     <ul className='tags lab-ul'>
-                                                                        {
-                                                                            item.tags.map((tag, index) => (
-                                                                            <li key = {index}>
-                                                                                <a href = "#">{tag}</a>
+                                                                        {blog.tags.map((tag, index) => (
+                                                                            <li key={index}>
+                                                                                <a href="#">{tag}</a>
                                                                             </li>
-                                                                            ))
-                                                                        }
+                                                                        ))}
                                                                     </ul>
-
-                                                                    {/* <ul className='lab-ul social-icons'>
-                                                                        {
-                                                                            socialList.map((val, i) => (
-                                                                                <li key = {i}>
-                                                                                    <a href = "#" className={val.iconName}>
-                                                                                        <i className={val.iconName}></i>
-                                                                                    </a>
-                                                                                </li>
-                                                                            ))
-                                                                        }
-                                                                    </ul> */}
-                                                                </div> 
-                                                            </div>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    ))
-                                                }
+                                                    </div>
+                                                </div>
+
+                                                <div className='navigations-part'>
+                                                    <div className='left'>
+                                                        {adjacentBlogs.prev ? (
+                                                            <>
+                                                                <a href={`/blog/${adjacentBlogs.prev._id}`} className='prev'>
+                                                                    <i className='icofont-double-left'></i> Previous Blog
+                                                                </a>
+                                                                <a href={`/blog/${adjacentBlogs.prev._id}`} className='title'>
+                                                                    {adjacentBlogs.prev.title}
+                                                                </a>
+                                                            </>
+                                                        ) : (
+                                                            <p>No previous blog</p>
+                                                        )}
+                                                    </div>
+
+                                                    <div className='right'>
+                                                        {adjacentBlogs.next ? (
+                                                            <>
+                                                                <a href={`/blog/${adjacentBlogs.next._id}`} className='prev'>
+                                                                    <i className='icofont-double-right'></i> Later Blog
+                                                                </a>
+                                                                <a href={`/blog/${adjacentBlogs.next._id}`} className='title'>
+                                                                    {adjacentBlogs.next.title}
+                                                                </a>
+                                                            </>
+                                                        ) : (
+                                                            <p>No later blog</p>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className='navigations-part'>
-                                            <div className='left'>
-                                                {adjacentBlogs.prev ? (
-                                                <>
-                                                    <a href={`/blog/${adjacentBlogs.prev._id}`} className='prev'>
-                                                    <i className='icofont-double-left'></i> Previous Blog
-                                                    </a>
-                                                    <a href={`/blog/${adjacentBlogs.prev._id}`} className='title'>
-                                                    {adjacentBlogs.prev.title}
-                                                    </a>
-                                                </>
-                                                ) : (
-                                                <p>No previous blog</p>
-                                                )}
-                                            </div>
-
-                                            <div className='right'>
-                                                {adjacentBlogs.next ? (
-                                                <>
-                                                    <a href={`/blog/${adjacentBlogs.next._id}`} className='prev'>
-                                                    <i className='icofont-double-right'></i> Later Blog
-                                                    </a>
-                                                    <a href={`/blog/${adjacentBlogs.next._id}`} className='title'>
-                                                    {adjacentBlogs.next.title}
-                                                    </a>
-                                                </>
-                                                ) : (
-                                                <p>No later blog</p>
-                                                )}
-                                            </div>
-                                            </div>
                                     </div>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
+                                ) : (
+                                    <p>Loading blog...</p>
+                                )}
 
-                    <div className='col-lg-4 col-12'>
-                        <aside>
-                            {/* <Tags/> */}
-                            <PopularPost/>
-                        </aside>
+                                <div className='comment-area mt-5'>
+                                    <h4 className='mb-4'>{commentCountLabel}</h4>
+                                    {renderComments()}
+                                </div>
+
+                                <div className='comment-form mt-5'>
+                                    <h4 className='mb-3'>Leave a Comment</h4>
+                                    <p className='mb-4 text-muted'>Your email address will remain private. Required fields are marked.</p>
+                                    <form className='row g-3' onSubmit={handleSubmit}>
+                                        <div className='col-md-6'>
+                                            <label className='form-label'>Display Name</label>
+                                            <input
+                                                type='text'
+                                                name='name'
+                                                className='form-control'
+                                                placeholder='Your name'
+                                                value={formValues.name}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div className='col-md-6'>
+                                            <label className='form-label'>Email Address</label>
+                                            <input
+                                                type='email'
+                                                name='email'
+                                                className='form-control'
+                                                placeholder='you@example.com'
+                                                value={formValues.email}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div className='col-12'>
+                                            <label className='form-label'>Comment</label>
+                                            <textarea
+                                                name='message'
+                                                rows='5'
+                                                className='form-control'
+                                                placeholder='Share your thoughts...'
+                                                value={formValues.message}
+                                                onChange={handleInputChange}
+                                                required
+                                            ></textarea>
+                                        </div>
+                                        {moderationNotice && (
+                                            <div className='col-12'>
+                                                <div className='alert alert-info mb-0'>{moderationNotice}</div>
+                                            </div>
+                                        )}
+                                        <div className='col-12'>
+                                            <button type='submit' className='lab-btn' disabled={submitting}>
+                                                <span>{submitting ? 'Submitting...' : 'Post Comment'}</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div className='col-lg-4 col-12'>
+                            <aside>
+                                <PopularPost />
+                            </aside>
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
+    );
+};
 
-    </div>
-    )
-}
-
-export default SingleBlog
+export default SingleBlog;

@@ -14,9 +14,11 @@ import OrderDetails from './../../views/admin/OrderDetails';
 import BlogPost from "../../views/admin/BlogPost";
 import BlogEdit from "../../views/admin/BlogEdit";
 import AddBlog from "../../views/admin/AddBlog";
+import BlogComments from "../../views/admin/BlogComments";
 import Coupon from "../../views/admin/Coupon";
 
 import HomeSwiper from "../../views/admin/HomeSwiper";
+import ProductReviews from "../../views/admin/ProductReviews";
 
 export const privateRoutesAdmin = [
     {
@@ -70,6 +72,11 @@ export const privateRoutesAdmin = [
         role: 'admin'
     },
     {
+        path: 'admin/dashboard/product-reviews/:productId',
+        element: <ProductReviews/>,
+        role: 'admin'
+    },
+    {
         path: 'admin/dashboard/order/details/:orderId',
         element: <OrderDetails/>,
         role: 'admin'
@@ -82,6 +89,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/blog-edit/:id',
         element: <BlogEdit/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/blog-comments/:id',
+        element: <BlogComments/>,
         role: 'admin'
     },
     {

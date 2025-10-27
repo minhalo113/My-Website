@@ -45,13 +45,11 @@ const PopularPost = () => {
                     <h5 className="text-lg font-semibold hover:underline text-gray-800">{blog.title}</h5>
                 </Link>
                 <p className="text-sm text-gray-500 mt-1">
-                    🕒 {new Date(blog.createdAt).toLocaleString("en-US", {
+                    🕒 {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                    })}
+                    day: "numeric"
+                    }) : ''}
                 </p>
                 </div>
             </li>

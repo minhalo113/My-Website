@@ -1,5 +1,28 @@
 import { Schema, model } from "mongoose";
 
+const commentSchema = new Schema(
+  {
+    user: { type: Schema.Types.ObjectId, ref: 'Customer' },
+    userImage: {
+      public_id: { type: String },
+      url: { type: String }
+    },
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    message: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ['approved', 'pending', 'rejected'],
+      default: 'approved'
+    },
+    moderationReason: { type: String },
+    isEdited: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+  },
+  { _id: true }
+);
+
 const blogSchema = new Schema({
     image: {
       url: String,
@@ -11,18 +34,7 @@ const blogSchema = new Schema({
 
     slug: { type: String, unique: true },
     commentCount: { type: Number, default: 0 },
-    comments: [
-      {
-        user: {type: Schema.Types.ObjectId, ref: 'Customer'},
-        userImage: {
-            public_id: {type: String},
-            url: {type: String}
-        },
-        name: {type: String, required: false},
-        message: String,
-        date: { type: Date, default: Date.now }
-      }
-    ],
+    comments: [commentSchema],
     btnText: { type: String, default: "Read More" },
     metaList: [
       {

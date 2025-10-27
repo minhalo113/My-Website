@@ -12,5 +12,10 @@ blogRouter.post('/automate_create_blog', authMiddleware, blogController.automate
 blogRouter.patch('/update-blog', authMiddleware, blogController.update_blog);
 blogRouter.get('/blog/adjacent/:id', blogController.get_adjacent_blog)
 blogRouter.get('/recent-blogs', blogController.get_recent_blogs);
+blogRouter.post('/blog/:id/comments', blogController.add_comment);
+blogRouter.get('/blog/:id/comments', blogController.get_public_comments);
+blogRouter.get('/blog/:id/comments/manage', authMiddleware, blogController.get_admin_comments);
+blogRouter.patch('/blog/:blogId/comments/:commentId', authMiddleware, blogController.update_comment);
+blogRouter.delete('/blog/:blogId/comments/:commentId', authMiddleware, blogController.delete_comment);
 
 export default blogRouter;

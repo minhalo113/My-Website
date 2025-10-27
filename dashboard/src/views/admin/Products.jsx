@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState } from 'react';
 import Search from '../components/Search';
 import { Link } from 'react-router-dom';
 import Pagination from '../Pagination'; 
-import { FaEdit, FaEye, FaEyeSlash, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaEye, FaEyeSlash, FaTrash, FaComments } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { get_products, deleteProduct, product_visibility, messageClear, search_product_by_image } from '../../store/Reducers/productReducer';
 import toast from 'react-hot-toast';
@@ -250,6 +250,9 @@ const Products = () => {
                                     :
                                     <button className='p-[6px] bg-blue-500 rounded hover:shadow-lg hover:shadow-blue-500/50' onClick={() => handleVisibility(d._id, true)}><FaEyeSlash/></button>
                                 }
+                                <Link to={`/admin/dashboard/product-reviews/${d._id}`} className='p-[6px] bg-indigo-500 rounded hover:shadow-lg hover:shadow-indigo-500/50'>
+                                    <FaComments/>
+                                </Link>
                                 <Link to={`/admin/dashboard/edit-product/${d._id}`} className='p-[6px] bg-yellow-500 rounded hover:shadow-lg hover:shadow-yellow-500/50'> <FaEdit/> </Link>
                                 <Link className='p-[6px] bg-red-500 rounded hover:shadow-lg hover:shadow-red-500/50' onClick={() => handleDelete(d._id)}> <FaTrash/> </Link>
                             </div>

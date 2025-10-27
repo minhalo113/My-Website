@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { IoMdAdd } from "react-icons/io";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit, FaRegCommentDots } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { get_blogs, messageClear, delete_blog } from "../../store/Reducers/blogReducer";
@@ -12,15 +12,15 @@ const BlogPost = () => {
 
     const {loader, blogs, blog, totalBlog, errorMessage, successMessage} = useSelector(state => state.blog)
 
-    useEffect(() => { 
+    useEffect(() => {
       if (successMessage){
         toast.success(successMessage);
-        dispatch(messageClear)
+        dispatch(messageClear())
       }
 
       if(errorMessage){
         toast.error(errorMessage);
-        dispatch(messageClear)
+        dispatch(messageClear())
       }
 
       let obj = {
@@ -41,8 +41,11 @@ const BlogPost = () => {
     };
 
   const handleEdit = (id) => {
-    // Placeholder function - you can link to an edit page or open a modal
     navigate(`/admin/dashboard/blog-edit/${id}`);
+  };
+
+  const handleComments = (id) => {
+    navigate(`/admin/dashboard/blog-comments/${id}`);
   };
 
   return (
@@ -63,20 +66,29 @@ const BlogPost = () => {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Author</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
                 <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Actions</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Comments</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {blogs.map((blog) => (
-                <tr key={blog.id}>
+                <tr key={blog._id || blog.id}>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{blog.title}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{blog.author}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{blog.date}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{blog.author || '—'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{blog.date || (blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '—')}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{blog.commentCount ?? 0}</td>
                   <td className="px-6 py-4 text-right space-x-4">
                     <button
                       onClick={() => handleEdit(blog._id)}
                       className="text-blue-600 hover:text-blue-800"
                     >
                       <FaEdit />
+                    </button>
+                    <button
+                      onClick={() => handleComments(blog._id)}
+                      className="text-green-600 hover:text-green-800"
+                      title="Manage comments"
+                    >
+                      <FaRegCommentDots />
                     </button>
                     <button
                       onClick={() => handleDelete(blog._id)}

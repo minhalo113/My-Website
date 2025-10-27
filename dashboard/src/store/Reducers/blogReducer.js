@@ -86,6 +86,46 @@ export const update_blog = createAsyncThunk(
     }
 )
 
+export const get_blog_comments_admin = createAsyncThunk(
+    'blog/get_blog_comments_admin',
+    async(blogId, { rejectWithValue, fulfillWithValue }) => {
+        try {
+            const { data } = await api.get(`/blog/${blogId}/comments/manage`, { withCredentials: true });
+            return fulfillWithValue({ ...data, blogId });
+        } catch (err) {
+            const errorData = err.response?.data || { message: err.message };
+            return rejectWithValue(errorData);
+        }
+    }
+);
+
+export const update_blog_comment = createAsyncThunk(
+    'blog/update_blog_comment',
+    async({ blogId, commentId, payload }, { rejectWithValue, fulfillWithValue }) => {
+        try {
+            const { data } = await api.patch(`/blog/${blogId}/comments/${commentId}`, payload, { withCredentials: true });
+            return fulfillWithValue({ ...data, blogId });
+        } catch (err) {
+            const errorData = err.response?.data || { message: err.message };
+            return rejectWithValue(errorData);
+        }
+    }
+);
+
+export const delete_blog_comment = createAsyncThunk(
+    'blog/delete_blog_comment',
+    async({ blogId, commentId }, { rejectWithValue, fulfillWithValue }) => {
+        try {
+            const { data } = await api.delete(`/blog/${blogId}/comments/${commentId}`, { withCredentials: true });
+            return fulfillWithValue({ ...data, blogId, commentId });
+        } catch (err) {
+            const errorData = err.response?.data || { message: err.message };
+            return rejectWithValue(errorData);
+        }
+    }
+);
+
+
 export const blogReducer = createSlice({
     name: 'blog',
     initialState: {
@@ -96,6 +136,9 @@ export const blogReducer = createSlice({
         blog: {},
         totalBlog: 0,
         aiBlogData: null,
+        commentList: [],
+        commentLoader: false,
+        selectedBlogTitle: '',
     },
     reducers: {
         messageClear: (state, _) => {
@@ -168,6 +211,45 @@ export const blogReducer = createSlice({
             //
             state.blog = payload.blog;
             state.successMessage = payload.message;
+        })
+
+        .addCase(get_blog_comments_admin.pending, (state) => {
+            state.commentLoader = true;
+            state.errorMessage = "";
+            state.successMessage = "";
+        })
+        .addCase(get_blog_comments_admin.rejected, (state, { payload }) => {
+            state.commentLoader = false;
+            state.errorMessage = payload?.message || 'Failed to load comments';
+        })
+        .addCase(get_blog_comments_admin.fulfilled, (state, { payload }) => {
+            state.commentLoader = false;
+            state.commentList = payload.comments || [];
+            state.selectedBlogTitle = payload.title || '';
+        })
+
+        .addCase(update_blog_comment.rejected, (state, { payload }) => {
+            state.errorMessage = payload?.message || 'Failed to update comment';
+        })
+        .addCase(update_blog_comment.fulfilled, (state, { payload }) => {
+            state.successMessage = payload?.message || 'Comment updated successfully';
+            const updated = payload?.comment;
+            if (updated) {
+                state.commentList = state.commentList.map((comment) =>
+                    comment._id === updated._id ? { ...comment, ...updated } : comment
+                );
+            }
+        })
+
+        .addCase(delete_blog_comment.rejected, (state, { payload }) => {
+            state.errorMessage = payload?.message || 'Failed to delete comment';
+        })
+        .addCase(delete_blog_comment.fulfilled, (state, { payload }) => {
+            state.successMessage = payload?.message || 'Comment deleted successfully';
+            const removedId = payload?.comment?._id || payload?.commentId;
+            if (removedId) {
+                state.commentList = state.commentList.filter((comment) => comment._id !== removedId);
+            }
         })
     }
 })

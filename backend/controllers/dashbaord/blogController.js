@@ -4,6 +4,8 @@ import { v2 as cloudinary } from 'cloudinary';
 import blogModel from "../../models/blogModel.js"
 import slugify from 'slugify'
 import { generateBlogEnhancement } from './../../services/aiBlogService.js';
+import mongoose from 'mongoose';
+import { evaluateCommentModeration } from './../../utils/moderation.js';
 
 class blogController{
     add_blog = async(req, res) => {
@@ -126,7 +128,14 @@ class blogController{
                 return responseReturn(res, 404, {message: 'Blog not found'});
             }
 
-            return responseReturn(res, 200, {blog})
+            const blogData = blog.toObject ? blog.toObject() : blog;
+            if (Array.isArray(blogData.comments)) {
+                blogData.comments = blogData.comments
+                    .filter((comment) => comment.status === 'approved')
+                    .map(({ email, ...rest }) => rest);
+            }
+
+            return responseReturn(res, 200, {blog: blogData})
         }catch(err){
             return responseReturn(res, 500, {message: err.message});
         }
@@ -296,6 +305,253 @@ class blogController{
             })
         }catch(err){
             return responseReturn(res, 500, {message: err.message, error: err.message})
+        }
+    }
+
+    add_comment = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { name, email, message } = req.body || {};
+
+            const trimmedName = typeof name === 'string' ? name.trim() : '';
+            const trimmedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+            const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+
+            if (!trimmedName || !trimmedEmail || !trimmedMessage) {
+                return responseReturn(res, 400, { message: 'Name, email, and message are required.' });
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(trimmedEmail)) {
+                return responseReturn(res, 400, { message: 'Please provide a valid email address.' });
+            }
+
+            const blog = await blogModel.findById(id);
+            if (!blog) {
+                return responseReturn(res, 404, { message: 'Blog not found.' });
+            }
+
+            const moderation = evaluateCommentModeration(trimmedMessage);
+
+            blog.comments.push({
+                name: trimmedName,
+                email: trimmedEmail,
+                message: trimmedMessage,
+                status: moderation.status,
+                moderationReason: moderation.reason || undefined,
+            });
+
+            const newComment = blog.comments[blog.comments.length - 1];
+            if (!newComment._id) {
+                newComment._id = new mongoose.Types.ObjectId();
+            }
+            newComment.createdAt = newComment.createdAt || new Date();
+            newComment.updatedAt = new Date();
+
+            blog.commentCount = blog.comments.reduce((total, current) => current.status === 'approved' ? total + 1 : total, 0);
+
+            await blog.save();
+
+            const sanitizedComment = {
+                _id: newComment._id,
+                name: newComment.name,
+                message: newComment.message,
+                status: newComment.status,
+                moderationReason: newComment.moderationReason || '',
+                isEdited: newComment.isEdited,
+                createdAt: newComment.createdAt,
+                updatedAt: newComment.updatedAt
+            };
+
+            const responseMessage = newComment.status === 'approved'
+                ? 'Your comment has been posted.'
+                : 'Thanks! Your comment is awaiting moderation.';
+
+            return responseReturn(res, 201, {
+                message: responseMessage,
+                comment: sanitizedComment
+            });
+        } catch (err) {
+            const errorMessage = err?.message || 'Failed to submit comment.';
+            return responseReturn(res, 500, { message: errorMessage });
+        }
+    }
+
+    get_public_comments = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const blog = await blogModel.findById(id).select('comments');
+
+            if (!blog) {
+                return responseReturn(res, 404, { message: 'Blog not found.' });
+            }
+
+            const comments = (blog.comments || [])
+                .filter((comment) => comment.status === 'approved')
+                .sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0))
+                .map(({ _id, name, message, createdAt, updatedAt, isEdited }) => ({
+                    _id,
+                    name,
+                    message,
+                    createdAt,
+                    updatedAt,
+                    isEdited: Boolean(isEdited)
+                }));
+
+            return responseReturn(res, 200, { comments });
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
+        }
+    }
+
+    get_admin_comments = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const blog = await blogModel.findById(id).select('comments title');
+
+            if (!blog) {
+                return responseReturn(res, 404, { message: 'Blog not found.' });
+            }
+
+            const comments = (blog.comments || [])
+                .map((comment) => ({
+                    _id: comment._id,
+                    name: comment.name,
+                    email: comment.email,
+                    message: comment.message,
+                    status: comment.status,
+                    moderationReason: comment.moderationReason || '',
+                    isEdited: Boolean(comment.isEdited),
+                    createdAt: comment.createdAt,
+                    updatedAt: comment.updatedAt
+                }))
+                .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+            return responseReturn(res, 200, {
+                title: blog.title,
+                comments
+            });
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
+        }
+    }
+
+    update_comment = async (req, res) => {
+        try {
+            const { blogId, commentId } = req.params;
+            const { message, status, moderationReason } = req.body || {};
+
+            const blog = await blogModel.findById(blogId);
+            if (!blog) {
+                return responseReturn(res, 404, { message: 'Blog not found.' });
+            }
+
+            const comment = blog.comments.find((item) => item._id.toString() === commentId);
+            if (!comment) {
+                return responseReturn(res, 404, { message: 'Comment not found.' });
+            }
+
+            const trimmedMessage = typeof message === 'string' ? message.trim() : '';
+            const allowedStatuses = ['approved', 'pending', 'rejected'];
+            const trimmedModerationReason = typeof moderationReason === 'string' ? moderationReason.trim() : undefined;
+
+            if (!trimmedMessage && !status && typeof trimmedModerationReason === 'undefined') {
+                return responseReturn(res, 400, { message: 'No updates provided.' });
+            }
+
+            let hasUpdates = false;
+
+            if (trimmedMessage && trimmedMessage !== comment.message) {
+                comment.message = trimmedMessage;
+                comment.isEdited = true;
+                hasUpdates = true;
+            }
+
+            if (status && allowedStatuses.includes(status) && status !== comment.status) {
+                comment.status = status;
+                hasUpdates = true;
+            }
+
+            if (typeof trimmedModerationReason !== 'undefined') {
+                comment.moderationReason = trimmedModerationReason || undefined;
+                hasUpdates = true;
+            }
+
+            if (!hasUpdates) {
+                return responseReturn(res, 200, { message: 'No changes were applied.', comment: {
+                    _id: comment._id,
+                    name: comment.name,
+                    email: comment.email,
+                    message: comment.message,
+                    status: comment.status,
+                    moderationReason: comment.moderationReason || '',
+                    isEdited: Boolean(comment.isEdited),
+                    createdAt: comment.createdAt,
+                    updatedAt: comment.updatedAt
+                }});
+            }
+
+            comment.updatedAt = new Date();
+
+            blog.commentCount = blog.comments.reduce((total, current) => current.status === 'approved' ? total + 1 : total, 0);
+
+            await blog.save();
+
+            return responseReturn(res, 200, {
+                message: 'Comment updated successfully.',
+                comment: {
+                    _id: comment._id,
+                    name: comment.name,
+                    email: comment.email,
+                    message: comment.message,
+                    status: comment.status,
+                    moderationReason: comment.moderationReason || '',
+                    isEdited: Boolean(comment.isEdited),
+                    createdAt: comment.createdAt,
+                    updatedAt: comment.updatedAt
+                }
+            });
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
+        }
+    }
+
+    delete_comment = async (req, res) => {
+        try {
+            const { blogId, commentId } = req.params;
+
+            const blog = await blogModel.findById(blogId);
+            if (!blog) {
+                return responseReturn(res, 404, { message: 'Blog not found.' });
+            }
+
+            const commentIndex = blog.comments.findIndex((item) => item._id.toString() === commentId);
+            if (commentIndex === -1) {
+                return responseReturn(res, 404, { message: 'Comment not found.' });
+            }
+
+            const [removedComment] = blog.comments.splice(commentIndex, 1);
+
+            blog.commentCount = blog.comments.reduce((total, current) => current.status === 'approved' ? total + 1 : total, 0);
+
+            await blog.save();
+
+            return responseReturn(res, 200, {
+                message: 'Comment deleted successfully.',
+                comment: {
+                    _id: removedComment._id,
+                    name: removedComment.name,
+                    email: removedComment.email,
+                    message: removedComment.message,
+                    status: removedComment.status,
+                    moderationReason: removedComment.moderationReason || '',
+                    isEdited: Boolean(removedComment.isEdited),
+                    createdAt: removedComment.createdAt,
+                    updatedAt: removedComment.updatedAt
+                }
+            });
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
         }
     }
 
