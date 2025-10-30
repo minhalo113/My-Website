@@ -6,7 +6,7 @@ import HomeImageSwiper from '../../components/HomeImageSwiper';
 
 const title = (
     <>
-        <h2 className="subtitle a-figure-a-day-title">A Figure A Day <span role="img" aria-label="figure">🤖</span></h2>
+        <h2 className="subtitle a-figure-a-day-title">A Figure A Day <span role="img" aria-label="figure"></span></h2>
         <h3>Figures You <span>Love</span>, Deals You <span>Watch Daily</span>!</h3>
     </>
 )

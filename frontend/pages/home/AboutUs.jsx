@@ -7,10 +7,10 @@ const title = "Explore Our Collection";
 const desc = "Browse our growing collection of anime statues, scale figures, and desk companions with ease. Discover limited drops, everyday essentials, and display-ready pieces curated for collectors."; 
 const btnText = "Shop Now";
 
-const countList = [ 
-    { iconName: 'icofont-users-alt-4', count: '12600', text: 'Happy Customers', }, 
-    { iconName: 'icofont-computer', count: '50', text: 'Products Available', }, 
-    { iconName: 'icofont-gift', count: '100', text: 'Special Offers & Rewards', }, 
+const countList = [
+  { icon: "👥", count: "12600", text: "Happy Customers" },
+  { icon: "🎎", count: "300", text: "Figures Available" },
+  { icon: "🏷️", count: "100", text: "Special Coupons" },
 ];
 
 const AboutUs = () => {
@@ -25,7 +25,9 @@ const AboutUs = () => {
                                 <div key = {i} className='count-item'>
                                     <div className='count-inner'>
                                         <div className='count-icon'>
-                                            <i className={val.iconName}></i>
+                                            <i className="flex items-center justify-center text-4xl w-16 h-16 rounded-full">
+                                                {val.icon}
+                                            </i>
                                         </div>
 
                                         <div className='count-content'>
@@ -46,7 +48,7 @@ const AboutUs = () => {
                             <span className='subtitle'>{subTitle}</span>
                             <h2 className='title'>{title}</h2>
                             <p>{desc}</p>
-                            <Link href = "/shop" className='lab-btn' style={{background: "#DCA54A"}}>{btnText}</Link>
+                            <Link href = "/shop" className='lab-btn' style={{background: "#ffffff"}}>{btnText}</Link>
                         </div>
                     </div>
 
