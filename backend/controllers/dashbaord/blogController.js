@@ -5,7 +5,7 @@ import blogModel from "../../models/blogModel.js"
 import slugify from 'slugify'
 import { generateBlogEnhancement } from './../../services/aiBlogService.js';
 import mongoose from 'mongoose';
-import { evaluateCommentModeration } from './../../utils/moderation.js';
+import {evaluateCommentModeration} from '../../utils/moderation.js'
 
 class blogController{
     add_blog = async(req, res) => {
@@ -331,7 +331,7 @@ class blogController{
                 return responseReturn(res, 404, { message: 'Blog not found.' });
             }
 
-            const moderation = evaluateCommentModeration(trimmedMessage);
+            const moderation = await evaluateCommentModeration(trimmedMessage);
 
             blog.comments.push({
                 name: trimmedName,

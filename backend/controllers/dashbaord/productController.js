@@ -8,6 +8,8 @@ import axios from 'axios';
 import parseColorPrices from '../../utils/parseColorPrices.js';
 import { createEffectivePriceExpression, computeEffectivePrice } from '../../utils/effectivePrice.js';
 import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
+import { generateProductSocialCopy } from '../../services/aiProductSocialService.js';
+import { publishProductSocialPost } from '../../services/metaPublisher.js';
 import {
     extractPublicId,
     fingerprintFromUploadResult
@@ -73,6 +75,37 @@ const formatProductReviewForResponse = (review) => {
         updatedAt: plain.updatedAt || plain.createdAt || null,
         isEdited: Boolean(plain.isEdited),
     };
+};
+
+const parseSocialTags = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) {
+        return value
+            .map((item) => parseSocialTags(item))
+            .flat()
+            .filter(Boolean);
+    }
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+                return parseSocialTags(parsed);
+            }
+        } catch (error) {
+            // ignore JSON parse errors for plain string lists
+        }
+        return value
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
+    }
+    return [];
+};
+
+const pickFirstValue = (value) => (Array.isArray(value) ? value[0] : value);
+const sanitizeStringField = (value) => {
+    const resolved = pickFirstValue(value);
+    return typeof resolved === 'string' ? resolved.trim() : '';
 };
 
 class productController{
@@ -1002,6 +1035,76 @@ class productController{
         }
     };
     
+    generate_product_social_preview = async (req, res) => {
+        if (req.role !== 'admin') {
+            return responseReturn(res, 403, { error: 'Only administrators can generate social media posts.' });
+        }
+
+        try {
+            const { title, description, images = [], brand = '', productUrl = '' } = req.body || {};
+            const preview = await generateProductSocialCopy({
+                title,
+                description,
+                imageHints: images,
+                brand,
+                productUrl,
+            });
+
+            return responseReturn(res, 200, { preview });
+        } catch (error) {
+            console.error('generate_product_social_preview error:', error);
+            const message = error?.message || 'Failed to generate social post preview';
+            const status = /required/i.test(message) ? 400 : 500;
+            return responseReturn(res, status, { error: message });
+        }
+    };
+
+    publish_product_social_post = async (req, res) => {
+        if (req.role !== 'admin') {
+            return responseReturn(res, 403, { error: 'Only administrators can publish social media posts.' });
+        }
+
+        const form = formidable({ multiples: true, keepExtensions: true });
+
+        form.parse(req, async (err, fields, files) => {
+            if (err) {
+                return responseReturn(res, 400, { error: err.message });
+            }
+
+            const title = sanitizeStringField(fields.title);
+            const caption = sanitizeStringField(fields.caption);
+            const callToAction = sanitizeStringField(fields.callToAction);
+            const productUrl = sanitizeStringField(fields.productUrl || fields.link);
+            const hashtags = parseSocialTags(fields.hashtags || fields.tags);
+            const imageFile = pickFirstValue(files.image || files.primaryImage || files.socialImage);
+
+            if (!title || !caption) {
+                return responseReturn(res, 400, { error: 'A title and caption are required to publish the post.' });
+            }
+
+            if (!imageFile || !imageFile.filepath) {
+                return responseReturn(res, 400, { error: 'An image is required for social media publishing.' });
+            }
+
+            try {
+                const result = await publishProductSocialPost({
+                    title,
+                    caption,
+                    callToAction,
+                    productUrl,
+                    hashtags,
+                    imagePath: imageFile.filepath,
+                });
+                return responseReturn(res, 200, result);
+            } catch (error) {
+                console.error('publish_product_social_post error:', error);
+                const message = error?.response?.data?.error?.message || error?.message || 'Failed to publish social post';
+                const statusCode = error?.response?.status || (/required/i.test(message) ? 400 : 500);
+                return responseReturn(res, statusCode, { error: message });
+            }
+        });
+    };
+
     product_visibility = async(req, res) => {
         const {productId, isHidden} = req.body;
         try{

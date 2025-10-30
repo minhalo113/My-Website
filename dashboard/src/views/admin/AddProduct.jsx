@@ -291,6 +291,7 @@ const AddProduct = () => {
         if (socialPreview) {
             setShowSocialModal(true)
         }
+        console.log(socialPreview)
     }, [socialPreview])
 
     useEffect(() => {

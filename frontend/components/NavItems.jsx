@@ -80,7 +80,7 @@ const NavItems = () => {
             <div className='logo-search-acte'>
               <div className='logo'>
                 <Link href = {"/"}>
-                  <img src = "/images/logo/myLogo.webp" alt = ""   style={{width: "120px", height: "120px"}}/>
+                  <img src = "/images/logo/myLogo.png" alt = ""   style={{width: "120px", height: "120px"}}/>
                 </Link>
 
               </div>

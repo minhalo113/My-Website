@@ -57,7 +57,7 @@ function MyApp({ Component, pageProps }) {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.afigureaday.com/" />
         <meta property="og:image" content="/images/about-figures.jpg" />
-        <link rel="icon" href="/cropped-cropped-DALL·E-2024-11-21-11.20.10-A-vintage-style-logo-featuring-an-open-book-in-the-center-with-an-hourglass-above-it-a-globe-on-the-left-and-a-ships-wheel-on-the-right.-The-logo-i-1.webp" />
+        <link rel="icon" href="/images/logo/myLogo.png" />
     </Head>
       <CartProvider>
 

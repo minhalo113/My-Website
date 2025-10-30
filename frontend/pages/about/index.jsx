@@ -23,7 +23,6 @@ export default function AboutUsPage() {
             </div>
           </div>
 
-          {/* 3-column highlights */}
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <Highlight
               title="Curated Selection"
@@ -111,15 +110,12 @@ export default function AboutUsPage() {
   );
 }
 
-/* ---------- small presentational helpers ---------- */
-
 function Highlight({ title, text, icon }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">{/* ↑ subtle hover */}
-      <div className="flex items-start gap-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-1 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-start gap-1">
         <div
-          className="flex h-10 w-10 items-center justify-center rounded-full text-lg"
-          style={{ backgroundColor: "rgba(220,165,74,.12)", color: "#8f6a23" }}
+          className="m-2 rounded-full text-lg"
         >
           {icon}
         </div>

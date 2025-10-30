@@ -1,13 +1,10 @@
 import fetch from "node-fetch";
-import dotenv from "dotenv"
-import process from "process"
-dotenv.config();
 
 const API_KEY = process.env.PERSPECTIVE_API_KEY
 
 export const evaluateCommentModeration = async (message = '') => {
   const normalized = message.toLowerCase();
-
+  
   if (/(https?:\/\/|www\.)/i.test(normalized))
     return { status: 'pending', reason: 'Contains a link' };
 
