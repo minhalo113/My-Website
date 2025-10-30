@@ -4,7 +4,7 @@ import { IoMdImages } from "react-icons/io";
 import { IoMdCloseCircle } from "react-icons/io";
 import { useDispatch, useSelector } from 'react-redux';
 import { get_category } from '../../store/Reducers/categoryReducer';
-import { add_product, messageClear, import_aliexpress_product, check_product_images_for_duplicates } from '../../store/Reducers/productReducer';
+import { add_product, messageClear, import_aliexpress_product, check_product_images_for_duplicates, generate_product_social_preview, publish_product_social_post, resetSocialPreview } from '../../store/Reducers/productReducer';
 import { PropagateLoader } from 'react-spinners';
 import { overrideStyle, extractColors } from '../../utilis/utils';
 import toast from 'react-hot-toast';
@@ -24,6 +24,12 @@ const AddProduct = () => {
         preflightCheckMessage,
         preflightCheckThreshold,
         preflightCheckMatches,
+        socialPreview,
+        socialPreviewLoading,
+        socialPreviewError,
+        socialPublishLoading,
+        socialPublishResult,
+        socialPublishError,
     } = useSelector(state => state.product)
     
     useEffect(() => {
@@ -49,6 +55,7 @@ const AddProduct = () => {
     })
 
     const [importUrl, setImportUrl] = useState('')
+    const [showSocialModal, setShowSocialModal] = useState(false)
 
     const inputHandle = (e) => {
         setState({
@@ -138,6 +145,52 @@ const AddProduct = () => {
         dispatch(check_product_images_for_duplicates(formData));
     };
     
+    const handleGenerateSocialPreview = () => {
+        const trimmedName = state.name.trim();
+        const trimmedDescription = state.description.trim();
+        if (!trimmedName || !trimmedDescription) {
+            toast.error('Please add a product name and description before generating a social post');
+            return;
+        }
+
+        if (socialPreview) {
+            dispatch(resetSocialPreview());
+        }
+        setShowSocialModal(false);
+
+        dispatch(generate_product_social_preview({
+            title: trimmedName,
+            description: trimmedDescription,
+        }));
+    };
+
+    const handlePublishSocialPost = () => {
+        if (!socialPreview) {
+            return;
+        }
+
+        const primaryImage = images[0] || colorImages[0];
+        if (!primaryImage) {
+            toast.error('Please upload at least one product image before publishing');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', socialPreview.headline || state.name);
+        formData.append('caption', socialPreview.caption || state.description);
+        formData.append('callToAction', socialPreview.callToAction || '');
+        // formData.append('productUrl', state.link || '');
+        formData.append('hashtags', JSON.stringify(socialPreview.hashtags || []));
+        formData.append('image', primaryImage);
+
+        dispatch(publish_product_social_post(formData));
+    };
+
+    const handleCloseSocialModal = () => {
+        setShowSocialModal(false);
+        dispatch(resetSocialPreview());
+    };
+
     const [cateShow, setCateShow] = useState(false)
     const [category, setCategory] = useState('')
     const [allCategory, setAllCategory] = useState([])
@@ -207,7 +260,7 @@ const AddProduct = () => {
 
         if (successMessage) {
             toast.success(successMessage)
-            dispatch(messageClear()) 
+            dispatch(messageClear())
             setState({
                 name: "",
                 description: '',
@@ -233,6 +286,32 @@ const AddProduct = () => {
             dispatch(messageClear())
         }
     },[successMessage,errorMessage])
+
+    useEffect(() => {
+        if (socialPreview) {
+            setShowSocialModal(true)
+        }
+    }, [socialPreview])
+
+    useEffect(() => {
+        if (socialPreviewError) {
+            toast.error(socialPreviewError)
+        }
+    }, [socialPreviewError])
+
+    useEffect(() => {
+        if (socialPublishError) {
+            toast.error(socialPublishError)
+        }
+    }, [socialPublishError])
+
+    useEffect(() => {
+        if (socialPublishResult?.message) {
+            toast.success(socialPublishResult.message)
+            setShowSocialModal(false)
+            dispatch(resetSocialPreview())
+        }
+    }, [socialPublishResult, dispatch])
 
     const changeImage = (img, index) => {
         if (img) {
@@ -533,6 +612,28 @@ const AddProduct = () => {
                     </div>
                 )}
             </div>
+            <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-6 text-[#d0d2d6]'>
+                <div className='flex flex-col sm:flex-row gap-3 w-full'>
+                    <button
+                        type='button'
+                        onClick={handleGenerateSocialPreview}
+                        disabled={socialPreviewLoading || socialPublishLoading}
+                        className={`px-4 py-2 rounded-md w-full sm:w-auto transition-colors ${
+                            socialPreviewLoading || socialPublishLoading
+                                ? 'bg-slate-600 cursor-not-allowed text-slate-300'
+                                : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        }`}
+                    >
+                        {socialPreviewLoading ? 'Preparing social copy...' : 'Generate Social Post'}
+                    </button>
+                    {socialPreview && !socialPublishLoading && (
+                        <span className='text-sm text-indigo-200 bg-indigo-600/30 border border-indigo-400/40 px-3 py-2 rounded-md'>
+                            Preview ready – review before publishing.
+                        </span>
+                    )}
+                </div>
+                <p className='text-xs text-slate-200/80'>The first uploaded image will be used when publishing to Instagram and Facebook.</p>
+            </div>
 
             <div className='flex flex-col w-full gap-1 mb-4 text-[#d0d2d6]'>
                 <label htmlFor='video'>Product Videos</label>
@@ -638,6 +739,107 @@ const AddProduct = () => {
 
     </form>
 </div>
+           {showSocialModal && socialPreview && (
+                <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4'>
+                    <div className='relative w-full max-w-3xl rounded-lg border border-indigo-400/40 bg-[#352ec2] p-6 shadow-2xl'>
+                        <button
+                            type='button'
+                            onClick={handleCloseSocialModal}
+                            className='absolute right-4 top-4 text-slate-200 hover:text-white'
+                            aria-label='Close social preview'
+                        >
+                            <IoMdCloseCircle className='h-6 w-6' />
+                        </button>
+                        <h2 className='mb-4 pr-10 text-2xl font-semibold text-white'>Social Post Preview</h2>
+                        <div className='grid gap-4 text-[#d0d2d6] md:grid-cols-[2fr,1fr]'>
+                            <div className='space-y-4'>
+                                <div>
+                                    <p className='text-xs uppercase tracking-wide text-indigo-200/80'>Headline</p>
+                                    <p className='text-lg font-semibold leading-snug text-white'>{socialPreview.headline}</p>
+                                </div>
+                                <div>
+                                    <p className='text-xs uppercase tracking-wide text-indigo-200/80'>Caption</p>
+                                    <p className='whitespace-pre-line rounded-md border border-indigo-300/40 bg-indigo-600/20 p-3 text-sm leading-relaxed'>
+                                        {socialPreview.caption}
+                                    </p>
+                                </div>
+                                {socialPreview.callToAction && (
+                                    <div>
+                                        <p className='text-xs uppercase tracking-wide text-indigo-200/80'>Call to Action</p>
+                                        <p className='rounded-md border border-indigo-300/40 bg-indigo-600/20 p-2 text-sm font-medium text-white'>
+                                            {socialPreview.callToAction}
+                                        </p>
+                                    </div>
+                                )}
+                                <div>
+                                    <p className='text-xs uppercase tracking-wide text-indigo-200/80'>Hashtags</p>
+                                    {Array.isArray(socialPreview.hashtags) && socialPreview.hashtags.length > 0 ? (
+                                        <div className='mt-2 flex flex-wrap gap-2'>
+                                            {socialPreview.hashtags.map((tag) => (
+                                                <span
+                                                    key={tag}
+                                                    className='rounded-full border border-indigo-400/40 bg-indigo-600/30 px-3 py-1 text-xs text-indigo-100'
+                                                >
+                                                    #{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className='text-sm text-slate-200/80'>No hashtags suggested.</p>
+                                    )}
+                                </div>
+                                {state.link && (
+                                    <div>
+                                        <p className='text-xs uppercase tracking-wide text-indigo-200/80'>Product Link</p>
+                                        <p className='truncate text-sm text-indigo-100'>{state.link}</p>
+                                    </div>
+                                )}
+                                <p className='text-xs text-slate-200/70'>The generated content will be sent to both Instagram and Facebook once you publish.</p>
+                            </div>
+                            <div className='space-y-3'>
+                                <p className='text-xs uppercase tracking-wide text-indigo-200/80'>Preview Image</p>
+                                {imageShow[0]?.url || colorImageShow[0]?.url ? (
+                                    <img
+                                        src={imageShow[0]?.url || colorImageShow[0]?.url}
+                                        alt='Social preview'
+                                        className='h-56 w-full rounded-md border border-indigo-300/50 object-cover'
+                                    />
+                                ) : (
+                                    <div className='flex h-56 items-center justify-center rounded-md border border-dashed border-indigo-300/50 text-sm text-slate-200/70'>
+                                        Upload an image to include it with the post.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className='mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end'>
+                            <button
+                                type='button'
+                                onClick={handleCloseSocialModal}
+                                disabled={socialPublishLoading}
+                                className={`rounded-md border px-5 py-2 transition-colors ${
+                                    socialPublishLoading
+                                        ? 'cursor-not-allowed border-slate-600 text-slate-300'
+                                        : 'border-slate-500 text-slate-100 hover:border-white'
+                                }`}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type='button'
+                                onClick={handlePublishSocialPost}
+                                disabled={socialPublishLoading}
+                                className={`rounded-md px-5 py-2 transition-colors ${
+                                    socialPublishLoading
+                                        ? 'cursor-wait bg-slate-600 text-slate-300'
+                                        : 'bg-green-500 text-white hover:bg-green-600'
+                                }`}
+                            >
+                                {socialPublishLoading ? 'Publishing...' : 'Post to Instagram & Facebook'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             </div>
             

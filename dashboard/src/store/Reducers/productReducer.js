@@ -14,6 +14,35 @@ export const add_product = createAsyncThunk(
     }
 )
 
+export const generate_product_social_preview = createAsyncThunk(
+    'product/generate_product_social_preview',
+    async(payload, { rejectWithValue, fulfillWithValue }) => {
+        try{
+            const { data } = await api.post('/product-social-preview', payload, { withCredentials: true });
+            return fulfillWithValue(data);
+        }catch(error){
+            const responsePayload = error?.response?.data || { error: 'Failed to generate social post preview' };
+            return rejectWithValue(responsePayload);
+        }
+    }
+)
+
+export const publish_product_social_post = createAsyncThunk(
+    'product/publish_product_social_post',
+    async(formData, { rejectWithValue, fulfillWithValue }) => {
+        try{
+            const { data } = await api.post('/product-social-publish', formData, {
+                withCredentials: true,
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return fulfillWithValue(data);
+        }catch(error){
+            const responsePayload = error?.response?.data || { error: 'Failed to publish social post' };
+            return rejectWithValue(responsePayload);
+        }
+    }
+)
+
 export const import_aliexpress_product = createAsyncThunk(
     'product/import_aliexpress_product',
     async(url, {rejectWithValue, fulfillWithValue}) => {
@@ -222,6 +251,12 @@ export const productReducer = createSlice({
         selectedProductName: '',
         averageProductRating: 0,
         reviewCount: 0,
+        socialPreview: null,
+        socialPreviewLoading: false,
+        socialPreviewError: '',
+        socialPublishLoading: false,
+        socialPublishResult: null,
+        socialPublishError: '',
     },
     reducers: {
         messageClear: (state, _) => {
@@ -233,6 +268,14 @@ export const productReducer = createSlice({
             state.preflightCheckResults = []
             state.preflightCheckMatches = 0
             state.preflightCheckLoading = false
+            },
+        resetSocialPreview: (state) => {
+            state.socialPreview = null;
+            state.socialPreviewError = '';
+            state.socialPreviewLoading = false;
+            state.socialPublishLoading = false;
+            state.socialPublishResult = null;
+            state.socialPublishError = '';
         }
     },
     extraReducers: (builder) => {
@@ -250,7 +293,7 @@ export const productReducer = createSlice({
             state.successMessage = payload.message;
         })
 
-            .addCase(import_aliexpress_product.pending, (state) => {
+        .addCase(import_aliexpress_product.pending, (state) => {
             state.loader = true;
         })
         .addCase(import_aliexpress_product.rejected, (state, {payload}) => {
@@ -260,6 +303,33 @@ export const productReducer = createSlice({
         .addCase(import_aliexpress_product.fulfilled, (state, {payload}) => {
             state.loader = false;
             state.importedProduct = payload;
+        })
+               .addCase(generate_product_social_preview.pending, (state) => {
+            state.socialPreviewLoading = true;
+            state.socialPreviewError = '';
+        })
+        .addCase(generate_product_social_preview.fulfilled, (state, { payload }) => {
+            state.socialPreviewLoading = false;
+            state.socialPreview = payload?.preview || null;
+            state.socialPreviewError = '';
+        })
+        .addCase(generate_product_social_preview.rejected, (state, { payload }) => {
+            state.socialPreviewLoading = false;
+            state.socialPreviewError = typeof payload === 'string' ? payload : (payload?.error || 'Failed to generate social post preview');
+        })
+        .addCase(publish_product_social_post.pending, (state) => {
+            state.socialPublishLoading = true;
+            state.socialPublishError = '';
+            state.socialPublishResult = null;
+        })
+        .addCase(publish_product_social_post.fulfilled, (state, { payload }) => {
+            state.socialPublishLoading = false;
+            state.socialPublishResult = payload || null;
+            state.socialPublishError = '';
+        })
+        .addCase(publish_product_social_post.rejected, (state, { payload }) => {
+            state.socialPublishLoading = false;
+            state.socialPublishError = typeof payload === 'string' ? payload : (payload?.error || 'Failed to publish social post');
         })
         .addCase(get_products.fulfilled, (state, {payload}) => {
             state.loader = false;
@@ -456,5 +526,5 @@ export const productReducer = createSlice({
     }
 })
 
-export const {messageClear} = productReducer.actions
+export const {messageClear, resetSocialPreview} = productReducer.actions
 export default productReducer.reducer
