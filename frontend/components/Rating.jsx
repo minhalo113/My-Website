@@ -4,9 +4,10 @@ import React from 'react';
 const MAX_STARS = 5;
 
 const Rating = ({rating, number_of_ratings}) => {
+    const formattedRating = Number.isFinite(rating) ? rating.toFixed(1) : '0.0';
   return (
-    <div>
-      <span className='rating flex gap-1 text-yellow-400'>
+    <div className="flex flex-col items-start gap-1 text-gray-500">
+      <span className="rating flex items-center gap-1 text-yellow-400">
         {[...Array(MAX_STARS)].map((_, index) => {
           const fillPercent = Math.min(Math.max(rating - index, 0), 1) * 100;
 
@@ -14,7 +15,7 @@ const Rating = ({rating, number_of_ratings}) => {
             <div
               key={index}
               className="relative text-gray-300"
-              style={{ fontSize: '20px', width: '1em', height: '1em' }}
+              style={{ fontSize: '18px', width: '1em', height: '1em' }}
             >
               <i className="icofont-ui-rating absolute left-0 top-0" style={{ color: 'gray' }} />
               <i
@@ -28,9 +29,10 @@ const Rating = ({rating, number_of_ratings}) => {
             </div>
           );
         })}
-        <h6>{rating}</h6>
-    </span>
-    <p>({number_of_ratings} reviews)</p>
+        {/* <span className="text-sm font-medium text-gray-700">{formattedRating}</span> */}
+              <p className="text-xs text-gray-400">({number_of_ratings})</p>
+      </span>
+
     </div>
   )
 }

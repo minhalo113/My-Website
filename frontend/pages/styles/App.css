@@ -34,7 +34,7 @@ ul{
   color:#DCA54A !important;
 }
 .banner-section.style-4 .banner-content .a-figure-a-day-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 700;
   text-shadow: 2px 2px #000;
   margin-bottom: 10px;

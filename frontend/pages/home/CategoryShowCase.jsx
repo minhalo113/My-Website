@@ -35,6 +35,70 @@ const CategoryShowCase = () => {
         fetchData();
     }, [])
 
+   const formatCurrency = (value) => {
+        const numericValue = typeof value === 'number' ? value : parseFloat(value);
+        if (!Number.isFinite(numericValue)) {
+            return value;
+        }
+        return `$${numericValue.toFixed(2)}`;
+    };
+
+    const renderDiscountedPrice = (discountedLabel, originalLabel) => (
+        <>
+            <span className="text-[11px] uppercase tracking-wide text-red-500 font-semibold">Sale</span>
+            <span className="flex items-baseline gap-2">
+                <span className="font-semibold text-lg text-[#DCA54A]">{discountedLabel}</span>
+                <del className="text-xs text-gray-500">{originalLabel}</del>
+            </span>
+        </>
+    );
+
+    const renderPrice = (product) => {
+        const hasVariant =
+            product.colors &&
+            product.colors.length > 0 &&
+            Array.isArray(product.colorPrices) &&
+            product.colorPrices.length > 0;
+
+        if (hasVariant) {
+            const prices = product.colors
+                .map((c, idx) => product.colorPrices[idx])
+                .filter((v) => v !== undefined);
+
+            if (!prices.length) {
+                return <span className="font-semibold text-lg text-[#DCA54A]">{formatCurrency(product.price)}</span>;
+            }
+
+            const min = Math.min(...prices);
+            const max = Math.max(...prices);
+            const hasRange = min !== max;
+            const baseLabel = hasRange
+                ? `${formatCurrency(min)} - ${formatCurrency(max)}`
+                : formatCurrency(min);
+
+            if (product.discount > 0) {
+                const discountMultiplier = 1 - product.discount / 100;
+                const minDiscount = min * discountMultiplier;
+                const maxDiscount = max * discountMultiplier;
+                const discountedLabel = hasRange
+                    ? `${formatCurrency(minDiscount)} - ${formatCurrency(maxDiscount)}`
+                    : formatCurrency(minDiscount);
+
+                return renderDiscountedPrice(discountedLabel, baseLabel);
+            }
+
+            return <span className="font-semibold text-lg text-[#DCA54A]">{baseLabel}</span>;
+        }
+
+        if (product.discount > 0) {
+            const discountedPrice =
+                product.price - (product.price * product.discount) / 100;
+            return renderDiscountedPrice(formatCurrency(discountedPrice), formatCurrency(product.price));
+        }
+
+        return <span className="font-semibold text-lg text-[#DCA54A]">{formatCurrency(product.price)}</span>;
+    };
+
     const filterItem = (categItem) =>{
         if(!productData.length) {
             return;
@@ -98,77 +162,10 @@ const CategoryShowCase = () => {
                                     <Link href={`/shop/${product._id.toString()}`}><h6>{product.name}</h6></Link>
                                     <div className='course-footer'>
                                         <div className='course-author'>
-                                        <Link href = {`/shop/${product._id.toString()}`} className='ca-name'>{product.seller}</Link>
+                                            <Link href = {`/shop/${product._id.toString()}`} className='ca-name'>{product.seller}</Link>
                                         </div>
-                                        <div className='course-price' style={{color: "#DCA54A"}}>
-                                            {(() => {
-                                                const hasVariant =
-                                                    product.colors &&
-                                                    product.colors.length > 0 &&
-                                                    Array.isArray(product.colorPrices) &&
-                                                    product.colorPrices.length > 0;
-
-                                                if (hasVariant) {
-                                                    const prices = product.colors
-                                                        .map((c, idx) => product.colorPrices[idx])
-                                                        .filter(v => v !== undefined);
-                                                    const min = Math.min(...prices);
-                                                    const max = Math.max(...prices);
-                                                    const minBase = min.toFixed(2);
-                                                    const maxBase = max.toFixed(2);
-                                                    if (product.discount > 0) {
-                                                        const minDiscount = (min - (min * product.discount) / 100).toFixed(2);
-                                                        const maxDiscount = (max - (max * product.discount) / 100).toFixed(2);
-
-                                                        if (minBase === maxBase) {
-                                                            return (
-                                                                <>
-                                                                    ${minDiscount}
-                                                                    <del className='text-sm text-gray-500 ml-1'>
-                                                                        ${minBase}
-                                                                    </del>
-                                                                </>
-                                                            );
-                                                        }
-
-                                                        return (
-                                                            <>
-                                                                ${minDiscount}
-                                                                <del className='text-sm text-gray-500 ml-1'>
-                                                                    ${minBase}
-                                                                </del>
-                                                                {` - `}
-                                                                ${maxDiscount}
-                                                                <del className='text-sm text-gray-500 ml-1'>
-                                                                    ${maxBase}
-                                                                </del>
-                                                            </>
-                                                        );
-                                                    }
-
-                                                    if (minBase === maxBase) {
-                                                        return `$${minBase}`;
-                                                    }
-                                                    return `$${minBase} - $${maxBase}`;
-                                                }
-
-                                                if (product.discount > 0) {
-                                                    const discountedPrice = (
-                                                        product.price -
-                                                        (product.price * product.discount) / 100
-                                                    ).toFixed(2);
-                                                    return (
-                                                        <>
-                                                            ${discountedPrice}
-                                                            <del className='text-sm text-gray-500 ml-1'>
-                                                                ${product.price}
-                                                            </del>
-                                                        </>
-                                                    );
-                                                }
-
-                                                return `$${product.price}`;
-                                            })()}
+                                        <div className='course-price flex flex-col items-end text-right gap-1' style={{color: "#DCA54A"}}>
+                                            {renderPrice(product)}
                                         </div>
                                     </div>
                                 </div>
