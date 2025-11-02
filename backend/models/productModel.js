@@ -92,6 +92,7 @@ const productSchema = new Schema({
             rating: {type: Number, required: true, min: 1, max: 5},
             comment: String,
             images: {type: [String], default: []},
+            reviewDate: {type: Date},
             createdAt: {type: Date, default: Date.now},
             updatedAt: {type: Date, default: Date.now},
             isEdited: {type: Boolean, default: false}

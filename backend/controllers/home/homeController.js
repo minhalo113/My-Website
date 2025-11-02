@@ -1,5 +1,6 @@
 import formidable from 'formidable';
 import {v2 as cloudinary} from 'cloudinary';
+import mongoose from 'mongoose';
 import productModel from "../../models/productModel.js";
 import categoryModel from "../../models/categoryModel.js";
 import responseReturn from "../../utils/response.js";
@@ -10,7 +11,9 @@ import {
     fetchProductsForImageSearch,
     collectMatchesForFingerprint,
 } from "../../utils/productImageSearch.js";
-import { formatReviewListForResponse } from "../../utils/reviewFormatter.js";
+import { formatReviewForResponse, formatReviewListForResponse, repositionReviewInPlace } from "../../utils/reviewFormatter.js";
+
+const { Types } = mongoose;
 
 class homeControllers{
     formateProduct = (products) => {
@@ -218,6 +221,7 @@ class homeControllers{
                 return r.user.toString() === userId; 
             });
 
+            let targetReview = null;
             if(existing){
                 existing.rating = rating;
                 existing.comment = comment;
@@ -225,9 +229,13 @@ class homeControllers{
                 existing.updatedAt = new Date();
                 existing.isEdited = true;
                 existing.userImage = curUser.image;
+                if (!existing.reviewDate) {
+                    existing.reviewDate = existing.createdAt || new Date();
+                }
                 if (!existing.createdAt) {
                     existing.createdAt = new Date();
                 }
+                targetReview = existing;
             }else{
                 product.ratings.push({
                     user: userId,
@@ -236,11 +244,18 @@ class homeControllers{
                     images,
                     name: curUser.name,
                     userImage: curUser.image,
+                    reviewDate: new Date(),
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     isEdited: false
-                })
+                });
+                targetReview = product.ratings[product.ratings.length - 1];
             }
+
+            if (targetReview) {
+                repositionReviewInPlace(product.ratings, targetReview);
+            }
+            product.markModified('ratings');
             product.averageRating = Math.round(product.ratings.reduce((acc, r) => acc + r.rating, 0) / product.ratings.length * 10) / 10;
             product.reviewCount = product.ratings.length;
             await product.save()
@@ -252,13 +267,99 @@ class homeControllers{
     }
 
     get_reviews = async(req, res) => {
+        const { productId } = req.params;
+        const limitParam = Number.parseInt(req.query.limit, 10);
+        const pageParam = Number.parseInt(req.query.page, 10);
+        const limit = Math.min(Math.max(Number.isFinite(limitParam) && limitParam > 0 ? limitParam : 10, 1), 100);
+        const page = Math.max(Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1, 1);
+        const skip = (page - 1) * limit;
+
+        if (!Types.ObjectId.isValid(productId)) {
+            return responseReturn(res, 400, { message: 'Invalid product identifier.' });
+        }
+
         try{
-            const product = await productModel.findById(req.params.productId).select('ratings');
-            if(!product){
-                return responseReturn(res, 404, {message: 'Product not found'})
+            const productObjectId = new Types.ObjectId(productId);
+            const buildPipeline = (skipValue) => [
+                { $match: { _id: productObjectId } },
+                {
+                    $facet: {
+                        ratings: [
+                            { $unwind: { path: '$ratings', preserveNullAndEmptyArrays: true } },
+                            { $match: { ratings: { $ne: null } } },
+                            { $addFields: { 'ratings.effectiveDate': { $ifNull: ['$ratings.reviewDate', '$ratings.createdAt'] } } },
+                            { $sort: { 'ratings.effectiveDate': -1, 'ratings._id': -1 } },
+                            { $skip: skipValue },
+                            { $limit: limit },
+                            { $replaceRoot: { newRoot: '$ratings' } },
+                        ],
+                        meta: [
+                            {
+                                $project: {
+                                    totalReviews: { $size: '$ratings' },
+                                    averageRating: '$averageRating',
+                                    reviewCount: '$reviewCount',
+                                },
+                            },
+                        ],
+                    },
+                },
+                {
+                    $addFields: {
+                        totalReviews: { $ifNull: [{ $arrayElemAt: ['$meta.totalReviews', 0] }, 0] },
+                        averageRating: { $ifNull: [{ $arrayElemAt: ['$meta.averageRating', 0] }, 0] },
+                        reviewCount: { $ifNull: [{ $arrayElemAt: ['$meta.reviewCount', 0] }, 0] },
+                    },
+                },
+                {
+                    $project: {
+                        ratings: 1,
+                        totalReviews: 1,
+                        averageRating: 1,
+                        reviewCount: 1,
+                    },
+                },
+            ];
+
+            const [result] = await productModel.aggregate(buildPipeline(skip));
+
+            if (!result) {
+                const exists = await productModel.exists({ _id: productObjectId });
+                if (!exists) {
+                    return responseReturn(res, 404, { message: 'Product not found' });
+                }
+                return responseReturn(res, 200, {
+                    reviewList: [],
+                    totalReviews: 0,
+                    totalPages: 1,
+                    page,
+                    limit,
+                    averageRating: 0,
+                    reviewCount: 0,
+                });
             }
-            const reviewList = formatReviewListForResponse(product.ratings || []);
-            return responseReturn(res, 200, {reviewList})
+
+            const totalReviews = result.totalReviews || 0;
+            const totalPages = totalReviews === 0 ? 1 : Math.ceil(totalReviews / limit);
+            const clampedPage = totalReviews === 0 ? 1 : Math.min(page, totalPages);
+            let ratings = result.ratings || [];
+
+            if (totalReviews > 0 && page > totalPages) {
+                const adjustedSkip = (totalPages - 1) * limit;
+                const [adjusted] = await productModel.aggregate(buildPipeline(adjustedSkip));
+                ratings = adjusted?.ratings || [];
+            }
+            const reviewList = ratings.map((item) => formatReviewForResponse(item));
+
+            return responseReturn(res, 200, {
+                reviewList,
+                totalReviews,
+                totalPages,
+                page: clampedPage,
+                limit,
+                averageRating: result.averageRating ?? 0,
+                reviewCount: result.reviewCount ?? totalReviews,
+            });
         }catch(error){
             console.log(error)
             return responseReturn(res, 500, {message: error.message})

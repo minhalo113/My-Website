@@ -11,7 +11,7 @@ import { generateProductSocialCopy } from '../../services/aiProductSocialService
 import { publishProductSocialPost } from '../../services/metaPublisher.js';
 import {
     extractPublicId,
-    fingerprintFromUploadResult
+    fingerprintFromUploadResult,
 } from '../../utils/imageFingerprint.js';
 import {
     fetchProductsForImageSearch,
@@ -20,6 +20,7 @@ import {
 import {
     formatReviewForResponse,
     formatReviewListForResponse,
+        repositionReviewInPlace,
 } from '../../utils/reviewFormatter.js';
 
 const normalizeUploadList = (value) => {
@@ -873,12 +874,7 @@ class productController{
                 return responseReturn(res, 404, { error: 'Product not found.' });
             }
 
-            const reviews = formatReviewListForResponse(product.ratings || [])
-                .sort((a, b) => {
-                    const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
-                    const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
-                    return bTime - aTime;
-                });
+            const reviews = formatReviewListForResponse(product.ratings || []);
 
             const averageRating = computeAverageRatingValue(product.ratings);
             const reviewCount = reviews.length;
@@ -914,7 +910,7 @@ class productController{
             const ratingInput = sanitizeStringField(fields.rating);
             const commentInput = sanitizeStringField(fields.comment);
             const nameInput = sanitizeStringField(fields.name);
-            const createdAtInput = sanitizeStringField(fields.reviewDate || fields.createdAt || fields.date);
+            const reviewDateInput = sanitizeStringField(fields.reviewDate || fields.date || fields.createdAt);
             const updatedAtInput = sanitizeStringField(fields.updatedAt);
             const isEditedInput = sanitizeStringField(fields.isEdited);
 
@@ -1009,7 +1005,9 @@ class productController{
                     }
                 }
 
-                const createdAt = parseDateField(createdAtInput) || new Date();
+                const parsedReviewDate = parseDateField(reviewDateInput);
+                const reviewDate = parsedReviewDate || new Date();
+                const createdAt = new Date();
                 let updatedAt = parseDateField(updatedAtInput) || createdAt;
                 if (updatedAt < createdAt) {
                     updatedAt = createdAt;
@@ -1025,9 +1023,22 @@ class productController{
                     comment: commentInput,
                     images: reviewImages,
                     userImage,
+                    reviewDate,
                     createdAt,
                     updatedAt,
                     isEdited,
+                });
+                const insertedReview = product.ratings[product.ratings.length - 1];
+                const insertedId = insertedReview?._id ? insertedReview._id.toString() : null;
+                product.ratings.sort((a, b) => {
+                    const aTime = new Date(a.reviewDate || a.createdAt || a.updatedAt || 0).getTime();
+                    const bTime = new Date(b.reviewDate || b.createdAt || b.updatedAt || 0).getTime();
+                    if (bTime !== aTime) {
+                        return bTime - aTime;
+                    }
+                    const aId = a?._id ? a._id.toString() : '';
+                    const bId = b?._id ? b._id.toString() : '';
+                    return bId.localeCompare(aId);
                 });
                 product.markModified('ratings');
 
@@ -1035,11 +1046,13 @@ class productController{
                 product.reviewCount = product.ratings.length;
 
                 await product.save();
-                const newlyCreated = product.ratings[product.ratings.length - 1];
+                const persistedReview = insertedId
+                    ? product.ratings.id(insertedId) || product.ratings.find((item) => item._id?.toString() === insertedId)
+                    : product.ratings[0];
 
                 return responseReturn(res, 201, {
-                    message: 'Fake review added successfully.',
-                    review: formatReviewForResponse(newlyCreated),
+                    message: 'Review added successfully.',
+                    review: formatReviewForResponse(persistedReview || insertedReview),
                     averageRating: product.averageRating,
                     reviewCount: product.reviewCount,
                 });
@@ -1118,6 +1131,8 @@ class productController{
             }
 
             review.updatedAt = new Date();
+            repositionReviewInPlace(product.ratings, review);
+            product.markModified('ratings');
 
             product.averageRating = computeAverageRatingValue(product.ratings);
             product.reviewCount = product.ratings.length;
@@ -1125,7 +1140,7 @@ class productController{
 
             return responseReturn(res, 200, {
                 message: 'Review updated successfully.',
-                review: formatProductReviewForResponse(review),
+                review: formatReviewForResponse(review),
                 averageRating: product.averageRating,
                 reviewCount: product.reviewCount,
             });

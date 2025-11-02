@@ -492,7 +492,7 @@ export const productReducer = createSlice({
             if (payload?.review) {
                 state.reviewList = [payload.review, ...state.reviewList];
             }
-            state.successMessage = payload?.message || 'Fake review added successfully.';
+            state.successMessage = payload?.message || 'Review added successfully.';
             if (payload?.averageRating !== undefined) {
                 state.averageProductRating = payload.averageRating;
             }

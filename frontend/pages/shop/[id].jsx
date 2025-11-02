@@ -14,23 +14,55 @@ const SingleProduct = () => {
     const [loading, setLoading] = useState(true);
     
     const [reviewList, setReviewList] = useState([])
+    const [reviewPage, setReviewPage] = useState(1)
+    const [reviewTotalPages, setReviewTotalPages] = useState(1)
+    const [reviewTotalCount, setReviewTotalCount] = useState(0)
     const [previewImage, setPreviewImage] = useState(null)
     
     const router = useRouter();
     const {id} = router.query;
 
-    const fetchData = async(_id) => {
-        try{
-            let {data} = await api.get(`/customers-product-get/${_id}`, {withCredentials: true})
-            setProduct(data.product);
-            let reviewRes = await api.get(`/get-reviews/${_id}`, {withCredentials: true})
-            setReviewList(reviewRes.data.reviewList);
+    const REVIEW_PAGE_SIZE = 10;
 
+    const fetchProduct = async(_id) => {
+        try{
+            const {data} = await api.get(`/customers-product-get/${_id}`, {withCredentials: true})
+            setProduct(data.product);
         }catch(err){
             console.log(err.response.data.message)
-        }finally{
+        }
+    }
+
+    const fetchReviews = async(_id, page = 1) => {
+        try{
+            const { data } = await api.get(`/get-reviews/${_id}`, {
+                withCredentials: true,
+                params: { page, limit: REVIEW_PAGE_SIZE },
+            })
+            setReviewList(data.reviewList || [])
+            setReviewPage(data.page || page)
+            setReviewTotalPages(data.totalPages || 1)
+            setReviewTotalCount(data.totalReviews || 0)
+        }catch(err){
+            console.log(err?.response?.data?.message || err.message)
+        }
+    }
+
+    const fetchData = async(_id) => {
+        setLoading(true)
+        try {
+            await Promise.all([fetchProduct(_id), fetchReviews(_id, 1)])
+        } finally {
             setLoading(false)
         }
+    }
+
+    const handleReviewPageChange = (page) => {
+        if (!id || page === reviewPage || page < 1 || page > reviewTotalPages) {
+            return
+        }
+        setReviewPage(page)
+        fetchReviews(id, page)
     }
 
     useEffect(() =>{
@@ -75,7 +107,18 @@ const SingleProduct = () => {
                                 </div>
                             </div>
                             <div className='review'>
-                                <Review item = {productData} reviewList = {reviewList} reloadFunction = {() => fetchData(id)}/>
+                                <Review
+                                    item={productData}
+                                    reviewList={reviewList}
+                                    page={reviewPage}
+                                    totalPages={reviewTotalPages}
+                                    totalReviews={reviewTotalCount}
+                                    onPageChange={handleReviewPageChange}
+                                    reloadFunction={() => {
+                                        setReviewPage(1)
+                                        fetchReviews(id, 1)
+                                    }}
+                                />
                             </div>
                         </article>
                     </div>

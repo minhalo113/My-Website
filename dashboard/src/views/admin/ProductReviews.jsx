@@ -418,7 +418,7 @@ const ProductReviews = () => {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Rating</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Comment</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Submitted</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Display Date</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Updated</th>
                 <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Actions</th>
               </tr>
@@ -501,7 +501,7 @@ const ProductReviews = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{formatDate(review.createdAt)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{formatDate(review.reviewDate || review.createdAt)}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{formatDate(review.updatedAt)}</td>
                     <td className="px-6 py-4 text-sm text-right space-x-2 whitespace-nowrap">
                       <button

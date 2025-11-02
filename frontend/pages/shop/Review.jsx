@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from 'react'
+import React,{useState} from 'react'
 import Rating from '../../components/Rating'
 import PropTypes from 'prop-types'
 import api from '../../src/api/api';
@@ -11,7 +11,7 @@ const DEFAULT_ICON = "★";
 const DEFAULT_UNSELECTED_COLOR = "grey";
 const DEFAULT_COLOR = "#facc15";
 
-const Review = ({ item, reloadFunction, reviewList }) => {
+const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, totalReviews = 0, onPageChange }) => {
   const { description, _id } = item || {}
 
   const [comment, setComment] = useState("")
@@ -81,7 +81,8 @@ const Review = ({ item, reloadFunction, reviewList }) => {
           <ul className="content lab-ul">
             {reviewList.map((review, i) => {
               const displayName = review.displayName || review.name || 'Anonymous';
-              const reviewDate = review.createdAt ? new Date(review.createdAt).toISOString().slice(0, 10) : '';
+              const referenceDate = review.reviewDate || review.createdAt || review.updatedAt;
+              const reviewDate = referenceDate ? new Date(referenceDate).toISOString().slice(0, 10) : '';
 
               return (
                 <li key={i} className="review-item">
@@ -132,6 +133,30 @@ const Review = ({ item, reloadFunction, reviewList }) => {
               );
             })}
           </ul>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between flex-wrap gap-3 mt-4">
+              <button
+                type="button"
+                className="default-button !px-4 !py-2"
+                disabled={page <= 1}
+                onClick={() => onPageChange && onPageChange(page - 1)}
+              >
+                <span>Previous</span>
+              </button>
+              <p className="m-0 text-sm text-slate-600">
+                Page {page} of {totalPages} &middot; {totalReviews} review{totalReviews === 1 ? '' : 's'}
+              </p>
+              <button
+                type="button"
+                className="default-button !px-4 !py-2"
+                disabled={page >= totalPages}
+                onClick={() => onPageChange && onPageChange(page + 1)}
+              >
+                <span>Next</span>
+              </button>
+            </div>
+          )}
 
           <div className="client-review">
             <div className="review-form">
@@ -207,10 +232,22 @@ const Review = ({ item, reloadFunction, reviewList }) => {
 
 Review.propTypes = {
   item: PropTypes.shape({
-    description: PropTypes.string.isRequired
+    description: PropTypes.string,
+    _id: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   }).isRequired,
   reloadFunction: PropTypes.func.isRequired,
-  reviewList: PropTypes.array.isRequired
+  reviewList: PropTypes.array.isRequired,
+  page: PropTypes.number,
+  totalPages: PropTypes.number,
+  totalReviews: PropTypes.number,
+  onPageChange: PropTypes.func,
+}
+
+Review.defaultProps = {
+  page: 1,
+  totalPages: 1,
+  totalReviews: 0,
+  onPageChange: () => {},
 }
 
 export default Review
