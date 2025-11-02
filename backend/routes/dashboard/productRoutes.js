@@ -14,6 +14,7 @@ productRouter.post('/product-image-precheck', authMiddleware, productController.
 productRouter.post('/product-visibility', authMiddleware, productController.product_visibility)
 productRouter.post('/product-social-preview', authMiddleware, productController.generate_product_social_preview)
 productRouter.post('/product-social-publish', authMiddleware, productController.publish_product_social_post)
+productRouter.post('/product/:productId/reviews', authMiddleware, productController.create_fake_product_review)
 productRouter.get('/product/:productId/reviews', authMiddleware, productController.get_product_reviews)
 productRouter.patch('/product/:productId/reviews/:reviewId', authMiddleware, productController.update_product_review)
 productRouter.delete('/product/:productId/reviews/:reviewId', authMiddleware, productController.delete_product_review)

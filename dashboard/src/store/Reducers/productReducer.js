@@ -201,6 +201,22 @@ export const fetch_product_reviews = createAsyncThunk(
     }
 );
 
+export const create_fake_product_review = createAsyncThunk(
+    'product/create_fake_product_review',
+    async({ productId, payload }, { rejectWithValue, fulfillWithValue }) => {
+        try{
+            const { data } = await api.post(`/product/${productId}/reviews`, payload, {
+                withCredentials: true,
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            return fulfillWithValue({ productId, ...data });
+        }catch(error){
+            const responsePayload = error?.response?.data || { error: 'Failed to add fake review' };
+            return rejectWithValue(responsePayload);
+        }
+    }
+);
+
 export const update_product_review = createAsyncThunk(
     'product/update_product_review',
     async({ productId, reviewId, payload }, { rejectWithValue, fulfillWithValue }) => {
@@ -467,6 +483,26 @@ export const productReducer = createSlice({
         .addCase(fetch_product_reviews.rejected, (state, { payload }) => {
             state.reviewLoader = false;
             state.errorMessage = typeof payload === 'string' ? payload : (payload?.error || 'Failed to load product reviews');
+        })
+        .addCase(create_fake_product_review.pending, (state) => {
+            state.reviewLoader = true;
+        })
+        .addCase(create_fake_product_review.fulfilled, (state, { payload }) => {
+            state.reviewLoader = false;
+            if (payload?.review) {
+                state.reviewList = [payload.review, ...state.reviewList];
+            }
+            state.successMessage = payload?.message || 'Fake review added successfully.';
+            if (payload?.averageRating !== undefined) {
+                state.averageProductRating = payload.averageRating;
+            }
+            if (payload?.reviewCount !== undefined) {
+                state.reviewCount = payload.reviewCount;
+            }
+        })
+        .addCase(create_fake_product_review.rejected, (state, { payload }) => {
+            state.reviewLoader = false;
+            state.errorMessage = typeof payload === 'string' ? payload : (payload?.error || 'Failed to add fake review');
         })
         .addCase(update_product_review.pending, (state) => {
             state.reviewLoader = true;

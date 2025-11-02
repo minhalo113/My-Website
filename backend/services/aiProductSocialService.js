@@ -54,7 +54,7 @@ export const generateProductSocialCopy = async ({
         throw new Error('OpenAI API key is not configured');
     }
 
-    const systemPrompt = `You are a marketing assistant helping to promote ecommerce products on Instagram and Facebook.\n\nRespond strictly with a JSON object using this schema:\n{\n  "headline": string,              // punchy, 6-12 words, suitable as post opener\n  "caption": string,               // energetic 2-3 sentence caption highlighting the product benefits\n  "callToAction": string,          // brief imperative encouraging viewers to act\n  "hashtags": string[]             // 6-10 high-intent hashtags without the # symbol\n}\n\nKeep the tone upbeat, concise, and platform-ready. Avoid emojis unless already provided. Do not include URLs unless supplied.`;
+    const systemPrompt = `You are a marketing assistant helping to promote ecommerce products on Instagram and Facebook.\n\nRespond strictly with a JSON object using this schema:\n{\n  "headline": string,              // punchy, 6-12 words, suitable as post opener\n  "caption": string,               // energetic 2-3 sentence caption highlighting the product benefits\n  "callToAction": string,          // brief imperative encouraging viewers to act, remember to include the shop URL\n  "hashtags": string[]             // 6-10 high-intent hashtags without the # symbol\n}\n\nKeep the tone upbeat, concise, and platform-ready. Avoid emojis unless already provided.`;
 
     const parts = [
         `Product title: ${trimmedTitle}`,

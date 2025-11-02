@@ -79,16 +79,20 @@ const Review = ({ item, reloadFunction, reviewList }) => {
         <h3 style={titleStyle} className="section-title">Reviews</h3>
         <div className="review-showing">
           <ul className="content lab-ul">
-            {reviewList.map((review, i) => (
-              <li key={i} className="review-item">
+            {reviewList.map((review, i) => {
+              const displayName = review.displayName || review.name || 'Anonymous';
+              const reviewDate = review.createdAt ? new Date(review.createdAt).toISOString().slice(0, 10) : '';
+
+              return (
+                <li key={i} className="review-item">
                 <div className="post-thumb">
-                  <img src={review?.userImage?.url}/>
+                  <img src={review?.userImage?.url} alt={displayName} />
                 </div>
                 <div className="post-content">
                   <div className="entry-meta">
                     <div className="posted-on flex items-start gap-2">
-                      <a href="#" className="pointer-events-none text-gray-500">{review.name}</a>
-                      <p>{new Date(review.createdAt).toISOString().slice(0, 10)}</p>
+                      <a href="#" className="pointer-events-none text-gray-500">{displayName}</a>
+                      <p>{reviewDate}</p>
                     </div>
                     <div className="flex items-center gap-1 h-full">
                         {stars.map((item, index) => {
@@ -124,8 +128,9 @@ const Review = ({ item, reloadFunction, reviewList }) => {
                     )}
                   </div>
                 </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           <div className="client-review">

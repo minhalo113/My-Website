@@ -6,11 +6,11 @@ import responseReturn from "../../utils/response.js";
 import { fingerprintFromUploadResult } from "../../utils/imageFingerprint.js";
 import {searchCatalogProducts} from "../../services/productSearchService.js";
 import { computeEffectivePrice } from "../../utils/effectivePrice.js";
-import { response } from 'express';
 import {
     fetchProductsForImageSearch,
     collectMatchesForFingerprint,
 } from "../../utils/productImageSearch.js";
+import { formatReviewListForResponse } from "../../utils/reviewFormatter.js";
 
 class homeControllers{
     formateProduct = (products) => {
@@ -192,11 +192,15 @@ class homeControllers{
     product_get = async(req, res) => {
         const {productId} = req.params;
         try{
-            const product = await productModel.findOne({_id: productId, isHidden: false})
+            const product = await productModel.findOne({_id: productId, isHidden: false}).lean()
             if(!product){
                 return responseReturn(res, 404, {error: 'Product not found'})
             }
-            return responseReturn(res, 200, {product})
+            const sanitizedProduct = {
+                ...product,
+                ratings: formatReviewListForResponse(product?.ratings || []),
+            }
+            return responseReturn(res, 200, {product: sanitizedProduct})
         }catch(error){
             return responseReturn(res, 500, {error: error.message})
         }
@@ -249,9 +253,12 @@ class homeControllers{
 
     get_reviews = async(req, res) => {
         try{
-            const product = await productModel.findById(req.params.productId);
-            const reviewList = product.ratings;
-            return responseReturn(res, 200, {reviewList: reviewList})
+            const product = await productModel.findById(req.params.productId).select('ratings');
+            if(!product){
+                return responseReturn(res, 404, {message: 'Product not found'})
+            }
+            const reviewList = formatReviewListForResponse(product.ratings || []);
+            return responseReturn(res, 200, {reviewList})
         }catch(error){
             console.log(error)
             return responseReturn(res, 500, {message: error.message})

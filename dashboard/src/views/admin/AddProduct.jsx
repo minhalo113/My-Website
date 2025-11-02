@@ -789,12 +789,12 @@ const AddProduct = () => {
                                         <p className='text-sm text-slate-200/80'>No hashtags suggested.</p>
                                     )}
                                 </div>
-                                {state.link && (
+                                {/* {state.link && (
                                     <div>
                                         <p className='text-xs uppercase tracking-wide text-indigo-200/80'>Product Link</p>
                                         <p className='truncate text-sm text-indigo-100'>{state.link}</p>
                                     </div>
-                                )}
+                                )} */}
                                 <p className='text-xs text-slate-200/70'>The generated content will be sent to both Instagram and Facebook once you publish.</p>
                             </div>
                             <div className='space-y-3'>
