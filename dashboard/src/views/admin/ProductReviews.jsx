@@ -274,7 +274,7 @@ const ProductReviews = () => {
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Add Fake Review</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Add Review</h2>
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleAddFakeReview}>
           <div>
             <label htmlFor="fake-review-name" className="block text-sm font-medium text-gray-700">
@@ -404,7 +404,7 @@ const ProductReviews = () => {
               className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
               disabled={isSubmittingReview || reviewLoader}
             >
-              {isSubmittingReview ? 'Saving review...' : 'Add fake review'}
+              {isSubmittingReview ? 'Saving review...' : 'Add review'}
             </button>
           </div>
         </form>
