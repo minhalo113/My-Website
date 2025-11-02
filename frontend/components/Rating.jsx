@@ -30,7 +30,9 @@ const Rating = ({rating, number_of_ratings}) => {
           );
         })}
         {/* <span className="text-sm font-medium text-gray-700">{formattedRating}</span> */}
-              <p className="text-xs text-gray-400">({number_of_ratings})</p>
+        <div className="text-sm text-gray-400 inline-flex items-center">
+          ({number_of_ratings})
+        </div>
       </span>
 
     </div>
