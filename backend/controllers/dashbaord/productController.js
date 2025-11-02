@@ -2,7 +2,6 @@ import formidable from "formidable";
 import responseReturn from "../../utils/response.js";
 import { v2 as cloudinary } from 'cloudinary';
 import productModel from "../../models/productModel.js";
-import { response } from "express";
 import crypto from 'crypto';
 import axios from 'axios';
 import parseColorPrices from '../../utils/parseColorPrices.js';
@@ -18,6 +17,10 @@ import {
     fetchProductsForImageSearch,
     collectMatchesForFingerprint,
 } from '../../utils/productImageSearch.js';
+import {
+    formatReviewForResponse,
+    formatReviewListForResponse,
+} from '../../utils/reviewFormatter.js';
 
 const normalizeUploadList = (value) => {
     if (!value) return [];
@@ -53,30 +56,6 @@ const computeAverageRatingValue = (ratings = []) => {
     return Math.round((total / ratings.length) * 10) / 10;
 };
 
-const formatProductReviewForResponse = (review) => {
-    if (!review) return null;
-    const plain = typeof review.toObject === 'function' ? review.toObject() : review;
-    const toStringSafe = (value) => {
-        if (!value) return null;
-        if (typeof value === 'string') return value;
-        if (typeof value.toString === 'function') return value.toString();
-        return null;
-    };
-
-    return {
-        _id: toStringSafe(plain._id) || plain._id,
-        user: toStringSafe(plain.user),
-        name: plain.name || 'Anonymous',
-        rating: plain.rating ?? null,
-        comment: plain.comment || '',
-        images: Array.isArray(plain.images) ? plain.images : [],
-        userImage: plain.userImage || null,
-        createdAt: plain.createdAt || null,
-        updatedAt: plain.updatedAt || plain.createdAt || null,
-        isEdited: Boolean(plain.isEdited),
-    };
-};
-
 const parseSocialTags = (value) => {
     if (!value) return [];
     if (Array.isArray(value)) {
@@ -106,6 +85,13 @@ const pickFirstValue = (value) => (Array.isArray(value) ? value[0] : value);
 const sanitizeStringField = (value) => {
     const resolved = pickFirstValue(value);
     return typeof resolved === 'string' ? resolved.trim() : '';
+};
+
+const parseDateField = (value) => {
+    const normalized = sanitizeStringField(value);
+    if (!normalized) return null;
+    const parsed = new Date(normalized);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
 class productController{
@@ -875,7 +861,7 @@ class productController{
 
 
     }
-   get_product_reviews = async (req, res) => {
+    get_product_reviews = async (req, res) => {
         if (req.role !== 'admin') {
             return responseReturn(res, 403, { error: 'Only administrators can manage product reviews.' });
         }
@@ -887,8 +873,7 @@ class productController{
                 return responseReturn(res, 404, { error: 'Product not found.' });
             }
 
-            const reviews = (product.ratings || [])
-                .map((review) => formatProductReviewForResponse(review))
+            const reviews = formatReviewListForResponse(product.ratings || [])
                 .sort((a, b) => {
                     const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
                     const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -911,6 +896,159 @@ class productController{
             console.error('get_product_reviews error:', error);
             return responseReturn(res, 500, { error: 'Failed to load product reviews.' });
         }
+    };
+
+       create_fake_product_review = async (req, res) => {
+        if (req.role !== 'admin') {
+            return responseReturn(res, 403, { error: 'Only administrators can manage product reviews.' });
+        }
+
+        const { productId } = req.params;
+        const form = formidable({ multiples: true, keepExtensions: true });
+
+        form.parse(req, async (err, fields, files) => {
+            if (err) {
+                return responseReturn(res, 400, { error: err.message || 'Unable to process review form data.' });
+            }
+
+            const ratingInput = sanitizeStringField(fields.rating);
+            const commentInput = sanitizeStringField(fields.comment);
+            const nameInput = sanitizeStringField(fields.name);
+            const createdAtInput = sanitizeStringField(fields.reviewDate || fields.createdAt || fields.date);
+            const updatedAtInput = sanitizeStringField(fields.updatedAt);
+            const isEditedInput = sanitizeStringField(fields.isEdited);
+
+            if (!ratingInput) {
+                return responseReturn(res, 400, { error: 'Rating is required.' });
+            }
+
+            const parsedRating = Number(ratingInput);
+            if (!Number.isFinite(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+                return responseReturn(res, 400, { error: 'Rating must be a number between 1 and 5.' });
+            }
+
+            if (!commentInput) {
+                return responseReturn(res, 400, { error: 'Review comment is required.' });
+            }
+
+            let product;
+            try {
+                product = await productModel.findById(productId).select('ratings averageRating reviewCount');
+            } catch (lookupError) {
+                console.error('create_fake_product_review lookup error:', lookupError);
+                return responseReturn(res, 500, { error: 'Failed to add fake review.' });
+            }
+
+            if (!product) {
+                return responseReturn(res, 404, { error: 'Product not found.' });
+            }
+
+            const profileUploads = normalizeUploadList(files.profileImage || files.userImage || files.avatar);
+            const profileFile = profileUploads.length ? profileUploads[0] : null;
+            const reviewImageUploads = normalizeUploadList(files.reviewImages || files.reviewImage || files.images);
+
+            const requiresUpload = Boolean(profileFile || reviewImageUploads.length);
+            if (requiresUpload) {
+                cloudinary.config({
+                    cloud_name: process.env.cloud_name,
+                    api_key: process.env.api_key,
+                    api_secret: process.env.api_secret,
+                    secure: true,
+                });
+            }
+
+            const uploadedResources = [];
+            const registerUpload = (result) => {
+                if (result?.public_id) {
+                    uploadedResources.push({
+                        id: result.public_id,
+                        resource_type: result?.resource_type || 'image',
+                    });
+                }
+                return result;
+            };
+
+            const cleanupUploads = async () => {
+                if (!uploadedResources.length) return;
+                for (const resource of uploadedResources) {
+                    try {
+                        if (resource.resource_type && resource.resource_type !== 'image') {
+                            await cloudinary.uploader.destroy(resource.id, { resource_type: resource.resource_type });
+                        } else {
+                            await cloudinary.uploader.destroy(resource.id);
+                        }
+                    } catch (cleanupError) {
+                        console.error('Failed to clean up review upload:', cleanupError.message || cleanupError);
+                    }
+                }
+            };
+
+            try {
+                let userImage = null;
+                if (profileFile) {
+                    const uploadResult = registerUpload(
+                        await cloudinary.uploader.upload(profileFile.filepath || profileFile.path, {
+                            folder: 'products/reviews/profiles',
+                        })
+                    );
+                    userImage = {
+                        public_id: uploadResult.public_id,
+                        url: uploadResult.secure_url || uploadResult.url,
+                    };
+                }
+
+                const reviewImages = [];
+                for (const file of reviewImageUploads) {
+                    const uploadResult = registerUpload(
+                        await cloudinary.uploader.upload(file.filepath || file.path, {
+                            folder: 'products/reviews/gallery',
+                        })
+                    );
+                    if (uploadResult.secure_url || uploadResult.url) {
+                        reviewImages.push(uploadResult.secure_url || uploadResult.url);
+                    }
+                }
+
+                const createdAt = parseDateField(createdAtInput) || new Date();
+                let updatedAt = parseDateField(updatedAtInput) || createdAt;
+                if (updatedAt < createdAt) {
+                    updatedAt = createdAt;
+                }
+
+                const isEdited = typeof isEditedInput === 'string'
+                    ? ['true', '1', 'yes', 'on'].includes(isEditedInput.toLowerCase())
+                    : false;
+
+                product.ratings.push({
+                    name: nameInput || 'Anonymous',
+                    rating: parsedRating,
+                    comment: commentInput,
+                    images: reviewImages,
+                    userImage,
+                    createdAt,
+                    updatedAt,
+                    isEdited,
+                });
+                product.markModified('ratings');
+
+                product.averageRating = computeAverageRatingValue(product.ratings);
+                product.reviewCount = product.ratings.length;
+
+                await product.save();
+                const newlyCreated = product.ratings[product.ratings.length - 1];
+
+                return responseReturn(res, 201, {
+                    message: 'Fake review added successfully.',
+                    review: formatReviewForResponse(newlyCreated),
+                    averageRating: product.averageRating,
+                    reviewCount: product.reviewCount,
+                });
+            } catch (error) {
+                await cleanupUploads();
+                console.error('create_fake_product_review error:', error);
+                return responseReturn(res, 500, { error: 'Failed to add fake review.' });
+            }
+        });
     };
 
     update_product_review = async (req, res) => {
@@ -973,7 +1111,7 @@ class productController{
             if (!changed) {
                 return responseReturn(res, 200, {
                     message: 'No changes were applied.',
-                    review: formatProductReviewForResponse(review),
+                    review: formatReviewForResponse(review),
                     averageRating: computeAverageRatingValue(product.ratings),
                     reviewCount: product.ratings.length,
                 });
