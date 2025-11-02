@@ -898,7 +898,7 @@ class productController{
         }
     };
 
-       create_fake_product_review = async (req, res) => {
+    create_fake_product_review = async (req, res) => {
         if (req.role !== 'admin') {
             return responseReturn(res, 403, { error: 'Only administrators can manage product reviews.' });
         }

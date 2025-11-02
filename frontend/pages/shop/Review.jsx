@@ -86,7 +86,7 @@ const Review = ({ item, reloadFunction, reviewList }) => {
               return (
                 <li key={i} className="review-item">
                 <div className="post-thumb">
-                  <img src={review?.userImage?.url} alt={displayName} />
+                  <img src={review?.userImage?.url || '/images/profile-default-image.png'} />
                 </div>
                 <div className="post-content">
                   <div className="entry-meta">
