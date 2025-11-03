@@ -27,9 +27,29 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
 
   const submitRating = async(e, _id) => {
     e.preventDefault()
+
+    if (!rating) {
+      toast.error("Please select a star rating before submitting.")
+      return
+    }
+
+    const trimmedComment = comment.trim()
+    const payload = {
+      rating,
+      images
+    }
+
+    if (trimmedComment) {
+      payload.comment = trimmedComment
+    }
+
     try{
-      const res = await api.post(`/rate-product/${_id}`, {rating, comment, images}, {withCredentials: true});
+      const res = await api.post(`/rate-product/${_id}`, payload, {withCredentials: true});
       toast.success(res.data.message)
+      setComment("")
+      setRating(0)
+      setTemporaryRating(0)
+      setImages([])
     }catch(err){
       console.log(err)
       toast.error(

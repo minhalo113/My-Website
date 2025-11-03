@@ -138,12 +138,6 @@ const ProductReviews = () => {
     event.preventDefault();
     if (!productId) return;
 
-    const trimmedComment = formState.comment.trim();
-    if (!trimmedComment) {
-      toast.error('Review comment is required.');
-      return;
-    }
-
     const parsedRating = Number(formState.rating);
     if (!Number.isFinite(parsedRating) || parsedRating < 1 || parsedRating > 5) {
       toast.error('Rating must be a number between 1 and 5.');
@@ -156,7 +150,10 @@ const ProductReviews = () => {
       payload.append('name', trimmedName);
     }
     payload.append('rating', String(parsedRating));
-    payload.append('comment', trimmedComment);
+    const trimmedComment = formState.comment.trim();
+    if (trimmedComment) {
+      payload.append('comment', trimmedComment);
+    }
     if (formState.reviewDate) {
       payload.append('reviewDate', formState.reviewDate);
     }
