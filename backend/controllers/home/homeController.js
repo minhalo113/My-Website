@@ -217,9 +217,9 @@ class homeControllers{
             const userId = req.user.id.toString();
             const curUser = req.user;
     
-            const existing = product.ratings.find(r => {
-                return r.user.toString() === userId; 
-            });
+            const existing = product.ratings.find(
+                (r) => r?.user?.toString?.() === userId
+            );
 
             let targetReview = null;
             if(existing){
@@ -256,7 +256,10 @@ class homeControllers{
                 repositionReviewInPlace(product.ratings, targetReview);
             }
             product.markModified('ratings');
-            product.averageRating = Math.round(product.ratings.reduce((acc, r) => acc + r.rating, 0) / product.ratings.length * 10) / 10;
+            const valid = product.ratings.filter(r => typeof r.rating === 'number');
+            product.averageRating =
+            valid.length ? Math.round((valid.reduce((s, r) => s + r.rating, 0) / valid.length) * 10) / 10 : 0;
+
             product.reviewCount = product.ratings.length;
             await product.save()
             return responseReturn(res, 200, {message: "Rating saved", averageRating: product.averageRating})
