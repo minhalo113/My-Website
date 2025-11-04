@@ -84,7 +84,7 @@ const uploadImageToCloudinary = async (filepath) => {
     const result = await cloudinary.uploader.upload(filepath, {
         folder: 'social-posts',
     });
-    return result.secure_url || result.url;
+    return result;
 };
 
 export const publishProductSocialPost = async ({
@@ -103,7 +103,8 @@ export const publishProductSocialPost = async ({
         throw new Error('An image is required to publish to Instagram and Facebook');
     }
 
-    const imageUrl = await uploadImageToCloudinary(imagePath);
+    const uploadResult = await uploadImageToCloudinary(imagePath);
+    const imageUrl = uploadResult.url || uploadResult.secure_url;
     let payload = null;
 
     try {
