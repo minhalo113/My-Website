@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useState, useEffect, useCallback, useRef} from 'react'
 import Rating from '../../components/Rating'
 import PropTypes from 'prop-types'
 import api from '../../src/api/api';
@@ -15,17 +15,121 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
   const { description, _id } = item || {}
 
   const [comment, setComment] = useState("")
-
   const [rating, setRating] = useState(0);
   const [temporaryRating, setTemporaryRating] = useState(0);
-  const [images, setImages] = useState([]);
+  const [imageEntries, setImageEntries] = useState([]);
+  const objectUrlRef = useRef(new Set());
+  const fileInputRef = useRef(null);
+
+  const clearNewEntryPreviews = useCallback((entries = []) => {
+    entries.forEach((entry) => {
+      if (entry && entry.type === 'new' && entry.url) {
+        URL.revokeObjectURL(entry.url);
+        objectUrlRef.current.delete(entry.url);
+      }
+    });
+  }, []);
+
+  const replaceImageEntries = useCallback((nextEntries) => {
+    setImageEntries((prev) => {
+      clearNewEntryPreviews(prev);
+      return nextEntries;
+    });
+  }, [clearNewEntryPreviews]);
+
+  const buildExistingEntry = useCallback((image, index) => {
+    if (!image) return null;
+    const url = image.url || '';
+    if (!url) return null;
+    const identifier = image.identifier || image.publicId || `image-${index}`;
+    return {
+      id: identifier,
+      identifier,
+      url,
+      type: 'existing',
+      publicId: image.publicId || null,
+      resourceType: image.resourceType || 'image',
+    };
+  }, []);
+
+  const createNewEntry = useCallback((file) => {
+    if (!file) return null;
+    const previewUrl = URL.createObjectURL(file);
+    objectUrlRef.current.add(previewUrl);
+    return {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+      type: 'new',
+      file,
+      url: previewUrl,
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      objectUrlRef.current.forEach((url) => {
+        URL.revokeObjectURL(url);
+      });
+      objectUrlRef.current.clear();
+    };
+  }, []);
+
+  const fetchMyReview = useCallback(async () => {
+    if (!_id) {
+      replaceImageEntries([]);
+      setRating(0);
+      setTemporaryRating(0);
+      setComment('');
+      return;
+    }
+
+    const productId = typeof _id === 'object' ? _id.toString() : _id;
+    if (!productId) {
+      return;
+    }
+
+    try {
+      const { data } = await api.get(`/my-product-review/${productId}`, { withCredentials: true });
+      const review = data?.review;
+      if (!review) {
+        replaceImageEntries([]);
+        setComment('');
+        setRating(0);
+        setTemporaryRating(0);
+        return;
+      }
+
+      const normalizedRating = Number(review.rating) || 0;
+      setComment(review.comment || '');
+      setRating(normalizedRating);
+      setTemporaryRating(normalizedRating);
+      const entries = Array.isArray(review.images)
+        ? review.images
+            .map((image, index) => buildExistingEntry(image, index))
+            .filter(Boolean)
+        : [];
+      replaceImageEntries(entries);
+    } catch (error) {
+      if (error?.response?.status === 401) {
+        replaceImageEntries([]);
+        setComment('');
+        setRating(0);
+        setTemporaryRating(0);
+        return;
+      }
+      console.log(error);
+    }
+  }, [_id, buildExistingEntry, replaceImageEntries]);
+
+  useEffect(() => {
+    fetchMyReview();
+  }, [fetchMyReview]);
   let stars = Array(DEFAULT_COUNT).fill(DEFAULT_ICON);
 
   const handleClick = (rating) => {
     setRating(rating);
   };
 
-  const submitRating = async(e, _id) => {
+  const submitRating = async(e, productIdentifier) => {
     e.preventDefault()
 
     if (!rating) {
@@ -33,23 +137,42 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
       return
     }
 
+    const productId = typeof productIdentifier === 'object' ? productIdentifier?.toString() : productIdentifier
+    if (!productId) {
+      toast.error("Missing product identifier.")
+      return
+    }
+
     const trimmedComment = comment.trim()
-    const payload = {
-      rating,
-      images
-    }
-
+    const formData = new FormData()
+    formData.append('rating', String(rating))
     if (trimmedComment) {
-      payload.comment = trimmedComment
+      formData.append('comment', trimmedComment)
     }
 
+    const keepImageKeys = imageEntries
+      .filter((entry) => entry.type === 'existing')
+      .map((entry) => entry.identifier)
+      .filter(Boolean)
+    formData.append('keepImageKeys', JSON.stringify(keepImageKeys))
+
+    imageEntries
+      .filter((entry) => entry.type === 'new' && entry.file)
+      .forEach((entry) => {
+        formData.append('images', entry.file)
+      })
     try{
-      const res = await api.post(`/rate-product/${_id}`, payload, {withCredentials: true});
+      const res = await api.post(`/rate-product/${productId}`, formData, {
+        withCredentials: true,
+      });
       toast.success(res.data.message)
       setComment("")
       setRating(0)
       setTemporaryRating(0)
-      setImages([])
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+      await fetchMyReview()
     }catch(err){
       console.log(err)
       toast.error(
@@ -74,14 +197,33 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files || []);
-    const promises = files.map(file => {
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      })
+    if (!files.length) {
+      return;
+    }
+    const newEntries = files
+      .map((file) => createNewEntry(file))
+      .filter(Boolean);
+    if (!newEntries.length) {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+    setImageEntries((prev) => [...prev, ...newEntries]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+
+  const handleRemoveImage = (id) => {
+    setImageEntries((prevEntries) => {
+      const entry = prevEntries.find((imageEntry) => imageEntry.id === id);
+      if (entry && entry.type === 'new' && entry.url) {
+        URL.revokeObjectURL(entry.url);
+        objectUrlRef.current.delete(entry.url);
+      }
+      return prevEntries.filter((imageEntry) => imageEntry.id !== id);
     });
-    Promise.all(promises).then(imgs => setImages(imgs));
   }
 
   return (
@@ -234,10 +376,35 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
                     type="file"
                     multiple
                     onChange={handleImageChange}
+                    ref={fileInputRef}
                   />
                 </div>
+                {imageEntries.length > 0 && (
+                  <div className="col-md-12 col-12">
+                    <div className="flex flex-wrap gap-3">
+                      {imageEntries.map((entry) => (
+                        <div key={entry.id} className="relative w-20 h-20 rounded overflow-hidden shadow-sm">
+                          <img src={entry.url} alt="Selected review" className="w-20 h-20 object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(entry.id)}
+                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-black text-white text-xs flex items-center justify-center"
+                            aria-label="Remove image"
+                          >
+                            &times;
+                          </button>
+                          {entry.type === 'existing' && (
+                            <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1 rounded">
+                              Saved
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="col-12">
-                  <button onClick={(e) => submitRating(e, _id.toString())} type="submit" className="default-button">
+                  <button onClick={(e) => submitRating(e, _id)} type="submit" className="default-button">
                     <span>Submit Review</span>
                   </button>
                 </div>
@@ -270,4 +437,4 @@ Review.defaultProps = {
   onPageChange: () => {},
 }
 
-export default Review
+export default Review;

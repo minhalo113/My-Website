@@ -14,6 +14,11 @@ import {
     fingerprintFromUploadResult,
 } from '../../utils/imageFingerprint.js';
 import {
+    buildStoredReviewImage,
+    getReviewImagePublicId,
+    getReviewImageResourceType,
+} from '../../utils/reviewImageUtils.js';
+import {
     fetchProductsForImageSearch,
     collectMatchesForFingerprint,
 } from '../../utils/productImageSearch.js';
@@ -913,6 +918,7 @@ class productController{
             const reviewDateInput = sanitizeStringField(fields.reviewDate || fields.date || fields.createdAt);
             const updatedAtInput = sanitizeStringField(fields.updatedAt);
             const isEditedInput = sanitizeStringField(fields.isEdited);
+            const normalizedComment = commentInput || '';
 
             if (!ratingInput) {
                 return responseReturn(res, 400, { error: 'Rating is required.' });
@@ -921,10 +927,6 @@ class productController{
             const parsedRating = Number(ratingInput);
             if (!Number.isFinite(parsedRating) || parsedRating < 1 || parsedRating > 5) {
                 return responseReturn(res, 400, { error: 'Rating must be a number between 1 and 5.' });
-            }
-
-            if (!commentInput) {
-                return responseReturn(res, 400, { error: 'Review comment is required.' });
             }
 
             let product;
@@ -987,10 +989,14 @@ class productController{
                             folder: 'products/reviews/profiles',
                         })
                     );
-                    userImage = {
-                        public_id: uploadResult.public_id,
-                        url: uploadResult.secure_url || uploadResult.url,
-                    };
+
+                    const userImageUrl = uploadResult?.secure_url || uploadResult?.url;
+                    if (userImageUrl) {
+                        userImage = {
+                            public_id: uploadResult?.public_id,
+                            url: userImageUrl,
+                        };
+                    }
                 }
 
                 const reviewImages = [];
@@ -1000,8 +1006,10 @@ class productController{
                             folder: 'products/reviews/gallery',
                         })
                     );
-                    if (uploadResult.secure_url || uploadResult.url) {
-                        reviewImages.push(uploadResult.secure_url || uploadResult.url);
+
+                    const storedImage = buildStoredReviewImage(uploadResult);
+                    if (storedImage) {
+                        reviewImages.push(storedImage);
                     }
                 }
 
@@ -1020,7 +1028,7 @@ class productController{
                 product.ratings.push({
                     name: nameInput || 'Anonymous',
                     rating: parsedRating,
-                    comment: commentInput,
+                    comment: normalizedComment,
                     images: reviewImages,
                     userImage,
                     reviewDate,
@@ -1162,11 +1170,43 @@ class productController{
                 return responseReturn(res, 404, { error: 'Product not found.' });
             }
 
-            const initialLength = product.ratings.length;
-            const filtered = product.ratings.filter((item) => item._id.toString() !== reviewId);
-            if (filtered.length === initialLength) {
+            const reviewToDelete = product.ratings.id(reviewId)
+                || product.ratings.find((item) => item?._id?.toString() === reviewId);
+            if (!reviewToDelete) {
                 return responseReturn(res, 404, { error: 'Review not found.' });
             }
+
+            const reviewRecord = typeof reviewToDelete.toObject === 'function'
+                ? reviewToDelete.toObject()
+                : reviewToDelete;
+            const isFakeReview = !reviewRecord?.user;
+
+            const assetMap = new Map();
+            const registerAssetForDeletion = (publicId, resourceType = 'image') => {
+                if (!publicId) return;
+                const normalizedType = resourceType || 'image';
+                const key = `${normalizedType}:${publicId}`;
+                if (!assetMap.has(key)) {
+                    assetMap.set(key, { publicId, resourceType: normalizedType });
+                }
+            };
+
+            if (isFakeReview) {
+                const profilePublicId = reviewRecord?.userImage?.public_id
+                    || extractPublicId(reviewRecord?.userImage?.url || '');
+                registerAssetForDeletion(profilePublicId, reviewRecord?.userImage?.resource_type || 'image');
+            }
+
+            if (Array.isArray(reviewRecord?.images)) {
+                reviewRecord.images.forEach((item) => {
+                    const publicId = getReviewImagePublicId(item);
+                    if (!publicId) return;
+                    const resourceType = getReviewImageResourceType(item);
+                    registerAssetForDeletion(publicId, resourceType);
+                });
+            }
+
+            const filtered = product.ratings.filter((item) => item?._id?.toString() !== reviewId);
 
             product.ratings = filtered;
             product.markModified('ratings');
@@ -1175,6 +1215,35 @@ class productController{
             product.reviewCount = filtered.length;
 
             await product.save();
+
+            const assetsToDelete = Array.from(assetMap.values());
+            if (assetsToDelete.length) {
+                try {
+                    cloudinary.config({
+                        cloud_name: process.env.cloud_name,
+                        api_key: process.env.api_key,
+                        api_secret: process.env.api_secret,
+                        secure: true,
+                    });
+
+                    await Promise.all(
+                        assetsToDelete.map(async ({ publicId, resourceType }) => {
+                            if (!publicId) return;
+                            const options = {
+                                invalidate: true,
+                                ...(resourceType && resourceType !== 'image' ? { resource_type: resourceType } : {}),
+                            };
+                            try {
+                                await cloudinary.uploader.destroy(publicId, options);
+                            } catch (destroyError) {
+                                console.error('Failed to destroy review asset:', destroyError?.message || destroyError);
+                            }
+                        })
+                    );
+                } catch (configError) {
+                    console.error('Cloudinary configuration failed for review cleanup:', configError?.message || configError);
+                }
+            }
 
             return responseReturn(res, 200, {
                 message: 'Review deleted successfully.',

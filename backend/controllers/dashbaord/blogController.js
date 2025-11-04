@@ -106,10 +106,10 @@ class blogController{
             }
 
             if (blog.image?.publicId){
-                await cloudinary.uploader.destroy(blog.image.publicId);
+                await cloudinary.uploader.destroy(blog.image.publicId, { invalidate: true });
             }
             if(blog.youtubeThumbnail?.publicId){
-                await cloudinary.uploader.destroy(blog.youtubeThumbnail.publicId);
+                await cloudinary.uploader.destroy(blog.youtubeThumbnail.publicId, { invalidate: true });
             }
             await blogModel.findByIdAndDelete(id);
 
@@ -259,7 +259,7 @@ class blogController{
 
                     if(blog_image){
                         if(blog.image?.publicId){
-                            await cloudinary.uploader.destroy(blog.image.publicId);
+                            await cloudinary.uploader.destroy(blog.image.publicId, { invalidate: true });
                         }
 
                         const imageResult = await cloudinary.uploader.upload(blog_image.filepath,{
@@ -274,7 +274,7 @@ class blogController{
 
                     if (youtube_image){
                         if(blog.youtubeThumbnail?.publicId){
-                            await cloudinary.uploader.destroy(blog.youtubeThumbnail.publicId)
+                            await cloudinary.uploader.destroy(blog.youtubeThumbnail.publicId, { invalidate: true })
                         }
 
                         const youtubeThumbResult = await cloudinary.uploader.upload(youtube_image.filepath,{

@@ -91,7 +91,7 @@ const productSchema = new Schema({
             name: {type: String, required: false},
             rating: {type: Number, required: true, min: 1, max: 5},
             comment: String,
-            images: {type: [String], default: []},
+            images: {type: [Schema.Types.Mixed], default: []},
             reviewDate: {type: Date},
             createdAt: {type: Date, default: Date.now},
             updatedAt: {type: Date, default: Date.now},

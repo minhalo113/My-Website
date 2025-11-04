@@ -1,3 +1,5 @@
+import { getReviewImageUrl } from './reviewImageUtils.js';
+
 const toStringSafe = (value) => {
     if (!value) return null;
     if (typeof value === 'string') return value;
@@ -106,6 +108,14 @@ export const formatReviewForResponse = (review) => {
         ? plain.name.trim()
         : 'Anonymous';
     const displayName = maskReviewerName(originalNameValue);
+    const normalizedImages = Array.isArray(plain.images)
+        ? plain.images
+            .map((item) => {
+                const url = getReviewImageUrl(item);
+                return typeof url === 'string' && url.trim() ? url : null;
+            })
+            .filter(Boolean)
+        : [];
 
     return {
         _id: toStringSafe(plain._id) || plain._id,
@@ -115,7 +125,7 @@ export const formatReviewForResponse = (review) => {
         originalName: originalNameValue,
         rating: plain.rating ?? null,
         comment: plain.comment || '',
-        images: Array.isArray(plain.images) ? plain.images : [],
+        images: normalizedImages,
         userImage: plain.userImage || null,
         reviewDate: plain.reviewDate || plain.createdAt || null,
         createdAt: plain.createdAt || null,
