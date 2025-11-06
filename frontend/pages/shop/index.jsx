@@ -114,15 +114,15 @@ const Shop = () => {
 
   const menuItems = [...new Set(categories.map((category) => category.name))];
 
-  const filterItem = (curcat) => {
-    setSelectedCategory(curcat);
+  const filterItem = useCallback((curcat) => {
+    const normalizedCategory = curcat || 'all';
+    setSelectedCategory(normalizedCategory);
     setCurrentPage(1);
-  }
+  }, []);
 
   const handleSearchTermChange = useCallback((value) => {
     setSearchValue(value);
     setCurrentPage(1);
-    setSelectedCategory('all');
   }, [])
 
   const handlePriceFilterChange = useCallback(({ min, max }) => {
@@ -201,6 +201,11 @@ const Shop = () => {
                     minPrice = {minPrice}
                     maxPrice = {maxPrice}
                     onPriceRangeChange= {handlePriceFilterChange}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={filterItem}
+                    availableCategories={menuItems}
+                    categoryFacets={searchFacets?.categories}
+                    totalProducts={totalProducts}
                   />
                   {/* {console.log(menuItems === undefined)} */}
                   <ShopCategory                     

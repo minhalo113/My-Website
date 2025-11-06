@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 import api from '../../src/api/api';
@@ -28,6 +28,11 @@ const Search = ({
     minPrice,
     maxPrice,
     onPriceRangeChange,
+    selectedCategory,
+    onCategoryChange,
+    categoryFacets,
+    availableCategories,
+    totalProducts,
 }) => {
     const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
 
@@ -49,11 +54,62 @@ const Search = ({
     const [textSearchError, setTextSearchError] = useState('');
     const [textSuggestions, setTextSuggestions] = useState([]);
 
+    const normalizedSelectedCategory = selectedCategory && typeof selectedCategory === 'string' ? selectedCategory : 'all';
+
+    const categoryOptions = useMemo(() => {
+        const facetOptions = Array.isArray(categoryFacets)
+            ? categoryFacets
+                  .filter((facet) => facet && typeof facet.value === 'string' && facet.value.trim())
+                  .map((facet) => ({
+                      value: facet.value.trim(),
+                      label: facet.value.trim(),
+                      count: Number.isFinite(Number(facet.count)) ? Number(facet.count) : null,
+                  }))
+            : [];
+
+        const fallbackOptions = Array.isArray(availableCategories)
+            ? availableCategories
+                  .filter((name) => typeof name === 'string' && name.trim())
+                  .map((name) => ({
+                      value: name.trim(),
+                      label: name.trim(),
+                      count: null,
+                  }))
+            : [];
+
+        const merged = new Map();
+        facetOptions.forEach((option) => {
+            merged.set(option.value, option);
+        });
+        fallbackOptions.forEach((option) => {
+            if (!merged.has(option.value)) {
+                merged.set(option.value, option);
+            }
+        });
+
+        return Array.from(merged.values()).sort((a, b) => {
+            const aHasCount = Number.isFinite(a.count);
+            const bHasCount = Number.isFinite(b.count);
+            if (aHasCount && bHasCount && a.count !== b.count) {
+                return b.count - a.count;
+            }
+            if (aHasCount && !bHasCount) {
+                return -1;
+            }
+            if (!aHasCount && bHasCount) {
+                return 1;
+            }
+            return a.label.localeCompare(b.label);
+        });
+    }, [availableCategories, categoryFacets]);
+
+    const formattedTotalProducts = Number.isFinite(Number(totalProducts)) ? Number(totalProducts).toLocaleString() : null;
+
     useEffect(() => {
         setLocalSearchTerm(searchTerm || "");
     }, [searchTerm]);
 
-        useEffect(() => {
+    useEffect(() => {
         const parsed = parsePriceInput(minPrice);
         if (parsed != null) {
             setLocalMinPrice((prev) => (prev === String(parsed) ? prev : String(parsed)));
@@ -268,6 +324,21 @@ const Search = ({
         switchToTextSearch(e.target.value);
     };
 
+    const handleCategoryChange = useCallback(
+        (event) => {
+            if (!onCategoryChange) return;
+            const { value } = event.target;
+            onCategoryChange(value || 'all');
+        },
+        [onCategoryChange],
+    );
+
+    const handleClearCategory = useCallback(() => {
+        if (onCategoryChange) {
+            onCategoryChange('all');
+        }
+    }, [onCategoryChange]);
+
     const handleSuggestionSelect = useCallback((suggestion) => {
         if (!suggestion) return;
         const value = typeof suggestion === 'string' ? suggestion : suggestion.text;
@@ -441,6 +512,38 @@ const Search = ({
                 <i className='icofont-search-2'></i>
             </button>
         </form>
+
+        <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
+            <h6 className='fw-semibold mb-2'>Filter by category</h6>
+            <select
+                className='form-select form-select-sm'
+                value={normalizedSelectedCategory}
+                onChange={handleCategoryChange}
+            >
+                <option value='all'>
+                    {`All categories${formattedTotalProducts ? ` (${formattedTotalProducts})` : ''}`}
+                </option>
+                {categoryOptions.map((option) => {
+                    const displayCount = Number.isFinite(option.count) ? option.count.toLocaleString() : null;
+                    return (
+                        <option key={option.value} value={option.value}>
+                            {`${option.label}${displayCount ? ` (${displayCount})` : ''}`}
+                        </option>
+                    );
+                })}
+            </select>
+            <div className='d-flex justify-content-between align-items-center mt-2'>
+                <small className='text-muted'>Narrow your results by selecting a category.</small>
+                <button
+                    type='button'
+                    className='btn btn-link btn-sm p-0'
+                    onClick={handleClearCategory}
+                    disabled={normalizedSelectedCategory === 'all'}
+                >
+                    Reset
+                </button>
+            </div>
+        </div>
 
         <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
             <h6 className='fw-semibold mb-2'>Filter by price</h6>
@@ -666,6 +769,16 @@ Search.propTypes = {
     minPrice: PropTypes.number,
     maxPrice: PropTypes.number,
     onPriceRangeChange: PropTypes.func,
+    selectedCategory: PropTypes.string,
+    onCategoryChange: PropTypes.func,
+    categoryFacets: PropTypes.arrayOf(
+        PropTypes.shape({
+            value: PropTypes.string,
+            count: PropTypes.number,
+        }),
+    ),
+    availableCategories: PropTypes.arrayOf(PropTypes.string),
+    totalProducts: PropTypes.number,
 };
 
 Search.defaultProps = {
@@ -674,6 +787,11 @@ Search.defaultProps = {
     minPrice: null,
     maxPrice: null,
     onPriceRangeChange: undefined,
+    selectedCategory: 'all',
+    onCategoryChange: undefined,
+    categoryFacets: [],
+    availableCategories: [],
+    totalProducts: null,
 };
 
 export default Search
