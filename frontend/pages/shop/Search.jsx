@@ -148,12 +148,13 @@ const Search = ({
         };
     }, [localSearchTerm, onSearchTermChange]);
 
-        useEffect(() => {
+    useEffect(() => {
         if (!onPriceRangeChange) return undefined;
 
         const handler = setTimeout(() => {
             const min = parsePriceInput(localMinPrice);
             const max = parsePriceInput(localMaxPrice);
+            console.log(min, max)
             onPriceRangeChange({ min, max });
         }, PRICE_FILTER_DEBOUNCE);
 
@@ -190,6 +191,12 @@ const Search = ({
                     withCredentials: true,
                 });
 
+                console.log("hi2")
+                console.log(parsedMin)
+                console.log(parsedMax)
+                console.log(data.results.minPrice, data.results.maxPrice)
+                console.log(data)
+
                 if (ignore) return;
 
                 setTextResults(Array.isArray(data?.results) ? data.results : []);
@@ -216,6 +223,7 @@ const Search = ({
     }, [localSearchTerm, localMinPrice, localMaxPrice]);
 
     const handleMinPriceInputChange = useCallback((event) => {
+        console.log("set min")
         const value = event.target.value.trim();
         if (value === '' || PRICE_INPUT_REGEX.test(value)) {
             setLocalMinPrice(value);
@@ -223,6 +231,7 @@ const Search = ({
     }, []);
 
     const handleMaxPriceInputChange = useCallback((event) => {
+        console.log("set max")
         const value = event.target.value.trim();
         if (value === '' || PRICE_INPUT_REGEX.test(value)) {
             setLocalMaxPrice(value);
@@ -505,7 +514,7 @@ const Search = ({
                     </button>
                 </div>
             )}
-
+{/* 
             <div className='mt-3'>
                 <label htmlFor='image-threshold-input' className='form-label small text-muted mb-1'>Match strictness</label>
                 <input
@@ -520,7 +529,7 @@ const Search = ({
                     disabled={!imageFile}
                 />
                 <p className='small text-muted mb-0'>Maximum Hamming distance: {imageThreshold}. Lower values return only near-identical matches.</p>
-            </div>
+            </div> */}
         </div>
 
         <div  style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY :"auto"}}>
@@ -536,7 +545,7 @@ const Search = ({
                         {!isTextSearching && !textSearchError && textResults.length === 0 && textSuggestions.length === 0 && (
                             <div className='p-2 text-center text-muted small'>No products found.</div>
                         )}
-                        {!isTextSearching && textSuggestions.length > 0 && (
+                        {/* {!isTextSearching && textSuggestions.length > 0 && (
                             <div className='px-2'>
                                 <p className='small text-uppercase text-muted fw-semibold mb-2'>Top suggestions</p>
                                 {textSuggestions.map((suggestion) => {
@@ -566,14 +575,19 @@ const Search = ({
                                 })}
                                 <hr className='my-2' />
                             </div>
-                        )}
+                        )} */}
                         {textResults.slice(0, 20).map((product) => (
                             <Link key={product._id?.toString() || product._id} href={`/shop/${product._id?.toString() || product._id}`}>
                                 <div className='d-flex gap-3 p-2'>
-                                    <div className='pro-thumb h-25'>
-                                        <img src={product.coverImage || product.images?.[0]} alt={product.name} className='flex-shrink-0'/>
+                                    <div className="pro-thumb" style={{ flex: "0 0 64px", width: 64, height: 64 }}>
+                                        <img
+                                        src={product.coverImage || product.images?.[0] || "/placeholder.png"}
+                                        alt={product.name}
+                                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8, display: "block" }}
+                                        onError={(e) => (e.currentTarget.src = "/placeholder.png")}
+                                        />
                                     </div>
-                                                            <div className='product-content flex-grow-1'>
+                                    <div className='product-content flex-grow-1'>
                                         <p className='mb-1 fw-semibold text-truncate'>{product.name}</p>
                                         {product.relevance?.label && (
                                             <p className='small text-muted mb-1 text-capitalize'>
