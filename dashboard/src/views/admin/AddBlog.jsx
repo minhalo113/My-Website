@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { add_blog, automate_create_blog } from '../../store/Reducers/blogReducer';
 import toast from "react-hot-toast";
 import { clearAiBlogData, messageClear } from "../../store/Reducers/blogReducer";
 
-const AddBlog = () => {
-    const dispatch = useDispatch();
-  const [formData, setFormData] = useState({
+const initialFormState = {
     image: '',
     title: '',
     content: '',
@@ -16,21 +14,23 @@ const AddBlog = () => {
     youtubeThumbnail: '',
     citation: '',
     tags: '',
-  });
+  };
 
+const AddBlog = () => {
+  const dispatch = useDispatch();
+  const [formData, setFormData] = useState(initialFormState);
   const {loader, successMessage, errorMessage, aiBlogData} = useSelector(state => state.blog)
 
   const [previewImage, setPreviewImage] = useState(null);
-  const [previewYoutubeThumbnail, setPreviewYoutubeThumbnail] = useState(null);
+  const formRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image' || name === 'youtubeThumbnail') {
+    if (name === 'image') {
       const file = files[0];
       if (file) {
         const previewUrl = URL.createObjectURL(file);
-        if (name === 'image') setPreviewImage(previewUrl);
-        if (name === 'youtubeThumbnail') setPreviewYoutubeThumbnail(previewUrl);
+        setPreviewImage(previewUrl);
       }
       setFormData({ ...formData, [name]: file });
     } else {
@@ -42,6 +42,11 @@ const AddBlog = () => {
     if (successMessage){
         toast.success(successMessage)
         dispatch(messageClear());
+        setFormData({ ...initialFormState });
+        setPreviewImage(null);
+        if (formRef.current) {
+            formRef.current.reset();
+        }
     }
     if(errorMessage){
         toast.error(errorMessage);
@@ -90,7 +95,7 @@ const AddBlog = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Add New Blog Post</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" ref={formRef}>
         <div>
           <label className="block text-sm font-medium">Blog Image</label>
           <input type="file" name="image" accept="image/*" onChange={handleChange} className="mt-1" />
@@ -120,12 +125,6 @@ const AddBlog = () => {
         <div>
           <label className="block text-sm font-medium">YouTube Link</label>
           <input type="text" name="youtubeLink" value={formData.youtubeLink} onChange={handleChange} className="w-full p-2 border rounded" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">YouTube Thumbnail</label>
-          <input type="file" name="youtubeThumbnail" accept="image/*" onChange={handleChange} className="mt-1" />
-          {previewYoutubeThumbnail && <img src={previewYoutubeThumbnail} alt="YouTube Thumbnail Preview" className="mt-2 w-48 h-auto rounded" />}
         </div>
 
         <div>

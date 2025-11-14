@@ -5,6 +5,65 @@ import PopularPost from '../shop/PopularPost';
 import api from '../../src/api/api';
 import { toast } from 'react-hot-toast';
 
+const extractStartTime = (searchParams) => {
+    if (!searchParams) return '';
+
+    const raw = searchParams.get('start') || searchParams.get('t');
+    if (!raw) return '';
+
+    if (/^\d+$/.test(raw)) {
+        return raw;
+    }
+
+    const pattern = /(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?/i;
+    const matches = raw.match(pattern);
+
+    if (!matches) return '';
+
+    const hours = parseInt(matches[1] || '0', 10);
+    const minutes = parseInt(matches[2] || '0', 10);
+    const seconds = parseInt(matches[3] || '0', 10);
+
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    return totalSeconds > 0 ? String(totalSeconds) : '';
+};
+
+const getYoutubeEmbedUrl = (url) => {
+    if (!url || typeof url !== 'string') return '';
+
+    try {
+        const trimmedUrl = url.trim();
+        const parsedUrl = new URL(trimmedUrl);
+        const hostname = parsedUrl.hostname.replace('www.', '');
+        const startTime = extractStartTime(parsedUrl.searchParams);
+        const startQuery = startTime ? `?start=${startTime}` : '';
+
+        if (hostname === 'youtube.com' || hostname === 'm.youtube.com') {
+            if (parsedUrl.pathname.startsWith('/embed/')) {
+                const search = parsedUrl.search || startQuery;
+                return `https://www.youtube.com${parsedUrl.pathname}${search}`;
+            }
+
+            if (parsedUrl.pathname.startsWith('/shorts/')) {
+                const videoId = parsedUrl.pathname.split('/')[2];
+                return videoId ? `https://www.youtube.com/embed/${videoId}${startQuery}` : '';
+            }
+
+            const videoId = parsedUrl.searchParams.get('v');
+            return videoId ? `https://www.youtube.com/embed/${videoId}${startQuery}` : '';
+        }
+
+        if (hostname === 'youtu.be') {
+            const videoId = parsedUrl.pathname.replace('/', '');
+            return videoId ? `https://www.youtube.com/embed/${videoId}${startQuery}` : '';
+        }
+
+        return '';
+    } catch (error) {
+        return '';
+    }
+};
+
 const SingleBlog = () => {
     const [blog, setBlog] = useState(null);
     const [adjacentBlogs, setAdjacentBlogs] = useState({ prev: null, next: null });
@@ -17,6 +76,7 @@ const SingleBlog = () => {
 
     const router = useRouter();
     const { id } = router.query;
+    const embedUrl = blog?.youtubeLink ? getYoutubeEmbedUrl(blog.youtubeLink) : '';
     const fetchData = useCallback(async (blogId) => {
         try {
             const response = await api.get(`/get_blog/${blogId}`, {
@@ -225,12 +285,17 @@ const SingleBlog = () => {
                                                                 </blockquote>
                                                             )}
 
-                                                            {blog.youtubeThumbnail?.url && blog.youtubeLink && (
+                                                            {embedUrl && (
                                                                 <div className='video-thumb'>
-                                                                    <img src={blog.youtubeThumbnail.url} alt="Video thumbnail" />
-                                                                    <a href={blog.youtubeLink} target="_blank" rel="noopener noreferrer" className='video-button popup'>
-                                                                        <i className='icofont-ui-play'></i>
-                                                                    </a>
+                                                                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px' }}>
+                                                                        <iframe
+                                                                            src={embedUrl}
+                                                                            title={blog.title || 'YouTube video player'}
+                                                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                                                                            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                                                                            allowFullScreen
+                                                                        ></iframe>
+                                                                    </div>
                                                                 </div>
                                                             )}
 
