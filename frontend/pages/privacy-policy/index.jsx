@@ -1,9 +1,15 @@
 import React from 'react'
 import PageHeader from '../../components/PageHeader'
+import SEO from '../../components/SEO'
 
 const PrivacyPolicy = () => {
   return (
     <div>
+        <SEO
+            title="Privacy Policy | A Figure A Day"
+            description="Read A Figure A Day's privacy policy to learn how we collect, use, and protect your data."
+            canonical="https://www.afigureaday.com/privacy-policy"
+        />
         <PageHeader title="Privacy Policy" curPage="Privacy Policy"/>
         <div className='container'>
             <p>Last updated: November 21, 2024</p>

@@ -1,9 +1,15 @@
 import React from 'react'
 import PageHeader from '../../components/PageHeader'
+import SEO from '../../components/SEO'
 
 export const TermsOfService = () => {
   return (
     <div>
+      <SEO
+        title="Terms of Service | A Figure A Day"
+        description="Review the terms of service for A Figure A Day, including user responsibilities and legal policies."
+        canonical="https://www.afigureaday.com/terms-of-service"
+      />
       <PageHeader title = "Terms of Service" curPage="Terms of Service"/>
       <div className='container'>
         <p><strong>OVERVIEW</strong></p>

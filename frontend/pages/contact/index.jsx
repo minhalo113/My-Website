@@ -5,6 +5,7 @@ import process from "process"
 dotenv.config();
 import api from '../../src/api/api';
 import toast from 'react-hot-toast';
+import SEO from "../../components/SEO";
 
 const Contact = () => {
 
@@ -45,6 +46,11 @@ const Contact = () => {
 
   return (
     <div>
+        <SEO
+            title="Contact A Figure A Day | Collector Support"
+            description="Need help with an order or have a question about figures? Contact A Figure A Day for collector support."
+            canonical="https://www.afigureaday.com/contact"
+        />
         <PageHeader title={"Get In Touch With Us"} curPage={"Contact Us"}/>
         <div className='map-address-section padding-tb section-bg'>
             <div className='container'>

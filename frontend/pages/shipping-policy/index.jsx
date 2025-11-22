@@ -1,9 +1,15 @@
 import React from 'react'
 import PageHeader from '../../components/PageHeader'
+import SEO from '../../components/SEO'
 
 const ShippingPolicy = () => {
   return (
     <div>
+        <SEO
+            title="Shipping Policy | A Figure A Day"
+            description="Learn about shipping times, carriers, and delivery policies for A Figure A Day orders."
+            canonical="https://www.afigureaday.com/shipping-policy"
+        />
         <PageHeader title = "Shipping Policy" curPage="Shipping Policy"></PageHeader>
         <div className='container'>
         <p><strong>Shipping Policy</strong></p>

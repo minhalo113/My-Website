@@ -1,9 +1,15 @@
 import React from 'react'
 import PageHeader from '../../components/PageHeader'
+import SEO from '../../components/SEO'
 
 const RefundPolicy = () => {
   return (
     <div>
+        <SEO
+            title="Refund Policy | A Figure A Day"
+            description="Understand A Figure A Day's refund and cancellation policy for figure orders and preorders."
+            canonical="https://www.afigureaday.com/refund-policy"
+        />
         <PageHeader title="Refund Policy" curPage="Refund Plicy"></PageHeader>
         <div className='container'>
         <h2>Cancellations and Returns</h2>

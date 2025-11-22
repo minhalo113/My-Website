@@ -1,12 +1,18 @@
 import Link from "next/link";
 import PropTypes from "prop-types";
 import PageHeader from "../../components/PageHeader";
+import SEO from "../../components/SEO";
 
 const BRAND = "#DCA54A";
 
 export default function AboutUsPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 w-full">
+      <SEO
+        title="About A Figure A Day | Collectible Figures"
+        description="Learn about A Figure A Day—curated anime figures, trusted sourcing, and collector-first support."
+        canonical="https://www.afigureaday.com/about"
+      />
       {PageHeader ? <PageHeader title="About Us" curPage="About Us" /> : null}
 
         <div className="bg-white p-8 shadow-sm ring-1 ring-slate-200 lg:p-12 p-4">

@@ -32,34 +32,34 @@ function MyApp({ Component, pageProps }) {
   const customerPrivateRoutes = null
 
   const getLayout = Component.getLayout || ((page) => page);
+  const canonicalPath =
+    router.asPath && router.asPath.includes('[') ? '/' : (router.asPath || '/');
+
   return (
     <>
     <Suspense>
     <Head>
-        <title>A Figure A Day | Daily Deals on Collectible Figures</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta charSet="UTF-8" />
-        <meta
-          name="description"
-          content="A Figure A Day curates anime statues and collectible figures with fresh deals, secure shipping, and responsive collector support."
-        />
-        <meta
-          name="keywords"
-          content="anime figures, collectible statues, a figure a day, scale figures, anime merch"
-        />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://www.afigureaday.com/" />
-        <meta property="og:title" content="A Figure A Day | Daily Deals on Collectible Figures" />
-        <meta
-          property="og:description"
-          content="Discover handpicked anime figures, statues, and collectibles with trustworthy sourcing and collector-friendly service."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.afigureaday.com/" />
-        <meta property="og:image" content="/images/about-figures.jpg" />
-        <link rel="icon" type="image/png" sizes="48x48" href="https://www.afigureaday.com/favicon.png" />
-        <link rel="shortcut icon" href="https://www.afigureaday.com/favicon.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="https://www.afigureaday.com/favicon.png" />
+      <title>A Figure A Day</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta charSet="UTF-8" />
+      <meta name="description" content="A Figure A Day curates anime statues and collectibles with daily deals and dependable support." />
+      <meta name="keywords" content="anime figures, collectible statues, a figure a day, scale figures, anime merch" />
+      <meta name="robots" content="index, follow" />
+      <link rel="canonical" href={`https://www.afigureaday.com${canonicalPath}`} key="canonical" />
+      <meta property="og:site_name" content="A Figure A Day" />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content="A Figure A Day" />
+      <meta property="og:description" content="A Figure A Day curates anime statues and collectibles with daily deals and dependable support." />
+      <meta property="og:url" content={`https://www.afigureaday.com${canonicalPath}`} />
+      <meta property="og:image" content="/images/logo/myLogoResize.png" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="A Figure A Day" />
+      <meta name="twitter:description" content="A Figure A Day curates anime statues and collectibles with daily deals and dependable support." />
+      <meta name="twitter:image" content="/images/logo/myLogoResize.png" />
+      <link rel="icon" href="/favicon.ico" />
+      <link rel="icon" type="image/png" href="/favicon.png" />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      <link rel="manifest" href="/site.webmanifest" />
     </Head>
       <CartProvider>
 
