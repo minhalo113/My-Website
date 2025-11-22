@@ -3,6 +3,7 @@ import PageHeader from "../../components/PageHeader"
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import api from '../../src/api/api';
+import SEO from "../../components/SEO";
 
 export const Blog = () => {
   const [blogList, setBlogList] = useState([])
@@ -26,6 +27,12 @@ export const Blog = () => {
 
   return (
     <div>
+      <SEO
+        title="Blog | A Figure A Day"
+        description="Collector tips, figure spotlights, and news from A Figure A Day."
+        canonical="https://www.afigureaday.com/blog"
+        keywords="anime figure news, collectible tips, a figure a day blog"
+      />
       <PageHeader title = "Blog Page" curPage="Blogs"/>
       <div className='blog-section padding-tb section-bg'>
         <div className='container'>

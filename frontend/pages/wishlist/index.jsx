@@ -4,6 +4,7 @@ import api from "../../src/api/api";
 import { AuthContext } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 import { useCart } from '../../context/CartContext';
+import SEO from "../../components/SEO";
 
 const WishList = () => {
     const {user} = useContext(AuthContext);
@@ -32,6 +33,12 @@ const WishList = () => {
     if (!user) {
         return (
             <div className="min-h-screen bg-slate-900 text-slate-100">
+                <SEO
+                    title="Wishlist | A Figure A Day"
+                    description="View your saved anime figures and collectibles on A Figure A Day."
+                    canonical="https://www.afigureaday.com/wishlist"
+                    noindex
+                />
                 <PageHeader title="Wishlist" curPage="Wishlist" />
                 <p className="text-slate-400">Please login to view your wishlist.</p>;
             </div>
@@ -89,6 +96,12 @@ const WishList = () => {
     
       return (
         <div className="min-h-screen text-slate-100">
+          <SEO
+            title="Wishlist | A Figure A Day"
+            description="View your saved anime figures and collectibles on A Figure A Day."
+            canonical="https://www.afigureaday.com/wishlist"
+            noindex
+          />
           <PageHeader title="Wishlist" curPage="Wishlist" />
       
           <div className="mx-auto w-full max-w-6xl px-4 py-10 lg:px-8">

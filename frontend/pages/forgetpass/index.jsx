@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '../../src/api/api.js'
+import SEO from '../../components/SEO';
 
 const ForgetPass = () => {
     const [email, setEmail] = useState('');
@@ -18,6 +19,12 @@ const ForgetPass = () => {
 
     return (
         <div className='login-section padding-tb section-bg' style={{height:'100vh',display:'flex',justifyContent:'center',alignItems:'center'}}>
+        <SEO
+            title="Reset Password | A Figure A Day"
+            description="Reset your A Figure A Day account password."
+            canonical="https://www.afigureaday.com/forgetpass"
+            noindex
+        />
         <div className='container'>
           <div className='account-wrapper'>
             <h3 className='title'>Forgot Password</h3>

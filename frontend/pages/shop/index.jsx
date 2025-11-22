@@ -7,6 +7,7 @@ import Search from './Search';
 import ShopCategory from './ShopCategory';
 import PopularPost from './PopularPost';
 import api from '../../src/api/api';
+import SEO from '../../components/SEO';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -150,6 +151,12 @@ const Shop = () => {
 
   return (
     <div>
+        <SEO
+            title="Shop Anime Figures | A Figure A Day"
+            description="Browse curated anime figures and collectibles with daily deals at A Figure A Day."
+            canonical="https://www.afigureaday.com/shop"
+            keywords="shop anime figures, buy anime statues, collectible figures store"
+        />
         <PageHeader title = "Our Shop Page" curPage = "Shop"/>
 
         <div className='shop-page padding-tb'>

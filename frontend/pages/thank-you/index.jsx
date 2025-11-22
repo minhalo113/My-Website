@@ -1,10 +1,17 @@
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import process from 'process'
+import SEO from '../../components/SEO';
 
 export default function ThankYouPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4">
+      <SEO
+        title="Thank You | A Figure A Day"
+        description="Thanks for reaching out to A Figure A Day. We'll get back to you soon."
+        canonical="https://www.afigureaday.com/thank-you"
+        noindex
+      />
       <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
       <h1 className="text-3xl font-semibold text-gray-800 mb-2">Thank you!</h1>
       <p className="text-gray-600 text-center max-w-md mb-6">

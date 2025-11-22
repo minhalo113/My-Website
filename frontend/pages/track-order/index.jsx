@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageHeader from "../../components/PageHeader";
 import OrderCard from "../../components/orders/OrderCard";
 import api from "../../src/api/api";
+import SEO from "../../components/SEO";
 
 const BRAND = "#DCA54A";
 
@@ -48,6 +49,12 @@ const TrackOrderPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
+      <SEO
+        title="Track Order | A Figure A Day"
+        description="Check the status of your A Figure A Day order with your order reference."
+        canonical="https://www.afigureaday.com/track-order"
+        noindex
+      />
       <PageHeader title="Track Order" curPage="Track Order" />
 
       <div className="px-4 py-4">

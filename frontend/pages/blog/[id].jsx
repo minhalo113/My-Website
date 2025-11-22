@@ -4,6 +4,7 @@ import PageHeader from '../../components/PageHeader';
 import PopularPost from '../shop/PopularPost';
 import api from '../../src/api/api';
 import { toast } from 'react-hot-toast';
+import SEO from '../../components/SEO';
 
 const extractStartTime = (searchParams) => {
     if (!searchParams) return '';
@@ -223,8 +224,21 @@ const SingleBlog = () => {
 
     const commentCountLabel = `${comments.length} Comment${comments.length === 1 ? '' : 's'}`;
 
+    const blogUrl = `https://www.afigureaday.com/blog/${blog?._id || ''}`
+    const description =
+        blog?.blogDetail?.summary ||
+        blog?.title ||
+        'Read the latest article from A Figure A Day.'
+    const image = blog?.image?.url || '/images/logo/myLogoResize.png'
+
     return (
         <div>
+            <SEO
+                title={`${blog?.title || 'Blog'} | A Figure A Day`}
+                description={description}
+                canonical={blogUrl}
+                image={image}
+            />
             <PageHeader title={"Single Blog Pages"} curPage={"Blog Details"} additionalLink={[{ label: "Blog", path: "/blog" }]} />
 
             <div className='blog-section blog-single padding-tb section-bg'>

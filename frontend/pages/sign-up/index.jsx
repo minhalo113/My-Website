@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import api from "../../src/api/api";
 import { AuthContext } from "../../context/AuthContext";
 import toast from "react-hot-toast";
+import SEO from "../../components/SEO";
 
 const title = "Register Now";
 const socialTitle = "Register With Social Media";
@@ -50,6 +51,12 @@ const Signup = () => {
 
   return (
     <div>
+      <SEO
+        title="Sign Up | A Figure A Day"
+        description="Create your A Figure A Day account to track orders, wishlist figures, and manage your collector profile."
+        canonical="https://www.afigureaday.com/sign-up"
+        noindex
+      />
       <div className="login-section padding-tb section-bg">
         <div className="container">
           <div className="account-wrapper">

@@ -4,6 +4,7 @@ import PageHeader from "../../components/PageHeader";
 import OrderCard from "../../components/orders/OrderCard";
 import { AuthContext } from "../../context/AuthContext";
 import api from "../../src/api/api";
+import SEO from "../../components/SEO";
 
 const History = () => {
     const {user} = useContext(AuthContext);
@@ -32,6 +33,12 @@ const History = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
+          <SEO
+            title="Order History | A Figure A Day"
+            description="View your past orders from A Figure A Day."
+            canonical="https://www.afigureaday.com/history"
+            noindex
+          />
           <PageHeader title="Order History" curPage="Order History" />
 
           <div className="mx-auto w-full max-w-6xl px-4 py-10 lg:px-8">

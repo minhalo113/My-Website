@@ -3,6 +3,7 @@ import api from '../../src/api/api.js';
 import PageHeader from '../../components/PageHeader';
 import { AuthContext } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
+import SEO from '../../components/SEO';
 
 const ProfilePage = () => {
     const {user} = useContext(AuthContext)
@@ -80,6 +81,12 @@ const ProfilePage = () => {
     if (!user){
         return (
             <div className="min-h-screen bg-slate-700 text-slate-100">
+                <SEO
+                    title="Profile | A Figure A Day"
+                    description="Manage your A Figure A Day account details and preferences."
+                    canonical="https://www.afigureaday.com/profile"
+                    noindex
+                />
                 <PageHeader title="Your Profile" curPage="Your Profile" />
                 <p className="text-slate-400">Please Login First To Check Your Profile</p>
             </div>
@@ -88,6 +95,12 @@ const ProfilePage = () => {
 
     return (
         <>
+        <SEO
+            title="Profile | A Figure A Day"
+            description="Manage your A Figure A Day account details and preferences."
+            canonical="https://www.afigureaday.com/profile"
+            noindex
+        />
         <PageHeader title="Your Profile" curPage="Your Profile" />
   
         <section className="py-10 bg-white mt-4 mb-2">
