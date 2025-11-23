@@ -41,7 +41,13 @@ const HomeCategory = () => {
                     {
                         categories.slice(0, 6).map((val) => (
                         <div key={val.productId || val.category} className='col' style={{display:"flex", justifyContent: 'center'}}>
-                            <Link href = "/shop" className='category-item'>
+                            <Link
+                              href={{
+                                pathname: '/shop',
+                                query: val?.category ? { category: val.category } : {},
+                              }}
+                              className='category-item'
+                            >
                                 <div className='category-inner'>
                                     <div className='category-thumb'>
                                         <img src = {val.image}></img>

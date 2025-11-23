@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import PageHeader from '../../components/PageHeader'
+import { useRouter } from 'next/router'
 
 import ProductCards from './ProductCards';
 import Paginations from './Paginations';
@@ -10,6 +11,7 @@ import api from '../../src/api/api';
 import SEO from '../../components/SEO';
 
 const Shop = () => {
+  const router = useRouter();
   const [products, setProducts] = useState([]);
   const [categories, setAllCategories] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -44,6 +46,19 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [minPrice, setMinPrice] = useState(null);
   const [maxPrice, setMaxPrice] = useState(null);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const rawCategory = Array.isArray(router.query?.category)
+      ? router.query.category[0]
+      : router.query?.category;
+
+    if (rawCategory) {
+      setSelectedCategory(rawCategory);
+      setCurrentPage(1);
+    }
+  }, [router.isReady, router.query?.category]);
 
   useEffect(() => {
     let ignore = false;
@@ -119,7 +134,9 @@ const Shop = () => {
     const normalizedCategory = curcat || 'all';
     setSelectedCategory(normalizedCategory);
     setCurrentPage(1);
-  }, []);
+    const query = normalizedCategory === 'all' ? {} : { category: normalizedCategory };
+    router.push({ pathname: '/shop', query }, undefined, { shallow: true });
+  }, [router]);
 
   const handleSearchTermChange = useCallback((value) => {
     setSearchValue(value);
