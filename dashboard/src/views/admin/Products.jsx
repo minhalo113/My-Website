@@ -213,6 +213,7 @@ const Products = () => {
                         <th scope='col' className='py-3 px-4'>Brand</th>
                         <th scope='col' className='py-3 px-4'>Price</th>
                         <th scope='col' className='py-3 px-4'>Discount</th>
+                        <th scope='col' className='py-3 px-4'>Reviews</th>
                         <th scope='col' className='py-3 px-4'>Stock</th>
                         <th scope='col' className='py-3 px-4'>Description</th>
                         <th scope='col' className='py-3 px-4'>Link</th>
@@ -237,6 +238,7 @@ const Products = () => {
                                     <span>%{d.discount}</span>
                                 }
                             </td>
+                            <td scope = "row" className = "py-1 px-4 font-medium whitespace-nowrap">{d.reviewCount ?? (Array.isArray(d.reviews) ? d.reviews.length : 0)}</td>
                             <td scope = "row" className = "py-1 px-4 font-medium whitespace-nowrap">{d.stock}</td>
                             <td scope = "row" className = "py-1 px-4 font-medium whitespace-nowrap">{truncateText(d.description, 150)}</td>
                              <td scope = "row" className = "py-1 px-4 font-medium whitespace-nowrap">
