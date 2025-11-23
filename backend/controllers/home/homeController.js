@@ -76,6 +76,43 @@ class homeControllers{
         }
     }
 
+    featured_categories = async (req, res) => {
+        const rawLimit = parseInt(req.query.limit, 10);
+        const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 24) : 6;
+
+        try{
+            const pipeline = [
+                { $match: { isHidden: false } },
+                { $sort: { createdAt: -1, _id: -1 } },
+                {
+                    $group: {
+                        _id: '$category',
+                        product: { $first: '$$ROOT' },
+                        createdAt: { $first: '$createdAt' },
+                    },
+                },
+                { $sort: { createdAt: -1, _id: 1 } },
+                { $limit: limit },
+            ];
+
+            const results = await productModel.aggregate(pipeline);
+            const categories = results.map((entry) => {
+                const product = entry.product || {};
+                const images = Array.isArray(product.images) ? product.images : [];
+                return {
+                    category: entry._id,
+                    productId: product._id,
+                    image: images[0] || null,
+                };
+            });
+
+            return responseReturn(res, 200, { categories });
+        }catch(error){
+            console.log(error);
+            return responseReturn(res, 500, {error: "Internal Server Error"});
+        }
+    }
+
     products_get = async(req, res) => {
         const {page, searchValue, parPage, category, minPrice, maxPrice, sort} = req.query
 

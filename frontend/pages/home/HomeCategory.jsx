@@ -9,16 +9,23 @@ const HomeCategory = () => {
     const [categories, setCategories] = useState([])
     
     useEffect(() =>{
-        const fetchData = async() => {
+        let mounted = true;
+        const loadCategories = async() => {
             try{
-                const response = await api.get('/customers-category-get', {withCredentials: true})
-                setCategories(response?.data?.categorys || []);
+                const response = await api.get('/customers-featured-categories', {
+                    params: { limit: 6 },
+                    withCredentials: true
+                });
+                if (mounted) {
+                    setCategories(response?.data?.categories || []);
+                }
             }catch(err){
                 console.log(err)
             }
         };
 
-        fetchData();
+        loadCategories();
+        return () => { mounted = false; }
     }, [])
 
   return (
@@ -33,7 +40,7 @@ const HomeCategory = () => {
                 <div className='row g-4 justify-content-center row-cols-md-3 row-cols-sm-2 row-cols-1'>
                     {
                         categories.slice(0, 6).map((val) => (
-                        <div key={val._id || val.slug || val.name} className='col' style={{display:"flex", justifyContent: 'center'}}>
+                        <div key={val.productId || val.category} className='col' style={{display:"flex", justifyContent: 'center'}}>
                             <Link href = "/shop" className='category-item'>
                                 <div className='category-inner'>
                                     <div className='category-thumb'>
@@ -41,7 +48,7 @@ const HomeCategory = () => {
                                     </div>
 
                                     <div className='category-content'>
-                                        <span>{val.name}</span>
+                                        <span>{val.category}</span>
                                     </div>
                                 </div>
                             </Link>
