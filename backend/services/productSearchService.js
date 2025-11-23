@@ -263,6 +263,25 @@ export const clearProductSearchCache = () => {
     searchCache.clear();
 };
 
+const sanitizeSort = (value) => {
+    const key = typeof value === 'string' ? value.trim().toLowerCase() : '';
+    switch (key) {
+        case 'reviews':
+        case 'review':
+        case 'mostreviewed':
+        case 'most-reviewed':
+            return { key: 'reviews', stage: { reviewCount: -1, averageRating: -1, createdAt: -1 } };
+        case 'price-asc':
+        case 'price_asc':
+            return { key: 'price-asc', stage: { effectivePrice: 1, createdAt: -1 } };
+        case 'price-desc':
+        case 'price_desc':
+            return { key: 'price-desc', stage: { effectivePrice: -1, createdAt: -1 } };
+        default:
+            return { key: 'newest', stage: { createdAt: -1 } };
+    }
+};
+
 export const searchCatalogProducts = async ({
     term = '',
     category,
@@ -272,6 +291,7 @@ export const searchCatalogProducts = async ({
     includeSuggestions = false,
     minPrice,
     maxPrice,
+    sort,
 } = {}) => {
     const sanitizedTerm = sanitizeTerm(term);
     const sanitizedCategory = sanitizeCategory(category);
@@ -288,6 +308,8 @@ export const searchCatalogProducts = async ({
         sanitizedMaxPrice = temp;
     }
 
+    const { key: sortKey, stage: sortStage } = sanitizeSort(sort);
+
     const shouldCache = Boolean(sanitizedTerm);
     const cacheKey = shouldCache
         ? JSON.stringify({
@@ -299,6 +321,7 @@ export const searchCatalogProducts = async ({
             includeSuggestions,
             minPrice: sanitizedMinPrice,
             maxPrice: sanitizedMaxPrice,
+            sort: sortKey,
         })
         : null;
 
@@ -346,7 +369,7 @@ export const searchCatalogProducts = async ({
         pipeline.push({ $addFields: { score: { $meta: 'textScore' } } });
         pipeline.push({ $sort: { score: -1, createdAt: -1 } });
     } else {
-        pipeline.push({ $sort: { createdAt: -1 } });
+        pipeline.push({ $sort: sortStage });
     }
 
     const projectStage = {

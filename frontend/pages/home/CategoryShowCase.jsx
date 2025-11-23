@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from 'react'
+import React,{useState, useEffect, useCallback} from 'react'
 import api from '../../src/api/api.js'
 import Rating from '../../components/Rating'
 import Link from 'next/link'
@@ -16,24 +16,41 @@ const CategoryShowCase = () => {
     const [allCategories, setAllCategories] = useState([])
     const [activeCategory, setActiveCategory] = useState("All Categories");
 
-    useEffect(() =>{
-        const fetchData = async() => {
-            try{
-                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
-                const allCategories = await api.get('/customers-category-get', {withCredentials: true})
+    const fetchProducts = useCallback(async (categoryName = 'All Categories') => {
+        setLoading(true);
+        try{
+            const response = await api.get('/customers-products-get', {
+                params: {
+                    sort: 'reviews',
+                    parPage: 12,
+                    category: categoryName && categoryName !== 'All Categories' ? categoryName : undefined,
+                },
+                withCredentials: true
+            });
+            const products = response?.data?.products || [];
+            setProductData(products);
+            setItems(products);
+            setActiveCategory(categoryName || 'All Categories');
+        }catch(err){
+            console.log(err)
+        }finally{
+            setLoading(false);
+        }
+    }, []);
 
-                setProductData(allProducts.data.products);
-                setItems(allProducts.data.products);
-                setAllCategories(allCategories.data.categorys);
+    useEffect(() =>{
+        const fetchCategories = async () => {
+            try{
+                const allCategories = await api.get('/customers-category-get', {withCredentials: true})
+                setAllCategories(allCategories.data.categorys || []);
             }catch(err){
                 console.log(err)
-            }finally{
-                setLoading(false);
             }
         };
 
-        fetchData();
-    }, [])
+        fetchCategories();
+        fetchProducts('All Categories');
+    }, [fetchProducts])
 
    const formatCurrency = (value) => {
         const numericValue = typeof value === 'number' ? value : parseFloat(value);
@@ -99,15 +116,8 @@ const CategoryShowCase = () => {
         return <span className="font-semibold text-lg text-[#DCA54A]">{formatCurrency(product.price)}</span>;
     };
 
-    const filterItem = (categItem) =>{
-        if(!productData.length) {
-            return;
-        }
-        const updateItems = productData.filter((curElem) => {
-            return curElem.category === categItem
-        });
-        setItems(updateItems);
-        setActiveCategory(categItem);
+    const filterItem = async (categItem) =>{
+        await fetchProducts(categItem);
     }
 
     if (loading) return <p>Loading product details...</p>
@@ -131,7 +141,7 @@ const CategoryShowCase = () => {
                 </h2>
                 <div className='course-filter-group'>
                     <ul className='lab-ul' style={{justifyContent: 'center'}}>
-                        <li onClick= {() => {setActiveCategory("All Categories");setItems(productData)}} style={{background: activeCategory === "All Categories" ? "#DCA54A" : ""}}>All Categories</li>
+                        <li onClick= {() => fetchProducts('All Categories')} style={{background: activeCategory === "All Categories" ? "#DCA54A" : ""}}>All Categories</li>
                         {
                             allCategories.map((category, index) => 
                                 <li key = {index} onClick={() => {filterItem(category.name)}} style = {{background: activeCategory === category.name ? "#DCA54A" : ""}}>{category.name}</li>

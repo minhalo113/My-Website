@@ -1,19 +1,18 @@
 import Link from 'next/link';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../src/api/api.js'
 
 const subTitle = "Celebrate Your Fandom";
 const title = "Find the Perfect Figure for Every Collection";
 
 const HomeCategory = () => {
-    const [productData, setProductData] = useState([])
+    const [categories, setCategories] = useState([])
     
     useEffect(() =>{
         const fetchData = async() => {
             try{
-                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
-
-                setProductData(allProducts.data.products);
+                const response = await api.get('/customers-category-get', {withCredentials: true})
+                setCategories(response?.data?.categorys || []);
             }catch(err){
                 console.log(err)
             }
@@ -21,16 +20,6 @@ const HomeCategory = () => {
 
         fetchData();
     }, [])
-
-
-    const uniqueProducts = useMemo(() => {
-        const seen = new Set();
-        return productData.filter(product => {
-            if (seen.has(product.category)) return false;
-            seen.add(product.category);
-            return true;
-        });
-    }, [productData]);
 
   return (
     <div className='category-section style-4 padding-tb'>
@@ -43,16 +32,16 @@ const HomeCategory = () => {
             <div className='section-wrapper' style={{display:"flex", justifyContent: 'center'}}>
                 <div className='row g-4 justify-content-center row-cols-md-3 row-cols-sm-2 row-cols-1'>
                     {
-                        uniqueProducts.slice(0, 6).map((val) => (
-                        <div key={val._id} className='col' style={{display:"flex", justifyContent: 'center'}}>
+                        categories.slice(0, 6).map((val) => (
+                        <div key={val._id || val.slug || val.name} className='col' style={{display:"flex", justifyContent: 'center'}}>
                             <Link href = "/shop" className='category-item'>
                                 <div className='category-inner'>
                                     <div className='category-thumb'>
-                                        <img src = {Array.isArray(val.images) ? val.images[0] : val.images}></img>
+                                        <img src = {val.image}></img>
                                     </div>
 
                                     <div className='category-content'>
-                                        <span>{val.category}</span>
+                                        <span>{val.name}</span>
                                     </div>
                                 </div>
                             </Link>

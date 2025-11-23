@@ -77,11 +77,12 @@ class homeControllers{
     }
 
     products_get = async(req, res) => {
-        const {page, searchValue, parPage, category, minPrice, maxPrice} = req.query
+        const {page, searchValue, parPage, category, minPrice, maxPrice, sort} = req.query
 
         const trimmedSearch = typeof searchValue === 'string' ? searchValue.trim() : ''
         const hasPriceFilter = minPrice !== undefined || maxPrice !== undefined
-        const shouldUseSearchServie = Boolean(trimmedSearch) || (page && parPage) || (category && category !== 'all') || hasPriceFilter
+        const hasSort = typeof sort === 'string' && sort.trim() !== ''
+        const shouldUseSearchServie = Boolean(trimmedSearch) || (page && parPage) || (category && category !== 'all') || hasPriceFilter || hasSort
 
         if (shouldUseSearchServie) {
             try{
@@ -94,6 +95,7 @@ class homeControllers{
                     includeSuggestions: Boolean(trimmedSearch),
                     minPrice,
                     maxPrice,
+                    sort,
                 })
 
                 const payload = {
