@@ -5,12 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { get_blogs, messageClear, delete_blog } from "../../store/Reducers/blogReducer";
 import toast from "react-hot-toast";
+import Pagination from "../Pagination";
 
 const BlogPost = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch();
 
-    const {loader, blogs, blog, totalBlog, errorMessage, successMessage} = useSelector(state => state.blog)
+    const {loader, blogs, totalBlog, errorMessage, successMessage} = useSelector(state => state.blog)
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [parPage, setParPage] = useState(10);
 
     useEffect(() => {
       if (successMessage){
@@ -22,12 +26,16 @@ const BlogPost = () => {
         toast.error(errorMessage);
         dispatch(messageClear())
       }
+    }, [errorMessage, successMessage, dispatch])
 
-      let obj = {
-        parPage: null, page: null, searchValue: null
+    useEffect(() => {
+      const obj = {
+        parPage: parseInt(parPage),
+        page: parseInt(currentPage),
+        searchValue: null,
       }
       dispatch(get_blogs(obj))
-    }, [errorMessage, successMessage])
+    }, [dispatch, currentPage, parPage])
 
     const handleDelete = async (id) => {
       const confirmed = window.confirm("Are you sure you want to delete this blog post?");
@@ -35,6 +43,15 @@ const BlogPost = () => {
 
       try{
         const result = await dispatch(delete_blog(id));
+        if (result?.meta?.requestStatus === 'fulfilled') {
+          const updatedTotal = Math.max(totalBlog - 1, 0);
+          const totalPages = Math.max(1, Math.ceil(updatedTotal / parPage));
+          if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+          } else {
+            dispatch(get_blogs({ parPage, page: currentPage, searchValue: null }));
+          }
+        }
       }catch(err){
         alert(err.response?.data?.message || "Unexpected error while deleting blog");
       }
@@ -59,17 +76,37 @@ const BlogPost = () => {
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+          <div className="flex justify-end items-center px-4 py-2 gap-3">
+            <label className="text-sm text-gray-700">Rows per page:</label>
+            <select
+              value={parPage}
+              onChange={(e) => {
+                setCurrentPage(1);
+                setParPage(parseInt(e.target.value));
+              }}
+              className="border rounded px-2 py-1 text-sm"
+            >
+              {[5,10,20,50].map((size) => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+          </div>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Author</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Actions</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Comments</th>
+                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
+              {loader && (
+                <tr>
+                  <td colSpan="5" className="text-center py-6 text-gray-500">Loading blogs...</td>
+                </tr>
+              )}
               {blogs.map((blog) => (
                 <tr key={blog._id || blog.id}>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{blog.title}</td>
@@ -101,7 +138,7 @@ const BlogPost = () => {
               ))}
               {blogs.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="text-center py-8 text-gray-500">
+                  <td colSpan="5" className="text-center py-8 text-gray-500">
                     No blog posts available.
                   </td>
                 </tr>
@@ -109,6 +146,16 @@ const BlogPost = () => {
             </tbody>
           </table>
         </div>
+        {totalBlog > parPage && (
+          <div className="w-full flex justify-end px-6 py-4">
+            <Pagination
+              pageNumber={currentPage}
+              setPageNumber={setCurrentPage}
+              totalItem={totalBlog}
+              parPage={parPage}
+            />
+          </div>
+        )}
         </div>
     </div>
   );

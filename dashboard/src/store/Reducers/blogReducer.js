@@ -176,12 +176,21 @@ export const blogReducer = createSlice({
         })
         .addCase(get_blog.fulfilled, (state, {payload}) => {
             //
-            state.blog = payload.blog;
+            state.loader = false;
+            state.blogs = payload.blogs;
+            state.totalBlog = payload.totalBlogs || 0;
+        })
+
+        .addCase(get_blogs.pending, (state) => {
+            state.loader = true;
+            state.errorMessage = "";
         })
 
         .addCase(get_blogs.rejected, (state, {payload}) => {
             //
-            state.errorMessage = payload.message;
+            state.loader = false;
+            state.errorMessage = payload?.message || 'Failed to load blogs';
+            state.blogs = [];
         })
         .addCase(get_blogs.fulfilled, (state, {payload}) => {
             //

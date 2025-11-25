@@ -164,12 +164,18 @@ const CategoryShowCase = () => {
                                     <DiscountBadge discount={product.discount} />
                                     <div className='course-category'>
                                         <div className='course-cate'><a href={`/shop/${product._id.toString()}`}>{product.category}</a></div>
-                                        <div className='course-reiew'><Rating rating={product.averageRating} number_of_ratings= {product.reviewCount}/></div>
                                     </div>
                                 </div>
 
                                 <div className='course-content'>
                                     <Link href={`/shop/${product._id.toString()}`}><h6>{product.name}</h6></Link>
+                                    <div className='mt-2'>
+                                        <Rating
+                                            rating={product.averageRating}
+                                            number_of_ratings={product.reviewCount}
+                                            layout="stacked"
+                                        />
+                                    </div>
                                     <div className='course-footer'>
                                         <div className='course-author'>
                                             <Link href = {`/shop/${product._id.toString()}`} className='ca-name'>{product.seller}</Link>

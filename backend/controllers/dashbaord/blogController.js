@@ -148,31 +148,24 @@ class blogController{
         searchValue = searchValue === 'null' ? null : searchValue;
 
         try{
-            let skipPage = ''
+            let skipPage = 0;
             if (parPage && page){
                 skipPage = parPage * (page - 1);
             }
 
-            if (searchValue && page && parPage){
-                const blogs = await blogModel.find({
-                    $text: {$search: searchValue}
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
+            const query = searchValue ? { $text: { $search: searchValue } } : {};
 
-                const totalBlogs = await blogModel.find({
-                    $text: {$search: searchValue}
-                }).countDocuments()
-                return responseReturn(res, 200, {blogs, totalBlogs})
-            }else if(searchValue === '' && page && parPage){
-                const blogs = await blogModel.find().skip(skipPage).limit(parPage).sort({createdAt: -1});
-                const totalBlogs = await blogModel.find().countDocuments();
-                return responseReturn(res, 200, {blogs, totalBlogs});
-            }else{
-                const blogs = await blogModel.find().sort({createdAt: -1});
-                const totalBlogs = await blogModel.find().countDocuments();
+            if (page && parPage){
+                const blogs = await blogModel.find(query).skip(skipPage).limit(parPage).sort({createdAt: -1});
+                const totalBlogs = await blogModel.find(query).countDocuments();
                 return responseReturn(res, 200, {blogs, totalBlogs});
             }
 
-        }catch(err){    
+            const blogs = await blogModel.find(query).sort({createdAt: -1});
+            const totalBlogs = await blogModel.find(query).countDocuments();
+            return responseReturn(res, 200, {blogs, totalBlogs});
+
+        }catch(err){   
             return responseReturn(res, 500, {message: err.message, error: err.message})
         }
     }
