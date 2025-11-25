@@ -176,14 +176,7 @@ export const blogReducer = createSlice({
         })
         .addCase(get_blog.fulfilled, (state, {payload}) => {
             //
-            state.loader = false;
-            state.blogs = payload.blogs;
-            state.totalBlog = payload.totalBlogs || 0;
-        })
-
-        .addCase(get_blogs.pending, (state) => {
-            state.loader = true;
-            state.errorMessage = "";
+            state.blog = payload.blog
         })
 
         .addCase(get_blogs.rejected, (state, {payload}) => {
@@ -194,7 +187,13 @@ export const blogReducer = createSlice({
         })
         .addCase(get_blogs.fulfilled, (state, {payload}) => {
             //
-            state.blogs = payload.blogs
+            state.loader = false;
+            state.blogs = payload.blogs;
+            state.totalBlog = payload.totalBlogs || 0;
+        })
+        .addCase(get_blogs.pending, (state) => {
+            state.loader = true;
+            state.errorMessage = ""; 
         })
 
         .addCase(automate_create_blog.pending, (state) => {
