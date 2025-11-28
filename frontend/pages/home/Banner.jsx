@@ -71,7 +71,7 @@ const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
 
     return (
         <div>
-            <div style={{ overflow: 'hidden', flexWrap: 'wrap', paddingBottom: "50px", position: 'relative' }}>
+            <div className="banner-section style-4" style={{ overflow: 'hidden', flexWrap: 'wrap', paddingBottom: "50px", position: 'relative' }}>
 
                 <Image
                     src="/images/bg-img/shopBackground.jpg"
