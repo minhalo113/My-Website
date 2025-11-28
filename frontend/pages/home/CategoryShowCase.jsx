@@ -1,24 +1,23 @@
-import React,{useState, useEffect, useCallback} from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import api from '../../src/api/api.js'
 import Rating from '../../components/Rating'
 import Link from 'next/link'
 import DiscountBadge from '../../components/DiscountBadge'
-
+import Image from 'next/image';
+import PropTypes from 'prop-types';
 
 const title = "Our Products"
 const btnText = "Start Shopping Now";
 
-const CategoryShowCase = () => {
-    const [productData, setProductData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [items, setItems] = useState([]);
+const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
+    const [items, setItems] = useState(initialProducts);
 
-    const [allCategories, setAllCategories] = useState([])
+    const [loading, setLoading] = useState(false);
     const [activeCategory, setActiveCategory] = useState("All Categories");
 
     const fetchProducts = useCallback(async (categoryName = 'All Categories') => {
         setLoading(true);
-        try{
+        try {
             const response = await api.get('/customers-products-get', {
                 params: {
                     sort: 'reviews',
@@ -28,31 +27,22 @@ const CategoryShowCase = () => {
                 withCredentials: true
             });
             const products = response?.data?.products || [];
-            setProductData(products);
             setItems(products);
             setActiveCategory(categoryName || 'All Categories');
-        }catch(err){
+        } catch (err) {
             console.log(err)
-        }finally{
+        } finally {
             setLoading(false);
         }
     }, []);
 
-    useEffect(() =>{
-        const fetchCategories = async () => {
-            try{
-                const allCategories = await api.get('/customers-category-get', {withCredentials: true})
-                setAllCategories(allCategories.data.categorys || []);
-            }catch(err){
-                console.log(err)
-            }
-        };
+    useEffect(() => {
+        if (activeCategory === "All Categories" && initialProducts.length > 0) {
+            setItems(initialProducts);
+        }
+    }, [initialProducts, activeCategory]);
 
-        fetchCategories();
-        fetchProducts('All Categories');
-    }, [fetchProducts])
-
-   const formatCurrency = (value) => {
+    const formatCurrency = (value) => {
         const numericValue = typeof value === 'number' ? value : parseFloat(value);
         if (!Number.isFinite(numericValue)) {
             return value;
@@ -116,88 +106,99 @@ const CategoryShowCase = () => {
         return <span className="font-semibold text-lg text-[#DCA54A]">{formatCurrency(product.price)}</span>;
     };
 
-    const filterItem = async (categItem) =>{
+    const filterItem = async (categItem) => {
         await fetchProducts(categItem);
     }
 
-    if (loading) return <p>Loading product details...</p>
-
-  return (
-    <div className='course-section style-3 padding-tb'>
-        <div>
-            {/*shape*/}
-            <img className='course-shape one combined-effect' src = "/images/shape-img/icon/circle-background.png" style={{width:'100px', height: 'auto'}}>
-            </img>
-            <img className='course-shape two drip-glow-effect' src = "/images/shape-img/icon/circle-background-2.png" style={{width:'100px', height: 'auto'}}>
-            </img>
+    return (
+        <div className='course-section style-3 padding-tb'>
+            <div>
+                {/*shape*/}
+                <img className='course-shape one combined-effect' src="/images/shape-img/icon/circle-background.png" style={{ width: '100px', height: 'auto' }}>
+                </img>
+                <img className='course-shape two drip-glow-effect' src="/images/shape-img/icon/circle-background-2.png" style={{ width: '100px', height: 'auto' }}>
+                </img>
             </div>
-        
-        {/*main section*/}
-        <div className='container' >
-            {/* section header */}
-            <div className='section-header flex flex-col items-center gap-4' style={{justifyContent:'center'}}>
-                <h2 className='title'>
-                    {title}
-                </h2>
-                <div className='course-filter-group'>
-                    <ul className='lab-ul' style={{justifyContent: 'center'}}>
-                        <li onClick= {() => fetchProducts('All Categories')} style={{background: activeCategory === "All Categories" ? "#DCA54A" : ""}}>All Categories</li>
-                        {
-                            allCategories.map((category, index) => 
-                                <li key = {index} onClick={() => {filterItem(category.name)}} style = {{background: activeCategory === category.name ? "#DCA54A" : ""}}>{category.name}</li>
-                            )
-                        }
-                    </ul>
+
+            {/*main section*/}
+            <div className='container' >
+                {/* section header */}
+                <div className='section-header flex flex-col items-center gap-4' style={{ justifyContent: 'center' }}>
+                    <h2 className='title'>
+                        {title}
+                    </h2>
+                    <div className='course-filter-group'>
+                        <ul className='lab-ul' style={{ justifyContent: 'center' }}>
+                            <li onClick={() => fetchProducts('All Categories')} style={{ background: activeCategory === "All Categories" ? "#DCA54A" : "" }}>All Categories</li>
+                            {
+                                allCategories.map((category, index) =>
+                                    <li key={index} onClick={() => { filterItem(category.name) }} style={{ background: activeCategory === category.name ? "#DCA54A" : "" }}>{category.name}</li>
+                                )
+                            }
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            {/* section body */}
-            <div className = "section-wrapper">
-                <div className='row g-4 justify-content-center row-cols-x1-4 row-cols-lg-3 row-cols-md-2 row-cols-1
+                {/* section body */}
+                <div className="section-wrapper">
+                    {loading ? <p>Loading product details...</p> : (
+                        <div className='row g-4 justify-content-center row-cols-x1-4 row-cols-lg-3 row-cols-md-2 row-cols-1
                  course-filter' >
-                    {items.slice(0, 12).map((product) => 
-                        <div key={product._id.toString()} className='col'>
-                            <div className='course-item style-4'>
-                            <div className='course-inner'>
-                                <div className='course-thumb relative'>
-                                    <img src={Array.isArray(product.images) ? product.images[0] : product.images} alt='' />
-                                    <DiscountBadge discount={product.discount} />
-                                    <div className='course-category'>
-                                        <div className='course-cate'><a href={`/shop/${product._id.toString()}`}>{product.category}</a></div>
-                                    </div>
-                                </div>
+                            {items.slice(0, 12).map((product) =>
+                                <div key={product._id.toString()} className='col'>
+                                    <div className='course-item style-4'>
+                                        <div className='course-inner'>
+                                            <div className='course-thumb relative' style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+                                                <Image
+                                                    src={Array.isArray(product.images) ? product.images[0] : product.images}
+                                                    alt={product.name}
+                                                    fill
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    style={{ objectFit: 'contain' }}
+                                                />
+                                                <DiscountBadge discount={product.discount} />
+                                                <div className='course-category'>
+                                                    <div className='course-cate'><a href={`/shop/${product._id.toString()}`}>{product.category}</a></div>
+                                                </div>
+                                            </div>
 
-                                <div className='course-content'>
-                                    <Link href={`/shop/${product._id.toString()}`}><h6>{product.name}</h6></Link>
-                                    <div className='mt-2'>
-                                        <Rating
-                                            rating={product.averageRating}
-                                            number_of_ratings={product.reviewCount}
-                                            layout="stacked"
-                                        />
-                                    </div>
-                                    <div className='course-footer'>
-                                        <div className='course-author'>
-                                            <Link href = {`/shop/${product._id.toString()}`} className='ca-name'>{product.seller}</Link>
-                                        </div>
-                                        <div className='course-price flex flex-col items-end text-right gap-1' style={{color: "#DCA54A"}}>
-                                            {renderPrice(product)}
-                                        </div>
-                                    </div>
-                                </div>
+                                            <div className='course-content'>
+                                                <Link href={`/shop/${product._id.toString()}`}><h6>{product.name}</h6></Link>
+                                                <div className='mt-2'>
+                                                    <Rating
+                                                        rating={product.averageRating}
+                                                        number_of_ratings={product.reviewCount}
+                                                        layout="stacked"
+                                                    />
+                                                </div>
+                                                <div className='course-footer'>
+                                                    <div className='course-author'>
+                                                        <Link href={`/shop/${product._id.toString()}`} className='ca-name'>{product.seller}</Link>
+                                                    </div>
+                                                    <div className='course-price flex flex-col items-end text-right gap-1' style={{ color: "#DCA54A" }}>
+                                                        {renderPrice(product)}
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                            </div>
+                                        </div>
+                                    </div>
+                                </div>)}
+
                         </div>
-                        </div> )}
-
-                </div>
-                <div className='text-center mt-5'>
-                    <Link href = "/shop" className='lab-btn' style={{background:"#DCA54A"}}><span style={{color: '#101115'}}>{btnText}</span></Link>
+                    )}
+                    <div className='text-center mt-5'>
+                        <Link href="/shop" className='lab-btn' style={{ background: "#DCA54A" }}><span style={{ color: '#101115' }}>{btnText}</span></Link>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-  )
+    )
 }
+
+CategoryShowCase.propTypes = {
+    initialProducts: PropTypes.array,
+    allCategories: PropTypes.array,
+};
 
 export default CategoryShowCase
