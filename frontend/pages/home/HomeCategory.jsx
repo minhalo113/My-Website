@@ -25,6 +25,7 @@ const HomeCategory = ({ categories = [] }) => {
                                             query: val?.category ? { category: val.category } : {},
                                         }}
                                         className='category-item'
+                                        style={{ width: '100%' }}
                                     >
                                         <div className='category-inner'>
                                             <div className='category-thumb relative' style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
