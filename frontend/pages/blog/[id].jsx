@@ -6,6 +6,7 @@ import PopularPost from '../shop/PopularPost';
 import api from '../../src/api/api';
 import { toast } from 'react-hot-toast';
 import SEO from '../../components/SEO';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const extractStartTime = (searchParams) => {
     if (!searchParams) return '';
@@ -256,7 +257,7 @@ const SingleBlog = () => {
                                                         <div className='post-thumb'>
                                                             {blog.image?.url && (
                                                                 <Image
-                                                                    src={blog.image.url}
+                                                                    src={ensureHttps(blog.image.url)}
                                                                     alt={blog.title}
                                                                     width={800}
                                                                     height={400}

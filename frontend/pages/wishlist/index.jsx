@@ -6,6 +6,7 @@ import { AuthContext } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 import { useCart } from '../../context/CartContext';
 import SEO from "../../components/SEO";
+import { ensureHttps } from "../../src/utils/imageUtils";
 
 const WishList = () => {
   const { user } = useContext(AuthContext);
@@ -122,7 +123,7 @@ const WishList = () => {
                 <div className="flex items-center gap-4">
                   <div className="h-30 w-30 shrink-0 overflow-hidden rounded bg-slate-700 relative">
                     <Image
-                      src={Array.isArray(product.images) ? product.images[0] : product.images}
+                      src={ensureHttps(Array.isArray(product.images) ? product.images[0] : product.images)}
                       alt={product.name}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"

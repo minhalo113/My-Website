@@ -7,6 +7,7 @@ import { useCart } from "../../context/CartContext"
 import api from './../../src/api/api';
 import { AuthContext } from '../../context/AuthContext';
 import SEO from '../../components/SEO';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const CartPage = () => {
     const { cart: cartItems, add, remove, clear, handleQuantityChange } = useCart();
@@ -122,7 +123,7 @@ const CartPage = () => {
                                                     <div className='p-thumb'>
                                                         <Link href={`/shop/${item.id.toString()}`}>
                                                             <Image
-                                                                src={Array.isArray(item.img) ? item.img[0] : item.img}
+                                                                src={ensureHttps(Array.isArray(item.img) ? item.img[0] : item.img)}
                                                                 alt={item.name || "Product"}
                                                                 width={85}
                                                                 height={85}

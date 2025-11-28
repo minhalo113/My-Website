@@ -22,6 +22,38 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'localhost',
       },
+      {
+        protocol: 'https',
+        hostname: 'alicdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ae01.alicdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ae02.alicdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ae03.alicdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ae04.alicdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'graph.facebook.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'platform-lookaside.fbsbx.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ibb.co',
+      },
     ],
   },
 };

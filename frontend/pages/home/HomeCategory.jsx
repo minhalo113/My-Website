@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const subTitle = "Celebrate Your Fandom";
 const title = "Find the Perfect Figure for Every Collection";
@@ -30,7 +31,7 @@ const HomeCategory = ({ categories = [] }) => {
                                         <div className='category-inner'>
                                             <div className='category-thumb relative' style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
                                                 <Image
-                                                    src={val.image}
+                                                    src={ensureHttps(val.image)}
                                                     alt={val.category}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

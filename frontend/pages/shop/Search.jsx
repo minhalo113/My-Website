@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import api from '../../src/api/api';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const DEFAULT_THRESHOLD = 64;
 const TEXT_SEARCH_DEBOUNCE = 300;
@@ -688,7 +689,7 @@ const Search = ({
                                     <div className='d-flex gap-3 p-2'>
                                         <div className="pro-thumb" style={{ flex: "0 0 64px", width: 64, height: 64 }}>
                                             <Image
-                                                src={product.coverImage || product.images?.[0] || "/placeholder.png"}
+                                                src={ensureHttps(product.coverImage || product.images?.[0] || "/placeholder.png")}
                                                 alt={product.name}
                                                 width={64}
                                                 height={64}
@@ -733,7 +734,7 @@ const Search = ({
                                             <div className='pro-thumb h-25'>
                                                 {previewUrl ? (
                                                     <Image
-                                                        src={previewUrl}
+                                                        src={ensureHttps(previewUrl)}
                                                         alt={previewAlt}
                                                         width={80}
                                                         height={80}

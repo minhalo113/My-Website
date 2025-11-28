@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import api from './../../src/api/api';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const title = "Most Recent Post"
 
@@ -34,7 +35,7 @@ const PopularPost = () => {
                         <div className="post-thumb rounded overflow-hidden shadow-sm">
                             <Link href={`/blog/${blog._id}`}>
                                 <Image
-                                    src={blog.image?.url || "/images/default-thumb.jpg"}
+                                    src={ensureHttps(blog.image?.url || "/images/default-thumb.jpg")}
                                     alt={blog.title}
                                     width={90}
                                     height={90}

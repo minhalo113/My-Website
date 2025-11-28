@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { ChevronDown, Clock, Package, Truck, CheckCircle2, XCircle } from "lucide-react";
 import Image from 'next/image';
+import { ensureHttps } from "../../src/utils/imageUtils";
 
 const BRAND = "#DCA54A";
 
@@ -70,7 +71,7 @@ const OrderCard = ({ order, expanded, onToggle }) => {
             <li key={item.id || item._id} className="m-1 flex items-center gap-4 py-3">
               {item.img?.[0] && (
                 <Image
-                  src={item.img[0]}
+                  src={ensureHttps(item.img[0])}
                   alt={item.name}
                   width={48}
                   height={48}

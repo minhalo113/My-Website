@@ -7,6 +7,7 @@ import Rating from '../../components/Rating';
 import { useCart } from '../../context/CartContext';
 import { toast } from "react-hot-toast"
 import api from '../../src/api/api';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const desc = "This is the detail of the product."
 
@@ -116,17 +117,17 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                                         {colorImages.map((img, i) => (
                                             <div key={i} className="flex flex-col items-center w-10">
                                                 <Image
-                                                    src={img}
+                                                    src={ensureHttps(img)}
                                                     alt={`color variant ${i}`}
                                                     width={40}
                                                     height={40}
                                                     onClick={() => {
                                                         setSelectedColorIndex(i);
-                                                        onSelectImage && onSelectImage(img)
+                                                        onSelectImage && onSelectImage(ensureHttps(img))
                                                     }}
                                                     className={`w-10 h-10 rounded cursor-pointer transition-all duration-200 ease-in-out ${selectedColorIndex === i
-                                                            ? 'border-4 border-emerald-500 ring-2 ring-emerald-300'
-                                                            : 'border border-gray-300'
+                                                        ? 'border-4 border-emerald-500 ring-2 ring-emerald-300'
+                                                        : 'border border-gray-300'
                                                         }`}
                                                 />
                                                 {selectedColorIndex === i && (

@@ -7,6 +7,7 @@ import { useCart } from '../../context/CartContext';
 import { toast } from "react-hot-toast"
 import api from '../../src/api/api';
 import DiscountBadge from '../../components/DiscountBadge';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const ProductCards = ({ GridList, products }) => {
   const { add } = useCart();
@@ -89,7 +90,7 @@ const ProductCards = ({ GridList, products }) => {
                 <div className='product-thumb'>
                   <div className='pro-thumb relative' style={{ width: '100%', aspectRatio: '1/1' }}>
                     <Image
-                      src={Array.isArray(product.images) ? product.images[0] : product.images}
+                      src={ensureHttps(Array.isArray(product.images) ? product.images[0] : product.images)}
                       alt={product.name || ""}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -158,7 +159,7 @@ const ProductCards = ({ GridList, products }) => {
                 <div className='product-thumb'>
                   <div className='pro-thumb relative' style={{ width: '100%', aspectRatio: '1/1' }}>
                     <Image
-                      src={Array.isArray(product.images) ? product.images[0] : product.images}
+                      src={ensureHttps(Array.isArray(product.images) ? product.images[0] : product.images)}
                       alt={product.name || ""}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

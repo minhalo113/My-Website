@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import api from '../../src/api/api';
 import SEO from "../../components/SEO";
 import Paginations from '../shop/Paginations';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 export const Blog = () => {
   const [blogList, setBlogList] = useState([])
@@ -76,7 +77,7 @@ export const Blog = () => {
 
                               <div className='post-thumb' style={{ position: 'relative', width: '100%', height: '250px' }}>
                                 <Link href={`/blog/${blog._id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
-                                  <Image src={blog.image?.url} alt={blog.title || ""} fill style={{ objectFit: 'cover' }} />
+                                  <Image src={ensureHttps(blog.image?.url)} alt={blog.title || ""} fill style={{ objectFit: 'cover' }} />
                                 </Link>
                               </div>
 

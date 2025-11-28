@@ -4,6 +4,7 @@ import Image from 'next/image';
 import PropTypes from 'prop-types'
 import api from '../../src/api/api';
 import toast from 'react-hot-toast';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const reviewTitle = 'Add a Review'
 
@@ -250,7 +251,7 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
               return (
                 <li key={i} className="review-item">
                   <div className="post-thumb">
-                    <Image src={review?.userImage?.url || '/images/profile-default-image.png'} alt="user" width={70} height={70} />
+                    <Image src={ensureHttps(review?.userImage?.url || '/images/profile-default-image.png')} alt="user" width={70} height={70} />
                   </div>
                   <div className="post-content">
                     <div className="entry-meta">
@@ -286,7 +287,7 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
                       {review.images && review.images.length > 0 && (
                         <div className="flex gap-2 flex-wrap mt-2">
                           {review.images.map((img, idx) => (
-                            <Image key={idx} src={img} alt="review" width={80} height={80} className="w-20 h-20 object-cover rounded" />
+                            <Image key={idx} src={ensureHttps(img)} alt="review" width={80} height={80} className="w-20 h-20 object-cover rounded" />
                           ))}
                         </div>
                       )}

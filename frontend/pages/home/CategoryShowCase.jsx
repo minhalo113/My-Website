@@ -5,6 +5,7 @@ import Link from 'next/link'
 import DiscountBadge from '../../components/DiscountBadge'
 import Image from 'next/image';
 import PropTypes from 'prop-types';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const title = "Our Products"
 const btnText = "Start Shopping Now";
@@ -148,7 +149,7 @@ const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
                                         <div className='course-inner'>
                                             <div className='course-thumb relative' style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
                                                 <Image
-                                                    src={Array.isArray(product.images) ? product.images[0] : product.images}
+                                                    src={ensureHttps(Array.isArray(product.images) ? product.images[0] : product.images)}
                                                     alt={product.name}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

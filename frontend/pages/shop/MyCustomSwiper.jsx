@@ -3,6 +3,7 @@ import { Autoplay, Navigation } from "swiper/modules";
 import { useRef, useEffect } from "react";
 import Image from 'next/image';
 import PropTypes from 'prop-types';
+import { ensureHttps } from "../../src/utils/imageUtils";
 
 const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
     const swiperRef = useRef(null);
@@ -64,7 +65,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                     <SwiperSlide key={`img-${index}`}>
                         <div className="single-thumb flex items-center justify-center h-[500px] w-full relative py-4">
                             <Image
-                                src={image}
+                                src={ensureHttps(image)}
                                 alt={`Product Image ${index + 1}`}
                                 fill
                                 className="object-contain"
