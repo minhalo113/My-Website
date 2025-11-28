@@ -71,7 +71,23 @@ const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
 
     return (
         <div>
-            <div className="banner-section style-4" style={{ overflow: 'hidden', flexWrap: 'wrap', paddingBottom: "50px" }}>
+            <div style={{ overflow: 'hidden', flexWrap: 'wrap', paddingBottom: "50px", position: 'relative' }}>
+
+                <Image
+                    src="/images/bg-img/shopBackground.jpg"
+                    alt="A Figure A Day Shop Background"
+                    fill
+                    priority={true}
+                    fetchPriority="high"
+                    quality={80}
+                    sizes="100vw"
+                    style={{
+                        objectFit: 'cover',
+                        zIndex: -1,
+                        pointerEvents: 'none'
+                    }}
+                />
+
                 <div className='container-fluid px-0'>
                     <div className='banner-content'>
                         {title}
@@ -98,8 +114,6 @@ const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
                                                         src={product.images[0]}
                                                         alt={product.name}
                                                         fill
-                                                        priority={true}
-                                                        fetchPriority="high"
                                                         sizes="100px"
                                                         style={{ objectFit: "contain" }}
                                                     />
@@ -110,7 +124,6 @@ const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
                                 </ul>
                             )}
                         </form>
-
                         <p style={{ marginBottom: "50px" }}>{desc}</p>
                     </div>
                 </div>
