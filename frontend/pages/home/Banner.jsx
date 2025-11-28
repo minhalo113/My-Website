@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link';
 import SelectedCategory from '../../components/SelectedCategory';
-// import HomeImageSwiper from '../../components/HomeImageSwiper';
+import HomeImageSwiper from '../../components/HomeImageSwiper';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 
@@ -14,7 +14,7 @@ const title = (
 
 const desc = "✨ Fresh collectible highlights, carefully packed for your shelf."
 
-const Banner = ({ products = [], categorys = [] }) => {
+const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
     const [selectedCategory, setSelectedCategory] = useState('all')
 
     const [searchInput, setSearchInput] = useState("");
@@ -129,14 +129,14 @@ const Banner = ({ products = [], categorys = [] }) => {
                 </div>
 
             </div>
-            {/* <HomeImageSwiper items={swiperItems} /> */}
+            <HomeImageSwiper items={swiperItems} />
         </div>
     )
 }
 Banner.propTypes = {
     products: PropTypes.array,
     categorys: PropTypes.array,
-    // swiperItems: PropTypes.array,
+    swiperItems: PropTypes.array,
 };
 
 export default Banner;

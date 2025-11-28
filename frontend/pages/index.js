@@ -10,7 +10,7 @@ import api from '../src/api/api'
 
 import PropTypes from 'prop-types';
 
-export const Home = ({ products, categorys, featuredCategories, showcaseProducts }) => {
+export const Home = ({ products, categorys, swiperItems, featuredCategories, showcaseProducts }) => {
   return (
     <>
       <SEO
@@ -19,7 +19,7 @@ export const Home = ({ products, categorys, featuredCategories, showcaseProducts
         canonical="https://www.afigureaday.com/"
       />
       <div>
-        <Banner products={products} categorys={categorys} />
+        <Banner products={products} categorys={categorys} swiperItems={swiperItems} />
         <HomeCategory categories={featuredCategories} />
         <CategoryShowCase initialProducts={showcaseProducts} allCategories={categorys} />
 
@@ -38,7 +38,7 @@ export async function getServerSideProps() {
     const [productsRes, categorysRes, swiperRes, featuredRes, showcaseRes] = await Promise.all([
       api.get('/customers-products-get'),
       api.get('/customers-category-get'),
-      // api.get('/home-swiper-get'),
+      api.get('/home-swiper-get'),
       api.get('/customers-featured-categories', { params: { limit: 6 } }),
       api.get('/customers-products-get', {
         params: {
@@ -52,7 +52,7 @@ export async function getServerSideProps() {
       props: {
         products: productsRes.data.products || [],
         categorys: categorysRes.data.categorys || [],
-        // swiperItems: swiperRes.data.items || [],
+        swiperItems: swiperRes.data.items || [],
         featuredCategories: featuredRes.data.categories || [],
         showcaseProducts: showcaseRes.data.products || [],
       },
