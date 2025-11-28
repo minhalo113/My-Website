@@ -1,9 +1,10 @@
+/* eslint-disable no-undef */
 import { useEffect, useState, useContext, useRef } from "react";
 
-import dotenv from "dotenv"
-import process from "process"
+// import dotenv from "dotenv"
+// import process from "process"
 import { AuthContext } from "../context/AuthContext";
-dotenv.config();
+// dotenv.config();
 
 const ChatCustomer = () => {
   const { user } = useContext(AuthContext)

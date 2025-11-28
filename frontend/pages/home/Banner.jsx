@@ -4,6 +4,7 @@ import SelectedCategory from '../../components/SelectedCategory';
 import HomeImageSwiper from '../../components/HomeImageSwiper';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
+import api from '../../src/api/api';
 
 const title = (
     <>
@@ -14,24 +15,39 @@ const title = (
 
 const desc = "✨ Fresh collectible highlights, carefully packed for your shelf."
 
-const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
+const Banner = () => {
+    const [productData, setProductData] = useState([])
+    const [categorys, setCategorys] = useState([])
     const [selectedCategory, setSelectedCategory] = useState('all')
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const allProducts = await api.get('/customers-products-get', { withCredentials: true })
+                const allCategorys = await api.get('/customers-category-get', { withCredentials: true })
+
+                setProductData(allProducts.data.products);
+                setCategorys(allCategorys.data.categorys);
+            } catch (err) {
+                console.log(err)
+            } finally {
+                // setLoading(false);
+            }
+        }
+        fetchData();
+    }, [])
+
     const [searchInput, setSearchInput] = useState("");
-    const [filteredProducts, setfilteredProducts] = useState(products);
+    const [filteredProducts, setfilteredProducts] = useState(productData);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null)
-
-    useEffect(() => {
-        setfilteredProducts(products);
-    }, [products]);
 
     const handleSearch = (e) => {
         const searchTerm = e.target.value;
         setSearchInput(searchTerm)
 
-        const filtered = products.filter((product) => {
+        const filtered = productData.filter((product) => {
             const matchesName = product.name.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
             return matchesName && matchesCategory;
@@ -45,7 +61,7 @@ const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
         const newCategory = e.target.value;
         setSelectedCategory(newCategory);
 
-        const filtered = products.filter((product) => {
+        const filtered = productData.filter((product) => {
             const matchesName = product.name.toLowerCase().includes(searchInput.toLowerCase());
             const matchesCategory = newCategory === "all" || product.category === newCategory;
             return matchesName && matchesCategory;
@@ -129,7 +145,7 @@ const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
                 </div>
 
             </div>
-            <HomeImageSwiper items={swiperItems} />
+            {/* <HomeImageSwiper/> */}
         </div>
     )
 }

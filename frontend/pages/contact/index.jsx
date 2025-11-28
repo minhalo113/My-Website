@@ -1,9 +1,10 @@
+/* eslint-disable no-undef */
 import React, { useState } from 'react'
 import PageHeader from '../../components/PageHeader'
 import Image from 'next/image';
-import dotenv from "dotenv"
-import process from "process"
-dotenv.config();
+// import dotenv from "dotenv"
+// import process from "process"
+// dotenv.config();
 import api from '../../src/api/api';
 import toast from 'react-hot-toast';
 import SEO from "../../components/SEO";

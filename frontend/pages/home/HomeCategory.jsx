@@ -2,11 +2,34 @@ import Link from 'next/link';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import { ensureHttps } from '../../src/utils/imageUtils';
+import { useState, useEffect } from 'react';
+import api from '../../src/api/api.js'
 
 const subTitle = "Celebrate Your Fandom";
 const title = "Find the Perfect Figure for Every Collection";
 
-const HomeCategory = ({ categories = [] }) => {
+const HomeCategory = () => {
+    const [categories, setCategories] = useState([])
+
+    useEffect(() => {
+        let mounted = true;
+        const loadCategories = async () => {
+            try {
+                const response = await api.get('/customers-featured-categories', {
+                    params: { limit: 6 },
+                    withCredentials: true
+                });
+                if (mounted) {
+                    setCategories(response?.data?.categories || []);
+                }
+            } catch (err) {
+                console.log(err)
+            }
+        };
+
+        loadCategories();
+        return () => { mounted = false; }
+    }, [])
     return (
         <div className='category-section style-4 padding-tb'>
             <div className="container">

@@ -10,10 +10,12 @@ import { ensureHttps } from '../../src/utils/imageUtils';
 const title = "Our Products"
 const btnText = "Start Shopping Now";
 
-const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
-    const [items, setItems] = useState(initialProducts);
+const CategoryShowCase = () => {
+    const [productData, setProductData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [items, setItems] = useState([]);
 
-    const [loading, setLoading] = useState(false);
+    const [allCategories, setAllCategories] = useState([])
     const [activeCategory, setActiveCategory] = useState("All Categories");
 
     const fetchProducts = useCallback(async (categoryName = 'All Categories') => {
@@ -28,6 +30,8 @@ const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
                 withCredentials: true
             });
             const products = response?.data?.products || [];
+
+            setProductData(products);
             setItems(products);
             setActiveCategory(categoryName || 'All Categories');
         } catch (err) {
@@ -38,10 +42,18 @@ const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
     }, []);
 
     useEffect(() => {
-        if (activeCategory === "All Categories" && initialProducts.length > 0) {
-            setItems(initialProducts);
-        }
-    }, [initialProducts, activeCategory]);
+        const fetchCategories = async () => {
+            try {
+                const allCategories = await api.get('/customers-category-get', { withCredentials: true })
+                setAllCategories(allCategories.data.categorys || []);
+            } catch (err) {
+                console.log(err)
+            }
+        };
+
+        fetchCategories();
+        fetchProducts('All Categories');
+    }, [fetchProducts])
 
     const formatCurrency = (value) => {
         const numericValue = typeof value === 'number' ? value : parseFloat(value);
@@ -111,6 +123,7 @@ const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
         await fetchProducts(categItem);
     }
 
+    if (loading) return <p>Loading product details...</p>
     return (
         <div className='course-section style-3 padding-tb'>
             <div>
