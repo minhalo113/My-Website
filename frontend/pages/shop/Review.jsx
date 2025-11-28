@@ -1,5 +1,6 @@
-import React,{useState, useEffect, useCallback, useRef} from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import Rating from '../../components/Rating'
+import Image from 'next/image';
 import PropTypes from 'prop-types'
 import api from '../../src/api/api';
 import toast from 'react-hot-toast';
@@ -104,8 +105,8 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
       setTemporaryRating(normalizedRating);
       const entries = Array.isArray(review.images)
         ? review.images
-            .map((image, index) => buildExistingEntry(image, index))
-            .filter(Boolean)
+          .map((image, index) => buildExistingEntry(image, index))
+          .filter(Boolean)
         : [];
       replaceImageEntries(entries);
     } catch (error) {
@@ -129,7 +130,7 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
     setRating(rating);
   };
 
-  const submitRating = async(e, productIdentifier) => {
+  const submitRating = async (e, productIdentifier) => {
     e.preventDefault()
 
     if (!rating) {
@@ -161,7 +162,7 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
       .forEach((entry) => {
         formData.append('images', entry.file)
       })
-    try{
+    try {
       const res = await api.post(`/rate-product/${productId}`, formData, {
         withCredentials: true,
       });
@@ -173,7 +174,7 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
         fileInputRef.current.value = ''
       }
       await fetchMyReview()
-    }catch(err){
+    } catch (err) {
       console.log(err)
       toast.error(
         err?.response?.data?.message || err.message || "Something went wrong"
@@ -227,7 +228,7 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
   }
 
   return (
-    <>  
+    <>
       <div className="review-content description-show description-section">
         <h3 style={titleStyle} className="section-title">Description</h3>
         <div className="description">
@@ -248,16 +249,16 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
 
               return (
                 <li key={i} className="review-item">
-                <div className="post-thumb">
-                  <img src={review?.userImage?.url || '/images/profile-default-image.png'} />
-                </div>
-                <div className="post-content">
-                  <div className="entry-meta">
-                    <div className="posted-on flex items-start gap-2">
-                      <a href="#" className="pointer-events-none text-gray-500">{displayName}</a>
-                      <p>{reviewDate}</p>
-                    </div>
-                    <div className="flex items-center gap-1 h-full">
+                  <div className="post-thumb">
+                    <Image src={review?.userImage?.url || '/images/profile-default-image.png'} alt="user" width={70} height={70} />
+                  </div>
+                  <div className="post-content">
+                    <div className="entry-meta">
+                      <div className="posted-on flex items-start gap-2">
+                        <a href="#" className="pointer-events-none text-gray-500">{displayName}</a>
+                        <p>{reviewDate}</p>
+                      </div>
+                      <div className="flex items-center gap-1 h-full">
                         {stars.map((item, index) => {
                           const isActiveColor = review.rating;
 
@@ -279,18 +280,18 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
                           );
                         })}
                       </div>
+                    </div>
+                    <div className="entry-content">
+                      <p>{review.comment}</p>
+                      {review.images && review.images.length > 0 && (
+                        <div className="flex gap-2 flex-wrap mt-2">
+                          {review.images.map((img, idx) => (
+                            <Image key={idx} src={img} alt="review" width={80} height={80} className="w-20 h-20 object-cover rounded" />
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="entry-content">
-                    <p>{review.comment}</p>
-                    {review.images && review.images.length > 0 && (
-                      <div className="flex gap-2 flex-wrap mt-2">
-                        {review.images.map((img, idx) => (
-                          <img key={idx} src={img} alt="review" className="w-20 h-20 object-cover rounded" />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
                 </li>
               );
             })}
@@ -333,37 +334,37 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
                   <input type="email" name="email" placeholder="Your Email *" />
                 </div> */}
                 <div className="flex items-center gap-2 rounded-md p-3" style={{ height: "60px" }}>
-                <p className="text-sm font-semibold text-slate-700 m-0 flex items-center h-full leading-none mr-3">
-                  Your Rating:     
-                </p>
-                <div className="flex items-center gap-1 h-full">
-                  {stars.map((item, index) => {
-                    const isActiveColor =
-                      (rating || temporaryRating) &&
-                      (index < rating || index < temporaryRating);
+                  <p className="text-sm font-semibold text-slate-700 m-0 flex items-center h-full leading-none mr-3">
+                    Your Rating:
+                  </p>
+                  <div className="flex items-center gap-1 h-full">
+                    {stars.map((item, index) => {
+                      const isActiveColor =
+                        (rating || temporaryRating) &&
+                        (index < rating || index < temporaryRating);
 
-                    const elementColor = isActiveColor ? DEFAULT_COLOR : DEFAULT_UNSELECTED_COLOR;
+                      const elementColor = isActiveColor ? DEFAULT_COLOR : DEFAULT_UNSELECTED_COLOR;
 
-                    return (
-                      <div
-                        key={index}
-                        className="transition-transform duration-150 hover:scale-110 cursor-pointer"
-                        style={{
-                          fontSize: "24px",
-                          color: elementColor,
-                          filter: isActiveColor ? "grayscale(0%)" : "grayscale(100%)",
-                          lineHeight: 1
-                        }}
-                        onMouseEnter={() => setTemporaryRating(index + 1)}
-                        onMouseLeave={() => setTemporaryRating(0)}
-                        onClick={() => handleClick(index + 1)}
-                      >
-                        {DEFAULT_ICON}
-                      </div>
-                    );
-                  })}
+                      return (
+                        <div
+                          key={index}
+                          className="transition-transform duration-150 hover:scale-110 cursor-pointer"
+                          style={{
+                            fontSize: "24px",
+                            color: elementColor,
+                            filter: isActiveColor ? "grayscale(0%)" : "grayscale(100%)",
+                            lineHeight: 1
+                          }}
+                          onMouseEnter={() => setTemporaryRating(index + 1)}
+                          onMouseLeave={() => setTemporaryRating(0)}
+                          onClick={() => handleClick(index + 1)}
+                        >
+                          {DEFAULT_ICON}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
 
                 <div className="col-md-12 col-12">
@@ -384,7 +385,14 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
                     <div className="flex flex-wrap gap-3">
                       {imageEntries.map((entry) => (
                         <div key={entry.id} className="relative w-20 h-20 rounded overflow-hidden shadow-sm">
-                          <img src={entry.url} alt="Selected review" className="w-20 h-20 object-cover" />
+                          <Image
+                            src={entry.url}
+                            alt="Selected review"
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover"
+                            unoptimized={entry.type === 'new'}
+                          />
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(entry.id)}
@@ -434,7 +442,7 @@ Review.defaultProps = {
   page: 1,
   totalPages: 1,
   totalReviews: 0,
-  onPageChange: () => {},
+  onPageChange: () => { },
 }
 
 export default Review;

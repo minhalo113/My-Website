@@ -114,10 +114,8 @@ const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
         <div className='course-section style-3 padding-tb'>
             <div>
                 {/*shape*/}
-                <img className='course-shape one combined-effect' src="/images/shape-img/icon/circle-background.png" style={{ width: '100px', height: 'auto' }}>
-                </img>
-                <img className='course-shape two drip-glow-effect' src="/images/shape-img/icon/circle-background-2.png" style={{ width: '100px', height: 'auto' }}>
-                </img>
+                <Image className='course-shape one combined-effect' src="/images/shape-img/icon/circle-background.png" width={100} height={100} alt="" style={{ width: '100px', height: 'auto' }} />
+                <Image className='course-shape two drip-glow-effect' src="/images/shape-img/icon/circle-background-2.png" width={100} height={100} alt="" style={{ width: '100px', height: 'auto' }} />
             </div>
 
             {/*main section*/}

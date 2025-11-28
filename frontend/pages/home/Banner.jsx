@@ -98,6 +98,8 @@ const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
                                                         src={product.images[0]}
                                                         alt={product.name}
                                                         fill
+                                                        priority={true}
+                                                        fetchPriority="high"
                                                         sizes="100px"
                                                         style={{ objectFit: "contain" }}
                                                     />

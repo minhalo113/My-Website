@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from 'next/image';
 import PropTypes from "prop-types";
 import PageHeader from "../../components/PageHeader";
 import SEO from "../../components/SEO";
@@ -15,37 +16,37 @@ export default function AboutUsPage() {
       />
       {PageHeader ? <PageHeader title="About Us" curPage="About Us" /> : null}
 
-        <div className="bg-white p-8 shadow-sm ring-1 ring-slate-200 lg:p-12 p-4">
-          <div className="flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                About <span style={{ color: BRAND }}>A Figure A Day</span>
-              </h1>
-              <p className="mt-4 text-slate-600">
-                Welcome to <strong>A Figure A Day</strong> — a place made by collectors, for collectors.
-                Our mission is simple: make it easier to discover beautiful, high-quality anime statues and
-                collectibles from trusted global suppliers — all in one place.
-              </p>
-            </div>
+      <div className="bg-white p-8 shadow-sm ring-1 ring-slate-200 lg:p-12 p-4">
+        <div className="flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+              About <span style={{ color: BRAND }}>A Figure A Day</span>
+            </h1>
+            <p className="mt-4 text-slate-600">
+              Welcome to <strong>A Figure A Day</strong> — a place made by collectors, for collectors.
+              Our mission is simple: make it easier to discover beautiful, high-quality anime statues and
+              collectibles from trusted global suppliers — all in one place.
+            </p>
           </div>
+        </div>
 
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Highlight
-              title="Curated Selection"
-              text="We handpick figures for design, detail and build quality — from premium resin to budget-friendly collectibles."
-              icon="🎯"
-            />
-            <Highlight
-              title="Trusted Sourcing"
-              text="We partner with verified suppliers and distributors. Every item is reviewed before it goes live."
-              icon="🔎"
-            />
-            <Highlight
-              title="Collector Care"
-              text="Secure packaging, clear tracking, and responsive support so your figure arrives display-ready."
-              icon="📦"
-            />
-          </div>
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <Highlight
+            title="Curated Selection"
+            text="We handpick figures for design, detail and build quality — from premium resin to budget-friendly collectibles."
+            icon="🎯"
+          />
+          <Highlight
+            title="Trusted Sourcing"
+            text="We partner with verified suppliers and distributors. Every item is reviewed before it goes live."
+            icon="🔎"
+          />
+          <Highlight
+            title="Collector Care"
+            text="Secure packaging, clear tracking, and responsive support so your figure arrives display-ready."
+            icon="📦"
+          />
+        </div>
 
         <div className="items-center gap-8 lg:grid-cols-2">
           <div className="bg-white p-8">
@@ -63,56 +64,58 @@ export default function AboutUsPage() {
             </ul>
           </div>
 
-            <div className="p-20 bg-white rounded-3xl flex items-center justify-center">
-            <img
-                src="/images/about-figures.jpg"
-                alt="Display shelves of anime figures"
-                className="max-h-72 w-auto object-contain"
+          <div className="p-20 bg-white rounded-3xl flex items-center justify-center">
+            <Image
+              src="/images/about-figures.jpg"
+              alt="Display shelves of anime figures"
+              width={840}
+              height={353}
+              className="max-h-72 w-auto object-contain"
             />
-            </div>
+          </div>
 
         </div>
 
-          <h2 className="text-2xl font-semibold">Why choose us</h2>
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{/* ↑ slightly tighter gap */}
-            <MiniCard title="Quality First" text="Only figures we’d proudly display ourselves." />
-            <MiniCard title="Global Shipping" text="Reliable carriers and careful packing." />
-            <MiniCard title="Secure Checkout" text="Safe payments and order tracking." />
-            <MiniCard title="Real Support" text="We actually read and reply to messages." />
-          </div>
+        <h2 className="text-2xl font-semibold">Why choose us</h2>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{/* ↑ slightly tighter gap */}
+          <MiniCard title="Quality First" text="Only figures we’d proudly display ourselves." />
+          <MiniCard title="Global Shipping" text="Reliable carriers and careful packing." />
+          <MiniCard title="Secure Checkout" text="Safe payments and order tracking." />
+          <MiniCard title="Real Support" text="We actually read and reply to messages." />
+        </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-5 p-4">
-                <Link
-                    href="/shop"
-                    className="inline-flex items-center justify-center rounded-xl px-2 py-3 font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.03] hover:opacity-90"
-                    style={{ backgroundColor: "#DCA54A" }}
-                >
-                    Browse the collection
-                </Link>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-5 p-4">
+          <Link
+            href="/shop"
+            className="inline-flex items-center justify-center rounded-xl px-2 py-3 font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.03] hover:opacity-90"
+            style={{ backgroundColor: "#DCA54A" }}
+          >
+            Browse the collection
+          </Link>
 
-                <Link
-                    href="/contact"
-                    className="inline-flex items-center justify-center rounded-xl px-4 py-3 font-semibold ring-2 ring-[#DCA54A] text-[#8f6a23] bg-[#fffaf0] hover:bg-[#fff0d9] transition-transform duration-200 hover:scale-[1.03] shadow-sm"
-                >
-                    Contact support
-                </Link>
-                </div>
-          {/* <h2 className="text-2xl font-semibold">Connect with us</h2>
+          <Link
+            href="/contact"
+            className="inline-flex items-center justify-center rounded-xl px-4 py-3 font-semibold ring-2 ring-[#DCA54A] text-[#8f6a23] bg-[#fffaf0] hover:bg-[#fff0d9] transition-transform duration-200 hover:scale-[1.03] shadow-sm"
+          >
+            Contact support
+          </Link>
+        </div>
+        {/* <h2 className="text-2xl font-semibold">Connect with us</h2>
           <p className="mt-3 text-slate-600">Follow our journey for restocks, highlights and behind-the-scenes:</p> */}
-{/* 
+        {/* 
           <div className="mt-6 grid gap-4 text-center sm:grid-cols-2 lg:grid-cols-3">
             <Social href="https://www.instagram.com/afigureaday" label="Instagram" />
             <Social href="https://www.tiktok.com/@afigureaday" label="Facebook" />
           </div> */}
-        </div>
+      </div>
 
 
 
 
-        </div>
+    </div>
 
 
-     
+
   );
 }
 

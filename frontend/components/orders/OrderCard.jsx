@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { ChevronDown, Clock, Package, Truck, CheckCircle2, XCircle } from "lucide-react";
+import Image from 'next/image';
 
 const BRAND = "#DCA54A";
 
@@ -7,7 +8,7 @@ const OrderCard = ({ order, expanded, onToggle }) => {
   const isExpanded = expanded === order._id;
   const shippingInfo = order.shippingInfo || {};
 
-  const currentStep = getCurrentStep(order); 
+  const currentStep = getCurrentStep(order);
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:shadow-md">
       {/* Header */}
@@ -68,9 +69,11 @@ const OrderCard = ({ order, expanded, onToggle }) => {
           {order.products.map((item) => (
             <li key={item.id || item._id} className="m-1 flex items-center gap-4 py-3">
               {item.img?.[0] && (
-                <img
+                <Image
                   src={item.img[0]}
                   alt={item.name}
+                  width={48}
+                  height={48}
                   className="h-12 w-12 rounded border border-slate-200 bg-slate-100 object-cover"
                 />
               )}
@@ -144,7 +147,7 @@ const ProgressSteps = ({ current, terminalLabel }) => {
 
   const trackExpr = `calc(100% - ${(PAD + GUTTER) * 2}px)`;
   const ratio = step / total;
-  const fillExpr  = `calc(${trackExpr} * ${ratio})`;
+  const fillExpr = `calc(${trackExpr} * ${ratio})`;
 
   return (
     <div className="w-full p-2 overflow-hidden">
@@ -186,9 +189,8 @@ const ProgressSteps = ({ current, terminalLabel }) => {
                 <Icon size={16} />
               </div>
               <div
-                className={`mt-2 text-xs font-medium ${
-                  active ? "text-slate-900" : "text-slate-600"
-                }`}
+                className={`mt-2 text-xs font-medium ${active ? "text-slate-900" : "text-slate-600"
+                  }`}
                 style={{ minWidth: 64, textAlign: "center" }}
               >
                 {label}
@@ -216,7 +218,7 @@ function getCurrentStep(order) {
 
   if (ds === "pending") {
     if (["accepted"].includes(os) || ["captured"].includes(ps)) return 1;
-    return 0; 
+    return 0;
   }
 
   if (["accepted"].includes(os)) return 1;
@@ -301,8 +303,8 @@ OrderCard.propTypes = {
     date: PropTypes.string,
     price: PropTypes.number,
     payment_status: PropTypes.string,
-    order_status: PropTypes.string,  
-    delivery_status: PropTypes.string, 
+    order_status: PropTypes.string,
+    delivery_status: PropTypes.string,
     shippingInfo: PropTypes.shape({
       address: PropTypes.string,
       phoneNumber: PropTypes.string,

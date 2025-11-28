@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import PageHeader from '../../components/PageHeader';
 import PopularPost from '../shop/PopularPost';
 import api from '../../src/api/api';
@@ -89,7 +90,7 @@ const SingleBlog = () => {
             toast.error(message);
         }
     }, []);
-    
+
     const fetchAdjacent = useCallback(async (blogId) => {
         try {
             const { data } = await api.get(`/blog/adjacent/${blogId}`, { withCredentials: true });
@@ -115,7 +116,7 @@ const SingleBlog = () => {
     }, []);
 
     useEffect(() => {
-        if(!id) return;
+        if (!id) return;
         fetchData(id);
         fetchAdjacent(id);
         fetchComments(id);
@@ -254,7 +255,14 @@ const SingleBlog = () => {
                                                     <div className="post-inner">
                                                         <div className='post-thumb'>
                                                             {blog.image?.url && (
-                                                                <img src={blog.image.url} alt={blog.title} className='w-100' />
+                                                                <Image
+                                                                    src={blog.image.url}
+                                                                    alt={blog.title}
+                                                                    width={800}
+                                                                    height={400}
+                                                                    className='w-100'
+                                                                    style={{ width: '100%', height: 'auto' }}
+                                                                />
                                                             )}
                                                         </div>
 

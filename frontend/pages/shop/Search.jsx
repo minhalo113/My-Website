@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import PropTypes from 'prop-types';
 import api from '../../src/api/api';
 
@@ -59,22 +60,22 @@ const Search = ({
     const categoryOptions = useMemo(() => {
         const facetOptions = Array.isArray(categoryFacets)
             ? categoryFacets
-                  .filter((facet) => facet && typeof facet.value === 'string' && facet.value.trim())
-                  .map((facet) => ({
-                      value: facet.value.trim(),
-                      label: facet.value.trim(),
-                      count: Number.isFinite(Number(facet.count)) ? Number(facet.count) : null,
-                  }))
+                .filter((facet) => facet && typeof facet.value === 'string' && facet.value.trim())
+                .map((facet) => ({
+                    value: facet.value.trim(),
+                    label: facet.value.trim(),
+                    count: Number.isFinite(Number(facet.count)) ? Number(facet.count) : null,
+                }))
             : [];
 
         const fallbackOptions = Array.isArray(availableCategories)
             ? availableCategories
-                  .filter((name) => typeof name === 'string' && name.trim())
-                  .map((name) => ({
-                      value: name.trim(),
-                      label: name.trim(),
-                      count: null,
-                  }))
+                .filter((name) => typeof name === 'string' && name.trim())
+                .map((name) => ({
+                    value: name.trim(),
+                    label: name.trim(),
+                    count: null,
+                }))
             : [];
 
         const merged = new Map();
@@ -419,7 +420,7 @@ const Search = ({
 
     const showTextResults = Boolean(localSearchTerm.trim() && showDropdown);
     const showImageResults = Boolean(!localSearchTerm && showDropdown && (imageMatches.length > 0 || imageSearchError || isImageSearching || queryPreview));
-    
+
     const getMatchPreview = (match) => {
         if (!match || typeof match !== 'object') {
             return { previewUrl: null, previewAlt: 'Matched product', bestMatch: null };
@@ -443,19 +444,19 @@ const Search = ({
         return { previewUrl, previewAlt, bestMatch };
     };
 
-      const renderTextResultPrice = useCallback((product) => {
+    const renderTextResultPrice = useCallback((product) => {
         const hasVariant = product.colors && product.colors.length > 0 && Array.isArray(product.colorPrices) && product.colorPrices.length > 0;
         let variantRange = null;
-        if(hasVariant){
-            const prices = product.colors.map((c, idx) => product.colorPrices[idx]).filter(v=>v!==undefined);
+        if (hasVariant) {
+            const prices = product.colors.map((c, idx) => product.colorPrices[idx]).filter(v => v !== undefined);
             if (prices.length) {
                 const min = Math.min(...prices);
                 const max = Math.max(...prices);
                 variantRange = {
                     minBase: min.toFixed(2),
                     maxBase: max.toFixed(2),
-                    minDiscount: (min - (min * product.discount)/100).toFixed(2),
-                    maxDiscount: (max - (max * product.discount)/100).toFixed(2)
+                    minDiscount: (min - (min * product.discount) / 100).toFixed(2),
+                    maxDiscount: (max - (max * product.discount) / 100).toFixed(2)
                 };
             }
         }
@@ -466,12 +467,12 @@ const Search = ({
             if (hasVariant && variantRange) {
                 if (product.discount > 0) {
                     return (
-                    <>
-                        ${variantRange.minDiscount}
-                        <del className="text-sm text-gray-500 ml-1">${variantRange.minBase}</del>
-                        - ${variantRange.maxDiscount}
-                        <del className="text-sm text-gray-500 ml-1">${variantRange.maxBase}</del>
-                    </>
+                        <>
+                            ${variantRange.minDiscount}
+                            <del className="text-sm text-gray-500 ml-1">${variantRange.minBase}</del>
+                            - ${variantRange.maxDiscount}
+                            <del className="text-sm text-gray-500 ml-1">${variantRange.maxBase}</del>
+                        </>
                     );
                 }
                 return variantRange.minBase === variantRange.maxBase
@@ -481,8 +482,8 @@ const Search = ({
             if (!hasVariant) {
                 return product.discount > 0 ? (
                     <>
-                    ${discountedPrice}{' '}
-                    <del className="text-sm text-gray-500 ml-1">${product.price}</del>
+                        ${discountedPrice}{' '}
+                        <del className="text-sm text-gray-500 ml-1">${product.price}</del>
                     </>
                 ) : (
                     `$${product.price}`
@@ -490,134 +491,137 @@ const Search = ({
             }
         } else if (variantRange) {
             return product.discount > 0
-            ?
+                ?
                 <>
                     ${variantRange.minDiscount}{' '}
                     <del className="text-sm text-gray-500 ml-1">${variantRange.minBase}</del>
                 </>
-            : `$${variantRange.minBase}`;
+                : `$${variantRange.minBase}`;
         }
 
         return formatPriceDisplay(product.price, product.discount);
     }, [formatPriceDisplay]);
-  
+
     return (
-    <div className='widget widget-search' ref={dropdownRef}>
-        <form className='search-wrapper mb-3' onSubmit={(e) => e.preventDefault()}>
-            <input type='text' name= "search" id = "search" placeholder='Search...'
-            value={localSearchTerm}
-            onChange={handleSearchChange}/>
+        <div className='widget widget-search' ref={dropdownRef}>
+            <form className='search-wrapper mb-3' onSubmit={(e) => e.preventDefault()}>
+                <input type='text' name="search" id="search" placeholder='Search...'
+                    value={localSearchTerm}
+                    onChange={handleSearchChange} />
 
-            <button type='submit'>
-                <i className='icofont-search-2'></i>
-            </button>
-        </form>
-
-        <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
-            <h6 className='fw-semibold mb-2'>Filter by category</h6>
-            <select
-                className='form-select form-select-sm'
-                value={normalizedSelectedCategory}
-                onChange={handleCategoryChange}
-            >
-                <option value='all'>
-                    {`All categories${formattedTotalProducts ? ` (${formattedTotalProducts})` : ''}`}
-                </option>
-                {categoryOptions.map((option) => {
-                    const displayCount = Number.isFinite(option.count) ? option.count.toLocaleString() : null;
-                    return (
-                        <option key={option.value} value={option.value}>
-                            {`${option.label}${displayCount ? ` (${displayCount})` : ''}`}
-                        </option>
-                    );
-                })}
-            </select>
-            <div className='d-flex justify-content-between align-items-center mt-2'>
-                <small className='text-muted'>Narrow your results by selecting a category.</small>
-                <button
-                    type='button'
-                    className='btn btn-link btn-sm p-0'
-                    onClick={handleClearCategory}
-                    disabled={normalizedSelectedCategory === 'all'}
-                >
-                    Reset
+                <button type='submit'>
+                    <i className='icofont-search-2'></i>
                 </button>
-            </div>
-        </div>
+            </form>
 
-        <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
-            <h6 className='fw-semibold mb-2'>Filter by price</h6>
-            <div className='row g-2 align-items-end'>
-                <div className='col'>
-                    <label className='form-label small text-muted mb-1' htmlFor='min-price-input'>Min price</label>
-                    <input
-                        id='min-price-input'
-                        type='text'
-                        inputMode='decimal'
-                        className='form-control form-control-sm'
-                        value={localMinPrice}
-                        onChange={handleMinPriceInputChange}
-                        placeholder='0.00'
-                        aria-describedby='price-filter-help'
-                    />
-                </div>
-                <div className='col'>
-                    <label className='form-label small text-muted mb-1' htmlFor='max-price-input'>Max price</label>
-                    <input
-                        id='max-price-input'
-                        type='text'
-                        inputMode='decimal'
-                        className='form-control form-control-sm'
-                        value={localMaxPrice}
-                        onChange={handleMaxPriceInputChange}
-                        placeholder='0.00'
-                        aria-describedby='price-filter-help'
-                    />
+            <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
+                <h6 className='fw-semibold mb-2'>Filter by category</h6>
+                <select
+                    className='form-select form-select-sm'
+                    value={normalizedSelectedCategory}
+                    onChange={handleCategoryChange}
+                >
+                    <option value='all'>
+                        {`All categories${formattedTotalProducts ? ` (${formattedTotalProducts})` : ''}`}
+                    </option>
+                    {categoryOptions.map((option) => {
+                        const displayCount = Number.isFinite(option.count) ? option.count.toLocaleString() : null;
+                        return (
+                            <option key={option.value} value={option.value}>
+                                {`${option.label}${displayCount ? ` (${displayCount})` : ''}`}
+                            </option>
+                        );
+                    })}
+                </select>
+                <div className='d-flex justify-content-between align-items-center mt-2'>
+                    <small className='text-muted'>Narrow your results by selecting a category.</small>
+                    <button
+                        type='button'
+                        className='btn btn-link btn-sm p-0'
+                        onClick={handleClearCategory}
+                        disabled={normalizedSelectedCategory === 'all'}
+                    >
+                        Reset
+                    </button>
                 </div>
             </div>
-            <div className='d-flex justify-content-between align-items-center mt-2'>
-                <small id='price-filter-help' className='text-muted'>Enter prices in CAD.</small>
-                <button
-                    type='button'
-                    className='btn btn-link btn-sm p-0'
-                    onClick={handleClearPriceFilters}
-                    disabled={!localMinPrice && !localMaxPrice}
-                >
-                    Clear
-                </button>
-            </div>
-            {showPriceRangeNotice && (
-                <p className='small text-warning mb-0 mt-2'>
-                    Max price is lower than min price. Results will swap the values automatically.
-                </p>
-            )}
-        </div>
 
-
-        <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
-            <label htmlFor='image-search-input' className='d-block fw-semibold mb-2'>Search with an image</label>
-            <input
-                id='image-search-input'
-                type='file'
-                accept='image/*'
-                className='form-control form-control-sm'
-                onChange={handleImageChange}
-            />
-            <p className='small text-muted mt-2 mb-0'>Upload a product photo to discover similar items.</p>
-
-            {queryPreview && (
-                <div className='d-flex align-items-center gap-3 mt-3'>
-                    <img
-                        src={queryPreview}
-                        alt='Selected reference'
-                        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #dee2e6' }}
-                    />
-                    <button type='button' className='btn btn-outline-secondary btn-sm' onClick={clearImageSearch}>
+            <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
+                <h6 className='fw-semibold mb-2'>Filter by price</h6>
+                <div className='row g-2 align-items-end'>
+                    <div className='col'>
+                        <label className='form-label small text-muted mb-1' htmlFor='min-price-input'>Min price</label>
+                        <input
+                            id='min-price-input'
+                            type='text'
+                            inputMode='decimal'
+                            className='form-control form-control-sm'
+                            value={localMinPrice}
+                            onChange={handleMinPriceInputChange}
+                            placeholder='0.00'
+                            aria-describedby='price-filter-help'
+                        />
+                    </div>
+                    <div className='col'>
+                        <label className='form-label small text-muted mb-1' htmlFor='max-price-input'>Max price</label>
+                        <input
+                            id='max-price-input'
+                            type='text'
+                            inputMode='decimal'
+                            className='form-control form-control-sm'
+                            value={localMaxPrice}
+                            onChange={handleMaxPriceInputChange}
+                            placeholder='0.00'
+                            aria-describedby='price-filter-help'
+                        />
+                    </div>
+                </div>
+                <div className='d-flex justify-content-between align-items-center mt-2'>
+                    <small id='price-filter-help' className='text-muted'>Enter prices in CAD.</small>
+                    <button
+                        type='button'
+                        className='btn btn-link btn-sm p-0'
+                        onClick={handleClearPriceFilters}
+                        disabled={!localMinPrice && !localMaxPrice}
+                    >
                         Clear
                     </button>
                 </div>
-            )}
-{/* 
+                {showPriceRangeNotice && (
+                    <p className='small text-warning mb-0 mt-2'>
+                        Max price is lower than min price. Results will swap the values automatically.
+                    </p>
+                )}
+            </div>
+
+
+            <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
+                <label htmlFor='image-search-input' className='d-block fw-semibold mb-2'>Search with an image</label>
+                <input
+                    id='image-search-input'
+                    type='file'
+                    accept='image/*'
+                    className='form-control form-control-sm'
+                    onChange={handleImageChange}
+                />
+                <p className='small text-muted mt-2 mb-0'>Upload a product photo to discover similar items.</p>
+
+                {queryPreview && (
+                    <div className='d-flex align-items-center gap-3 mt-3'>
+                        <Image
+                            src={queryPreview}
+                            alt='Selected reference'
+                            width={80}
+                            height={80}
+                            unoptimized
+                            style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #dee2e6' }}
+                        />
+                        <button type='button' className='btn btn-outline-secondary btn-sm' onClick={clearImageSearch}>
+                            Clear
+                        </button>
+                    </div>
+                )}
+                {/* 
             <div className='mt-3'>
                 <label htmlFor='image-threshold-input' className='form-label small text-muted mb-1'>Match strictness</label>
                 <input
@@ -633,22 +637,22 @@ const Search = ({
                 />
                 <p className='small text-muted mb-0'>Maximum Hamming distance: {imageThreshold}. Lower values return only near-identical matches.</p>
             </div> */}
-        </div>
+            </div>
 
-        <div  style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY :"auto"}}>
-            {
-                showTextResults && (
-                    <>
-                        {isTextSearching && (
-                            <div className='p-2 text-center text-muted small'>Searching...</div>
-                        )}
-                        {!isTextSearching && textSearchError && (
-                            <div className='p-2 text-center text-danger small'>{textSearchError}</div>
-                        )}
-                        {!isTextSearching && !textSearchError && textResults.length === 0 && textSuggestions.length === 0 && (
-                            <div className='p-2 text-center text-muted small'>No products found.</div>
-                        )}
-                        {/* {!isTextSearching && textSuggestions.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY: "auto" }}>
+                {
+                    showTextResults && (
+                        <>
+                            {isTextSearching && (
+                                <div className='p-2 text-center text-muted small'>Searching...</div>
+                            )}
+                            {!isTextSearching && textSearchError && (
+                                <div className='p-2 text-center text-danger small'>{textSearchError}</div>
+                            )}
+                            {!isTextSearching && !textSearchError && textResults.length === 0 && textSuggestions.length === 0 && (
+                                <div className='p-2 text-center text-muted small'>No products found.</div>
+                            )}
+                            {/* {!isTextSearching && textSuggestions.length > 0 && (
                             <div className='px-2'>
                                 <p className='small text-uppercase text-muted fw-semibold mb-2'>Top suggestions</p>
                                 {textSuggestions.map((suggestion) => {
@@ -679,88 +683,91 @@ const Search = ({
                                 <hr className='my-2' />
                             </div>
                         )} */}
-                        {textResults.slice(0, 20).map((product) => (
-                            <Link key={product._id?.toString() || product._id} href={`/shop/${product._id?.toString() || product._id}`}>
-                                <div className='d-flex gap-3 p-2'>
-                                    <div className="pro-thumb" style={{ flex: "0 0 64px", width: 64, height: 64 }}>
-                                        <img
-                                        src={product.coverImage || product.images?.[0] || "/placeholder.png"}
-                                        alt={product.name}
-                                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8, display: "block" }}
-                                        onError={(e) => (e.currentTarget.src = "/placeholder.png")}
-                                        />
-                                    </div>
-                                    <div className='product-content flex-grow-1'>
-                                        <p className='mb-1 fw-semibold text-truncate'>{product.name}</p>
-                                        {product.relevance?.label && (
-                                            <p className='small text-muted mb-1 text-capitalize'>
-                                                {product.relevance.label} relevance
-                                                {Number.isFinite(product.relevance?.score) ? ` • ${product.relevance.score}% match` : ''}
-                                            </p>
-                                        )}
-                                        <h6 className='mb-0'>
-                                            {renderTextResultPrice(product)}
-                                        </h6>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </>
-                )
-            }
-
-            {showImageResults && (
-                <>
-                    {isImageSearching && (
-                        <div className='p-2 text-center text-muted small'>Searching for similar items…</div>
-                    )}
-                    {!isImageSearching && imageMatches.length === 0 && !imageSearchError && imageFile && (
-                        <div className='p-2 text-center text-muted small'>No similar products found.</div>
-                    )}
-                    {imageMatches.slice(0, 10).map((match) => {
-                        const { previewUrl, previewAlt, bestMatch } = getMatchPreview(match);
-                        const matchSimilarity = Number(bestMatch?.similarity ?? match.similarity);
-                        const matchKey = match.productId || `${match.productName}-${match.slug || ''}`;
-                        return (
-                            <Link key={matchKey} href={`/shop/${match.productId}`}>
-                                <div className='d-flex flex-column gap-2 p-2'>
-                                    <div className='d-flex gap-3 align-items-center'>
-                                        <div className='pro-thumb h-25'>
-                                            {previewUrl ? (
-                                                <img
-                                                    src={previewUrl}
-                                                    alt={previewAlt}
-                                                    style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }}
-                                                />
-                                            ) : (
-                                                <div
-                                                    className='d-flex align-items-center justify-content-center bg-light border rounded'
-                                                    style={{ width: '80px', height: '80px' }}
-                                                >
-                                                    <span className='small text-muted'>No image</span>
-                                                </div>
-                                            )}
+                            {textResults.slice(0, 20).map((product) => (
+                                <Link key={product._id?.toString() || product._id} href={`/shop/${product._id?.toString() || product._id}`}>
+                                    <div className='d-flex gap-3 p-2'>
+                                        <div className="pro-thumb" style={{ flex: "0 0 64px", width: 64, height: 64 }}>
+                                            <Image
+                                                src={product.coverImage || product.images?.[0] || "/placeholder.png"}
+                                                alt={product.name}
+                                                width={64}
+                                                height={64}
+                                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8, display: "block" }}
+                                            />
                                         </div>
                                         <div className='product-content flex-grow-1'>
-                                            <p className='mb-1 fw-semibold'>{match.productName}</p>
-                                            {Number.isFinite(matchSimilarity) && (
-                                                <p className='small text-muted mb-0'>{Math.round(matchSimilarity)}% visual match</p>
+                                            <p className='mb-1 fw-semibold text-truncate'>{product.name}</p>
+                                            {product.relevance?.label && (
+                                                <p className='small text-muted mb-1 text-capitalize'>
+                                                    {product.relevance.label} relevance
+                                                    {Number.isFinite(product.relevance?.score) ? ` • ${product.relevance.score}% match` : ''}
+                                                </p>
                                             )}
+                                            <h6 className='mb-0'>
+                                                {renderTextResultPrice(product)}
+                                            </h6>
                                         </div>
                                     </div>
-  
-                                </div>
-                            </Link>
-                        );
-                    })}
-                    {imageSearchError && (
-                        <div className='p-2 text-center text-danger small'>{imageSearchError}</div>
-                    )}
-                </>
-            )}
+                                </Link>
+                            ))}
+                        </>
+                    )
+                }
+
+                {showImageResults && (
+                    <>
+                        {isImageSearching && (
+                            <div className='p-2 text-center text-muted small'>Searching for similar items…</div>
+                        )}
+                        {!isImageSearching && imageMatches.length === 0 && !imageSearchError && imageFile && (
+                            <div className='p-2 text-center text-muted small'>No similar products found.</div>
+                        )}
+                        {imageMatches.slice(0, 10).map((match) => {
+                            const { previewUrl, previewAlt, bestMatch } = getMatchPreview(match);
+                            const matchSimilarity = Number(bestMatch?.similarity ?? match.similarity);
+                            const matchKey = match.productId || `${match.productName}-${match.slug || ''}`;
+                            return (
+                                <Link key={matchKey} href={`/shop/${match.productId}`}>
+                                    <div className='d-flex flex-column gap-2 p-2'>
+                                        <div className='d-flex gap-3 align-items-center'>
+                                            <div className='pro-thumb h-25'>
+                                                {previewUrl ? (
+                                                    <Image
+                                                        src={previewUrl}
+                                                        alt={previewAlt}
+                                                        width={80}
+                                                        height={80}
+                                                        style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }}
+                                                    />
+                                                ) : (
+                                                    <div
+                                                        className='d-flex align-items-center justify-content-center bg-light border rounded'
+                                                        style={{ width: '80px', height: '80px' }}
+                                                    >
+                                                        <span className='small text-muted'>No image</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className='product-content flex-grow-1'>
+                                                <p className='mb-1 fw-semibold'>{match.productName}</p>
+                                                {Number.isFinite(matchSimilarity) && (
+                                                    <p className='small text-muted mb-0'>{Math.round(matchSimilarity)}% visual match</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </Link>
+                            );
+                        })}
+                        {imageSearchError && (
+                            <div className='p-2 text-center text-danger small'>{imageSearchError}</div>
+                        )}
+                    </>
+                )}
+            </div>
         </div>
-    </div>
-  )
+    )
 }
 
 Search.propTypes = {

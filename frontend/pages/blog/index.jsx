@@ -1,6 +1,7 @@
 import React from 'react'
 import PageHeader from "../../components/PageHeader"
 import Link from 'next/link'
+import Image from 'next/image';
 import { useState, useEffect } from 'react'
 import api from '../../src/api/api';
 import SEO from "../../components/SEO";
@@ -54,7 +55,7 @@ export const Blog = () => {
         canonical="https://www.afigureaday.com/blog"
         keywords="anime figure news, collectible tips, a figure a day blog"
       />
-      <PageHeader title = "Blog Page" curPage="Blogs"/>
+      <PageHeader title="Blog Page" curPage="Blogs" />
       <div className='blog-section padding-tb section-bg'>
         <div className='container'>
           <div className='section-wrapper'>
@@ -69,24 +70,24 @@ export const Blog = () => {
                   {
                     blogList.length > 0 ? (
                       blogList.map((blog, i) => (
-                        <div key = {i} className='col'>
+                        <div key={i} className='col'>
                           <div className='post-item'>
                             <div className='post-inner'>
 
-                              <div className='post-thumb'>
-                                <Link href = {`/blog/${blog._id}`}>
-                                  <img src = {blog.image?.url} alt = ""/>
+                              <div className='post-thumb' style={{ position: 'relative', width: '100%', height: '250px' }}>
+                                <Link href={`/blog/${blog._id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
+                                  <Image src={blog.image?.url} alt={blog.title || ""} fill style={{ objectFit: 'cover' }} />
                                 </Link>
                               </div>
 
                               <div className='post-content'>
-                                <Link href = {`/blog/${blog._id}`}><h4>{blog.title}</h4></Link>
+                                <Link href={`/blog/${blog._id}`}><h4>{blog.title}</h4></Link>
                                 <div className='meta-post'>
                                   <ul className='lab-ul'>
                                     {
                                       blog.metaList?.map((val, i) => (
-                                        <li key = {i}>
-                                          <i className= {val.iconName}></i> {val.text}
+                                        <li key={i}>
+                                          <i className={val.iconName}></i> {val.text}
                                         </li>
                                       ))
                                     }
@@ -99,7 +100,7 @@ export const Blog = () => {
 
                               <div className='post-footer'>
                                 <div className='pf-left'>
-                                  <Link href ={`/blog/${blog._id}`} className='lab-btn-text'>{blog.btnText}
+                                  <Link href={`/blog/${blog._id}`} className='lab-btn-text'>{blog.btnText}
                                     <i className='icofont-external-link'></i>
                                   </Link>
                                 </div>
