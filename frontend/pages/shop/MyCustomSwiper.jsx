@@ -63,7 +63,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
             >
                 {displayImages.map((image, index) => (
                     <SwiperSlide key={`img-${index}`}>
-                        <div className="single-thumb flex items-center justify-center h-[500px] w-full relative py-4">
+                        <div className="single-thumb flex items-center justify-center h-[500px] w-full relative py-4" style={{ height: '500px' }}>
                             <Image
                                 src={ensureHttps(image)}
                                 alt={`Product Image ${index + 1}`}
