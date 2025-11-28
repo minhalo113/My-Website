@@ -15,7 +15,7 @@ const HomeCategory = ({ categories = [] }) => {
                 </div>
                 {/* section card */}
                 <div className='section-wrapper' style={{ display: "flex", justifyContent: 'center' }}>
-                    <div className='row g-4 justify-content-center row-cols-md-3 row-cols-sm-2 row-cols-1'>
+                    <div className='row g-4 justify-content-center row-cols-md-3 row-cols-sm-2 row-cols-1' style={{ width: "100%" }}>
                         {
                             categories.slice(0, 6).map((val) => (
                                 <div key={val.productId || val.category} className='col' style={{ display: "flex", justifyContent: 'center' }}>
@@ -25,7 +25,7 @@ const HomeCategory = ({ categories = [] }) => {
                                             query: val?.category ? { category: val.category } : {},
                                         }}
                                         className='category-item'
-                                        style={{ width: '100%' }}
+                                        style={{ width: '100%', display: 'block' }}
                                     >
                                         <div className='category-inner'>
                                             <div className='category-thumb relative' style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
