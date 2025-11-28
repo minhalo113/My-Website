@@ -11,7 +11,7 @@ const ChatCustomer = () => {
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
   const [hasMounted, setHasMounted] = useState(false)
-  // Loading state
+
   const [isConnecting, setIsConnecting] = useState(false);
 
   const [unread, setUnread] = useState(false);
@@ -94,6 +94,9 @@ const ChatCustomer = () => {
                 </span>
               </div>
             ))}
+            <div className="text-xs text-gray-500 text-center mb-2 mt-1">
+              ⏳ Please note: Admin replies may take up to 24–48 hours.
+            </div>
           </div>
 
           <form onSubmit={send} className="p-2 flex gap-2 border-t border-gray-200">
