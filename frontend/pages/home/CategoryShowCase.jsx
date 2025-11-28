@@ -3,19 +3,21 @@ import api from '../../src/api/api.js'
 import Rating from '../../components/Rating'
 import Link from 'next/link'
 import DiscountBadge from '../../components/DiscountBadge'
-
+import Image from 'next/image';
+import PropTypes from 'prop-types';
 
 const title = "Our Products"
 const btnText = "Start Shopping Now";
 
-const CategoryShowCase = () => {
-    const [productData, setProductData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [items, setItems] = useState([]);
+const CategoryShowCase = ({ initialProducts = [], allCategories = [] }) => {
+    // Determine the initial items based on initialProducts
+    const [items, setItems] = useState(initialProducts);
 
-    const [allCategories, setAllCategories] = useState([])
+    // We can keep loading state for when user switches categories, but initially it's false
+    const [loading, setLoading] = useState(false);
     const [activeCategory, setActiveCategory] = useState("All Categories");
 
+    // Fetch products only when filtering
     const fetchProducts = useCallback(async (categoryName = 'All Categories') => {
         setLoading(true);
         try{
@@ -28,7 +30,6 @@ const CategoryShowCase = () => {
                 withCredentials: true
             });
             const products = response?.data?.products || [];
-            setProductData(products);
             setItems(products);
             setActiveCategory(categoryName || 'All Categories');
         }catch(err){
@@ -38,19 +39,16 @@ const CategoryShowCase = () => {
         }
     }, []);
 
-    useEffect(() =>{
-        const fetchCategories = async () => {
-            try{
-                const allCategories = await api.get('/customers-category-get', {withCredentials: true})
-                setAllCategories(allCategories.data.categorys || []);
-            }catch(err){
-                console.log(err)
-            }
-        };
+    // If initialProducts or allCategories change (e.g. from SSR), update state
+    // but only if we haven't interacted yet? Or just respect the prop update.
+    // For simplicity, we initialize state from props, and then manual interactions update state.
+    // To respect props update (re-hydration), we can use useEffect
+    useEffect(() => {
+        if (activeCategory === "All Categories" && initialProducts.length > 0) {
+           setItems(initialProducts);
+        }
+    }, [initialProducts, activeCategory]);
 
-        fetchCategories();
-        fetchProducts('All Categories');
-    }, [fetchProducts])
 
    const formatCurrency = (value) => {
         const numericValue = typeof value === 'number' ? value : parseFloat(value);
@@ -120,8 +118,6 @@ const CategoryShowCase = () => {
         await fetchProducts(categItem);
     }
 
-    if (loading) return <p>Loading product details...</p>
-
   return (
     <div className='course-section style-3 padding-tb'>
         <div>
@@ -153,14 +149,21 @@ const CategoryShowCase = () => {
 
             {/* section body */}
             <div className = "section-wrapper">
+                {loading ? <p>Loading product details...</p> : (
                 <div className='row g-4 justify-content-center row-cols-x1-4 row-cols-lg-3 row-cols-md-2 row-cols-1
                  course-filter' >
                     {items.slice(0, 12).map((product) => 
                         <div key={product._id.toString()} className='col'>
                             <div className='course-item style-4'>
                             <div className='course-inner'>
-                                <div className='course-thumb relative'>
-                                    <img src={Array.isArray(product.images) ? product.images[0] : product.images} alt='' />
+                                <div className='course-thumb relative' style={{position: 'relative', width: '100%', aspectRatio: '1/1'}}>
+                                    <Image
+                                        src={Array.isArray(product.images) ? product.images[0] : product.images}
+                                        alt={product.name}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        style={{objectFit: 'contain'}}
+                                    />
                                     <DiscountBadge discount={product.discount} />
                                     <div className='course-category'>
                                         <div className='course-cate'><a href={`/shop/${product._id.toString()}`}>{product.category}</a></div>
@@ -191,6 +194,7 @@ const CategoryShowCase = () => {
                         </div> )}
 
                 </div>
+                )}
                 <div className='text-center mt-5'>
                     <Link href = "/shop" className='lab-btn' style={{background:"#DCA54A"}}><span style={{color: '#101115'}}>{btnText}</span></Link>
                 </div>
@@ -199,5 +203,10 @@ const CategoryShowCase = () => {
     </div>
   )
 }
+
+CategoryShowCase.propTypes = {
+    initialProducts: PropTypes.array,
+    allCategories: PropTypes.array,
+};
 
 export default CategoryShowCase

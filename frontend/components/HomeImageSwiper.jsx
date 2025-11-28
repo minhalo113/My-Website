@@ -1,24 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
-import api from '../src/api/api';
+import Image from 'next/image';
+import PropTypes from 'prop-types';
 import 'swiper/css';
 
-const HomeImageSwiper = () => {
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const { data } = await api.get('/home-swiper-get');
-        setItems(data.items);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetch();
-  }, []);
-
+const HomeImageSwiper = ({ items = [] }) => {
   return (
     <div className="w-full">
       <Swiper
@@ -29,13 +16,16 @@ const HomeImageSwiper = () => {
         modules={[Autoplay]}
         className="w-full max-h-[500px]" 
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <SwiperSlide key={item._id} className="flex justify-center items-center">
-            <a href={item.link} className="block w-full h-full">
-              <img
+            <a href={item.link} className="block w-full h-full relative" style={{ height: '500px' }}>
+              <Image
                 src={item.image.url}
-                className="mx-auto w-full max-h-[500px] object-contain"
                 alt="Banner"
+                fill
+                sizes="100vw"
+                style={{ objectFit: 'contain' }}
+                priority={index === 0}
               />
             </a>
           </SwiperSlide>
@@ -43,6 +33,10 @@ const HomeImageSwiper = () => {
       </Swiper>
     </div>
   );
+};
+
+HomeImageSwiper.propTypes = {
+  items: PropTypes.array,
 };
 
 export default HomeImageSwiper;

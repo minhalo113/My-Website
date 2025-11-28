@@ -1,8 +1,9 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import Link from 'next/link';
 import SelectedCategory from '../../components/SelectedCategory';
-import api from '../../src/api/api';
 import HomeImageSwiper from '../../components/HomeImageSwiper';
+import Image from 'next/image';
+import PropTypes from 'prop-types';
 
 const title = (
     <>
@@ -13,39 +14,25 @@ const title = (
 
 const desc = "✨ Fresh collectible highlights, carefully packed for your shelf."
 
-const Banner = () => {
-    const [productData, setProductData] = useState([])
-    const [categorys, setCategorys] = useState([])
+const Banner = ({ products = [], categorys = [], swiperItems = [] }) => {
     const [selectedCategory, setSelectedCategory] = useState('all')
-
-    useEffect(() =>{
-        const fetchData = async() => {
-            try{
-                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
-                const allCategorys = await api.get('/customers-category-get', {withCredentials: true})
-    
-                setProductData(allProducts.data.products);
-                setCategorys(allCategorys.data.categorys);
-            }catch(err){
-                console.log(err)
-            }finally{
-                // setLoading(false);
-            }
-    }
-    fetchData();}
-    , [])
-
     const [searchInput, setSearchInput] = useState("");
-    const [filteredProducts, setfilteredProducts] = useState(productData);
+    const [filteredProducts, setfilteredProducts] = useState(products);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null)
+
+    // Update filteredProducts if products prop changes (though for SSR it shouldn't change much on client, but good practice)
+    useEffect(() => {
+        setfilteredProducts(products);
+    }, [products]);
+
 
     const handleSearch = (e) => {
         const searchTerm = e.target.value;
         setSearchInput(searchTerm)
 
-        const filtered = productData.filter((product) => {
+        const filtered = products.filter((product) => {
             const matchesName = product.name.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
             return matchesName && matchesCategory;
@@ -59,7 +46,7 @@ const Banner = () => {
         const newCategory = e.target.value;
         setSelectedCategory(newCategory);
 
-        const filtered = productData.filter((product) => {
+        const filtered = products.filter((product) => {
             const matchesName = product.name.toLowerCase().includes(searchInput.toLowerCase());
             const matchesCategory = newCategory === "all" || product.category === newCategory;
             return matchesName && matchesCategory;
@@ -107,7 +94,15 @@ const Banner = () => {
                             {
                                 searchInput && filteredProducts.slice(0,10).map((product, i) => 
                                     <li key = {i} style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>
-                                    <img src={product.images[0]} style={{width: "100px", height:'auto', marginRight: '10px'}}/>
+                                        <div style={{width: "100px", height:'auto', marginRight: '10px', position: 'relative', aspectRatio: '1/1'}}>
+                                            <Image
+                                                src={product.images[0]}
+                                                alt={product.name}
+                                                fill
+                                                sizes="100px"
+                                                style={{objectFit: "contain"}}
+                                            />
+                                        </div>
                                     <Link href = {`/shop/${product._id.toString()}`} style={{flexGrow: 1, textAlign: 'center'}}>{product.name}</Link>
                                     </li>)
                             }
@@ -120,8 +115,14 @@ const Banner = () => {
             </div>
 
         </div>
-            <HomeImageSwiper />
+            <HomeImageSwiper items={swiperItems} />
         </div>
     )
 }
+Banner.propTypes = {
+    products: PropTypes.array,
+    categorys: PropTypes.array,
+    swiperItems: PropTypes.array,
+};
+
 export default Banner;

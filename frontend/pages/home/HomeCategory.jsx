@@ -1,33 +1,11 @@
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import api from '../../src/api/api.js'
+import Image from 'next/image';
+import PropTypes from 'prop-types';
 
 const subTitle = "Celebrate Your Fandom";
 const title = "Find the Perfect Figure for Every Collection";
 
-const HomeCategory = () => {
-    const [categories, setCategories] = useState([])
-    
-    useEffect(() =>{
-        let mounted = true;
-        const loadCategories = async() => {
-            try{
-                const response = await api.get('/customers-featured-categories', {
-                    params: { limit: 6 },
-                    withCredentials: true
-                });
-                if (mounted) {
-                    setCategories(response?.data?.categories || []);
-                }
-            }catch(err){
-                console.log(err)
-            }
-        };
-
-        loadCategories();
-        return () => { mounted = false; }
-    }, [])
-
+const HomeCategory = ({ categories = [] }) => {
   return (
     <div className='category-section style-4 padding-tb'>
         <div className = "container">
@@ -49,8 +27,14 @@ const HomeCategory = () => {
                               className='category-item'
                             >
                                 <div className='category-inner'>
-                                    <div className='category-thumb'>
-                                        <img src = {val.image}></img>
+                                    <div className='category-thumb relative' style={{position: 'relative', width: '100%', aspectRatio: '1/1'}}>
+                                        <Image
+                                            src={val.image}
+                                            alt={val.category}
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                            style={{objectFit: 'cover'}}
+                                        />
                                     </div>
 
                                     <div className='category-content'>
@@ -69,5 +53,9 @@ const HomeCategory = () => {
     </div>
   )
 }
+
+HomeCategory.propTypes = {
+  categories: PropTypes.array,
+};
 
 export default HomeCategory
