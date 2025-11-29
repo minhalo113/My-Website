@@ -3,12 +3,12 @@
 
 const title = "About A Figure A Day";
 const desc = "Welcome to A Figure A Day, your daily source for anime statues, scale figures, and collectibles that bring your favorite characters to life.";
-const ItemTitle = "Categories"; 
-const quickTitle = "Quick Links"; 
+const ItemTitle = "Categories";
+const quickTitle = "Quick Links";
 // const blogTitle = "Recent Blogs";
 
 const addressList = [
-    { iconName: 'icofont-google-map', text: ' Edmonton, Canada.', },
+    { iconName: 'icofont-google-map', text: ' Based in Edmonton, Alberta, Canada', },
     { iconName: 'icofont-envelope', text: ' figureaday.store@gmail.com', },
 ]
 
@@ -19,64 +19,64 @@ const addressList = [
 //     { iconName: 'icofont-instagram', siteLink: 'https://www.instagram.com/ahistoryfactaday/?hl=en', className: 'instagram', }, 
 //     { iconName: 'icofont-youtube', siteLink: 'https://www.youtube.com/@RandoHistoryFacts_', className: 'youtube', }, ]
 
-const ItemList = [ { text: 'All Products', link: '/shop', }, 
-    { text: 'Shop', link: '/shop', }, { text: 'Blog', link: '/blog', }, 
-    { text: 'About', link: '/about', }, { text: 'Refund Policy', link: '/refund-policy', }, 
-    { text: 'Shipping Policy', link: '/shipping-policy',},
-    {/*{ text: 'FAQs', link: '/about', }*/} ]
+const ItemList = [{ text: 'All Products', link: '/shop', },
+{ text: 'Shop', link: '/shop', }, { text: 'Blog', link: '/blog', },
+{ text: 'About', link: '/about', }, { text: 'Refund Policy', link: '/refund-policy', },
+{ text: 'Shipping Policy', link: '/shipping-policy', },
+{/*{ text: 'FAQs', link: '/about', }*/ }]
 
 const quickList = [ /*{ text: 'Summer Sessions', link: '#', },*/
     //  { text: 'Events', link: '#', }, { text: 'Gallery', link: '#', }, 
     // { text: 'Forums', link: '#', },
-     { text: 'Privacy Policy', link: '/privacy-policy', }, 
-     { text: 'Terms of Service', link: '/terms-of-service', }, ]
+    { text: 'Privacy Policy', link: '/privacy-policy', },
+    { text: 'Terms of Service', link: '/terms-of-service', },]
 
 const Footer = () => {
-  return (
-    <footer className='style-2'>
-        <div className = 'footer-top dark-view padding-tb'>
-            <div className='container'>
-                <div className='row g-4 row-cols-xl-4 row-cols-sm-2 row-cols-1 justify-content-center'>
+    return (
+        <footer className='style-2'>
+            <div className='footer-top dark-view padding-tb'>
+                <div className='container'>
+                    <div className='row g-4 row-cols-xl-4 row-cols-sm-2 row-cols-1 justify-content-center'>
 
-                    <div className='col justify-content-center'>
-                        <div className='footer-item our-address'>
-                            <div className='footer-inner'>
-                                <div className='footer-content'>
-                                    <div className='title'>
-                                        <h4>{quickTitle}</h4>
-                                    </div>
-                                    <div className="content">
-                                        <ul className='lab-ul office-address'>
-                                        {
-                                            quickList.map((val, i) => (
-                                                <li key={i}><a href= {val.link}>{val.text}</a></li>
-                                            ))
-                                        }
-                                        </ul>
+                        <div className='col justify-content-center'>
+                            <div className='footer-item our-address'>
+                                <div className='footer-inner'>
+                                    <div className='footer-content'>
+                                        <div className='title'>
+                                            <h4>{quickTitle}</h4>
+                                        </div>
+                                        <div className="content">
+                                            <ul className='lab-ul office-address'>
+                                                {
+                                                    quickList.map((val, i) => (
+                                                        <li key={i}><a href={val.link}>{val.text}</a></li>
+                                                    ))
+                                                }
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className='col justify-content-center'>
-                        <div className='footer-item our-address'>
-                            <div className='footer-inner'>
-                                <div className='footer-content'>
-                                    <div className='title'>
-                                        <h4>{title}</h4>
-                                    </div>
-                                    <div className="content">
-                                        <p>{desc}</p>
-                                        <ul className='lab-ul office-address'>
-                                        {
-                                            addressList.map((val, i) => (
-                                                <li key = {i}><i className={val.iconName}>{val.text}</i></li>
-                                            ))
-                                        }
-                                        </ul>
-                                        
-                                        {/* <ul className='lab-ul social-icons justify-content-center'>
+                        <div className='col justify-content-center'>
+                            <div className='footer-item our-address'>
+                                <div className='footer-inner'>
+                                    <div className='footer-content'>
+                                        <div className='title'>
+                                            <h4>{title}</h4>
+                                        </div>
+                                        <div className="content">
+                                            <p>{desc}</p>
+                                            <ul className='lab-ul office-address'>
+                                                {
+                                                    addressList.map((val, i) => (
+                                                        <li key={i}><i className={val.iconName}>{val.text}</i></li>
+                                                    ))
+                                                }
+                                            </ul>
+
+                                            {/* <ul className='lab-ul social-icons justify-content-center'>
                                         {
                                             socialList.map((val, i) => (
                                                 <li key = {i}>
@@ -87,27 +87,28 @@ const Footer = () => {
                                                 ))
                                         }
                                         </ul> */}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className='col'>
-                        <div className='footer-item our-address'>
-                            <div className='footer-inner'>
-                                <div className='footer-content'>
-                                    <div className='title'>
-                                        <h4>{ItemTitle}</h4>
-                                    </div>
-                                    <div className="content">
-                                        <ul className='lab-ul office-address'>
-                                        {
-                                            ItemList.map((val, i) => (
-                                                <li key={i}><a href= {val.link}>{val.text}</a></li>
-                                            ))
-                                        }
-                                        </ul>
+                        <div className='col'>
+                            <div className='footer-item our-address'>
+                                <div className='footer-inner'>
+                                    <div className='footer-content'>
+                                        <div className='title'>
+                                            <h4>{ItemTitle}</h4>
+                                        </div>
+                                        <div className="content">
+                                            <ul className='lab-ul office-address'>
+                                                {
+                                                    ItemList.map((val, i) => (
+                                                        <li key={i}><a href={val.link}>{val.text}</a></li>
+                                                    ))
+                                                }
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -115,9 +116,8 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-        </div>
 
-        {/* <div className='footer-bottom'>
+            {/* <div className='footer-bottom'>
             <div className="container">
                 <div className="section-wrapper">
                     <p>&copy; 2024 <Link to = "/">Shop Cart</Link> Designed by <a href='/' target = "_blank">Michael Luong</a></p>
@@ -133,8 +133,8 @@ const Footer = () => {
                 </div>
             </div>
         </div> */}
-    </footer>
-  )
+        </footer>
+    )
 }
 
 export default Footer
