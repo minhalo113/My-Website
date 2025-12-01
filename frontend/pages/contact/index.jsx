@@ -71,7 +71,7 @@ const Contact = () => {
                                         contactList.map((val, i) => (
                                             <div key={i} className='contact-item'>
                                                 <div className='contact-thumb'>
-                                                    <Image src={val.imgUrl} alt="contact icon" width={50} height={50} />
+                                                    <Image src={ensureHttps(val.imgUrl)} alt="contact icon" width={50} height={50} />
                                                 </div>
                                                 <div className='contact-content'>
                                                     <h6 className='title'>{val.title}</h6>

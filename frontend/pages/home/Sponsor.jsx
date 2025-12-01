@@ -52,7 +52,7 @@ const Sponsor = () => {
                   <SwiperSlide key={i}>
                     <div className='sponsor-item'>
                       <div className='sponsor-thumb'>
-                        <Image src={val.imgUrl} alt="sponsor" width={val.width} height={val.height} />
+                        <Image src={ensureHttps(val.imgUrl)} alt="sponsor" width={val.width} height={val.height} />
                       </div>
                     </div>
                   </SwiperSlide>

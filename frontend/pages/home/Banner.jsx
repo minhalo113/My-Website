@@ -127,7 +127,7 @@ const Banner = () => {
                                             <li key={i} style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
                                                 <div style={{ width: "100px", height: 'auto', marginRight: '10px', position: 'relative', aspectRatio: '1/1' }}>
                                                     <Image
-                                                        src={product.images[0]}
+                                                        src={ensureHttps(product.images[0])}
                                                         alt={product.name}
                                                         fill
                                                         sizes="100px"

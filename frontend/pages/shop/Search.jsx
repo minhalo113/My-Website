@@ -610,7 +610,7 @@ const Search = ({
                 {queryPreview && (
                     <div className='d-flex align-items-center gap-3 mt-3'>
                         <Image
-                            src={queryPreview}
+                            src={ensureHttps(queryPreview)}
                             alt='Selected reference'
                             width={80}
                             height={80}

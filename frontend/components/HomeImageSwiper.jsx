@@ -35,7 +35,7 @@ const HomeImageSwiper = () => {
           <SwiperSlide key={item._id} className="flex justify-center items-center">
             <a href={item.link} className="block w-full h-full relative" style={{ height: '500px' }}>
               <Image
-                src={item.image.url}
+                src={ensureHttps(item.image.url)}
                 alt="Banner"
                 fill
                 sizes="100vw"
