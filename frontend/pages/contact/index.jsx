@@ -6,6 +6,7 @@ import Image from 'next/image';
 // import process from "process"
 // dotenv.config();
 import api from '../../src/api/api';
+import { ensureHttps } from '../../src/utils/imageUtils';
 import toast from 'react-hot-toast';
 import SEO from "../../components/SEO";
 

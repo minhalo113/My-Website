@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import Rating from '../../components/Rating'
+
 import Image from 'next/image';
 import PropTypes from 'prop-types'
 import api from '../../src/api/api';

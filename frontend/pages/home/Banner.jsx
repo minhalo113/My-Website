@@ -5,6 +5,7 @@ import HomeImageSwiper from '../../components/HomeImageSwiper';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import api from '../../src/api/api';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 const title = (
     <>
