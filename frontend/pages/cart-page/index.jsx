@@ -222,6 +222,10 @@ const CartPage = () => {
                                             </li>
 
                                         </ul>
+                                        <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '5px', color: '#166534', fontSize: '0.9rem' }}>
+                                            <p style={{ margin: 0, fontWeight: 'bold' }}>🇨🇦 Note to Customers:</p>
+                                            <p style={{ margin: 0 }}>We currently only ship to addresses within Canada. All prices are listed in Canadian Dollars (CAD).</p>
+                                        </div>
                                     </div>
                                     {/* </div> */}
                                     <div className="mt-10 space-y-3 bg-[#f8fafc] p-5 rounded-md shadow-md border border-slate-300">

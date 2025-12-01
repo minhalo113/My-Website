@@ -2,6 +2,8 @@ import Stripe from 'stripe';
 import responseReturn from "../../utils/response.js";
 import { sendMail } from '../../utils/mail.js';
 import customerOrder from '../../models/orderModel.js';
+import productModel from '../../models/productModel.js';
+import couponModel from '../../models/couponModel.js';
 import moment from 'moment'
 import couponController from '../dashbaord/couponController.js';
 
@@ -10,37 +12,78 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 class paymentController {
     create_payment_session = async (req, res) => {
         try {
-            const { cartItems, shipping, is_login, couponId, discount } = req.body;
+            const { cartItems, shipping, is_login, couponId } = req.body;
 
             if (!cartItems || !shipping) {
                 return responseReturn(res, 400, { error: "Missing cart or shipping information." })
             }
 
-            const line_items = cartItems.map(item => {
-                let price = item.price - (item.price * (item.discount || 0)) / 100;
-                if (discount) {
-                    price = price - (price * discount) / 100;
+            const productIds = cartItems.map(item => item.id);
+            const products = await productModel.find({ _id: { $in: productIds } });
+
+            let globalDiscount = 0;
+            if (couponId) {
+                const coupon = await couponModel.findById(couponId);
+                if (coupon && coupon.used < coupon.maxUses) {
+                    globalDiscount = coupon.discount;
                 }
-                return {
+            }
+
+            const line_items = [];
+            let finalPrice = 0;
+            const trustedCartItems = [];
+
+            for (const item of cartItems) {
+                const product = products.find(p => p._id.toString() === item.id);
+                if (!product) continue;
+
+                let price = product.price;
+                let productImage = product.images && product.images.length > 0 ? product.images[0] : '';
+
+                if (item.color) {
+                    const colorIndex = product.colors.findIndex(c => c === item.color);
+                    if (colorIndex !== -1) {
+                        if (product.colorPrices && product.colorPrices[colorIndex]) {
+                            price = product.colorPrices[colorIndex];
+                        }
+                        if (product.colorImages && product.colorImages[colorIndex]) {
+                            productImage = product.colorImages[colorIndex];
+                        }
+                    }
+                }
+
+                if (product.discount > 0) {
+                    price = price - (price * product.discount) / 100;
+                }
+
+                if (globalDiscount > 0) {
+                    price = price - (price * globalDiscount) / 100;
+                }
+
+                price = Math.round(price * 100) / 100;
+
+                line_items.push({
                     price_data: {
                         currency: 'cad',
                         product_data: {
-                            name: item.name,
-                            images: Array.isArray(item.img) ? [item.img[0]] : [item.img],
+                            name: product.name,
+                            images: productImage ? [productImage] : [],
                         },
                         unit_amount: Math.round(price * 100),
                     },
                     quantity: item.qty,
-                };
-            });
+                });
 
-            const finalPrice = cartItems.reduce((t, item) => {
-                let price = item.price - (item.price * (item.discount || 0)) / 100;
-                if (discount) {
-                    price = price - (price * discount) / 100;
-                }
-                return t + price * item.qty;
-            }, 0);
+                finalPrice += price * item.qty;
+
+                trustedCartItems.push({
+                    ...item,
+                    price: product.price,
+                    discount: product.discount,
+                    name: product.name,
+                    img: productImage
+                });
+            }
 
             if (finalPrice <= 0) {
                 return responseReturn(res, 400, { error: "Invalid final price after discount.", message: "Invalid final price after discount." });
@@ -54,7 +97,7 @@ class paymentController {
                 customerEmail,
                 customerName,
                 shippingInfo: shipping,
-                products: cartItems,
+                products: trustedCartItems,
                 price: finalPrice,
                 payment_status: 'Pending',
                 delivery_status: 'Pending',
