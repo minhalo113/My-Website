@@ -147,9 +147,7 @@ class paymentController {
                 from: process.env.RESEND_FROM,
                 to: email,
                 subject: `Order Received: #${orderId} - We are checking stock! 📦`,
-
                 reply_to: 'figureaday.store@gmail.com',
-
                 html: `
                     <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
                         <p>Hi there,</p>
