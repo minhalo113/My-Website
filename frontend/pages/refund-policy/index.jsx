@@ -35,13 +35,8 @@ const RefundPolicy = () => {
 
         {/* Section 2: Damaged / Defective */}
         <div style={{ marginBottom: "30px" }}>
-          {/* Fixed quotes here: "Arrive Safe" -> &quot;Arrive Safe&quot; */}
           <h3 style={{ borderBottom: "2px solid #f0f0f0", paddingBottom: "10px", marginBottom: "15px" }}>2. Damaged or Defective Items (&quot;Arrive Safe&quot; Guarantee)</h3>
           <p>Shipping can be rough, but we have you covered. If your figure arrives significantly damaged, broken, or with major defects:</p>
-
-          <div style={{ backgroundColor: "#f9f9f9", padding: "15px", borderLeft: "4px solid #4CAF50", margin: "15px 0" }}>
-            <strong>✅ No Return Needed for Major Damage:</strong> For significant damage, you do <em>not</em> need to ship the item back to us (saving you expensive international shipping costs).
-          </div>
 
           <p><strong>How to claim:</strong></p>
           <ol style={{ paddingLeft: "20px", marginTop: "10px" }}>
@@ -54,13 +49,13 @@ const RefundPolicy = () => {
             <li style={{ marginBottom: "10px" }}>Include your Order Number.</li>
             <li>Attach clear <strong>PHOTOS</strong> of the damaged product and the packaging (Video is optional but helpful).</li>
           </ol>
-          <p style={{ marginTop: "15px" }}>We will review your claim and offer a <strong>free replacement</strong> or a <strong>full refund</strong> immediately.</p>
+          <p style={{ marginTop: "15px" }}>We will review your claim and offer a <strong>full refund</strong> immediately.</p>
         </div>
 
         {/* Section 4: Disclaimer - Fixed quotes in this section */}
         <div style={{ marginTop: "40px", padding: "20px", border: "1px solid #e0e0e0", backgroundColor: "#fffbea", borderRadius: "5px" }}>
           <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
-            Please note that for certain budget-friendly figures listed as <em>&quot;China Ver.&quot;</em>, <em>&quot;Third Party&quot;</em>, or <em>&quot;Domestic Ver.&quot;</em>, minor paint imperfections or slight box damage during transit may occur. These are standard for this category of figures and are not considered &quot;defects&quot; eligible for a full refund. However, if the figure is broken or missing parts, our <strong>&quot;Arrive Safe&quot; Guarantee</strong> still applies.
+            Please note that for certain budget-friendly figures products, minor paint imperfections or slight box damage during transit may occur. These are standard for this category of figures and are not considered &quot;defects&quot; eligible for a full refund. However, if the figure is broken or missing parts, our <strong>&quot;Arrive Safe&quot; Guarantee</strong> still applies.
           </p>
         </div>
 
