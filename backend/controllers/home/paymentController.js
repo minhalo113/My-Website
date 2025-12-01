@@ -76,7 +76,11 @@ class paymentController {
                     couponId: couponId || ''
                 },
                 payment_intent_data: {
-                    capture_method: 'manual'
+                    capture_method: 'manual',
+                    metadata: {
+                        orderId: order._id.toString(),
+                        couponId: couponId || ''
+                    }
                 },
                 success_url: `${process.env.GIT_WEB_URL}/checkout-success?status=success`,
             })

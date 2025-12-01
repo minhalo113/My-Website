@@ -25,7 +25,7 @@ import {
 import {
     formatReviewForResponse,
     formatReviewListForResponse,
-        repositionReviewInPlace,
+    repositionReviewInPlace,
 } from '../../utils/reviewFormatter.js';
 
 const normalizeUploadList = (value) => {
@@ -100,8 +100,8 @@ const parseDateField = (value) => {
     return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
-class productController{
-    canManageProduct(product, req){
+class productController {
+    canManageProduct(product, req) {
         if (!product || !req) return false;
         if (req.role === 'admin') {
             return true;
@@ -111,29 +111,29 @@ class productController{
         // return Boolean(sellerId && requesterId && sellerId === requesterId);
         return false;
     }
-    
-    checkDuplicateLink = async(link, excludeId = null) => {
+
+    checkDuplicateLink = async (link, excludeId = null) => {
         const trimmed = String(link).trim();
-        if(!trimmed) {
+        if (!trimmed) {
             return null;
         }
-        const query = {link: trimmed};
-        if(excludeId) {
-            query._id = { $ne: excludeId};
+        const query = { link: trimmed };
+        if (excludeId) {
+            query._id = { $ne: excludeId };
         }
         return await productModel.findOne(query);
     }
 
-    add_product = async(req, res) => {
-        const {id} = req;
-        const form = formidable({multiples: true});
+    add_product = async (req, res) => {
+        const { id } = req;
+        const form = formidable({ multiples: true });
 
-        form.parse(req, async(err, field, files) => {
-            let {name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link} = field;
+        form.parse(req, async (err, field, files) => {
+            let { name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link } = field;
 
             shopName = String(shopName).trim()
 
-            let {images, colorImages, videos} = files;
+            let { images, colorImages, videos } = files;
 
             name = String(name).trim()
             const slug = name.split(' ').join('-')
@@ -146,18 +146,18 @@ class productController{
             })
 
             try {
-                if(link && String(link).trim()){
+                if (link && String(link).trim()) {
                     const duplicate = await this.checkDuplicateLink(link);
 
-                    if(duplicate){
-                        return responseReturn(res, 409, {error: 'Product link already exists'})
+                    if (duplicate) {
+                        return responseReturn(res, 409, { error: 'Product link already exists' })
                     }
                 }
 
                 const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
 
-                if(colorArr.length !== (files.colorImages ? (Array.isArray(files.colorImages) ? files.colorImages.length : 1) : 0)){
-                    return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
+                if (colorArr.length !== (files.colorImages ? (Array.isArray(files.colorImages) ? files.colorImages.length : 1) : 0)) {
+                    return responseReturn(res, 400, { error: 'Number of colors and color images must match' })
                 }
 
                 let allImageUrl = [];
@@ -166,36 +166,36 @@ class productController{
                 let colorImageFingerprints = [];
 
                 let allVideoUrl = [];
-                if (!Array.isArray(images)){
+                if (!Array.isArray(images)) {
                     images = [images]
                 }
-                if (colorImages && !Array.isArray(colorImages)){
+                if (colorImages && !Array.isArray(colorImages)) {
                     colorImages = [colorImages]
                 }
 
-                if (videos && !Array.isArray(videos)){
+                if (videos && !Array.isArray(videos)) {
                     videos = [videos]
                 }
 
-                for (let i = 0; i < images.length; ++i){
-                    const result = await cloudinary.uploader.upload(images[i].filepath, {folder: 'products', phash: true});
+                for (let i = 0; i < images.length; ++i) {
+                    const result = await cloudinary.uploader.upload(images[i].filepath, { folder: 'products', phash: true });
                     const url = result.secure_url || result.url;
                     allImageUrl.push(url);
                     imageFingerprints.push(fingerprintFromUploadResult(result) || '');
                 }
 
-                if (colorImages){
-                    for (let i = 0; i < colorImages.length; ++i){
-                        const result = await cloudinary.uploader.upload(colorImages[i].filepath, {folder: 'products/colors', phash: true});
+                if (colorImages) {
+                    for (let i = 0; i < colorImages.length; ++i) {
+                        const result = await cloudinary.uploader.upload(colorImages[i].filepath, { folder: 'products/colors', phash: true });
                         const url = result.secure_url || result.url;
                         allColorImageUrl.push(url);
                         colorImageFingerprints.push(fingerprintFromUploadResult(result) || '');
                     }
                 }
 
-                if(videos){
-                    for (let i = 0; i < videos.length; ++i){
-                        const result = await cloudinary.uploader.upload(videos[i].filepath, {folder: 'products/videos', resource_type: 'video'});
+                if (videos) {
+                    for (let i = 0; i < videos.length; ++i) {
+                        const result = await cloudinary.uploader.upload(videos[i].filepath, { folder: 'products/videos', resource_type: 'video' });
                         allVideoUrl.push(result.url)
                     }
                 }
@@ -222,17 +222,17 @@ class productController{
                     colorImageFingerprints,
                     colorPrices: parseColorPrices(colorPrices)
                 })
-                return responseReturn(res, 201, {message: "Product Added Successfully"})
-            }catch(error){
+                return responseReturn(res, 201, { message: "Product Added Successfully" })
+            } catch (error) {
                 console.log(error.message)
-                return responseReturn(res, 500, {error: error.message})
+                return responseReturn(res, 500, { error: error.message })
             }
         })
     }
 
-    products_get = async(req, res) => {
-        const {page, searchValue, parPage, minPrice, maxPrice} = req.query
-        const {id} = req;
+    products_get = async (req, res) => {
+        const { page, searchValue, parPage, minPrice, maxPrice } = req.query
+        const { id } = req;
 
         const parsedParPage = parseInt(parPage)
         const parsedPage = parseInt(page)
@@ -266,55 +266,64 @@ class productController{
             baseQuery.$expr = { $and: priceConditions }
         }
 
-        try{
+        try {
+            // Fetch all products (compact) if no specific pagination/search is requested,
+            // OR if the client explicitly requests "all" via a flag (though here we infer from absence of pagination if typical usage).
+            // The request is to "get all products" and "reduce return result".
+            // We'll apply the field selection to all branches to ensure reduction.
+
+            const selectFields = '_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand stock isHidden link shopName';
+
             if (searchValue) {
                 const searchQuery = {
                     ...baseQuery,
-                    $text: {$search: searchValue}
+                    $text: { $search: searchValue }
                 }
 
-                const products = await productModel.find(searchQuery).skip(skipPage).limit(limitValue).sort({createAt: -1})
+                const products = await productModel.find(searchQuery).select(selectFields).skip(skipPage).limit(limitValue).sort({ createAt: -1 })
                 const normalizedProducts = applyEffectivePriceToDocs(products)
 
                 const totalProduct = await productModel.find(searchQuery).countDocuments()
 
 
-                return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
-            }else if(limitValue && Number.isFinite(parsedPage)){
+                return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
+            } else if (limitValue && Number.isFinite(parsedPage)) {
                 const products = await productModel.find(baseQuery)
+                    .select(selectFields)
                     .skip(skipPage)
                     .limit(limitValue)
-                    .sort({createdAt: -1})
+                    .sort({ createdAt: -1 })
 
-                    const normalizedProducts = applyEffectivePriceToDocs(products)
+                const normalizedProducts = applyEffectivePriceToDocs(products)
 
-                    const totalProduct = await productModel.find(baseQuery).countDocuments()
-                
-                return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
-            }else{
-                const products = await productModel.find(baseQuery).sort({createdAt: -1})
-                const normalizedProducts = applyEffectivePriceToDocs(products)                
                 const totalProduct = await productModel.find(baseQuery).countDocuments()
 
-                return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
+                return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
+            } else {
+                // Fetch ALL compact
+                const products = await productModel.find(baseQuery).select(selectFields).sort({ createdAt: -1 })
+                const normalizedProducts = applyEffectivePriceToDocs(products)
+                const totalProduct = await productModel.find(baseQuery).countDocuments()
+
+                return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
             }
-        }catch(error){
-            return responseReturn(res, 500, {error: error.message})
+        } catch (error) {
+            return responseReturn(res, 500, { error: error.message })
         }
     }
 
-    product_get = async(req, res) => {
-        const {productId} = req.params;
-        try{
+    product_get = async (req, res) => {
+        const { productId } = req.params;
+        try {
             const product = await productModel.findById(productId)
-            return responseReturn(res, 200, {product})
-        }catch(error){
-            return responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 200, { product })
+        } catch (error) {
+            return responseReturn(res, 500, { error: error.message })
         }
     }
 
-    product_update = async(req, res) => {
-        let {name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link} = req.body;
+    product_update = async (req, res) => {
+        let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link } = req.body;
 
         name = String(name).trim()
         const slug = name.split(' ').join('-')
@@ -322,22 +331,22 @@ class productController{
         const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
         const sizeArr = sizes ? String(sizes).split(',').map(s => s.trim()).filter(Boolean) : []
 
-        try{
+        try {
             const product = await productModel.findById(productId)
-            if(!product){
-                return responseReturn(res, 404, {error: 'Product not found'})
+            if (!product) {
+                return responseReturn(res, 404, { error: 'Product not found' })
             }
-            if(!this.canManageProduct(product, req)){
-                return responseReturn(res, 403, {error: 'You are not authorized to update this product'});
+            if (!this.canManageProduct(product, req)) {
+                return responseReturn(res, 403, { error: 'You are not authorized to update this product' });
             }
-            if(colorArr.length !== (product.colorImages ? product.colorImages.length : 0)){
-                return responseReturn(res, 400, {error: 'Number of colors and color images must match'})
+            if (colorArr.length !== (product.colorImages ? product.colorImages.length : 0)) {
+                return responseReturn(res, 400, { error: 'Number of colors and color images must match' })
             }
 
-            if(link && String(link).trim()){
+            if (link && String(link).trim()) {
                 const duplicate = await this.checkDuplicateLink(link, productId);
-                if(duplicate){
-                    return responseReturn(res, 409, {error: 'Product link already exists'})
+                if (duplicate) {
+                    return responseReturn(res, 409, { error: 'Product link already exists' })
                 }
             }
 
@@ -349,15 +358,15 @@ class productController{
                 productId, slug
             })
             const updatedProduct = await productModel.findById(productId)
-            return responseReturn(res, 200, {product: updatedProduct, message: "Product Updated Successfully"})
-        }catch(error){
-            return responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 200, { product: updatedProduct, message: "Product Updated Successfully" })
+        } catch (error) {
+            return responseReturn(res, 500, { error: error.message })
         }
     }
 
     product_image_update = async (req, res) => {
         const form = formidable({
-            multiples: true,          
+            multiples: true,
             keepExtensions: true,
             allowEmptyFiles: false,
         });
@@ -429,8 +438,8 @@ class productController{
                 if (!product) {
                     return responseReturn(res, 404, { error: 'Product not found' });
                 }
-                if(!this.canManageProduct(product, req)){
-                    return responseReturn(res, 403, {error: 'You are not authorized to update this product images'});
+                if (!this.canManageProduct(product, req)) {
+                    return responseReturn(res, 403, { error: 'You are not authorized to update this product images' });
                 }
 
                 if (_action === 'delete') {
@@ -472,8 +481,8 @@ class productController{
                 const isVideo = _imageType === 'video';
                 const folder =
                     _imageType === 'color' ? 'products/colors' :
-                    isVideo ? 'products/videos' :
-                    'products';
+                        isVideo ? 'products/videos' :
+                            'products';
 
                 const uploadOpts = isVideo
                     ? { folder, resource_type: 'video' }
@@ -584,14 +593,14 @@ class productController{
                 if (!queryFingerprint) {
                     return responseReturn(res, 422, { error: 'Unable to generate fingerprint for the provided image' });
                 }
-                
+
                 const products = await fetchProductsForImageSearch();
                 const { groupedMatches, rawMatches } = collectMatchesForFingerprint({
                     products,
                     queryFingerprint,
                     threshold,
                 });
-                
+
                 return responseReturn(res, 200, {
                     matches: groupedMatches.slice(0, 20),
                     totalMatches: groupedMatches.length,
@@ -741,7 +750,7 @@ class productController{
                     totalMatches,
                     totalRawMatches,
                 });
-            }catch(error){
+            } catch (error) {
                 console.error('product_image_batch_check error:', error);
                 return responseReturn(res, 500, { error: 'Failed to check images for duplicates' });
             } finally {
@@ -755,16 +764,16 @@ class productController{
                 }
             }
         });
-    }    
+    }
 
-    import_aliexpress_product = async(req, res) => {
+    import_aliexpress_product = async (req, res) => {
         const { url, productId: bodyProductId } = req.body;
         const productId = bodyProductId || (url ? url.match(/(\d+)/)?.[1] : null);
-        if(!productId){
-            return responseReturn(res, 400, {error: 'Product ID is required'});
+        if (!productId) {
+            return responseReturn(res, 400, { error: 'Product ID is required' });
         }
 
-        try{
+        try {
             const APP_KEY = process.env.APP_KEY;
             const APP_SECRET = process.env.APP_SECRET;
             const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
@@ -777,7 +786,7 @@ class productController{
                 Object.keys(params).sort().map(k => k + String(params[k])).join('');
             const buildQuery = (params) => {
                 const usp = new URLSearchParams();
-                for(const [k,v] of Object.entries(params)) usp.append(k, String(v));
+                for (const [k, v] of Object.entries(params)) usp.append(k, String(v));
                 return usp.toString();
             };
 
@@ -860,9 +869,9 @@ class productController{
             console.log(productResp)
             const extracted = extractSkuImagesAndPrices(productResp);
             return res.status(200).json(extracted);
-        }catch(error){
+        } catch (error) {
             console.error('import_aliexpress_product error:', error);
-            return responseReturn(res, 500, {error: 'Failed to import product'});
+            return responseReturn(res, 500, { error: 'Failed to import product' });
         }
 
 
@@ -1256,7 +1265,7 @@ class productController{
             return responseReturn(res, 500, { error: 'Failed to delete review.' });
         }
     };
-    
+
     generate_product_social_preview = async (req, res) => {
         if (req.role !== 'admin') {
             return responseReturn(res, 403, { error: 'Only administrators can generate social media posts.' });
@@ -1327,30 +1336,30 @@ class productController{
         });
     };
 
-    product_visibility = async(req, res) => {
-        const {productId, isHidden} = req.body;
-        try{
+    product_visibility = async (req, res) => {
+        const { productId, isHidden } = req.body;
+        try {
             const product = await productModel.findByIdAndUpdate(
                 productId,
-                {isHidden},
-                {new: true}
+                { isHidden },
+                { new: true }
             );
-            if (!product){
-                return responseReturn(res, 404, {error: "Product not found"});
+            if (!product) {
+                return responseReturn(res, 404, { error: "Product not found" });
             }
             const message = isHidden ? "Product hidden successfully" : "Product unhidden successfully"
-            return responseReturn(res, 200, {message, product});
-        }catch(error){
-            return responseReturn(res, 500, {error: error.message});
+            return responseReturn(res, 200, { message, product });
+        } catch (error) {
+            return responseReturn(res, 500, { error: error.message });
         }
     }
 
-    deleteProduct = async(req, res) => {
-        try{
+    deleteProduct = async (req, res) => {
+        try {
             const productId = req.params.id;
             const product = await productModel.findById(productId);
-            if(!product){
-                return responseReturn(res, 404, {error: "Product Not Found"})
+            if (!product) {
+                return responseReturn(res, 404, { error: "Product Not Found" })
             }
 
             cloudinary.config({
@@ -1363,7 +1372,7 @@ class productController{
             const getPublicId = (url) => {
                 const parts = url.split('/');
                 const uploadIndex = parts.indexOf('upload')
-                if(uploadIndex !== -1){
+                if (uploadIndex !== -1) {
                     const publicIdParts = parts.slice(uploadIndex + 2);
                     const publicIdWithExt = publicIdParts.join('/');
                     return publicIdWithExt.replace(/\.[^/.]+$/, '');
@@ -1371,25 +1380,25 @@ class productController{
                 return url.split('/').pop().split('.')[0];
             };
 
-            if (product.images && product.images.length){
-                for (const img of product.images){
+            if (product.images && product.images.length) {
+                for (const img of product.images) {
                     const publicId = getPublicId(img);
                     await cloudinary.uploader.destroy(publicId);
                 }
             }
 
-            if (product.videos && product.videos.length){
-                for (const vid of product.videos){
+            if (product.videos && product.videos.length) {
+                for (const vid of product.videos) {
                     const publicId = getPublicId(vid);
-                    await cloudinary.uploader.destroy(publicId, {resource_type: 'video'})
+                    await cloudinary.uploader.destroy(publicId, { resource_type: 'video' })
                 }
             }
 
             await productModel.findByIdAndDelete(productId)
 
-            return responseReturn(res, 200, {message: "Product deleted successfully"})
-        }catch(error){
-            return responseReturn(res, 500, {error: "Internal Server Error"})
+            return responseReturn(res, 200, { message: "Product deleted successfully" })
+        } catch (error) {
+            return responseReturn(res, 500, { error: "Internal Server Error" })
         }
     }
 }

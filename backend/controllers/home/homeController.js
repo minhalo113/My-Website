@@ -1,11 +1,11 @@
 import formidable from 'formidable';
-import {v2 as cloudinary} from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import mongoose from 'mongoose';
 import productModel from "../../models/productModel.js";
 import categoryModel from "../../models/categoryModel.js";
 import responseReturn from "../../utils/response.js";
 import { fingerprintFromUploadResult } from "../../utils/imageFingerprint.js";
-import {searchCatalogProducts} from "../../services/productSearchService.js";
+import { searchCatalogProducts } from "../../services/productSearchService.js";
 import { computeEffectivePrice } from "../../utils/effectivePrice.js";
 import {
     fetchProductsForImageSearch,
@@ -22,11 +22,11 @@ import {
 
 const { Types } = mongoose;
 
-class homeControllers{
+class homeControllers {
     formateProduct = (products) => {
         const productArray = [];
         let i = 0;
-        while (i < products.length ) {
+        while (i < products.length) {
             let temp = []
             let j = i
             while (j < i + 3) {
@@ -41,38 +41,38 @@ class homeControllers{
         return productArray
     }
 
-    get_category = async(req, res) => {
-        const {page, searchValue, parPage} = req.query
+    get_category = async (req, res) => {
+        const { page, searchValue, parPage } = req.query
 
-        try{
+        try {
             let skipPage = ''
-            if(parPage && page){
+            if (parPage && page) {
                 skipPage = parseInt(parPage) * (parseInt(page) - 1)
             }
-            
-            if(searchValue && page && parPage){
+
+            if (searchValue && page && parPage) {
                 const categorys = await categoryModel.find({
-                    $text: { $search: searchValue}
-                }).skip(skipPage).limit(parPage).sort({createdAt: -1})
+                    $text: { $search: searchValue }
+                }).skip(skipPage).limit(parPage).sort({ createdAt: -1 })
 
                 const totalCategory = await categoryModel.find({
                     $text: { $search: searchValue }
                 }).countDocuments()
-                return responseReturn(res, 200, {categorys, totalCategory})
-            }else if (searchValue === '' && page && parPage){
-                const categorys = await categoryModel.find({ }).skip(skipPage).limit(parPage).sort({createdAt: -1})
-                const totalCategory = await categoryModel.find({ }).countDocuments()
-                return responseReturn(res, 200, {categorys, totalCategory})
+                return responseReturn(res, 200, { categorys, totalCategory })
+            } else if (searchValue === '' && page && parPage) {
+                const categorys = await categoryModel.find({}).skip(skipPage).limit(parPage).sort({ createdAt: -1 })
+                const totalCategory = await categoryModel.find({}).countDocuments()
+                return responseReturn(res, 200, { categorys, totalCategory })
             }
-            else{
-                const categorys = await categoryModel.find({ }).sort({createdAt: -1})
-                const totalCategory = await categoryModel.find({ }).countDocuments()
-                return responseReturn(res, 200, {categorys, totalCategory})
+            else {
+                const categorys = await categoryModel.find({}).sort({ createdAt: -1 })
+                const totalCategory = await categoryModel.find({}).countDocuments()
+                return responseReturn(res, 200, { categorys, totalCategory })
             }
-            
-        }catch(error){
+
+        } catch (error) {
             console.log(error)
-            return responseReturn(res, 500, {error: "Internal Server Error"})
+            return responseReturn(res, 500, { error: "Internal Server Error" })
         }
     }
 
@@ -80,7 +80,7 @@ class homeControllers{
         const rawLimit = parseInt(req.query.limit, 10);
         const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 24) : 6;
 
-        try{
+        try {
             const pipeline = [
                 { $match: { isHidden: false } },
                 { $sort: { createdAt: -1, _id: -1 } },
@@ -107,14 +107,14 @@ class homeControllers{
             });
 
             return responseReturn(res, 200, { categories });
-        }catch(error){
+        } catch (error) {
             console.log(error);
-            return responseReturn(res, 500, {error: "Internal Server Error"});
+            return responseReturn(res, 500, { error: "Internal Server Error" });
         }
     }
 
-    products_get = async(req, res) => {
-        const {page, searchValue, parPage, category, minPrice, maxPrice, sort} = req.query
+    products_get = async (req, res) => {
+        const { page, searchValue, parPage, category, minPrice, maxPrice, sort } = req.query
 
         const trimmedSearch = typeof searchValue === 'string' ? searchValue.trim() : ''
         const hasPriceFilter = minPrice !== undefined || maxPrice !== undefined
@@ -122,7 +122,7 @@ class homeControllers{
         const shouldUseSearchServie = Boolean(trimmedSearch) || (page && parPage) || (category && category !== 'all') || hasPriceFilter || hasSort
 
         if (shouldUseSearchServie) {
-            try{
+            try {
                 const searchResponse = await searchCatalogProducts({
                     term: trimmedSearch,
                     category,
@@ -142,29 +142,32 @@ class homeControllers{
                     parPage: searchResponse.perPage,
                 }
 
-                if (searchResponse.facets){
+                if (searchResponse.facets) {
                     payload.facets = searchResponse.facets
                 }
 
-                if (Array.isArray(searchResponse.suggestions)){
+                if (Array.isArray(searchResponse.suggestions)) {
                     payload.suggestions = searchResponse.suggestions
                 }
-                
-                if(searchResponse.metrics){
+
+                if (searchResponse.metrics) {
                     payload.metrics = searchResponse.metrics
                 }
-                if (searchResponse.filters){
+                if (searchResponse.filters) {
                     payload.filters = searchResponse.filters
                 }
                 return responseReturn(res, 200, payload)
-            }catch(error){
+            } catch (error) {
                 console.log(error)
-                return responseReturn(res, 500, {error: "Unable to load products right now."})
+                return responseReturn(res, 500, { error: "Unable to load products right now." })
             }
         }
 
-        try{
-            const products = await productModel.find({ isHidden: false }).sort({createdAt: -1})
+        try {
+            const products = await productModel.find({ isHidden: false })
+                .select('_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand')
+                .sort({ createdAt: -1 })
+
             const normalizedProducts = products.map((product) => {
                 const effectivePrice = computeEffectivePrice(product)
                 if (typeof product?.set === 'function') {
@@ -176,16 +179,16 @@ class homeControllers{
                     price: effectivePrice
                 }
             })
-            const totalProduct = await productModel.countDocuments({isHidden: false})
+            const totalProduct = await productModel.countDocuments({ isHidden: false })
 
-            return responseReturn(res, 200, {products: normalizedProducts, totalProduct})
-        }catch(error){
-            return responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
+        } catch (error) {
+            return responseReturn(res, 500, { error: error.message })
         }
     }
 
-    products_search = async(req, res) => {
-        const {q, searchValue, page, limit, parPage, category, minPrice, maxPrice} = req.query
+    products_search = async (req, res) => {
+        const { q, searchValue, page, limit, parPage, category, minPrice, maxPrice } = req.query
 
         const rawTerm = typeof q === 'string' ? q : searchValue
         const trimmedTerm = typeof rawTerm === 'string' ? rawTerm.trim() : ''
@@ -215,8 +218,8 @@ class homeControllers{
                 },
             })
         }
-        
-        try{
+
+        try {
             const searchResponse = await searchCatalogProducts({
                 term: trimmedTerm,
                 category,
@@ -232,33 +235,33 @@ class homeControllers{
                 ...searchResponse,
                 totalResults: searchResponse.total,
             })
-        }catch(error){
+        } catch (error) {
             console.log(error)
-            return responseReturn(res, 500, {error: 'Unable to search products right now'})
+            return responseReturn(res, 500, { error: 'Unable to search products right now' })
         }
     }
 
-    product_get = async(req, res) => {
-        const {productId} = req.params;
-        try{
-            const product = await productModel.findOne({_id: productId, isHidden: false}).lean()
-            if(!product){
-                return responseReturn(res, 404, {error: 'Product not found'})
+    product_get = async (req, res) => {
+        const { productId } = req.params;
+        try {
+            const product = await productModel.findOne({ _id: productId, isHidden: false }).lean()
+            if (!product) {
+                return responseReturn(res, 404, { error: 'Product not found' })
             }
             const sanitizedProduct = {
                 ...product,
                 ratings: formatReviewListForResponse(product?.ratings || []),
             }
-            return responseReturn(res, 200, {product: sanitizedProduct})
-        }catch(error){
-            return responseReturn(res, 500, {error: error.message})
+            return responseReturn(res, 200, { product: sanitizedProduct })
+        } catch (error) {
+            return responseReturn(res, 500, { error: error.message })
         }
     }
 
-    rate_product = async(req, res) => {
+    rate_product = async (req, res) => {
         const contentType = req.headers['content-type'] || '';
         const isMultipart = typeof contentType === 'string' && contentType.includes('multipart/form-data');
-        
+
         let fields = {};
         let files = {};
 
@@ -437,8 +440,8 @@ class homeControllers{
                                     resourceType: getReviewImageResourceType(image),
                                 });
                             }
-                            }
-                        });
+                        }
+                    });
                 } else {
                     retainedImages = [...existingImages];
                 }
@@ -464,7 +467,7 @@ class homeControllers{
                     existing.createdAt = now;
                 }
                 targetReview = existing;
-                } else {
+            } else {
                 const reviewPayload = {
                     user: userId,
                     rating: ratingValue,
@@ -484,7 +487,7 @@ class homeControllers{
             if (targetReview) {
                 repositionReviewInPlace(product.ratings, targetReview);
             }
-            
+
             product.markModified('ratings');
             if (product.ratings.length > 0) {
                 const total = product.ratings.reduce((acc, review) => acc + Number(review.rating || 0), 0);
@@ -547,22 +550,22 @@ class homeControllers{
 
     get_my_product_review = async (req, res) => {
         const { productId } = req.params;
-        try{
+        try {
             const product = await productModel.findById(productId).select('ratings');
-            if(!product){
+            if (!product) {
                 return responseReturn(res, 404, { message: 'Product not found.' });
             }
 
             const userId = req.user.id.toString();
             const review = product.ratings.find((item) => {
-                try{
+                try {
                     return item.user && item.user.toString() === userId;
-                }catch(error){
+                } catch (error) {
                     return false;
                 }
             });
 
-            if(!review){
+            if (!review) {
                 return responseReturn(res, 200, { review: null });
             }
 
@@ -594,13 +597,13 @@ class homeControllers{
                     isEdited: Boolean(plainReview.isEdited),
                 },
             });
-        }catch(error){
+        } catch (error) {
             console.log(error);
             return responseReturn(res, 500, { message: error.message || 'Failed to load review.' });
         }
     }
 
-    get_reviews = async(req, res) => {
+    get_reviews = async (req, res) => {
         const { productId } = req.params;
         const limitParam = Number.parseInt(req.query.limit, 10);
         const pageParam = Number.parseInt(req.query.page, 10);
@@ -612,7 +615,7 @@ class homeControllers{
             return responseReturn(res, 400, { message: 'Invalid product identifier.' });
         }
 
-        try{
+        try {
             const productObjectId = new Types.ObjectId(productId);
             const buildPipeline = (skipValue) => [
                 { $match: { _id: productObjectId } },
@@ -694,9 +697,9 @@ class homeControllers{
                 averageRating: result.averageRating ?? 0,
                 reviewCount: result.reviewCount ?? totalReviews,
             });
-        }catch(error){
+        } catch (error) {
             console.log(error)
-            return responseReturn(res, 500, {message: error.message})
+            return responseReturn(res, 500, { message: error.message })
         }
     }
 

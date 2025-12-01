@@ -19,27 +19,28 @@ const Shop = () => {
   const [productsError, setProductsError] = useState('');
   const [searchFacets, setSearchFacets] = useState(null);
 
-  useEffect(() =>{
+  useEffect(() => {
     let ignore = false;
-    const fetchCategories = async() => {
-        try{
-            const allCategories = await api.get('/customers-category-get', {withCredentials: true})
-            if (!ignore) {
-              setAllCategories(allCategories.data.categorys || []);
-            }
-        }catch(err){
-            console.log(err)
+    const fetchCategories = async () => {
+      try {
+        const allCategories = await api.get('/customers-category-get', { withCredentials: true })
+        if (!ignore) {
+          setAllCategories(allCategories.data.categorys || []);
         }
+      } catch (err) {
+        console.log(err)
+      }
     };
 
     fetchCategories();
     return () => {
       ignore = true;
     };
-}, [])
+  }, [])
 
   const [GridList, setGridList] = useState(true);
 
+  const [allProducts, setAllProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 30;
   const [searchValue, setSearchValue] = useState('');
@@ -62,49 +63,28 @@ const Shop = () => {
 
   useEffect(() => {
     let ignore = false;
-        const fetchProducts = async () => {
+    const fetchProducts = async () => {
       setIsLoadingProducts(true);
       setProductsError('');
       try {
-        const params = {
-          page: currentPage,
-          parPage: productsPerPage,
-        };
-
-        if (searchValue) {
-          params.searchValue = searchValue;
-        }
-
-        if (selectedCategory && selectedCategory !== 'all') {
-          params.category = selectedCategory;
-        }
-
-        if (minPrice != null) {
-          params.minPrice = minPrice;
-        }
-
-        if (maxPrice != null) {
-          params.maxPrice = maxPrice;
-        }
-
+        // Fetch ALL products once
         const { data } = await api.get('/customers-products-get', {
-          params,
           withCredentials: true,
         });
 
         if (ignore) return;
 
-        setProducts(Array.isArray(data?.products) ? data.products : []);
-        const totalCount = Number(data?.totalProduct);
-        setTotalProducts(Number.isFinite(totalCount) ? totalCount : 0);
-        setSearchFacets(data?.facets || null);
+        const fetched = Array.isArray(data?.products) ? data.products : [];
+        setAllProducts(fetched);
+        setProducts(fetched);
+        setTotalProducts(fetched.length);
       } catch (err) {
         if (ignore) return;
         console.log(err);
+        setAllProducts([]);
         setProducts([]);
         setTotalProducts(0);
         setProductsError('Failed to load products. Please try again.');
-        setSearchFacets(null);
       } finally {
         if (!ignore) {
           setIsLoadingProducts(false);
@@ -117,14 +97,42 @@ const Shop = () => {
     return () => {
       ignore = true;
     };
-  }, [currentPage, productsPerPage, searchValue, selectedCategory, minPrice, maxPrice]);
+  }, []);
 
-  const currentProducts = products;
+  // Client-side filtering
+  useEffect(() => {
+    let filtered = allProducts;
 
-  const startResult = totalProducts === 0 ? 0 : (currentPage - 1) * productsPerPage + 1;
-  const endResult = Math.min(currentPage * productsPerPage, totalProducts);
+    if (searchValue) {
+      const lowerTerm = searchValue.toLowerCase();
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(lowerTerm));
+    }
 
-  const paginate = (pageNumber) =>{
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+
+    if (minPrice != null) {
+      filtered = filtered.filter(p => p.price >= minPrice);
+    }
+    if (maxPrice != null) {
+      filtered = filtered.filter(p => p.price <= maxPrice);
+    }
+
+    setProducts(filtered);
+    setTotalProducts(filtered.length);
+    setCurrentPage(1);
+  }, [allProducts, searchValue, selectedCategory, minPrice, maxPrice]);
+
+  // Client-side pagination
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const startResult = totalProducts === 0 ? 0 : indexOfFirstProduct + 1;
+  const endResult = Math.min(indexOfLastProduct, totalProducts);
+
+  const paginate = (pageNumber) => {
     setCurrentPage(pageNumber)
   }
 
@@ -168,83 +176,83 @@ const Shop = () => {
 
   return (
     <div>
-        <SEO
-            title="Shop Anime Figures | A Figure A Day"
-            description="Browse curated anime figures and collectibles with daily deals at A Figure A Day."
-            canonical="https://www.afigureaday.com/shop"
-            keywords="shop anime figures, buy anime statues, collectible figures store"
-        />
-        <PageHeader title = "Our Shop Page" curPage = "Shop"/>
+      <SEO
+        title="Shop Anime Figures | A Figure A Day"
+        description="Browse curated anime figures and collectibles with daily deals at A Figure A Day."
+        canonical="https://www.afigureaday.com/shop"
+        keywords="shop anime figures, buy anime statues, collectible figures store"
+      />
+      <PageHeader title="Our Shop Page" curPage="Shop" />
 
-        <div className='shop-page padding-tb'>
-          <div className='container'>
-            <div className='row justify-content-center'>
-              <div className='col-lg-8 col-12'>
-                <article>
-                  <div className='shop-title d-flex flex-warp justify-content-between'>
-                    <p>{`Showing ${String(startResult).padStart(2, '0')} - ${String(endResult).padStart(2, '0')} of ${totalProducts} Results`}</p>
-                    <div className={`product-view-mode ${GridList ? "gridActive" : "listActive"}`}>
-                      <a className='grid' onClick = {() => setGridList(!GridList)}>
-                        <i className='icofont-ghost'></i>
-                      </a>
+      <div className='shop-page padding-tb'>
+        <div className='container'>
+          <div className='row justify-content-center'>
+            <div className='col-lg-8 col-12'>
+              <article>
+                <div className='shop-title d-flex flex-warp justify-content-between'>
+                  <p>{`Showing ${String(startResult).padStart(2, '0')} - ${String(endResult).padStart(2, '0')} of ${totalProducts} Results`}</p>
+                  <div className={`product-view-mode ${GridList ? "gridActive" : "listActive"}`}>
+                    <a className='grid' onClick={() => setGridList(!GridList)}>
+                      <i className='icofont-ghost'></i>
+                    </a>
 
-                      <a className='list' onClick = {() => setGridList(!GridList)}>
-                        <i className='icofont-listine-dots'></i>
-                      </a>
+                    <a className='list' onClick={() => setGridList(!GridList)}>
+                      <i className='icofont-listine-dots'></i>
+                    </a>
+                  </div>
+                </div>
+
+                {/* product cards */}
+                <div>
+                  {productsError && (
+                    <div className='alert alert-danger' role='alert'>
+                      {productsError}
                     </div>
-                  </div>
+                  )}
+                  {!productsError && isLoadingProducts && (
+                    <div className='py-4 text-center text-muted'>Loading products...</div>
+                  )}
+                  {!isLoadingProducts && !productsError && (
+                    <ProductCards GridList={GridList} products={currentProducts} />
+                  )}
+                </div>
 
-                  {/* product cards */}
-                  <div>
-                    {productsError && (
-                      <div className='alert alert-danger' role='alert'>
-                        {productsError}
-                      </div>
-                    )}
-                    {!productsError && isLoadingProducts && (
-                      <div className='py-4 text-center text-muted'>Loading products...</div>
-                    )}
-                    {!isLoadingProducts && !productsError && (
-                      <ProductCards GridList= {GridList} products = {currentProducts}/>
-                    )}
-                  </div>
+                <Paginations
+                  productsPerPage={productsPerPage}
+                  totalProducts={totalProducts}
+                  paginate={paginate}
+                  activePage={currentPage} />
+              </article>
+            </div>
 
-                  <Paginations
-                  productsPerPage = {productsPerPage}
-                  totalProducts = {totalProducts}
-                  paginate = {paginate}
-                  activePage = {currentPage}/>
-                  </article>
-              </div>
-
-              <div className='col-lg-4 col-12'>
-                <aside>
-                  <Search
-                    searchTerm={searchValue}
-                    onSearchTermChange={handleSearchTermChange}
-                    minPrice = {minPrice}
-                    maxPrice = {maxPrice}
-                    onPriceRangeChange= {handlePriceFilterChange}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={filterItem}
-                    availableCategories={menuItems}
-                    categoryFacets={searchFacets?.categories}
-                    totalProducts={totalProducts}
-                  />
-                  {/* {console.log(menuItems === undefined)} */}
-                  <ShopCategory                     
-                    filterItem ={filterItem}
-                    menuItems={menuItems}
-                    selectedCategory = {selectedCategory}
-                    categoryFacets={searchFacets?.categories}
-                    totalProducts={totalProducts}
-                  />
-                  <PopularPost/>
-                </aside>
-              </div>
+            <div className='col-lg-4 col-12'>
+              <aside>
+                <Search
+                  searchTerm={searchValue}
+                  onSearchTermChange={handleSearchTermChange}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  onPriceRangeChange={handlePriceFilterChange}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={filterItem}
+                  availableCategories={menuItems}
+                  categoryFacets={searchFacets?.categories}
+                  totalProducts={totalProducts}
+                />
+                {/* {console.log(menuItems === undefined)} */}
+                <ShopCategory
+                  filterItem={filterItem}
+                  menuItems={menuItems}
+                  selectedCategory={selectedCategory}
+                  categoryFacets={searchFacets?.categories}
+                  totalProducts={totalProducts}
+                />
+                <PopularPost />
+              </aside>
             </div>
           </div>
         </div>
+      </div>
 
     </div>
   )

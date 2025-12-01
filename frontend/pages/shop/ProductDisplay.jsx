@@ -214,6 +214,10 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                                 <span>Est. Delivery: {deliveryTime}</span>
                             </div>
                         )}
+                        <div className="flex items-center gap-4 text-lg text-gray-800">
+                            <i className="icofont-location-pin text-3xl text-[#D09A40]" />
+                            <span>Free Pickup in Edmonton</span>
+                        </div>
                     </div>
 
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "0.75rem" }}>
