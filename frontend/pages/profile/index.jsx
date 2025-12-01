@@ -108,7 +108,7 @@ const ProfilePage = () => {
                 <div className="container mx-auto max-w-2xl px-6 flex flex-col items-center gap-6">
                     <div className="flex flex-col items-center gap-4">
                         <Image
-                            src={previewUrl || '/images/default-avatar.png'}
+                            src={previewUrl || '/images/profile-default-image.png'}
                             alt="avatar"
                             width={200}
                             height={200}
