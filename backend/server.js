@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 import process from "process"
 dotenv.config();
 import http from 'http'
-import {initSocket} from './socket.js'
+import { initSocket } from './socket.js'
 
 import cors from "cors"
 import bodyParser from "body-parser";
@@ -36,14 +36,14 @@ const REAL_WEB_URL_2 = process.env.REAL_WEB_URL_2
 const app = express();
 
 app.post(
-    process.env.WEBHOOK_ENDPOINT,              
-    express.raw({ type: 'application/json' }),  
-    paymentController.handle_webhook,            
-  );
+  process.env.WEBHOOK_ENDPOINT,
+  express.raw({ type: 'application/json' }),
+  paymentController.handle_webhook,
+);
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.70:3001', DASHBOARD_URL, WEB_URL, GIT_WEB_URL, REAL_WEB_URL_1, REAL_WEB_URL_2],
-    credentials: true
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.70:3001', DASHBOARD_URL, WEB_URL, GIT_WEB_URL, REAL_WEB_URL_1, REAL_WEB_URL_2],
+  credentials: true
 }))
 app.use(bodyParser.json())
 app.use(cookieParser())
@@ -73,7 +73,7 @@ const server = http.createServer(app)
 initSocket(server)
 
 server.listen(PORT, () => {
-    console.log("Server is running")
+  console.log("Server is running")
 })
 
 // app.listen(PORT, () => {
