@@ -93,6 +93,7 @@ class paypalController {
 
     create_paypal_payment = async (req, res) => {
         try {
+            console.log(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
             const { cartItems, shipping, is_login, couponId } = req.body;
 
             if (!cartItems || !shipping) {
