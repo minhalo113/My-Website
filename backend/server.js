@@ -47,7 +47,7 @@ app.use(cors({
   credentials: true
 }))
 app.use(bodyParser.json())
-pp.post('/paypal-webhook', paypalController.handle_webhook);
+app.post('/paypal-webhook', paypalController.handle_webhook);
 app.use(cookieParser())
 
 app.use("/api", authRouter)
