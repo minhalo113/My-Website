@@ -23,6 +23,7 @@ const CartPage = () => {
     });
     const [coupon, setCoupon] = useState({ code: '', discount: 0, id: null });
     const [couponError, setCouponError] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('stripe');
 
     const calculateTotalPrice = (item) => {
         const price = item.price - (item.price * (item.discount || 0)) / 100;
@@ -72,10 +73,17 @@ const CartPage = () => {
                 is_login = user
             }
 
-            const { data } = await api.post("/create-payment-session", {
-                cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount
-            });
-            window.location.href = data.url;
+            if (paymentMethod === 'paypal') {
+                const { data } = await api.post("/create-paypal-payment", {
+                    cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount
+                });
+                window.location.href = data.url;
+            } else {
+                const { data } = await api.post("/create-payment-session", {
+                    cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount
+                });
+                window.location.href = data.url;
+            }
         } catch (error) {
             console.error(error);
             alert("Yikes! Payment session failed. Gremlins in the system? Try again in a bit.");
@@ -278,6 +286,34 @@ const CartPage = () => {
                                     </div>
 
                                     <div>
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-semibold text-slate-800 mb-2">Select Payment Method</h3>
+                                            <div className="flex gap-4">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="paymentMethod"
+                                                        value="stripe"
+                                                        checked={paymentMethod === 'stripe'}
+                                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                                                    />
+                                                    <span>Credit/Debit Card (Stripe)</span>
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="paymentMethod"
+                                                        value="paypal"
+                                                        checked={paymentMethod === 'paypal'}
+                                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                                                    />
+                                                    <span>PayPal</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
                                         <form onSubmit={handleCheckout} className="w-full sm:w-auto">
                                             <button
                                                 type="submit"
@@ -288,7 +324,7 @@ const CartPage = () => {
                                                         text-white font-semibold tracking-wide
                                                         shadow-md hover:shadow-lg
                                                         transition active:scale-95">
-                                                Proceed to Payment
+                                                {paymentMethod === 'paypal' ? 'Pay with PayPal' : 'Proceed to Payment'}
                                             </button>
                                         </form>
                                     </div>

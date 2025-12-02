@@ -18,6 +18,7 @@ import paymentRouter from "./routes/home/paymentRoutes.js";
 
 import paymentController from "./controllers/home/paymentController.js";
 import customerAuthControllerRouter from "./routes/home/customerAuthRoutes.js";
+import paypalController from "./controllers/home/paypalController.js";
 import orderRouter from "./routes/orders/orderRoutes.js";
 import wishlistRouter from "./routes/home/wishlistRoutes.js";
 import blogRouter from "./routes/dashboard/blogRoutes.js";
@@ -46,6 +47,7 @@ app.use(cors({
   credentials: true
 }))
 app.use(bodyParser.json())
+pp.post('/paypal-webhook', paypalController.handle_webhook);
 app.use(cookieParser())
 
 app.use("/api", authRouter)
