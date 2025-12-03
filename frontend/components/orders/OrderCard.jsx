@@ -67,25 +67,28 @@ const OrderCard = ({ order, expanded, onToggle }) => {
       {/* Items */}
       {isExpanded && Array.isArray(order.products) && order.products.length > 0 && (
         <ul className="divide-y divide-slate-200">
-          {order.products.map((item) => (
-            <li key={item.id || item._id} className="m-1 flex items-center gap-4 py-3">
-              {item.img?.[0] && (
-                <Image
-                  src={ensureHttps(item.img[0])}
-                  alt={item.name}
-                  width={48}
-                  height={48}
-                  className="h-12 w-12 rounded border border-slate-200 bg-slate-100 object-cover"
-                />
-              )}
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-slate-900">{item.name}</span>
-                <span className="text-xs text-slate-500">
-                  Qty: {item.qty} • {formatCurrency(item.price)}
-                </span>
-              </div>
-            </li>
-          ))}
+          {order.products.map((item) => {
+            const imgSrc = Array.isArray(item.img) ? item.img[0] : item.img;
+            return (
+              <li key={item.id || item._id} className="m-1 flex items-center gap-4 py-3">
+                {imgSrc && (
+                  <Image
+                    src={ensureHttps(imgSrc)}
+                    alt={item.name}
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 rounded border border-slate-200 bg-slate-100 object-cover"
+                  />
+                )}
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-slate-900">{item.name}</span>
+                  <span className="text-xs text-slate-500">
+                    Qty: {item.qty} • {formatCurrency(item.price)}
+                  </span>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
