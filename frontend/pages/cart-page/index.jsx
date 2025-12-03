@@ -230,7 +230,7 @@ const CartPage = () => {
                                             </li>
 
                                         </ul>
-                                        <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '5px', color: '#166534', fontSize: '0.9rem' }}>
+                                        <div style={{ marginBottom: '15px', marginTop: '15px', padding: '10px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '5px', color: '#166534', fontSize: '0.9rem' }}>
                                             <p style={{ margin: 0, fontWeight: 'bold' }}>🇨🇦 Note to Customers:</p>
                                             <p style={{ margin: 0 }}>We currently only ship to addresses within Canada. All prices are listed in Canadian Dollars (CAD).</p>
                                         </div>
@@ -286,30 +286,61 @@ const CartPage = () => {
                                     </div>
 
                                     <div>
-                                        <div className="mb-4">
-                                            <h3 className="text-lg font-semibold text-slate-800 mb-2">Select Payment Method</h3>
-                                            <div className="flex gap-4">
-                                                <label className="flex items-center gap-2 cursor-pointer">
+                                        <div className="mb-3">
+                                            <h3 className="text-lg font-semibold text-slate-800 mb-3">Select Payment Method</h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <label
+                                                    className={`relative flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${paymentMethod === 'stripe'
+                                                        ? 'border-emerald-600 bg-emerald-50 ring-1 ring-emerald-600 shadow-sm'
+                                                        : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50'
+                                                        }`}
+                                                >
                                                     <input
                                                         type="radio"
                                                         name="paymentMethod"
                                                         value="stripe"
                                                         checked={paymentMethod === 'stripe'}
                                                         onChange={(e) => setPaymentMethod(e.target.value)}
-                                                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                                                        className="sr-only"
                                                     />
-                                                    <span>Credit/Debit Card (Stripe)</span>
+                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${paymentMethod === 'stripe' ? 'border-emerald-600' : 'border-slate-400'
+                                                        }`}>
+                                                        {paymentMethod === 'stripe' && (
+                                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <span className="block font-semibold text-slate-800">Credit/Debit Card</span>
+                                                        <span className="text-sm text-slate-500">Pay securely with Stripe</span>
+                                                    </div>
+                                                    <div className="text-2xl opacity-80">💳</div>
                                                 </label>
-                                                <label className="flex items-center gap-2 cursor-pointer">
+
+                                                <label
+                                                    className={`relative flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${paymentMethod === 'paypal'
+                                                        ? 'border-emerald-600 bg-emerald-50 ring-1 ring-emerald-600 shadow-sm'
+                                                        : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50'
+                                                        }`}
+                                                >
                                                     <input
                                                         type="radio"
                                                         name="paymentMethod"
                                                         value="paypal"
                                                         checked={paymentMethod === 'paypal'}
                                                         onChange={(e) => setPaymentMethod(e.target.value)}
-                                                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                                                        className="sr-only"
                                                     />
-                                                    <span>PayPal</span>
+                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${paymentMethod === 'paypal' ? 'border-emerald-600' : 'border-slate-400'
+                                                        }`}>
+                                                        {paymentMethod === 'paypal' && (
+                                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <span className="block font-semibold text-slate-800">PayPal</span>
+                                                        <span className="text-sm text-slate-500">Fast & easy checkout</span>
+                                                    </div>
+                                                    <div className="text-2xl opacity-80">🅿️</div>
                                                 </label>
                                             </div>
                                         </div>

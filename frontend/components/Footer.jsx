@@ -12,12 +12,13 @@ const addressList = [
     { iconName: 'icofont-envelope', text: ' figureaday.store@gmail.com', },
 ]
 
-// const socialList = [ 
-//     { iconName: 'icofont-facebook', siteLink: 'https://www.facebook.com/profile.php?id=61569962775709', className: 'facebook', }, 
-//     { iconName: 'icofont-x', siteLink: 'https://x.com/fact_a8206', className: 'twitter', }, 
-//     { iconName: 'icofont-tiktok', siteLink: 'https://www.tiktok.com/@ahistoryfactaday', className: 'tiktok', },
-//     { iconName: 'icofont-instagram', siteLink: 'https://www.instagram.com/ahistoryfactaday/?hl=en', className: 'instagram', }, 
-//     { iconName: 'icofont-youtube', siteLink: 'https://www.youtube.com/@RandoHistoryFacts_', className: 'youtube', }, ]
+const socialList = [
+    { iconName: 'icofont-facebook', siteLink: 'https://www.facebook.com/profile.php?id=61569962775709', className: 'facebook', },
+    // { iconName: 'icofont-x', siteLink: 'https://x.com/fact_a8206', className: 'twitter', },
+    //     { iconName: 'icofont-tiktok', siteLink: 'https://www.tiktok.com/@ahistoryfactaday', className: 'tiktok', },
+    { iconName: 'icofont-instagram', siteLink: 'https://www.instagram.com/afigureaday123/?hl=en', className: 'instagram', },
+    { iconName: 'icofont-youtube', siteLink: 'https://youtube.com/@randohistoryfacts_?si=bfMKRbRI-BHjwOOJ', className: 'youtube', },
+]
 
 const ItemList = [{ text: 'All Products', link: '/shop', },
 { text: 'Shop', link: '/shop', }, { text: 'Blog', link: '/blog', },
@@ -76,17 +77,17 @@ const Footer = () => {
                                                 }
                                             </ul>
 
-                                            {/* <ul className='lab-ul social-icons justify-content-center'>
-                                        {
-                                            socialList.map((val, i) => (
-                                                <li key = {i}>
-                                                    <a href={val.siteLink} className={val.className} target="_blank" rel="noopener noreferrer">
-                                                        <i className={val.iconName}>{val.text}</i>
-                                                    </a>
-                                                </li>
-                                                ))
-                                        }
-                                        </ul> */}
+                                            <ul className='lab-ul social-icons justify-content-center'>
+                                                {
+                                                    socialList.map((val, i) => (
+                                                        <li key={i}>
+                                                            <a href={val.siteLink} className={val.className} target="_blank" rel="noopener noreferrer">
+                                                                <i className={val.iconName}>{val.text}</i>
+                                                            </a>
+                                                        </li>
+                                                    ))
+                                                }
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
