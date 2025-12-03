@@ -6,18 +6,8 @@ import couponModel from '../../models/couponModel.js';
 import moment from 'moment';
 import couponController from '../dashbaord/couponController.js';
 
-const client = new Client({
-    clientCredentials: {
-        clientId: process.env.PAYPAL_CLIENT_ID,
-        clientSecret: process.env.PAYPAL_CLIENT_SECRET
-    },
-    environment: process.env.NODE_ENV === 'production' ? Environment.Production : Environment.Sandbox,
-    logLevel: LogLevel.Info
-});
-
-const ordersController = new OrdersController(client);
-
 class paypalController {
+
     _processAuthorization = async (orderId, paypalOrderId, couponId, payerEmail, amountValue) => {
         try {
             const order = await customerOrder.findById(orderId);
@@ -28,7 +18,7 @@ class paypalController {
                 return { success: true, message: "Order already processed" };
             }
 
-            const { result } = await ordersController.authorizeOrder({
+            const { result } = await this.ordersController.authorizeOrder({
                 id: paypalOrderId
             });
 
@@ -93,7 +83,17 @@ class paypalController {
 
     create_paypal_payment = async (req, res) => {
         try {
-            console.log(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
+            const client = new Client({
+                clientCredentialsAuthCredentials: {
+                    oAuthClientId: process.env.PAYPAL_CLIENT_ID,
+                    oAuthClientSecret: process.env.PAYPAL_CLIENT_SECRET,
+                },
+                environment: Environment.Production,
+                logLevel: LogLevel.Info
+            });
+
+            const ordersController = new OrdersController(client);
+
             const { cartItems, shipping, is_login, couponId } = req.body;
 
             if (!cartItems || !shipping) {
@@ -183,7 +183,7 @@ class paypalController {
             // Encode orderId and couponId in custom_id for webhook reference
             const customId = `${order._id.toString()}|${couponId || ''}`;
 
-            const { result } = await ordersController.createOrder({
+            const { result } = ordersController.createOrder({
                 body: {
                     intent: 'AUTHORIZE',
                     purchaseUnits: [{
@@ -204,7 +204,7 @@ class paypalController {
                 }
             });
 
-            const approveLink = result.links.find(link => link.rel === 'approve').href;
+            console.log(result)
 
             return responseReturn(res, 200, { url: approveLink });
 
