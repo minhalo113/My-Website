@@ -1,12 +1,38 @@
-import { Client, Environment, LogLevel, OrdersController } from "@paypal/paypal-server-sdk";
+import {
+    Client,
+    Environment,
+    LogLevel,
+    OrdersController,
+    CheckoutPaymentIntent,
+    PaypalExperienceLandingPage,
+    PaypalExperienceUserAction,
+    PayeePaymentMethodPreference,
+    ShippingPreference
+} from "@paypal/paypal-server-sdk";
 import responseReturn from "../../utils/response.js";
 import customerOrder from '../../models/orderModel.js';
 import productModel from '../../models/productModel.js';
 import couponModel from '../../models/couponModel.js';
 import moment from 'moment';
 import couponController from '../dashbaord/couponController.js';
+import { sendMail } from '../../utils/mail.js';
 
 class paypalController {
+
+    constructor() {
+        const environment = Environment.Production;
+
+        this.client = new Client({
+            clientCredentialsAuthCredentials: {
+                oAuthClientId: process.env.PAYPAL_CLIENT_ID,
+                oAuthClientSecret: process.env.PAYPAL_CLIENT_SECRET,
+            },
+            environment: environment,
+            logLevel: LogLevel.Info
+        });
+
+        this.ordersController = new OrdersController(this.client);
+    }
 
     _processAuthorization = async (orderId, paypalOrderId, couponId, payerEmail, amountValue) => {
         try {
@@ -22,8 +48,16 @@ class paypalController {
                 id: paypalOrderId
             });
 
-            const authId = result.purchaseUnits[0].payments.authorizations[0].id;
-            const payerName = result.payer.name.givenName + ' ' + result.payer.name.surname;
+            // Accessing properties using snake_case as per SDK behavior
+            const purchaseUnits = result.purchase_units;
+            const payments = purchaseUnits?.[0]?.payments;
+            const authorizations = payments?.authorizations;
+            const authId = authorizations?.[0]?.id;
+
+            const payer = result.payer;
+            const givenName = payer?.name?.given_name;
+            const surname = payer?.name?.surname;
+            const payerName = (givenName && surname) ? `${givenName} ${surname}` : 'Unknown';
 
             const updatePayload = {
                 payment_status: 'Uncaptured',
@@ -32,7 +66,7 @@ class paypalController {
             };
 
             if (payerEmail) updatePayload.customerEmail = payerEmail;
-            if (payerName) updatePayload.customerName = payerName;
+            if (payerName && payerName !== 'Unknown') updatePayload.customerName = payerName;
 
             await customerOrder.findByIdAndUpdate(orderId, updatePayload);
 
@@ -83,17 +117,6 @@ class paypalController {
 
     create_paypal_payment = async (req, res) => {
         try {
-            const client = new Client({
-                clientCredentialsAuthCredentials: {
-                    oAuthClientId: process.env.PAYPAL_CLIENT_ID,
-                    oAuthClientSecret: process.env.PAYPAL_CLIENT_SECRET,
-                },
-                environment: Environment.Production,
-                logLevel: LogLevel.Info
-            });
-
-            const ordersController = new OrdersController(client);
-
             const { cartItems, shipping, is_login, couponId } = req.body;
 
             if (!cartItems || !shipping) {
@@ -183,9 +206,9 @@ class paypalController {
             // Encode orderId and couponId in custom_id for webhook reference
             const customId = `${order._id.toString()}|${couponId || ''}`;
 
-            const { result } = ordersController.createOrder({
+            const collect = {
                 body: {
-                    intent: 'AUTHORIZE',
+                    intent: CheckoutPaymentIntent.Authorize,
                     purchaseUnits: [{
                         amount: {
                             currencyCode: 'CAD',
@@ -194,28 +217,43 @@ class paypalController {
                         description: `Order #${order._id}`,
                         customId: customId
                     }],
-                    applicationContext: {
-                        brandName: "A Figure A Day",
-                        landingPage: "BILLING",
-                        userAction: "PAY_NOW",
-                        returnUrl: `${process.env.GIT_WEB_URL}/checkout-success?status=success`,
-                        cancelUrl: `${process.env.GIT_WEB_URL}/cart-page`
+                    paymentSource: {
+                        paypal: {
+                            experienceContext: {
+                                brandName: "A Figure A Day",
+                                landingPage: PaypalExperienceLandingPage.Login,
+                                userAction: PaypalExperienceUserAction.PayNow,
+                                paymentMethodPreference: PayeePaymentMethodPreference.ImmediatePaymentRequired,
+                                returnUrl: `${process.env.GIT_WEB_URL}/checkout-success?status=success`,
+                                cancelUrl: `${process.env.GIT_WEB_URL}/cart-page`
+                            }
+                        }
                     }
                 }
-            });
+            };
 
-            console.log(result)
+            const { result } = await this.ordersController.createOrder(collect);
 
-            return responseReturn(res, 200, { url: approveLink });
+            const links = result.links;
+            const approveLink = links.find(link => link.rel === 'payer-action' || link.rel === 'approve');
+
+            if (approveLink) {
+                return responseReturn(res, 200, { url: approveLink.href });
+            } else {
+                return responseReturn(res, 500, { error: "No approval link found in PayPal response." });
+            }
 
         } catch (error) {
             console.error("PayPal Create Error:", error);
+            if (error.statusCode) {
+                console.error("Status Code:", error.statusCode);
+                console.error("Result:", JSON.stringify(error.result, null, 2));
+            }
             return responseReturn(res, 500, { error: "Internal Server Error" });
         }
     }
 
     handle_webhook = async (req, res) => {
-
         try {
             const event = req.body;
 
