@@ -22,8 +22,15 @@ const ProductCards = ({ GridList, products }) => {
       colors = [],
       sizes = [],
       colorPrices = [],
-      colorImages = []
+      colorImages = [],
+      productType,
+      affiliateLink
     } = _product;
+
+    if (productType === 'affiliate' && affiliateLink) {
+      window.open(affiliateLink, '_blank', 'noopener,noreferrer');
+      return;
+    }
 
     const defaultColorIndex = 0;
     const defaultColor = colors[defaultColorIndex] || '';
@@ -110,7 +117,7 @@ const ProductCards = ({ GridList, products }) => {
                     </a>
 
                     <a onClick={(e) => handleSubmit(e, product)}>
-                      <i className="icofont-cart-alt text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-emerald-400" />
+                      <i className={`text-xl text-slate-700 transition-transform duration-200 hover:scale-125 ${product.productType === 'affiliate' ? 'icofont-external-link hover:text-blue-400' : 'icofont-cart-alt hover:text-emerald-400'}`} />
                     </a>
                   </div>
                 </div>
@@ -178,7 +185,7 @@ const ProductCards = ({ GridList, products }) => {
                     </a>
 
                     <a onClick={(e) => handleSubmit(e, product)}>
-                      <i className="icofont-cart-alt text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-emerald-400" />
+                      <i className={`text-xl text-slate-700 transition-transform duration-200 hover:scale-125 ${product.productType === 'affiliate' ? 'icofont-external-link hover:text-blue-400' : 'icofont-cart-alt hover:text-emerald-400'}`} />
                     </a>
                   </div>
                 </div>

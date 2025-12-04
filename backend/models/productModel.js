@@ -1,4 +1,4 @@
-import {Schema, model} from "mongoose";
+import { Schema, model } from "mongoose";
 
 const productSchema = new Schema({
     sellerId: {
@@ -25,6 +25,14 @@ const productSchema = new Schema({
         type: String,
         default: ''
     },
+    affiliateLink: {
+        type: String,
+        default: ''
+    },
+    productType: {
+        type: String,
+        default: 'standard'
+    },
     colors: {
         type: [String],
         default: []
@@ -45,7 +53,7 @@ const productSchema = new Schema({
         type: Number,
         required: true
     },
-    stock:{
+    stock: {
         type: Number,
         required: true
     },
@@ -83,28 +91,28 @@ const productSchema = new Schema({
     },
     ratings: [
         {
-            user: {type: Schema.Types.ObjectId, ref: 'Customer'},
+            user: { type: Schema.Types.ObjectId, ref: 'Customer' },
             userImage: {
-                public_id: {type: String},
-                url: {type: String}
+                public_id: { type: String },
+                url: { type: String }
             },
-            name: {type: String, required: false},
-            rating: {type: Number, required: true, min: 1, max: 5},
+            name: { type: String, required: false },
+            rating: { type: Number, required: true, min: 1, max: 5 },
             comment: String,
-            images: {type: [Schema.Types.Mixed], default: []},
-            reviewDate: {type: Date},
-            createdAt: {type: Date, default: Date.now},
-            updatedAt: {type: Date, default: Date.now},
-            isEdited: {type: Boolean, default: false}
+            images: { type: [Schema.Types.Mixed], default: [] },
+            reviewDate: { type: Date },
+            createdAt: { type: Date, default: Date.now },
+            updatedAt: { type: Date, default: Date.now },
+            isEdited: { type: Boolean, default: false }
         }
     ],
-    averageRating: {type: Number, default: 0},
-    reviewCount: {type: Number, default: 0},
+    averageRating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
     isHidden: {
         type: Boolean,
         default: false
     }
-}, {timestamps: true})
+}, { timestamps: true })
 
 productSchema.index({
     name: 'text',

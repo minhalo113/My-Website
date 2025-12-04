@@ -129,7 +129,7 @@ class productController {
         const form = formidable({ multiples: true });
 
         form.parse(req, async (err, field, files) => {
-            let { name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link } = field;
+            let { name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link, affiliateLink, productType } = field;
 
             shopName = String(shopName).trim()
 
@@ -216,6 +216,8 @@ class productController {
                     videos: allVideoUrl,
                     brand: String(brand).trim(),
                     link: link ? String(link).trim() : '',
+                    affiliateLink: affiliateLink ? String(affiliateLink).trim() : '',
+                    productType: productType ? String(productType).trim() : 'standard',
                     colors: colorArr,
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
@@ -323,7 +325,7 @@ class productController {
     }
 
     product_update = async (req, res) => {
-        let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link } = req.body;
+        let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link, affiliateLink, productType } = req.body;
 
         name = String(name).trim()
         const slug = name.split(' ').join('-')
@@ -353,6 +355,8 @@ class productController {
             await productModel.findByIdAndUpdate(productId, {
                 name, description, stock, price, category, discount, deliveryTime, brand,
                 link: link ? String(link).trim() : '',
+                affiliateLink: affiliateLink ? String(affiliateLink).trim() : '',
+                productType: productType ? String(productType).trim() : 'standard',
                 colors: colorArr,
                 colorPrices: parseColorPrices(colorPrices),
                 productId, slug

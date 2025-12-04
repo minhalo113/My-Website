@@ -165,7 +165,7 @@ class homeControllers {
 
         try {
             const products = await productModel.find({ isHidden: false })
-                .select('_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand')
+                .select('_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand productType affiliateLink link')
                 .sort({ createdAt: -1 })
 
             const normalizedProducts = products.map((product) => {

@@ -13,7 +13,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({ item, onSelectImage }) => {
-    const { name, _id, price, discount, seller, reviewCount, images, stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = [] } = item || {}
+    const { name, _id, price, discount, seller, reviewCount, images, stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = [], productType, affiliateLink } = item || {}
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -84,6 +84,8 @@ const ProductDisplay = ({ item, onSelectImage }) => {
             { duration: 2500 }
         );
     }
+
+    const isAffiliate = productType === 'affiliate' && affiliateLink;
 
     return (
         <div>
@@ -164,32 +166,34 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                             </div>
                         )}
 
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium">Quantity:</span>
-                            <div className="flex items-center border rounded overflow-hidden w-max">
-                                <button
-                                    type="button"
-                                    onClick={handleDecrease}
-                                    className="w-8 h-8 flex justify-center items-center text-xl font-bold border-r"
-                                >
-                                    -
-                                </button>
-                                <input
-                                    type="text"
-                                    name="qtybutton"
-                                    value={prequantity}
-                                    onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
-                                    className="w-12 text-center border-none outline-none"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleIncrease}
-                                    className="w-8 h-8 flex justify-center items-center text-xl font-bold border-l"
-                                >
-                                    +
-                                </button>
+                        {!isAffiliate && (
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium">Quantity:</span>
+                                <div className="flex items-center border rounded overflow-hidden w-max">
+                                    <button
+                                        type="button"
+                                        onClick={handleDecrease}
+                                        className="w-8 h-8 flex justify-center items-center text-xl font-bold border-r"
+                                    >
+                                        -
+                                    </button>
+                                    <input
+                                        type="text"
+                                        name="qtybutton"
+                                        value={prequantity}
+                                        onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
+                                        className="w-12 text-center border-none outline-none"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleIncrease}
+                                        className="w-8 h-8 flex justify-center items-center text-xl font-bold border-l"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
 
                         {/* Stock display */}
@@ -214,68 +218,96 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                                 <span>Est. Delivery: {deliveryTime}</span>
                             </div>
                         )}
-                        <div className="flex items-center gap-4 text-lg text-gray-800">
-                            <i className="icofont-location-pin text-3xl text-[#D09A40]" />
-                            <span>Free Pickup in Edmonton</span>
-                        </div>
+                        {!isAffiliate && (
+                            <div className="flex items-center gap-4 text-lg text-gray-800">
+                                <i className="icofont-location-pin text-3xl text-[#D09A40]" />
+                                <span>Free Pickup in Edmonton</span>
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: "0.75rem" }}>
-                        <button type="submit" className='lab-btn'
-                            style={{
-                                flex: 1,
-                                backgroundColor: '#059669',
-                                color: 'white',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '0.375rem',
-                                border: 'none',
-                                fontWeight: '600',
-                                fontSize: '14px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                            }}>
-                            <span>Add to Cart</span>
-                        </button>
+                        {isAffiliate ? (
+                            <a
+                                href={affiliateLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className='lab-btn'
+                                style={{
+                                    flex: 1,
+                                    backgroundColor: '#f97316',
+                                    color: 'white',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '0.375rem',
+                                    textDecoration: 'none',
+                                    fontWeight: '600',
+                                    fontSize: '14px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                }}>
+                                <span>Buy on Partner Site</span>
+                            </a>
+                        ) : (
+                            <>
+                                <button type="submit" className='lab-btn'
+                                    style={{
+                                        flex: 1,
+                                        backgroundColor: '#059669',
+                                        color: 'white',
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '0.375rem',
+                                        border: 'none',
+                                        fontWeight: '600',
+                                        fontSize: '14px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        cursor: 'pointer',
+                                    }}>
+                                    <span>Add to Cart</span>
+                                </button>
 
-                        <button
-                            type="button"
-                            onClick={addWishlist}
-                            className="lab-btn text-white"
-                            style={{
-                                flex: 1,
-                                backgroundColor: '#f97316',
-                                color: 'white',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '0.375rem',
-                                border: 'none',
-                                fontWeight: '600',
-                                fontSize: '14px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            <span>Add to Wishlist</span>
-                        </button>
+                                <button
+                                    type="button"
+                                    onClick={addWishlist}
+                                    className="lab-btn text-white"
+                                    style={{
+                                        flex: 1,
+                                        backgroundColor: '#f97316',
+                                        color: 'white',
+                                        padding: '0.5rem 1rem',
+                                        borderRadius: '0.375rem',
+                                        border: 'none',
+                                        fontWeight: '600',
+                                        fontSize: '14px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <span>Add to Wishlist</span>
+                                </button>
 
-                        <Link href="/cart-page" className='lab-btn bg-primary' style={{
-                            flex: 1,
-                            backgroundColor: '#3b82f6', // Tailwind blue-500
-                            color: 'white',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '0.375rem',
-                            textDecoration: 'none',
-                            fontWeight: '600',
-                            fontSize: '14px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                            <span>Check Out</span>
-                        </Link>
+                                <Link href="/cart-page" className='lab-btn bg-primary' style={{
+                                    flex: 1,
+                                    backgroundColor: '#3b82f6', // Tailwind blue-500
+                                    color: 'white',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '0.375rem',
+                                    textDecoration: 'none',
+                                    fontWeight: '600',
+                                    fontSize: '14px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                    <span>Check Out</span>
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </form>
             </div>
