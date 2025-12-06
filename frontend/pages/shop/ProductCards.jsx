@@ -104,6 +104,15 @@ const ProductCards = ({ GridList, products }) => {
                       style={{ objectFit: 'cover' }}
                     />
                     <DiscountBadge discount={product.discount} />
+                    {product.productType === 'affiliate' ? (
+                      <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+                        Check Deal ↗
+                      </span>
+                    ) : (
+                      <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+                        Direct Sale
+                      </span>
+                    )}
                   </div>
 
                   {/* product action link */}
@@ -173,6 +182,15 @@ const ProductCards = ({ GridList, products }) => {
                       style={{ objectFit: 'cover' }}
                     />
                     <DiscountBadge discount={product.discount} />
+                    {product.productType === 'affiliate' ? (
+                      <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+                        Check Deal ↗
+                      </span>
+                    ) : (
+                      <span className="absolute top-2 right-2 bg-emerald-600 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
+                        Direct Sale
+                      </span>
+                    )}
                   </div>
 
                   <div className="product-action-link flex items-center gap-3">

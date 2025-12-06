@@ -26,6 +26,7 @@ import contactRouter from "./routes/home/contactRoutes.js";
 import couponRouter from './routes/dashboard/couponRoutes.js';
 import homeSwiperRouter from './routes/dashboard/homeSwiperRoutes.js';
 import dashboardRouter from './routes/dashboard/dashboardRoutes.js';
+import startIngestionJob from './services/ingestion/scheduler.js';
 
 const PORT = process.env.PORT || 8080;
 const DASHBOARD_URL = process.env.DASHBOARD_URL
@@ -70,6 +71,7 @@ app.get('/health', (req, res) => {
 
 app.get("/", (req, res) => res.send("My backend"))
 dbConnect()
+startIngestionJob();
 
 const server = http.createServer(app)
 initSocket(server)
