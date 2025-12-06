@@ -25,6 +25,14 @@ const productSchema = new Schema({
         type: String,
         default: ''
     },
+    sourceId: {
+        type: String,
+        default: ''
+    },
+    currency: {
+        type: String,
+        default: 'USD'
+    },
     affiliateLink: {
         type: String,
         default: ''

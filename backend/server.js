@@ -15,6 +15,7 @@ import categoryRouter from "./routes/dashboard/categoryRoutes.js"
 import productRouter from "./routes/dashboard/productRoutes.js";
 import homeRouter from "./routes/home/homeRoutes.js";
 import paymentRouter from "./routes/home/paymentRoutes.js";
+import ebayRouter from "./routes/ebayRoutes.js";
 
 import paymentController from "./controllers/home/paymentController.js";
 import customerAuthControllerRouter from "./routes/home/customerAuthRoutes.js";
@@ -64,6 +65,7 @@ app.use('/api', contactRouter);
 app.use('/api', couponRouter);
 app.use('/api', homeSwiperRouter);
 app.use('/api', dashboardRouter);
+app.use('/api', ebayRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
