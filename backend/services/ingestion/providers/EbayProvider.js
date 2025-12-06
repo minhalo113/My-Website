@@ -80,38 +80,40 @@ class EbayProvider {
         const token = await this.getAccessToken();
         if (!token) return [];
 
-        const randomOffset = Math.floor(Math.random() * 201); // 0-200
-        const query = 'Anime Figure'; // The prompt mentions "Anime Figure", "Scale Statue". Let's use "Anime Figure". 
-        // Or maybe "(Anime Figure, Scale Statue)" syntax if eBay supports OR? eBay uses syntax like `(A,B)`.
+        const limit = 50;
+
+        const randomPage = Math.floor(Math.random() * 20);
+        const validOffset = randomPage * limit;
 
         const q = '(Anime Figure, Scale Statue)';
 
         const searchUrl = new URL(`${this.baseUrl}/buy/browse/v1/item_summary/search`);
         searchUrl.searchParams.append('q', q);
-        searchUrl.searchParams.append('filter', 'price:[50..1000],priceCurrency:USD,buyingOptions:{FIXED_PRICE},condition:{NEW}');
+
+        searchUrl.searchParams.append('filter', 'price:[50..1000],priceCurrency:USD,buyingOptions:{FIXED_PRICE},conditions:{NEW}');
         searchUrl.searchParams.append('sort', '-listDate');
-        searchUrl.searchParams.append('limit', '50');
-        searchUrl.searchParams.append('offset', randomOffset.toString());
+        searchUrl.searchParams.append('limit', limit.toString());
+        searchUrl.searchParams.append('offset', validOffset.toString()); // Offset chuẩn toán học
 
         const headers = {
             'Authorization': `Bearer ${token}`,
-            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
+            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US', // Đã đổi sang US như ông muốn
             'Content-Type': 'application/json'
         };
 
         const campaignId = process.env.EBAY_CAMPAIGN_ID;
-        const customId = process.env.EBAY_CUSTOM_ID || 'CUSTOM';
+        const customId = process.env.EBAY_CUSTOM_ID || 'AutoBot';
+
         if (campaignId) {
             headers['X-EBAY-C-ENDUSERCTX'] = `affiliateCampaignId=${campaignId},affiliateReferenceId=${customId}`;
         }
 
         try {
+            console.log(`🔍 eBay Bot Searching: Page ${randomPage} (Offset ${validOffset})`);
             const response = await fetch(searchUrl.toString(), { headers });
 
             if (!response.ok) {
                 console.error(`[EbayProvider] Search failed: ${response.status}`);
-                const txt = await response.text();
-                console.error(txt);
                 return [];
             }
 
@@ -120,12 +122,9 @@ class EbayProvider {
             if (!data.itemSummaries) return [];
 
             return data.itemSummaries.map(item => {
-                const affiliateLink = this.generateAffiliateLink(item);
 
                 const images = [];
-                if (item.image && item.image.imageUrl) {
-                    images.push(item.image.imageUrl);
-                }
+                if (item.image && item.image.imageUrl) images.push(item.image.imageUrl);
                 if (item.additionalImages) {
                     item.additionalImages.forEach(img => {
                         if (img.imageUrl) images.push(img.imageUrl);
@@ -135,18 +134,17 @@ class EbayProvider {
                 const priceValue = item.price ? parseFloat(item.price.value) : 0;
                 const currency = item.price ? item.price.currency : 'USD';
 
-                const sourceId = item.itemId;
-                const description = item.shortDescription || item.title;
-
                 return {
                     name: item.title,
                     price: priceValue,
                     currency: currency,
                     images: images,
-                    description: description,
-                    affiliateLink: affiliateLink,
+                    description: item.shortDescription || `eBay Listing: ${item.title}`,
+
+                    affiliateLink: item.itemWebUrl,
+
                     productType: 'affiliate',
-                    sourceId: sourceId,
+                    sourceId: item.itemId,
                     stock: 1,
                     link: item.itemWebUrl
                 };

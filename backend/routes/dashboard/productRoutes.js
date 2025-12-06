@@ -20,5 +20,6 @@ productRouter.patch('/product/:productId/reviews/:reviewId', authMiddleware, pro
 productRouter.delete('/product/:productId/reviews/:reviewId', authMiddleware, productController.delete_product_review)
 productRouter.delete('/product/:id', authMiddleware, productController.deleteProduct)
 productRouter.post('/product-import-aliexpress', authMiddleware, productController.import_aliexpress_product)
+productRouter.post('/product-ingest', authMiddleware, productController.trigger_ingestion)
 
 export default productRouter

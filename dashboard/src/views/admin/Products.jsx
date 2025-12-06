@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Search from '../components/Search';
 import { Link } from 'react-router-dom';
 import Pagination from '../Pagination';
-import { FaEdit, FaEye, FaEyeSlash, FaTrash, FaComments } from 'react-icons/fa';
+import { FaEdit, FaEye, FaEyeSlash, FaTrash, FaComments, FaSync } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { get_products, deleteProduct, product_visibility, messageClear, search_product_by_image } from '../../store/Reducers/productReducer';
+import { get_products, deleteProduct, product_visibility, messageClear, search_product_by_image, trigger_ingestion } from '../../store/Reducers/productReducer';
 import toast from 'react-hot-toast';
 
 const Products = () => {
@@ -19,8 +19,8 @@ const Products = () => {
         imageSearchLoading,
         imageSearchMeta,
         imageSearchMessage,
+        ingestionLoading
     } = useSelector(state => state.product)
-    console.log(products)
 
     const [currentPage, setCurrentPage] = useState(1)
     const [searchValue, setSearchValue] = useState('')
@@ -84,6 +84,12 @@ const Products = () => {
         dispatch(search_product_by_image({ imageFile: file }));
     };
 
+    const handleIngestion = () => {
+        if (window.confirm("Are you sure you want to manually trigger product ingestion? This may take a while.")) {
+            dispatch(trigger_ingestion());
+        }
+    };
+
     const handlePriceFilterChange = useCallback(({ min, max }) => {
         const normalizedMin = Number.isFinite(min) ? Number(min.toFixed(2)) : null
         const normalizedMax = Number.isFinite(max) ? Number(max.toFixed(2)) : null
@@ -132,7 +138,20 @@ const Products = () => {
 
     return (
         <div className='px-2 lg:px-7 pt-5'>
-            <h1 className='text-[#000000] font-semibold text-lg mb-3'>All Products</h1>
+            <div className="flex justify-between items-center mb-3">
+                <h1 className='text-[#000000] font-semibold text-lg'>All Products</h1>
+                <button
+                    onClick={handleIngestion}
+                    disabled={ingestionLoading}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-semibold transition-colors ${ingestionLoading
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-green-500 hover:bg-green-600 shadow-md'
+                        }`}
+                >
+                    <FaSync className={ingestionLoading ? 'animate-spin' : ''} />
+                    {ingestionLoading ? 'Fetching...' : 'Fetch Products'}
+                </button>
+            </div>
 
             <div className='w-full p-4 bg-[#6a5fdf] rounded-md'>
                 <Search

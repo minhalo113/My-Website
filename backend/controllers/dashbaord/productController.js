@@ -27,6 +27,7 @@ import {
     formatReviewListForResponse,
     repositionReviewInPlace,
 } from '../../utils/reviewFormatter.js';
+import ingestionService from '../../services/ingestion/IngestionService.js';
 
 const normalizeUploadList = (value) => {
     if (!value) return [];
@@ -1404,6 +1405,18 @@ class productController {
         } catch (error) {
             return responseReturn(res, 500, { error: "Internal Server Error" })
         }
+    }
+
+    trigger_ingestion = async (req, res) => {
+        if (req.role !== 'admin') {
+            return responseReturn(res, 403, { error: 'Only administrators can trigger ingestion.' });
+        }
+
+        ingestionService.run().catch(error => {
+            console.error('[Background Ingestion] Error:', error);
+        });
+
+        return responseReturn(res, 202, { message: 'Ingestion process initiated.' });
     }
 }
 
