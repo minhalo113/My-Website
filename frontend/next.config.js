@@ -54,6 +54,18 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'i.ibb.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.ebayimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'thumbs.ebaystatic.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'galleryplus.ebayimg.com',
+      },
     ],
   },
 };

@@ -57,23 +57,31 @@ class EbayProvider {
         }
 
         const campaignId = process.env.EBAY_CAMPAIGN_ID;
-        const customId = process.env.EBAY_CUSTOM_ID || 'CUSTOM';
-        const itemId = item.itemId.split('|')[1] || item.itemId;
-
-        let legacyItemId = item.itemId;
-        if (legacyItemId.startsWith('v1|')) {
-            const parts = legacyItemId.split('|');
-            if (parts.length >= 2) {
-                legacyItemId = parts[1];
-            }
-        }
+        console.log(campaignId)
 
         if (!campaignId) {
-            // Fallback to raw URL if no campaign ID
             return rawUrl;
         }
 
-        return `https://www.ebay.com/itm/${legacyItemId}?mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=${campaignId}&toolid=10001&mkevt=1`;
+        let itemIdToUse = item.legacyItemId;
+
+        if (!itemIdToUse) {
+            const legacyItemId = item.itemId;
+            if (legacyItemId.startsWith('v1|')) {
+                const parts = legacyItemId.split('|');
+                if (parts.length >= 2) {
+                    itemIdToUse = parts[1];
+                }
+            } else {
+                itemIdToUse = legacyItemId;
+            }
+        }
+
+        if (!itemIdToUse) {
+            return rawUrl;
+        }
+
+        return `https://www.ebay.com/itm/${itemIdToUse}?mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=${campaignId}&toolid=10001&mkevt=1`;
     }
 
     async searchProducts() {
@@ -90,14 +98,14 @@ class EbayProvider {
         const searchUrl = new URL(`${this.baseUrl}/buy/browse/v1/item_summary/search`);
         searchUrl.searchParams.append('q', q);
 
-        searchUrl.searchParams.append('filter', 'price:[50..1000],priceCurrency:USD,buyingOptions:{FIXED_PRICE},conditions:{NEW}');
+        searchUrl.searchParams.append('filter', 'price:[5..1000],priceCurrency:USD,buyingOptions:{FIXED_PRICE},conditions:{NEW}');
         searchUrl.searchParams.append('sort', '-listDate');
         searchUrl.searchParams.append('limit', limit.toString());
-        searchUrl.searchParams.append('offset', validOffset.toString()); // Offset chuẩn toán học
+        searchUrl.searchParams.append('offset', validOffset.toString());
 
         const headers = {
             'Authorization': `Bearer ${token}`,
-            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US', // Đã đổi sang US như ông muốn
+            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
             'Content-Type': 'application/json'
         };
 
@@ -140,9 +148,7 @@ class EbayProvider {
                     currency: currency,
                     images: images,
                     description: item.shortDescription || `eBay Listing: ${item.title}`,
-
-                    affiliateLink: item.itemWebUrl,
-
+                    affiliateLink: this.generateAffiliateLink(item),
                     productType: 'affiliate',
                     sourceId: item.itemId,
                     stock: 1,
