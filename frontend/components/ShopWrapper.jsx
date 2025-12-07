@@ -9,6 +9,7 @@ import ShopCategory from '../pages/shop/ShopCategory';
 import PopularPost from '../pages/shop/PopularPost';
 import api from '../src/api/api';
 import SEO from './SEO';
+import PropTypes from 'prop-types';
 
 const ShopWrapper = ({ productType = 'all' }) => {
     const router = useRouter();
@@ -298,5 +299,9 @@ const ShopWrapper = ({ productType = 'all' }) => {
         </div>
     )
 }
+
+ShopWrapper.propTypes = {
+    productType: PropTypes.string,
+};
 
 export default ShopWrapper
