@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import PageHeader from './PageHeader'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 import ProductCards from '../pages/shop/ProductCards';
 import Paginations from '../pages/shop/Paginations';
@@ -70,7 +71,10 @@ const ShopWrapper = ({ productType = 'all' }) => {
             try {
                 const params = {};
                 if (productType && productType !== 'all') {
-                    params.type = productType;
+
+                    if (productType === 'standard') params.type = 'direct';
+                    else if (productType === 'affiliate') params.type = 'global-finds';
+                    else params.type = productType;
                 }
 
                 // Fetch products
@@ -150,9 +154,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
         setSelectedCategory(normalizedCategory);
         setCurrentPage(1);
         const query = normalizedCategory === 'all' ? {} : { category: normalizedCategory };
-        // Preserve other query params like type if needed, but here we are using URL query for shop root not state
-        // Actually, if we are in /shop/affiliate, the route is different.
-        // If we are in /shop?type=affiliate, we need to preserve it.
+
         const newQuery = { ...router.query, ...query };
         if (normalizedCategory === 'all') delete newQuery.category;
 
@@ -189,8 +191,8 @@ const ShopWrapper = ({ productType = 'all' }) => {
 
     const pageTitleMap = {
         'all': 'Our Shop Page',
-        'dropship': 'Dropship Store',
-        'affiliate': 'Affiliate Store'
+        'standard': 'Direct Store',
+        'affiliate': 'Global Finds'
     };
 
     const title = pageTitleMap[productType] || 'Our Shop Page';
@@ -205,25 +207,108 @@ const ShopWrapper = ({ productType = 'all' }) => {
             />
             <PageHeader title={title} curPage="Shop" />
 
-            {/* Navigation Tabs */}
-            <div className="container mt-4">
-                <ul className="nav nav-tabs">
-                    <li className="nav-item">
-                        <a className={`nav-link ${productType === 'all' ? 'active' : ''}`} href="/shop" onClick={(e) => { e.preventDefault(); router.push('/shop'); }}>
-                            All
-                        </a>
-                    </li>
-                    <li className="nav-item">
-                        <a className={`nav-link ${productType === 'dropship' ? 'active' : ''}`} href="/shop/dropship" onClick={(e) => { e.preventDefault(); router.push('/shop/dropship'); }}>
-                            Dropship
-                        </a>
-                    </li>
-                    <li className="nav-item">
-                        <a className={`nav-link ${productType === 'affiliate' ? 'active' : ''}`} href="/shop/affiliate" onClick={(e) => { e.preventDefault(); router.push('/shop/affiliate'); }}>
-                            Affiliate
-                        </a>
-                    </li>
-                </ul>
+            <div style={{ marginTop: "2rem", marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+
+                    <div
+                        style={{
+                            display: "inline-flex",
+                            backgroundColor: "#f3f4f6",
+                            padding: "4px",
+                            borderRadius: "9999px",
+                            boxShadow: "inset 0 0 4px rgba(0,0,0,0.05)"
+                        }}
+                    >
+
+                        <Link
+                            href="/shop"
+                            style={{
+                                padding: "8px 24px",
+                                borderRadius: "9999px",
+                                fontSize: "0.875rem",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                                transition: "all 0.3s",
+                                backgroundColor: productType === "all" ? "#ffffff" : "transparent",
+                                color: productType === "all" ? "#059669" : "#6b7280",
+                                boxShadow: productType === "all" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                                cursor: "pointer"
+                            }}
+                        >
+                            All Collection
+                        </Link>
+
+                        <Link
+                            href="/shop/direct-store"
+                            style={{
+                                padding: "8px 24px",
+                                borderRadius: "9999px",
+                                fontSize: "0.875rem",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                                transition: "all 0.3s",
+                                backgroundColor: productType === "standard" ? "#ffffff" : "transparent",
+                                color: productType === "standard" ? "#059669" : "#6b7280",
+                                boxShadow: productType === "standard" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                                cursor: "pointer"
+                            }}
+                        >
+                            Direct Store 🇨🇦
+                        </Link>
+
+                        <Link
+                            href="/shop/global-finds"
+                            style={{
+                                padding: "8px 24px",
+                                borderRadius: "9999px",
+                                fontSize: "0.875rem",
+                                fontWeight: 600,
+                                textDecoration: "none",
+                                transition: "all 0.3s",
+                                backgroundColor: productType === "affiliate" ? "#ffffff" : "transparent",
+                                color: productType === "affiliate" ? "#f97316" : "#6b7280",
+                                boxShadow: productType === "affiliate" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                                cursor: "pointer"
+                            }}
+                        >
+                            Global Finds 🌍
+                        </Link>
+
+                    </div>
+
+                    {productType === "standard" && (
+                        <div style={{ marginTop: "1rem", textAlign: "center", maxWidth: "32rem" }}>
+                            <p style={{
+                                color: "#047857",
+                                fontSize: "0.875rem",
+                                backgroundColor: "#ecfdf5",
+                                padding: "8px 16px",
+                                borderRadius: "0.5rem",
+                                border: "1px solid #d1fae5",
+                                display: "inline-block"
+                            }}>
+                                ✨ Professional grade accessories sent directly from our warehouse partners.
+                            </p>
+                        </div>
+                    )}
+
+                    {productType === "affiliate" && (
+                        <div style={{ marginTop: "1rem", textAlign: "center", maxWidth: "32rem" }}>
+                            <p style={{
+                                color: "#c2410c",
+                                fontSize: "0.875rem",
+                                backgroundColor: "#fff7ed",
+                                padding: "8px 16px",
+                                borderRadius: "0.5rem",
+                                border: "1px solid #ffedd5",
+                                display: "inline-block"
+                            }}>
+                                🌍 Products sourced from international marketplaces.
+                            </p>
+                        </div>
+                    )}
+
+                </div>
             </div>
 
             <div className='shop-page padding-tb'>

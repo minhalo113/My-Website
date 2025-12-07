@@ -16,8 +16,8 @@ const createTimedCache = (maxEntries, ttl) => {
     if (!Number.isFinite(maxEntries) || maxEntries <= 0 || !Number.isFinite(ttl) || ttl <= 0) {
         return {
             get: () => undefined,
-            set: () => {},
-            clear: () => {},
+            set: () => { },
+            clear: () => { },
         };
     }
 
@@ -76,6 +76,14 @@ const sanitizeCategory = (value) => {
     const trimmed = value.trim();
     if (!trimmed || trimmed.toLowerCase() === 'all') return '';
     return trimmed;
+};
+
+const sanitizeProductType = (value) => {
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim().toLowerCase();
+    // Only accept internal database values, mapping happens in controller
+    if (['standard', 'affiliate'].includes(trimmed)) return trimmed;
+    return '';
 };
 
 const sanitizePrice = (value) => {
@@ -285,6 +293,7 @@ const sanitizeSort = (value) => {
 export const searchCatalogProducts = async ({
     term = '',
     category,
+    productType,
     page,
     limit,
     includeFacets = true,
@@ -295,6 +304,7 @@ export const searchCatalogProducts = async ({
 } = {}) => {
     const sanitizedTerm = sanitizeTerm(term);
     const sanitizedCategory = sanitizeCategory(category);
+    const sanitizedProductType = sanitizeProductType(productType);
     const normalizedPage = toPositiveInt(page, 1, { min: 1 });
     const normalizedLimit = toPositiveInt(limit, DEFAULT_PAGE_SIZE, { min: 1, max: MAX_PAGE_SIZE });
     const skip = normalizedLimit * (normalizedPage - 1);
@@ -315,6 +325,7 @@ export const searchCatalogProducts = async ({
         ? JSON.stringify({
             term: sanitizedTerm,
             category: sanitizedCategory || null,
+            productType: sanitizedProductType || null,
             page: normalizedPage,
             limit: normalizedLimit,
             includeFacets,
@@ -342,6 +353,10 @@ export const searchCatalogProducts = async ({
 
     if (sanitizedCategory) {
         initialMatchStage.category = sanitizedCategory;
+    }
+
+    if (sanitizedProductType) {
+        initialMatchStage.productType = sanitizedProductType;
     }
 
     const pipeline = [];

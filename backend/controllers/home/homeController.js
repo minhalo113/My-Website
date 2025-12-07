@@ -114,7 +114,12 @@ class homeControllers {
     }
 
     products_get = async (req, res) => {
-        const { page, searchValue, parPage, category, minPrice, maxPrice, sort } = req.query
+        const { page, searchValue, parPage, category, minPrice, maxPrice, sort, type } = req.query
+
+        // Map public type names to internal productType values
+        let mappedType = type;
+        if (type === 'direct') mappedType = 'standard';
+        if (type === 'global-finds') mappedType = 'affiliate';
 
         const trimmedSearch = typeof searchValue === 'string' ? searchValue.trim() : ''
         const hasPriceFilter = minPrice !== undefined || maxPrice !== undefined
@@ -126,6 +131,7 @@ class homeControllers {
                 const searchResponse = await searchCatalogProducts({
                     term: trimmedSearch,
                     category,
+                    productType: mappedType,
                     page,
                     limit: parPage,
                     includeFacets: Boolean(trimmedSearch),
@@ -164,7 +170,11 @@ class homeControllers {
         }
 
         try {
-            const products = await productModel.find({ isHidden: false })
+            const matchQuery = { isHidden: false }
+            if (mappedType && ['standard', 'affiliate'].includes(mappedType)) {
+                matchQuery.productType = mappedType
+            }
+            const products = await productModel.find(matchQuery)
                 .select('_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand productType affiliateLink link')
                 .sort({ createdAt: -1 })
 
@@ -179,7 +189,7 @@ class homeControllers {
                     price: effectivePrice
                 }
             })
-            const totalProduct = await productModel.countDocuments({ isHidden: false })
+            const totalProduct = await productModel.countDocuments(matchQuery)
 
             return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
         } catch (error) {
