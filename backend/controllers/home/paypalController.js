@@ -126,6 +126,18 @@ class paypalController {
             const productIds = cartItems.map(item => item.id);
             const products = await productModel.find({ _id: { $in: productIds } });
 
+            // Validate shipping destinations
+            const destinations = new Set(products.map(p => p.shippingDestination || 'both'));
+            if (destinations.has('canada_only') && destinations.has('us_only')) {
+                return responseReturn(res, 400, { error: "Cart contains items that ship to Canada Only and US Only. Please separate your orders." });
+            }
+
+            // Determine order currency
+            let orderCurrency = 'USD';
+            if (destinations.has('canada_only')) {
+                orderCurrency = 'CAD';
+            }
+
             let globalDiscount = 0;
             if (couponId) {
                 const coupon = await couponModel.findById(couponId);
@@ -136,6 +148,9 @@ class paypalController {
 
             let finalPrice = 0;
             const trustedCartItems = [];
+
+            // Exchange rate for Both (USD) items when paying in CAD
+            const USD_TO_CAD_RATE = 1.35;
 
             for (const item of cartItems) {
                 const product = products.find(p => p._id.toString() === item.id);
@@ -154,6 +169,12 @@ class paypalController {
                             productImage = product.colorImages[colorIndex];
                         }
                     }
+                }
+
+                // Currency Conversion Logic for "Both" items
+                if (orderCurrency === 'CAD' && (product.shippingDestination === 'both' || !product.shippingDestination)) {
+                    // Item is USD, but order is CAD. Convert price.
+                    price = price * USD_TO_CAD_RATE;
                 }
 
                 if (product.discount > 0) {
@@ -211,7 +232,7 @@ class paypalController {
                     intent: CheckoutPaymentIntent.Authorize,
                     purchaseUnits: [{
                         amount: {
-                            currencyCode: 'CAD',
+                            currencyCode: orderCurrency,
                             value: finalPrice.toFixed(2)
                         },
                         description: `Order #${order._id}`,

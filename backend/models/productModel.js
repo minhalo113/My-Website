@@ -41,6 +41,10 @@ const productSchema = new Schema({
         type: String,
         default: 'standard'
     },
+    shippingDestination: {
+        type: String,
+        default: 'both' // 'canada_only', 'us_only', 'both'
+    },
     colors: {
         type: [String],
         default: []

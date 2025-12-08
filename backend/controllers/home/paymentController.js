@@ -21,6 +21,17 @@ class paymentController {
             const productIds = cartItems.map(item => item.id);
             const products = await productModel.find({ _id: { $in: productIds } });
 
+            // Validate shipping destinations
+            const destinations = new Set(products.map(p => p.shippingDestination || 'both'));
+            if (destinations.has('canada_only') && destinations.has('us_only')) {
+                return responseReturn(res, 400, { error: "Cart contains items that ship to Canada Only and US Only. Please separate your orders." });
+            }
+
+            let orderCurrency = 'usd';
+            if (destinations.has('canada_only')) {
+                orderCurrency = 'cad';
+            }
+
             let globalDiscount = 0;
             if (couponId) {
                 const coupon = await couponModel.findById(couponId);
@@ -32,6 +43,8 @@ class paymentController {
             const line_items = [];
             let finalPrice = 0;
             const trustedCartItems = [];
+
+            const USD_TO_CAD_RATE = 1.4;
 
             for (const item of cartItems) {
                 const product = products.find(p => p._id.toString() === item.id);
@@ -52,6 +65,10 @@ class paymentController {
                     }
                 }
 
+                if (orderCurrency === 'cad' && (product.shippingDestination === 'both' || !product.shippingDestination)) {
+                    price = price * USD_TO_CAD_RATE;
+                }
+
                 if (product.discount > 0) {
                     price = price - (price * product.discount) / 100;
                 }
@@ -64,7 +81,7 @@ class paymentController {
 
                 line_items.push({
                     price_data: {
-                        currency: 'cad',
+                        currency: orderCurrency,
                         product_data: {
                             name: product.name,
                             images: productImage ? [productImage] : [],

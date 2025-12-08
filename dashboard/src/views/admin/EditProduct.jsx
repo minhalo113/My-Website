@@ -39,7 +39,9 @@ const EditProduct = () => {
         colorPrices: '',
         link: '',
         affiliateLink: '',
-        productType: 'standard'
+        productType: 'standard',
+        shippingDestination: 'both',
+        currency: 'USD'
     })
 
     const colorPriceEntries = useMemo(
@@ -199,6 +201,12 @@ const EditProduct = () => {
         }))
     }
     useEffect(() => {
+        const shippingDest = product.shippingDestination || 'both';
+        let derivedCurrency = 'USD';
+        if (shippingDest === 'canada_only') {
+            derivedCurrency = 'CAD';
+        }
+
         setState({
             name: product.name,
             description: product.description,
@@ -211,7 +219,9 @@ const EditProduct = () => {
             colorPrices: Array.isArray(product.colorPrices) ? product.colors.map((c, i) => `${c}:${product.colorPrices[i] ?? ''}`).join(',') : '',
             link: product.link || '',
             affiliateLink: product.affiliateLink || '',
-            productType: product.productType || 'standard'
+            productType: product.productType || 'standard',
+            shippingDestination: shippingDest,
+            currency: derivedCurrency
         })
         setCategory(product.category)
         setImageShow(product.images)
@@ -270,6 +280,8 @@ const EditProduct = () => {
             link: state.link,
             affiliateLink: state.affiliateLink,
             productType: state.productType,
+            shippingDestination: state.shippingDestination,
+            currency: state.currency,
             category: category,
             productId: productId
         }
@@ -293,6 +305,18 @@ const EditProduct = () => {
                             <select className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.productType} name='productType' id='productType'>
                                 <option value="standard">Standard (Dropship)</option>
                                 <option value="affiliate">Affiliate (External Link)</option>
+                            </select>
+
+                            <label htmlFor="shippingDestination" className='text-[#d0d2d6] mt-2'>Shipping Destination</label>
+                            <select className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={(e) => {
+                                const dest = e.target.value;
+                                let curr = 'USD';
+                                if (dest === 'canada_only') curr = 'CAD';
+                                setState({ ...state, shippingDestination: dest, currency: curr });
+                            }} value={state.shippingDestination} name='shippingDestination' id='shippingDestination'>
+                                <option value="both">Both (USD)</option>
+                                <option value="canada_only">Canada Only (CAD)</option>
+                                <option value="us_only">US Only (USD)</option>
                             </select>
 
                             <label htmlFor="description" className='text-[#d0d2d6] mt-2'>Description</label>

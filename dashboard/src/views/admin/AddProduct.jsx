@@ -53,7 +53,9 @@ const AddProduct = () => {
         colorPrices: '',
         link: '',
         affiliateLink: '',
-        productType: 'standard'
+        productType: 'standard',
+        shippingDestination: 'both',
+        currency: 'USD'
     })
 
     const [importUrl, setImportUrl] = useState('')
@@ -425,6 +427,18 @@ const AddProduct = () => {
                                 <option value="affiliate">Affiliate (External Link)</option>
                             </select>
 
+                            <label htmlFor="shippingDestination" className='text-[#d0d2d6] mt-2'>Shipping Destination</label>
+                            <select className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={(e) => {
+                                const dest = e.target.value;
+                                let curr = 'USD';
+                                if (dest === 'canada_only') curr = 'CAD';
+                                setState({ ...state, shippingDestination: dest, currency: curr });
+                            }} value={state.shippingDestination} name='shippingDestination' id='shippingDestination'>
+                                <option value="both">Both (USD)</option>
+                                <option value="canada_only">Canada Only (CAD)</option>
+                                <option value="us_only">US Only (USD)</option>
+                            </select>
+
                             <label htmlFor="description" className='text-[#d0d2d6] mt-2'>Description</label>
                             <textarea className='px-4 py-2 focus:border-indigo-500 outline-none bg-[#6a5fdf] border border-slate-700 rounded-md text-[#d0d2d6]' onChange={inputHandle} value={state.description} name='description' id='description' placeholder='Description' rows="4"></textarea>
                         </div>
@@ -508,8 +522,8 @@ const AddProduct = () => {
                                     onClick={handleImageDuplicateCheck}
                                     disabled={preflightCheckLoading || (images.length === 0 && colorImages.length === 0)}
                                     className={`px-4 py-2 rounded-md w-full lg:w-auto transition-colors ${preflightCheckLoading || (images.length === 0 && colorImages.length === 0)
-                                            ? 'bg-slate-600 cursor-not-allowed text-slate-300'
-                                            : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                                        ? 'bg-slate-600 cursor-not-allowed text-slate-300'
+                                        : 'bg-indigo-500 hover:bg-indigo-600 text-white'
                                         }`}
                                 >
                                     {preflightCheckLoading ? 'Checking images...' : 'Check for Existing Images'}
@@ -631,8 +645,8 @@ const AddProduct = () => {
                                     onClick={handleGenerateSocialPreview}
                                     disabled={socialPreviewLoading || socialPublishLoading}
                                     className={`px-4 py-2 rounded-md w-full sm:w-auto transition-colors ${socialPreviewLoading || socialPublishLoading
-                                            ? 'bg-slate-600 cursor-not-allowed text-slate-300'
-                                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                        ? 'bg-slate-600 cursor-not-allowed text-slate-300'
+                                        : 'bg-blue-500 hover:bg-blue-600 text-white'
                                         }`}
                                 >
                                     {socialPreviewLoading ? 'Preparing social copy...' : 'Generate Social Post'}
@@ -834,8 +848,8 @@ const AddProduct = () => {
                                     onClick={handleCloseSocialModal}
                                     disabled={socialPublishLoading}
                                     className={`rounded-md border px-5 py-2 transition-colors ${socialPublishLoading
-                                            ? 'cursor-not-allowed border-slate-600 text-slate-300'
-                                            : 'border-slate-500 text-slate-100 hover:border-white'
+                                        ? 'cursor-not-allowed border-slate-600 text-slate-300'
+                                        : 'border-slate-500 text-slate-100 hover:border-white'
                                         }`}
                                 >
                                     Cancel
@@ -845,8 +859,8 @@ const AddProduct = () => {
                                     onClick={handlePublishSocialPost}
                                     disabled={socialPublishLoading}
                                     className={`rounded-md px-5 py-2 transition-colors ${socialPublishLoading
-                                            ? 'cursor-wait bg-slate-600 text-slate-300'
-                                            : 'bg-green-500 text-white hover:bg-green-600'
+                                        ? 'cursor-wait bg-slate-600 text-slate-300'
+                                        : 'bg-green-500 text-white hover:bg-green-600'
                                         }`}
                                 >
                                     {socialPublishLoading ? 'Publishing...' : 'Post to Instagram & Facebook'}
