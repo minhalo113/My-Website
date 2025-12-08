@@ -365,15 +365,19 @@ const ShopWrapper = ({ productType = 'all' }) => {
                                     availableCategories={menuItems}
                                     categoryFacets={searchFacets?.categories}
                                     totalProducts={totalProducts}
+                                    showCategoryFilter={productType !== 'affiliate'}
+                                    showImageSearch={productType !== 'affiliate'}
                                 />
                                 {/* {console.log(menuItems === undefined)} */}
-                                <ShopCategory
-                                    filterItem={filterItem}
-                                    menuItems={menuItems}
-                                    selectedCategory={selectedCategory}
-                                    categoryFacets={searchFacets?.categories}
-                                    totalProducts={totalProducts}
-                                />
+                                {productType !== 'affiliate' && (
+                                    <ShopCategory
+                                        filterItem={filterItem}
+                                        menuItems={menuItems}
+                                        selectedCategory={selectedCategory}
+                                        categoryFacets={searchFacets?.categories}
+                                        totalProducts={totalProducts}
+                                    />
+                                )}
                                 <PopularPost />
                             </aside>
                         </div>

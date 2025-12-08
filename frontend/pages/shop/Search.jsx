@@ -35,6 +35,8 @@ const Search = ({
     categoryFacets,
     availableCategories,
     totalProducts,
+    showCategoryFilter,
+    showImageSearch,
 }) => {
     const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || "");
 
@@ -515,37 +517,39 @@ const Search = ({
                 </button>
             </form>
 
-            <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
-                <h6 className='fw-semibold mb-2'>Filter by category</h6>
-                <select
-                    className='form-select form-select-sm'
-                    value={normalizedSelectedCategory}
-                    onChange={handleCategoryChange}
-                >
-                    <option value='all'>
-                        {`All categories${formattedTotalProducts ? ` (${formattedTotalProducts})` : ''}`}
-                    </option>
-                    {categoryOptions.map((option) => {
-                        const displayCount = Number.isFinite(option.count) ? option.count.toLocaleString() : null;
-                        return (
-                            <option key={option.value} value={option.value}>
-                                {`${option.label}${displayCount ? ` (${displayCount})` : ''}`}
-                            </option>
-                        );
-                    })}
-                </select>
-                <div className='d-flex justify-content-between align-items-center mt-2'>
-                    <small className='text-muted'>Narrow your results by selecting a category.</small>
-                    <button
-                        type='button'
-                        className='btn btn-link btn-sm p-0'
-                        onClick={handleClearCategory}
-                        disabled={normalizedSelectedCategory === 'all'}
+            {showCategoryFilter && (
+                <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
+                    <h6 className='fw-semibold mb-2'>Filter by category</h6>
+                    <select
+                        className='form-select form-select-sm'
+                        value={normalizedSelectedCategory}
+                        onChange={handleCategoryChange}
                     >
-                        Reset
-                    </button>
+                        <option value='all'>
+                            {`All categories${formattedTotalProducts ? ` (${formattedTotalProducts})` : ''}`}
+                        </option>
+                        {categoryOptions.map((option) => {
+                            const displayCount = Number.isFinite(option.count) ? option.count.toLocaleString() : null;
+                            return (
+                                <option key={option.value} value={option.value}>
+                                    {`${option.label}${displayCount ? ` (${displayCount})` : ''}`}
+                                </option>
+                            );
+                        })}
+                    </select>
+                    <div className='d-flex justify-content-between align-items-center mt-2'>
+                        <small className='text-muted'>Narrow your results by selecting a category.</small>
+                        <button
+                            type='button'
+                            className='btn btn-link btn-sm p-0'
+                            onClick={handleClearCategory}
+                            disabled={normalizedSelectedCategory === 'all'}
+                        >
+                            Reset
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
                 <h6 className='fw-semibold mb-2'>Filter by price</h6>
@@ -596,49 +600,51 @@ const Search = ({
             </div>
 
 
-            <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
-                <label htmlFor='image-search-input' className='d-block fw-semibold mb-2'>Search with an image</label>
-                <input
-                    id='image-search-input'
-                    type='file'
-                    accept='image/*'
-                    className='form-control form-control-sm'
-                    onChange={handleImageChange}
-                />
-                <p className='small text-muted mt-2 mb-0'>Upload a product photo to discover similar items.</p>
+            {showImageSearch && (
+                <div className='mb-3 p-3 border rounded' style={{ background: '#f8f9fa' }}>
+                    <label htmlFor='image-search-input' className='d-block fw-semibold mb-2'>Search with an image</label>
+                    <input
+                        id='image-search-input'
+                        type='file'
+                        accept='image/*'
+                        className='form-control form-control-sm'
+                        onChange={handleImageChange}
+                    />
+                    <p className='small text-muted mt-2 mb-0'>Upload a product photo to discover similar items.</p>
 
-                {queryPreview && (
-                    <div className='d-flex align-items-center gap-3 mt-3'>
-                        <Image
-                            src={ensureHttps(queryPreview)}
-                            alt='Selected reference'
-                            width={80}
-                            height={80}
-                            unoptimized
-                            style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #dee2e6' }}
-                        />
-                        <button type='button' className='btn btn-outline-secondary btn-sm' onClick={clearImageSearch}>
-                            Clear
-                        </button>
-                    </div>
-                )}
-                {/* 
-            <div className='mt-3'>
-                <label htmlFor='image-threshold-input' className='form-label small text-muted mb-1'>Match strictness</label>
-                <input
-                    id='image-threshold-input'
-                    type='range'
-                    min='0'
-                    max='64'
-                    step='1'
-                    value={imageThreshold}
-                    className='form-range'
-                    onChange={handleImageThresholdChange}
-                    disabled={!imageFile}
-                />
-                <p className='small text-muted mb-0'>Maximum Hamming distance: {imageThreshold}. Lower values return only near-identical matches.</p>
-            </div> */}
-            </div>
+                    {queryPreview && (
+                        <div className='d-flex align-items-center gap-3 mt-3'>
+                            <Image
+                                src={ensureHttps(queryPreview)}
+                                alt='Selected reference'
+                                width={80}
+                                height={80}
+                                unoptimized
+                                style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #dee2e6' }}
+                            />
+                            <button type='button' className='btn btn-outline-secondary btn-sm' onClick={clearImageSearch}>
+                                Clear
+                            </button>
+                        </div>
+                    )}
+                    {/* 
+                <div className='mt-3'>
+                    <label htmlFor='image-threshold-input' className='form-label small text-muted mb-1'>Match strictness</label>
+                    <input
+                        id='image-threshold-input'
+                        type='range'
+                        min='0'
+                        max='64'
+                        step='1'
+                        value={imageThreshold}
+                        className='form-range'
+                        onChange={handleImageThresholdChange}
+                        disabled={!imageFile}
+                    />
+                    <p className='small text-muted mb-0'>Maximum Hamming distance: {imageThreshold}. Lower values return only near-identical matches.</p>
+                </div> */}
+                </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: "400px", overflowY: "auto" }}>
                 {
@@ -787,6 +793,8 @@ Search.propTypes = {
     ),
     availableCategories: PropTypes.arrayOf(PropTypes.string),
     totalProducts: PropTypes.number,
+    showCategoryFilter: PropTypes.bool,
+    showImageSearch: PropTypes.bool,
 };
 
 Search.defaultProps = {
@@ -800,6 +808,8 @@ Search.defaultProps = {
     categoryFacets: [],
     availableCategories: [],
     totalProducts: null,
+    showCategoryFilter: true,
+    showImageSearch: true,
 };
 
 export default Search

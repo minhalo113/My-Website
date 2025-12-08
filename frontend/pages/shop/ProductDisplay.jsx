@@ -214,7 +214,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
 
 
                         {/* Stock display */}
-                        {stock !== undefined && (
+                        {stock !== undefined && !isAffiliate && (
                             <div className="flex items-center gap-4 text-lg text-gray-800">
                                 <i className="icofont-box text-3xl text-[#D09A40]" />
                                 <span>
@@ -233,12 +233,6 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                             <div className="flex items-center gap-4 text-lg text-gray-800">
                                 <i className="icofont-truck-loaded text-3xl text-[#D09A40]" />
                                 <span>Est. Delivery: {deliveryTime}</span>
-                            </div>
-                        )}
-                        {!isAffiliate && (
-                            <div className="flex items-center gap-4 text-lg text-gray-800">
-                                <i className="icofont-location-pin text-3xl text-[#D09A40]" />
-                                <span>Free Pickup in Edmonton</span>
                             </div>
                         )}
                     </div>
@@ -264,7 +258,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                                     alignItems: 'center',
                                     cursor: 'pointer',
                                 }}>
-                                <span>Buy on Partner Site</span>
+                                <span>Buy</span>
                             </a>
                         ) : (
                             <>
