@@ -13,7 +13,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({ item, onSelectImage }) => {
-    const { name, _id, price, discount, seller, reviewCount, images, stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = [], productType, affiliateLink } = item || {}
+    const { name, _id, price, discount, seller, reviewCount, images, stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = [], productType, affiliateLink, shippingDestination = 'both' } = item || {}
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -74,6 +74,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
             colorIndex: selectedColorIndex,
             variantId,
             size: selectedSize,
+            shippingDestination: shippingDestination
         }
 
         e.preventDefault();
@@ -87,10 +88,25 @@ const ProductDisplay = ({ item, onSelectImage }) => {
 
     const isAffiliate = productType === 'affiliate' && affiliateLink;
 
+    let shippingFlag = '🇨🇦 🇺🇸'; // Both
+    let currencyLabel = 'USD';
+    if (shippingDestination === 'canada_only') {
+        shippingFlag = '🇨🇦 Only';
+        currencyLabel = 'CAD';
+    } else if (shippingDestination === 'us_only') {
+        shippingFlag = '🇺🇸 Only';
+        currencyLabel = 'USD';
+    }
+
     return (
         <div>
             <div>
-                <h4>{name}</h4>
+                <h4>
+                    {name}
+                    <span className="ml-3 text-sm bg-slate-800 text-white px-2 py-1 rounded shadow-sm align-middle">
+                        Ships to: {shippingFlag}
+                    </span>
+                </h4>
                 <Rating rating={averageRating} number_of_ratings={reviewCount} />
                 <h4>
                     {discount > 0 ? (
@@ -101,6 +117,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                     ) : (
                         `$${getVariantPrice()}`
                     )}
+                    <span className="text-xl text-gray-500 font-normal ml-2">{currencyLabel}</span>
                 </h4>
                 <h6>{seller}</h6>
                 {/* <p style={{ whiteSpace: 'pre-line' }}>{description}</p> */}

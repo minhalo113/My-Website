@@ -24,7 +24,8 @@ const ProductCards = ({ GridList, products }) => {
       colorPrices = [],
       colorImages = [],
       productType,
-      affiliateLink
+      affiliateLink,
+      shippingDestination = 'both'
     } = _product;
 
     if (productType === 'affiliate' && affiliateLink) {
@@ -48,6 +49,7 @@ const ProductCards = ({ GridList, products }) => {
       color: defaultColor,
       colorIndex: defaultColorIndex,
       size: defaultSize,
+      shippingDestination: shippingDestination
     }
 
     e.preventDefault();
@@ -90,6 +92,17 @@ const ProductCards = ({ GridList, products }) => {
             };
           }
           const discountedPrice = (!hasVariant && product.discount > 0) ? (product.price - (product.price * product.discount) / 100).toFixed(2) : null;
+
+          let shippingFlag = '🇨🇦 🇺🇸'; // Both
+          let currencyLabel = 'USD';
+          if (product.shippingDestination === 'canada_only') {
+            shippingFlag = '🇨🇦 Only';
+            currencyLabel = 'CAD';
+          } else if (product.shippingDestination === 'us_only') {
+            shippingFlag = '🇺🇸 Only';
+            currencyLabel = 'USD';
+          }
+
           return (
             <div key={i} className='col-lg-4 col-md-6 col-12'>
               <div className='product-item'>
@@ -104,6 +117,9 @@ const ProductCards = ({ GridList, products }) => {
                       style={{ objectFit: 'cover' }}
                     />
                     <DiscountBadge discount={product.discount} />
+                    <span className="absolute top-2 left-2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10 opacity-90">
+                      {shippingFlag}
+                    </span>
                     {product.productType === 'affiliate' ? (
                       <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
                         Check Deal ↗
@@ -166,6 +182,7 @@ const ProductCards = ({ GridList, products }) => {
                     ) : (
                       `$${product.price}`
                     )}
+                    <span className="text-sm font-normal text-gray-500 ml-1">{currencyLabel}</span>
                   </h6>
                 </div>
               </div>
@@ -182,6 +199,9 @@ const ProductCards = ({ GridList, products }) => {
                       style={{ objectFit: 'cover' }}
                     />
                     <DiscountBadge discount={product.discount} />
+                    <span className="absolute top-2 left-2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10 opacity-90">
+                      {shippingFlag}
+                    </span>
                     {product.productType === 'affiliate' ? (
                       <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
                         Check Deal ↗
@@ -242,6 +262,7 @@ const ProductCards = ({ GridList, products }) => {
                     ) : (
                       `$${product.price}`
                     )}
+                    <span className="text-sm font-normal text-gray-500 ml-1">{currencyLabel}</span>
                   </h6>
                 </div>
               </div>

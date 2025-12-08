@@ -25,8 +25,28 @@ const CartPage = () => {
     const [couponError, setCouponError] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('stripe');
 
+    // Validation Logic
+    const destinations = new Set(cartItems.map(item => item.shippingDestination || 'both'));
+    const hasCanadaOnly = destinations.has('canada_only');
+    const hasUsOnly = destinations.has('us_only');
+    const isMixedConflict = hasCanadaOnly && hasUsOnly;
+
+    let cartCurrency = 'USD';
+    if (hasCanadaOnly) {
+        cartCurrency = 'CAD';
+    }
+
+    const USD_TO_CAD_RATE = 1.35;
+
     const calculateTotalPrice = (item) => {
-        const price = item.price - (item.price * (item.discount || 0)) / 100;
+        let price = item.price - (item.price * (item.discount || 0)) / 100;
+
+        // Frontend conversion logic: If cart is CAD, convert USD items (both) to CAD
+        // If item is 'both' (USD) and cart is CAD
+        if (cartCurrency === 'CAD' && (item.shippingDestination === 'both' || !item.shippingDestination)) {
+            price = price * USD_TO_CAD_RATE;
+        }
+
         return price * item.qty
     }
 
@@ -64,6 +84,11 @@ const CartPage = () => {
 
         if (!cartItems || cartItems.length === 0) {
             alert("Your cart is emptier than my fridge on payday!");
+            return;
+        }
+
+        if (isMixedConflict) {
+            alert("Your cart contains items that ship to Canada Only and items that ship to US Only. Please separate your orders to proceed.");
             return;
         }
 
@@ -218,7 +243,7 @@ const CartPage = () => {
                                                 <span className='pull-left'>
                                                     Cart Subtotal
                                                 </span>
-                                                <p className='pull-right'>$ {cartSubtotal.toFixed(2)}</p>
+                                                <p className='pull-right'>$ {cartSubtotal.toFixed(2)} {cartCurrency}</p>
                                             </li>
                                             <li>
                                                 <span className='pull-left'>Shipping and Handling</span>
@@ -226,14 +251,25 @@ const CartPage = () => {
                                             </li>
                                             <li>
                                                 <span className='pull-left'>Order Total</span>
-                                                <p className='pull-right'>$ {orderTotal.toFixed(2)}</p>
+                                                <p className='pull-right'>$ {orderTotal.toFixed(2)} {cartCurrency}</p>
                                             </li>
 
                                         </ul>
-                                        <div style={{ marginBottom: '15px', marginTop: '15px', padding: '10px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '5px', color: '#166534', fontSize: '0.9rem' }}>
-                                            <p style={{ margin: 0, fontWeight: 'bold' }}>🇨🇦 Note to Customers:</p>
-                                            <p style={{ margin: 0 }}>We currently only ship to addresses within Canada. All prices are listed in Canadian Dollars (CAD).</p>
-                                        </div>
+                                        {isMixedConflict ? (
+                                            <div style={{ marginBottom: '15px', marginTop: '15px', padding: '10px', backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '5px', color: '#b91c1c', fontSize: '0.9rem' }}>
+                                                <p style={{ margin: 0, fontWeight: 'bold' }}>⚠️ Shipping Conflict:</p>
+                                                <p style={{ margin: 0 }}>Your cart contains items restricted to Canada and items restricted to US. Please purchase them in separate orders.</p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ marginBottom: '15px', marginTop: '15px', padding: '10px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '5px', color: '#166534', fontSize: '0.9rem' }}>
+                                                <p style={{ margin: 0, fontWeight: 'bold' }}>ℹ️ Currency Note:</p>
+                                                <p style={{ margin: 0 }}>
+                                                    {cartCurrency === 'CAD'
+                                                        ? "Your order will be processed in Canadian Dollars (CAD) because it contains Canada-specific items."
+                                                        : "Your order will be processed in US Dollars (USD)."}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                     {/* </div> */}
                                     <div className="mt-10 space-y-3 bg-[#f8fafc] p-5 rounded-md shadow-md border border-slate-300">

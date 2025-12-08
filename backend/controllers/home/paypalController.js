@@ -150,7 +150,7 @@ class paypalController {
             const trustedCartItems = [];
 
             // Exchange rate for Both (USD) items when paying in CAD
-            const USD_TO_CAD_RATE = 1.35;
+            const USD_TO_CAD_RATE = 1.4;
 
             for (const item of cartItems) {
                 const product = products.find(p => p._id.toString() === item.id);
