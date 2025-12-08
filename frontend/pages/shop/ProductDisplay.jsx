@@ -103,9 +103,11 @@ const ProductDisplay = ({ item, onSelectImage }) => {
             <div>
                 <h4>
                     {name}
-                    <span className="ml-3 text-sm bg-slate-800 text-white px-2 py-1 rounded shadow-sm align-middle">
-                        Ships to: {shippingFlag}
-                    </span>
+                    {!isAffiliate && (
+                        <span className="ml-3 text-sm bg-slate-800 text-white px-2 py-1 rounded shadow-sm align-middle">
+                            Ships to: {shippingFlag}
+                        </span>
+                    )}
                 </h4>
                 <Rating rating={averageRating} number_of_ratings={reviewCount} />
                 <h4>

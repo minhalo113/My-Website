@@ -117,9 +117,11 @@ const ProductCards = ({ GridList, products }) => {
                       style={{ objectFit: 'cover' }}
                     />
                     <DiscountBadge discount={product.discount} />
-                    <span className="absolute bottom-2 left-2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10 opacity-90">
-                      {shippingFlag}
-                    </span>
+                    {product.productType !== 'affiliate' && (
+                      <span className="absolute bottom-2 left-2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10 opacity-90">
+                        {shippingFlag}
+                      </span>
+                    )}
                     {product.productType === 'affiliate' ? (
                       <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
                         Check Deal ↗
@@ -199,9 +201,11 @@ const ProductCards = ({ GridList, products }) => {
                       style={{ objectFit: 'cover' }}
                     />
                     <DiscountBadge discount={product.discount} />
-                    <span className="absolute bottom-2 left-2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10 opacity-90">
-                      {shippingFlag}
-                    </span>
+                    {product.productType !== 'affiliate' && (
+                      <span className="absolute bottom-2 left-2 bg-slate-800 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10 opacity-90">
+                        {shippingFlag}
+                      </span>
+                    )}
                     {product.productType === 'affiliate' ? (
                       <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md z-10">
                         Check Deal ↗

@@ -251,12 +251,6 @@ const Search = ({
                     withCredentials: true,
                 });
 
-                console.log("hi2")
-                console.log(parsedMin)
-                console.log(parsedMax)
-                console.log(data.results.minPrice, data.results.maxPrice)
-                console.log(data)
-
                 if (ignore) return;
 
                 setTextResults(Array.isArray(data?.results) ? data.results : []);
