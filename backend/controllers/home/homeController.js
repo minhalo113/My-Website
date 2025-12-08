@@ -175,7 +175,7 @@ class homeControllers {
                 matchQuery.productType = mappedType
             }
             const products = await productModel.find(matchQuery)
-                .select('_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand productType affiliateLink link')
+                .select('_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand productType affiliateLink link shippingDestination')
                 .sort({ createdAt: -1 })
 
             const normalizedProducts = products.map((product) => {

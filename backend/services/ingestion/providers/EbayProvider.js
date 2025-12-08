@@ -93,7 +93,7 @@ class EbayProvider {
         const randomPage = Math.floor(Math.random() * 20);
         const validOffset = randomPage * limit;
 
-        const q = '(Anime Figure, Scale Statue)';
+        const q = '(Anime Figure, Scale Statue, Nendoroid, Figma, Pop Up Parade, Kotobukiya)';
 
         const searchUrl = new URL(`${this.baseUrl}/buy/browse/v1/item_summary/search`);
         searchUrl.searchParams.append('q', q);
