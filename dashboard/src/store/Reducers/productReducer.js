@@ -4,9 +4,9 @@ import { MdImageSearch } from "react-icons/md";
 
 export const trigger_ingestion = createAsyncThunk(
     'product/trigger_ingestion',
-    async (_, { rejectWithValue, fulfillWithValue }) => {
+    async (provider = null, { rejectWithValue, fulfillWithValue }) => {
         try {
-            const { data } = await api.post('/product-ingest', {}, { withCredentials: true })
+            const { data } = await api.post('/product-ingest', { provider }, { withCredentials: true })
             return fulfillWithValue(data)
         } catch (error) {
             return rejectWithValue(error.response.data)

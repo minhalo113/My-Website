@@ -1412,11 +1412,13 @@ class productController {
             return responseReturn(res, 403, { error: 'Only administrators can trigger ingestion.' });
         }
 
-        ingestionService.run().catch(error => {
+        const { provider } = req.body;
+
+        ingestionService.run(provider).catch(error => {
             console.error('[Background Ingestion] Error:', error);
         });
 
-        return responseReturn(res, 202, { message: 'Ingestion process initiated.' });
+        return responseReturn(res, 202, { message: `Ingestion process initiated${provider ? ` for ${provider}` : ''}.` });
     }
 }
 

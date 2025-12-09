@@ -84,9 +84,13 @@ const Products = () => {
         dispatch(search_product_by_image({ imageFile: file }));
     };
 
-    const handleIngestion = () => {
-        if (window.confirm("Are you sure you want to manually trigger product ingestion? This may take a while.")) {
-            dispatch(trigger_ingestion());
+    const handleIngestion = (provider = null) => {
+        const message = provider
+            ? `Are you sure you want to manually trigger product ingestion for ${provider}? This may take a while.`
+            : "Are you sure you want to manually trigger product ingestion for all providers? This may take a while.";
+
+        if (window.confirm(message)) {
+            dispatch(trigger_ingestion(provider));
         }
     };
 
@@ -140,17 +144,30 @@ const Products = () => {
         <div className='px-2 lg:px-7 pt-5'>
             <div className="flex justify-between items-center mb-3">
                 <h1 className='text-[#000000] font-semibold text-lg'>All Products</h1>
-                <button
-                    onClick={handleIngestion}
-                    disabled={ingestionLoading}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-semibold transition-colors ${ingestionLoading
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-green-500 hover:bg-green-600 shadow-md'
-                        }`}
-                >
-                    <FaSync className={ingestionLoading ? 'animate-spin' : ''} />
-                    {ingestionLoading ? 'Fetching...' : 'Fetch Products'}
-                </button>
+                <div className='flex items-center gap-3'>
+                    <button
+                        onClick={() => handleIngestion('eBay')}
+                        disabled={ingestionLoading}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-semibold transition-colors ${ingestionLoading
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-blue-500 hover:bg-blue-600 shadow-md'
+                            }`}
+                    >
+                        <FaSync className={ingestionLoading ? 'animate-spin' : ''} />
+                        Fetch eBay
+                    </button>
+                    <button
+                        onClick={() => handleIngestion('AliExpress')}
+                        disabled={ingestionLoading}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-semibold transition-colors ${ingestionLoading
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-[#FF4747] hover:bg-[#ff2b2b] shadow-md'
+                            }`}
+                    >
+                        <FaSync className={ingestionLoading ? 'animate-spin' : ''} />
+                        Fetch AliExpress
+                    </button>
+                </div>
             </div>
 
             <div className='w-full p-4 bg-[#6a5fdf] rounded-md'>
