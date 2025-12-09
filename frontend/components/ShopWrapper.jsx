@@ -11,6 +11,7 @@ import PopularPost from '../pages/shop/PopularPost';
 import api from '../src/api/api';
 import SEO from './SEO';
 import PropTypes from 'prop-types';
+import { US, CA } from "country-flag-icons/react/3x2";
 
 const ShopWrapper = ({ productType = 'all' }) => {
     const router = useRouter();
@@ -253,7 +254,9 @@ const ShopWrapper = ({ productType = 'all' }) => {
                                 cursor: "pointer"
                             }}
                         >
-                            Direct Store 🇨🇦
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                Direct Store <CA style={{ width: "16px", height: "auto" }} />
+                            </span>
                         </Link>
 
                         <Link
@@ -375,21 +378,19 @@ const ShopWrapper = ({ productType = 'all' }) => {
                                     showImageSearch={productType !== 'affiliate'}
                                 />
                                 {/* {console.log(menuItems === undefined)} */}
-                                {productType !== 'affiliate' && (
-                                    <ShopCategory
-                                        filterItem={filterItem}
-                                        menuItems={
-                                            productType === 'affiliate'
-                                                ? ['Aliexpress', 'eBay']
-                                                : productType === 'standard'
-                                                    ? menuItems.filter(cat => !['Aliexpress', 'eBay'].includes(cat))
-                                                    : menuItems
-                                        }
-                                        selectedCategory={selectedCategory}
-                                        categoryFacets={searchFacets?.categories}
-                                        totalProducts={totalProducts}
-                                    />
-                                )}
+                                <ShopCategory
+                                    filterItem={filterItem}
+                                    menuItems={
+                                        productType === 'affiliate'
+                                            ? ['Aliexpress', 'eBay']
+                                            : productType === 'standard'
+                                                ? menuItems.filter(cat => !['Aliexpress', 'eBay'].includes(cat))
+                                                : menuItems
+                                    }
+                                    selectedCategory={selectedCategory}
+                                    categoryFacets={searchFacets?.categories}
+                                    totalProducts={totalProducts}
+                                />
                                 <PopularPost />
                             </aside>
                         </div>

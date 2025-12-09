@@ -8,6 +8,7 @@ import { useCart } from '../../context/CartContext';
 import { toast } from "react-hot-toast"
 import api from '../../src/api/api';
 import { ensureHttps } from '../../src/utils/imageUtils';
+import { US, CA } from 'country-flag-icons/react/3x2';
 
 const desc = "This is the detail of the product."
 
@@ -88,13 +89,28 @@ const ProductDisplay = ({ item, onSelectImage }) => {
 
     const isAffiliate = productType === 'affiliate' && affiliateLink;
 
-    let shippingFlag = '🇨🇦 🇺🇸'; // Both
+    let shippingFlag = (
+        <div className="inline-flex items-center gap-1 align-middle">
+            <US className="w-4 h-auto" />
+            <CA className="w-4 h-auto" />
+        </div>
+    ); // Both
     let currencyLabel = 'USD';
     if (shippingDestination === 'canada_only') {
-        shippingFlag = '🇨🇦 Only';
+        shippingFlag = (
+            <div className="inline-flex items-center gap-1 align-middle">
+                <CA className="w-4 h-auto" />
+                <span>Only</span>
+            </div>
+        );
         currencyLabel = 'CAD';
     } else if (shippingDestination === 'us_only') {
-        shippingFlag = '🇺🇸 Only';
+        shippingFlag = (
+            <div className="inline-flex items-center gap-1 align-middle">
+                <US className="w-4 h-auto" />
+                <span>Only</span>
+            </div>
+        );
         currencyLabel = 'USD';
     }
 
@@ -104,7 +120,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                 <h4>
                     {name}
                     {!isAffiliate && (
-                        <span className="ml-3 text-sm bg-slate-800 text-white px-2 py-1 rounded shadow-sm align-middle">
+                        <span className="ml-3 text-sm bg-slate-800 text-white px-2 py-1 rounded shadow-sm align-middle inline-flex items-center gap-1">
                             Ships to: {shippingFlag}
                         </span>
                     )}
