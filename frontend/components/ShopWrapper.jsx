@@ -362,7 +362,13 @@ const ShopWrapper = ({ productType = 'all' }) => {
                                     onPriceRangeChange={handlePriceFilterChange}
                                     selectedCategory={selectedCategory}
                                     onCategoryChange={filterItem}
-                                    availableCategories={productType === 'affiliate' ? ['Aliexpress', 'eBay'] : menuItems}
+                                    availableCategories={
+                                        productType === 'affiliate'
+                                            ? ['Aliexpress', 'eBay']
+                                            : productType === 'standard'
+                                                ? menuItems.filter(cat => !['Aliexpress', 'eBay'].includes(cat))
+                                                : menuItems
+                                    }
                                     categoryFacets={searchFacets?.categories}
                                     totalProducts={totalProducts}
                                     showCategoryFilter={true}
@@ -372,7 +378,13 @@ const ShopWrapper = ({ productType = 'all' }) => {
                                 {productType !== 'affiliate' && (
                                     <ShopCategory
                                         filterItem={filterItem}
-                                        menuItems={menuItems}
+                                        menuItems={
+                                            productType === 'affiliate'
+                                                ? ['Aliexpress', 'eBay']
+                                                : productType === 'standard'
+                                                    ? menuItems.filter(cat => !['Aliexpress', 'eBay'].includes(cat))
+                                                    : menuItems
+                                        }
                                         selectedCategory={selectedCategory}
                                         categoryFacets={searchFacets?.categories}
                                         totalProducts={totalProducts}
