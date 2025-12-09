@@ -163,6 +163,7 @@ class EbayProvider {
                     description: item.shortDescription || `eBay Listing: ${item.title}`,
                     affiliateLink: this.generateAffiliateLink(item),
                     productType: 'affiliate',
+                    category: 'eBay',
                     sourceId: item.itemId,
                     stock: 1,
                     link: item.itemWebUrl

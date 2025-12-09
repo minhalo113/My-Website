@@ -362,10 +362,10 @@ const ShopWrapper = ({ productType = 'all' }) => {
                                     onPriceRangeChange={handlePriceFilterChange}
                                     selectedCategory={selectedCategory}
                                     onCategoryChange={filterItem}
-                                    availableCategories={menuItems}
+                                    availableCategories={productType === 'affiliate' ? ['Aliexpress', 'eBay'] : menuItems}
                                     categoryFacets={searchFacets?.categories}
                                     totalProducts={totalProducts}
-                                    showCategoryFilter={productType !== 'affiliate'}
+                                    showCategoryFilter={true}
                                     showImageSearch={productType !== 'affiliate'}
                                 />
                                 {/* {console.log(menuItems === undefined)} */}
