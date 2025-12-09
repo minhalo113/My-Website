@@ -93,10 +93,23 @@ class EbayProvider {
         const randomPage = Math.floor(Math.random() * 20);
         const validOffset = randomPage * limit;
 
-        const q = '(Anime Figure, Scale Statue, Nendoroid, Figma, Pop Up Parade, Kotobukiya)';
+        const keywords = [
+            "Anime Figure",
+            "Scale Statue",
+            "Nendoroid",
+            "Figma",
+            "Pop Up Parade",
+            "Kotobukiya",
+            "SH Figuarts",
+            "Genshin Impact Figure",
+            "One Piece Figure",
+            "Miku Figure"
+        ];
+
+        const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
 
         const searchUrl = new URL(`${this.baseUrl}/buy/browse/v1/item_summary/search`);
-        searchUrl.searchParams.append('q', q);
+        searchUrl.searchParams.append('q', randomKeyword);
 
         searchUrl.searchParams.append('filter', 'price:[5..1000],priceCurrency:USD,buyingOptions:{FIXED_PRICE},conditions:{NEW}');
         searchUrl.searchParams.append('sort', '-listDate');
