@@ -57,7 +57,6 @@ class EbayProvider {
         }
 
         const campaignId = process.env.EBAY_CAMPAIGN_ID;
-        console.log(campaignId)
 
         if (!campaignId) {
             return rawUrl;

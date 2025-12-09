@@ -13,7 +13,7 @@ class AliExpressProvider {
     async getCredentials() {
         const appKey = process.env.ALIEXPRESS_APP_KEY;
         const appSecret = process.env.ALIEXPRESS_APP_SECRET;
-        const trackingId = process.env.ALIEXPRESS_TRACKING_ID;
+        const trackingId = 'default';
 
         if (!appKey || !appSecret) {
             console.error('[AliExpressProvider] Missing credentials (ALIEXPRESS_APP_KEY or ALIEXPRESS_APP_SECRET)');
