@@ -6,7 +6,7 @@ import apiTokenModel from '../../../models/apiTokenModel.js';
 class AliExpressProvider {
     constructor() {
         this.name = 'AliExpress';
-        this.baseUrl = 'https://api.taobao.com/router/rest';
+        this.baseUrl = 'https://api-sg.aliexpress.com/rest';
         this.tokenUrl = 'https://oauth.aliexpress.com/token'; // Or use global endpoint
     }
 
@@ -229,6 +229,8 @@ class AliExpressProvider {
             return [];
         }
 
+        console.log("fetched data")
+        console.log(data)
         const products = data.aliexpress_affiliate_product_query_response.resp_result.result.products.product;
 
         return products.map(item => {
