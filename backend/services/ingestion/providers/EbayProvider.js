@@ -176,6 +176,68 @@ class EbayProvider {
         }
     }
 
+    async fetchProductDetails(sourceId) {
+        const token = await this.getAccessToken();
+        if (!token) throw new Error("Failed to get access token");
+
+        const url = `${this.baseUrl}/buy/browse/v1/item/${encodeURIComponent(sourceId)}`;
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
+            'Content-Type': 'application/json'
+        };
+
+        const campaignId = process.env.EBAY_CAMPAIGN_ID;
+        const customId = process.env.EBAY_CUSTOM_ID || 'AutoBot';
+
+        if (campaignId) {
+            headers['X-EBAY-C-ENDUSERCTX'] = `affiliateCampaignId=${campaignId},affiliateReferenceId=${customId}`;
+        }
+
+        try {
+            const response = await fetch(url, { headers });
+            if (response.status === 404) {
+                return null; // Product gone
+            }
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`eBay API error: ${response.status} ${errorText}`);
+            }
+
+            const item = await response.json();
+
+            const images = [];
+            if (item.image && item.image.imageUrl) images.push(item.image.imageUrl);
+            if (item.additionalImages) {
+                item.additionalImages.forEach(img => {
+                    if (img.imageUrl) images.push(img.imageUrl);
+                });
+            }
+
+            const priceValue = item.price ? parseFloat(item.price.value) : 0;
+            const currency = item.price ? item.price.currency : 'USD';
+
+            return {
+                name: item.title,
+                price: priceValue,
+                currency: currency,
+                discount: 0,
+                images: images,
+                description: item.shortDescription || item.description || `eBay Listing: ${item.title}`,
+                affiliateLink: this.generateAffiliateLink(item),
+                productType: 'affiliate',
+                category: 'eBay',
+                sourceId: item.itemId,
+                stock: 1,
+                link: item.itemWebUrl
+            };
+
+        } catch (error) {
+            console.error(`[EbayProvider] Error fetching details for ${sourceId}:`, error);
+            throw error;
+        }
+    }
+
     async fetchProducts() {
         return await this.searchProducts();
     }

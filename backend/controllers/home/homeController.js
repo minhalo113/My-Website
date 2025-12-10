@@ -19,6 +19,7 @@ import {
     getReviewImageResourceType,
     getReviewImageUrl,
 } from "../../utils/reviewImageUtils.js";
+import IngestionService from "../../services/ingestion/IngestionService.js";
 
 const { Types } = mongoose;
 
@@ -254,17 +255,36 @@ class homeControllers {
     product_get = async (req, res) => {
         const { productId } = req.params;
         try {
-            const product = await productModel.findOne({ _id: productId, isHidden: false }).lean()
+            let product = await productModel.findOne({ _id: productId, isHidden: false }).lean();
             if (!product) {
-                return responseReturn(res, 404, { error: 'Product not found' })
+                return responseReturn(res, 404, { error: 'Product not found' });
             }
+
+            if ((product.productType === 'affiliate' || product.category === 'eBay' || product.category === 'Aliexpress') && product.updatedAt) {
+                const now = new Date();
+                const updatedAt = new Date(product.updatedAt);
+                const threeDaysInMillis = 3 * 24 * 60 * 60 * 1000;
+
+                if (now - updatedAt > threeDaysInMillis) {
+                    try {
+                        const updated = await IngestionService.updateProduct(product);
+                        if (!updated) {
+                            return responseReturn(res, 404, { error: 'This product is currently unavailable' });
+                        }
+                        product = updated.toObject ? updated.toObject() : updated;
+                    } catch (err) {
+                        console.error('Error updating affiliate product on access:', err);
+                    }
+                }
+            }
+
             const sanitizedProduct = {
                 ...product,
                 ratings: formatReviewListForResponse(product?.ratings || []),
-            }
-            return responseReturn(res, 200, { product: sanitizedProduct })
+            };
+            return responseReturn(res, 200, { product: sanitizedProduct });
         } catch (error) {
-            return responseReturn(res, 500, { error: error.message })
+            return responseReturn(res, 500, { error: error.message });
         }
     }
 

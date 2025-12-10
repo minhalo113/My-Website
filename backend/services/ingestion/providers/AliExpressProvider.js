@@ -190,6 +190,58 @@ class AliExpressProvider {
         return url;
     }
 
+    async fetchProductDetails(sourceId) {
+        const creds = await this.getCredentials();
+        if (!creds) return null;
+
+        const businessParams = {
+            product_ids: sourceId,
+            target_currency: 'USD',
+            target_language: 'EN',
+        };
+
+        if (creds.trackingId) {
+            businessParams.tracking_id = creds.trackingId;
+        }
+
+        const data = await this.makeRequest('aliexpress.affiliate.product.detail.get', businessParams);
+
+        if (!data || !data.aliexpress_affiliate_product_detail_get_response ||
+            !data.aliexpress_affiliate_product_detail_get_response.resp_result ||
+            !data.aliexpress_affiliate_product_detail_get_response.resp_result.result ||
+            !data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products ||
+            !data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products.product ||
+            data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products.product.length === 0) {
+            return null;
+        }
+
+        const item = data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products.product[0];
+
+        const images = [item.product_main_image_url];
+        if (item.product_small_image_urls && item.product_small_image_urls.string) {
+            const smallImgs = Array.isArray(item.product_small_image_urls.string)
+                ? item.product_small_image_urls.string
+                : [item.product_small_image_urls.string];
+            images.push(...smallImgs);
+        }
+
+        return {
+            name: item.product_title,
+            price: parseFloat(item.target_sale_price || item.target_original_price),
+            currency: item.target_sale_price_currency || 'USD',
+            images: images,
+            description: `AliExpress Product: ${item.product_title}`,
+            affiliateLink: item.promotion_link || item.product_url,
+            productType: 'affiliate',
+            category: 'Aliexpress',
+            sourceId: item.product_id.toString(),
+            stock: 1, // Assume available if returned
+            link: item.product_detail_url,
+            discount: item.discount,
+            videos: item.product_video_url ? [item.product_video_url] : undefined
+        };
+    }
+
     async fetchProducts() {
         const creds = await this.getCredentials();
         if (!creds) return [];

@@ -14,7 +14,7 @@ const desc = "This is the detail of the product."
 
 
 const ProductDisplay = ({ item, onSelectImage }) => {
-    const { name, _id, price, discount, seller, reviewCount, images, stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = [], productType, affiliateLink, shippingDestination = 'both' } = item || {}
+    const { name, _id, price, discount, seller, reviewCount, images, stock, averageRating, deliveryTime, colors = [], colorImages = [], sizes = [], colorPrices = [], productType, affiliateLink, shippingDestination = 'both', updatedAt } = item || {}
 
     const [prequantity, setQuantity] = useState(1);
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -138,6 +138,11 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                     <span className="text-xl text-gray-500 font-normal ml-2">{currencyLabel}</span>
                 </h4>
                 <h6>{seller}</h6>
+                {isAffiliate && updatedAt && (
+                    <p className="text-sm text-gray-500 mt-1 mb-2">
+                        Last Updated: {new Date(updatedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                )}
                 {/* <p style={{ whiteSpace: 'pre-line' }}>{description}</p> */}
             </div>
 

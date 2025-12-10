@@ -21,6 +21,60 @@ class IngestionService {
         return admin._id;
     }
 
+    async updateProduct(product) {
+        if (!product || !product.sourceId || !product.category) return null;
+
+        const provider = this.providers.find(p => p.name.toLowerCase() === product.category.toLowerCase());
+        if (!provider) {
+            console.error(`[IngestionService] No provider found for category: ${product.category}`);
+            return null;
+        }
+
+        try {
+            console.log(`[IngestionService] Updating individual product: ${product.name} (${product.sourceId}) via ${provider.name}`);
+            const updatedItem = await provider.fetchProductDetails(product.sourceId);
+
+            if (!updatedItem) {
+                console.log(`[IngestionService] Product no longer available: ${product.name}. Deleting.`);
+                await productModel.deleteOne({ _id: product._id });
+                return null;
+            }
+
+            const { name, price, stock, images, description, currency, affiliateLink, link, discount, videos } = updatedItem;
+
+            let finalDiscount = discount ? parseFloat(String(discount).replace('%', '')) : 0;
+            if (isNaN(finalDiscount)) finalDiscount = 0;
+
+            const updatedProduct = await productModel.findByIdAndUpdate(
+                product._id,
+                {
+                    $set: {
+                        name,
+                        price,
+                        stock,
+                        images,
+                        description,
+                        currency,
+                        affiliateLink,
+                        link,
+                        discount: finalDiscount,
+                        videos,
+                        updatedAt: new Date()
+                    }
+                },
+                { new: true }
+            );
+
+            return updatedProduct;
+
+        } catch (error) {
+            console.error(`[IngestionService] Failed to update product ${product._id}:`, error.message);
+
+            await productModel.deleteOne({ _id: product._id });
+            return null;
+        }
+    }
+
     async run(targetProviderName = null) {
         console.log(`[IngestionService] Starting ingestion job${targetProviderName ? ` for ${targetProviderName}` : ' for all providers'}...`);
 

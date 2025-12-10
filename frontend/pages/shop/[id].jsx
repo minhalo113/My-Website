@@ -12,6 +12,7 @@ import SEO from '../../components/SEO';
 const SingleProduct = () => {
     const [productData, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState('');
 
     const [reviewList, setReviewList] = useState([])
     const [reviewPage, setReviewPage] = useState(1)
@@ -29,7 +30,8 @@ const SingleProduct = () => {
             const { data } = await api.get(`/customers-product-get/${_id}`, { withCredentials: true })
             setProduct(data.product);
         } catch (err) {
-            console.log(err.response.data.message)
+            console.log(err.response?.data?.message || err.response?.data?.error)
+            setErrorMsg(err.response?.data?.message || err.response?.data?.error || 'Product Not Found')
         }
     }
 
@@ -70,8 +72,20 @@ const SingleProduct = () => {
         fetchData(id);
     }, [id])
 
-    if (loading) return <p>Loading product detials...</p>
-    if (!productData) return <p>Product Not Found.</p>
+    if (loading) {
+        return (
+            <div className="w-full h-screen flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-emerald-500 rounded-full animate-spin"></div>
+                <p className="text-lg font-medium text-gray-700">Verifying product availability...</p>
+            </div>
+        )
+    }
+
+    if (!productData) return (
+        <div className="w-full h-screen flex items-center justify-center">
+            <p className="text-xl font-bold text-red-500">{errorMsg || "Product Not Found."}</p>
+        </div>
+    )
 
     const fallbackDescription =
         productData?.description || `${productData.name} available at A Figure A Day.`
