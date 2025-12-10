@@ -256,7 +256,9 @@ class AliExpressProvider {
                 category: 'Aliexpress',
                 sourceId: item.product_id.toString(),
                 stock: 1,
-                link: item.product_url
+                link: item.product_detail_url,
+                discount: item.discount,
+                videos: [item.product_video_url]
             };
         });
     }
