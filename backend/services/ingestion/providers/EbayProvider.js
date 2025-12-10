@@ -140,7 +140,6 @@ class EbayProvider {
             const data = await response.json();
 
             if (!data.itemSummaries) return [];
-
             return data.itemSummaries.map(item => {
 
                 const images = [];
@@ -160,7 +159,7 @@ class EbayProvider {
                     currency: currency,
                     discount: item.discount || 0,
                     images: images,
-                    description: item.shortDescription || `eBay Listing: ${item.title}`,
+                    description: `eBay Listing: ${item.title}`,
                     affiliateLink: this.generateAffiliateLink(item),
                     productType: 'affiliate',
                     category: 'eBay',
@@ -223,7 +222,7 @@ class EbayProvider {
                 currency: currency,
                 discount: 0,
                 images: images,
-                description: item.shortDescription || item.description || `eBay Listing: ${item.title}`,
+                description: item.description || `eBay Listing: ${item.title}`,
                 affiliateLink: this.generateAffiliateLink(item),
                 productType: 'affiliate',
                 category: 'eBay',

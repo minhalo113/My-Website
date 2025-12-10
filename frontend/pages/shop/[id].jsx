@@ -74,7 +74,7 @@ const SingleProduct = () => {
 
     if (loading) {
         return (
-            <div className="w-full h-screen flex flex-col items-center justify-center gap-4">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-4">
                 <div className="w-12 h-12 border-4 border-gray-300 border-t-emerald-500 rounded-full animate-spin"></div>
                 <p className="text-lg font-medium text-gray-700">Verifying product availability...</p>
             </div>
