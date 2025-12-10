@@ -269,7 +269,7 @@ class AliExpressProvider {
             target_currency: 'USD',
             target_language: 'EN',
             page_no: pageNo,
-            page_size: 20,
+            page_size: 40,
             sort: 'LAST_VOLUME_DESC',
         };
 
