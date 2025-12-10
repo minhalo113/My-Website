@@ -61,6 +61,7 @@ class IngestionService {
 
                         let finalDiscount = discount ? parseFloat(String(discount).replace('%', '')) : 0;
                         if (isNaN(finalDiscount)) finalDiscount = 0;
+
                         await productModel.findOneAndUpdate(
                             query,
                             {

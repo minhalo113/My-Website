@@ -235,6 +235,7 @@ class AliExpressProvider {
         }
 
         const products = data.aliexpress_affiliate_product_query_response.resp_result.result.products.product;
+        console.log(products)
 
         return products.map(item => {
             const images = [item.product_main_image_url];
@@ -258,7 +259,7 @@ class AliExpressProvider {
                 stock: 1,
                 link: item.product_detail_url,
                 discount: item.discount,
-                videos: [item.product_video_url]
+                videos: item.product_video_url ? [item.product_video_url] : undefined
             };
         });
     }
