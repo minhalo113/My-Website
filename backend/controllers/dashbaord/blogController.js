@@ -5,23 +5,23 @@ import blogModel from "../../models/blogModel.js"
 import slugify from 'slugify'
 import { generateBlogEnhancement } from './../../services/aiBlogService.js';
 import mongoose from 'mongoose';
-import {evaluateCommentModeration} from '../../utils/moderation.js'
+import { evaluateCommentModeration } from '../../utils/moderation.js'
 
-class blogController{
-    add_blog = async(req, res) => {
-        try{
+class blogController {
+    add_blog = async (req, res) => {
+        try {
             const form = formidable({});
-            form.parse(req, async(err, fields, files) => {
+            form.parse(req, async (err, fields, files) => {
                 if (err) {
                     return responseReturn(res, 400, {
                         message: 'Form parsing failed',
                         error: err.message,
                     });
                 }
-                
-                try{
-                    let {title, content, description, blockQuote, youtubeLink, citation, tags} = fields
-                    
+
+                try {
+                    let { title, content, description, blockQuote, youtubeLink, citation, tags } = fields
+
                     title = Array.isArray(title) ? title[0] : title;
                     content = Array.isArray(content) ? content[0] : content;
                     description = Array.isArray(description) ? description[0] : description;
@@ -29,7 +29,7 @@ class blogController{
                     youtubeLink = Array.isArray(youtubeLink) ? youtubeLink[0] : youtubeLink;
                     citation = Array.isArray(citation) ? citation[0] : citation;
                     tags = Array.isArray(tags) ? tags[0] : tags;
-                    
+
                     title = title.trim();
                     content = content.trim();
                     description = description.trim();
@@ -37,9 +37,9 @@ class blogController{
                     youtubeLink = youtubeLink.trim();
                     citation = citation.trim();
                     tags = tags.trim().split(',').map((t) => t.trim());
-                    
+
                     const slug = slugify(title, { lower: true })
-                    
+
                     cloudinary.config({
                         cloud_name: process.env.cloud_name,
                         api_key: process.env.api_key,
@@ -48,7 +48,7 @@ class blogController{
                     })
                     let imageResult = null;
                     let youtubeThumbResult = null;
-            
+
                     let blog_image = Array.isArray(files.image) ? files.image[0] : files.image;
                     let youtube_image = Array.isArray(files.youtubeThumbnail) ? files.youtubeThumbnail[0] : files.youtubeThumbnail;
 
@@ -57,13 +57,13 @@ class blogController{
                             folder: 'blogs/images',
                         });
                     }
-                    
+
                     if (files.youtubeThumbnail) {
                         youtubeThumbResult = await cloudinary.uploader.upload(youtube_image.filepath, {
                             folder: 'blogs/thumbnails',
                         });
                     }
-                    
+
                     const blog = new blogModel({
                         image: {
                             url: imageResult?.url || '',
@@ -76,14 +76,15 @@ class blogController{
                         },
                         youtubeLink,
                         tags,
+                        status: 'approved' // Default status
                     })
-                    
+
                     await blog.save();
                     return responseReturn(res, 201, {
                         message: 'Blog added successfully',
                         blog,
                     });
-                }catch(innerErr){
+                } catch (innerErr) {
                     return responseReturn(res, 500, {
                         message: innerErr.message,
                         error: innerErr.message
@@ -91,41 +92,42 @@ class blogController{
                 }
             });
 
-        }catch(err){
-            return responseReturn(res, 500, {message: err.message, error: err.message})
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message, error: err.message })
         }
     }
 
-    delete_blog = async(req, res) => {
-        try{
-            const {id} = req.params;
+    delete_blog = async (req, res) => {
+        try {
+            const { id } = req.params;
 
             const blog = await blogModel.findById(id);
-            if(!blog){
-                return responseReturn(res, 404, {message: "Blog not found"});
+            if (!blog) {
+                return responseReturn(res, 404, { message: "Blog not found" });
             }
 
-            if (blog.image?.publicId){
+            if (blog.image?.publicId) {
                 await cloudinary.uploader.destroy(blog.image.publicId, { invalidate: true });
             }
-            if(blog.youtubeThumbnail?.publicId){
+            if (blog.youtubeThumbnail?.publicId) {
                 await cloudinary.uploader.destroy(blog.youtubeThumbnail.publicId, { invalidate: true });
             }
             await blogModel.findByIdAndDelete(id);
 
-            return responseReturn(res, 200, {message: "Blog deleted successfully"})
-        }catch(err){
-            return responseReturn(res, 500, {message: err.message});
+            return responseReturn(res, 200, { message: "Blog deleted successfully" })
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
         }
     }
 
-    get_blog = async(req, res) => {
-        try{
-            const {id} = req.params;
-            const blog = await blogModel.findById(id);
+    // Public method: returns only approved blogs
+    get_blog = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const blog = await blogModel.findOne({ _id: id, status: 'approved' });
 
             if (!blog) {
-                return responseReturn(res, 404, {message: 'Blog not found'});
+                return responseReturn(res, 404, { message: 'Blog not found' });
             }
 
             const blogData = blog.toObject ? blog.toObject() : blog;
@@ -135,49 +137,117 @@ class blogController{
                     .map(({ email, ...rest }) => rest);
             }
 
-            return responseReturn(res, 200, {blog: blogData})
-        }catch(err){
-            return responseReturn(res, 500, {message: err.message});
+            return responseReturn(res, 200, { blog: blogData })
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
         }
     }
 
-    get_blogs = async(req, res) => {
-        let {parPage, page, searchValue} = req.query;
+    // Admin method: returns blog regardless of status
+    get_admin_blog = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const blog = await blogModel.findById(id);
+
+            if (!blog) {
+                return responseReturn(res, 404, { message: 'Blog not found' });
+            }
+
+            // Return full blog data including comments for moderation if needed
+            // But usually admin comments are handled via specific endpoint. 
+            // For editing, we just need blog fields.
+            return responseReturn(res, 200, { blog })
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
+        }
+    }
+
+    // Public method: returns only approved blogs
+    get_blogs = async (req, res) => {
+        let { parPage, page, searchValue } = req.query;
         parPage = parPage === 'null' ? null : parseInt(parPage);
         page = page === 'null' ? null : parseInt(page);
         searchValue = searchValue === 'null' ? null : searchValue;
 
-        try{
+        try {
             let skipPage = 0;
-            if (parPage && page){
+            if (parPage && page) {
+                skipPage = parPage * (page - 1);
+            }
+
+            const query = searchValue ? { $text: { $search: searchValue }, status: 'approved' } : { status: 'approved' };
+
+            if (page && parPage) {
+                const blogs = await blogModel.find(query).skip(skipPage).limit(parPage).sort({ createdAt: -1 });
+                const totalBlogs = await blogModel.find(query).countDocuments();
+                return responseReturn(res, 200, { blogs, totalBlogs });
+            }
+
+            const blogs = await blogModel.find(query).sort({ createdAt: -1 });
+            const totalBlogs = await blogModel.find(query).countDocuments();
+            return responseReturn(res, 200, { blogs, totalBlogs });
+
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message, error: err.message })
+        }
+    }
+
+    // Admin method: returns all blogs, supports search
+    get_admin_blogs = async (req, res) => {
+        let { parPage, page, searchValue } = req.query;
+        parPage = parPage === 'null' ? null : parseInt(parPage);
+        page = page === 'null' ? null : parseInt(page);
+        searchValue = searchValue === 'null' ? null : searchValue;
+
+        try {
+            let skipPage = 0;
+            if (parPage && page) {
                 skipPage = parPage * (page - 1);
             }
 
             const query = searchValue ? { $text: { $search: searchValue } } : {};
 
-            if (page && parPage){
-                const blogs = await blogModel.find(query).skip(skipPage).limit(parPage).sort({createdAt: -1});
+            if (page && parPage) {
+                const blogs = await blogModel.find(query).skip(skipPage).limit(parPage).sort({ createdAt: -1 });
                 const totalBlogs = await blogModel.find(query).countDocuments();
-                return responseReturn(res, 200, {blogs, totalBlogs});
+                return responseReturn(res, 200, { blogs, totalBlogs });
             }
 
-            const blogs = await blogModel.find(query).sort({createdAt: -1});
+            const blogs = await blogModel.find(query).sort({ createdAt: -1 });
             const totalBlogs = await blogModel.find(query).countDocuments();
-            return responseReturn(res, 200, {blogs, totalBlogs});
+            return responseReturn(res, 200, { blogs, totalBlogs });
 
-        }catch(err){   
-            return responseReturn(res, 500, {message: err.message, error: err.message})
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message, error: err.message })
         }
     }
 
-    automate_create_blog = async(req, res) => {
-        try{
+    update_blog_status = async (req, res) => {
+        try {
+            const { id, status } = req.body;
+            if (!['approved', 'pending'].includes(status)) {
+                return responseReturn(res, 400, { message: 'Invalid status' });
+            }
+
+            const blog = await blogModel.findByIdAndUpdate(id, { status }, { new: true });
+            if (!blog) {
+                return responseReturn(res, 404, { message: 'Blog not found' });
+            }
+
+            return responseReturn(res, 200, { message: 'Blog status updated', blog });
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message });
+        }
+    }
+
+    automate_create_blog = async (req, res) => {
+        try {
             const { title, content, instructions } = req.body || {};
 
             const trimmedTitle = typeof title === 'string' ? title.trim() : '';
             const trimmedContent = typeof content === 'string' ? content.trim() : '';
 
-            if(!trimmedTitle || !trimmedContent){
+            if (!trimmedTitle || !trimmedContent) {
                 return responseReturn(res, 400, { message: 'Title and content are required to generate AI suggestions' });
             }
 
@@ -191,7 +261,7 @@ class blogController{
                 message: 'AI blog suggestions generated successfully',
                 blog: aiResult,
             });
-        }catch(err){
+        } catch (err) {
             console.error('Failed to automate blog creation', err);
             const errorMessage = err?.response?.data?.message || err?.response?.data?.error?.message || err?.message || 'Failed to generate AI blog content';
             return responseReturn(res, 500, {
@@ -200,23 +270,23 @@ class blogController{
         }
     }
 
-    update_blog = async(req, res) => {
-        try{
+    update_blog = async (req, res) => {
+        try {
             const form = formidable({});
-            form.parse(req, async(err, fields, files) => {
-                if(err) {
+            form.parse(req, async (err, fields, files) => {
+                if (err) {
                     return responseReturn(res, 400, {
                         message: "Form passing failed",
                         error: err.message,
                     });
                 }
-    
-                try{
-                    let {id, title, content, description, blockQuote, youtubeLink, citation, tags} = fields
-                    
+
+                try {
+                    let { id, title, content, description, blockQuote, youtubeLink, citation, tags, status } = fields
+
                     const blog = await blogModel.findById(id);
-                    if(!blog){
-                        return responseReturn(res, 404, {message: "Blog not found"})
+                    if (!blog) {
+                        return responseReturn(res, 404, { message: "Blog not found" })
                     }
 
                     title = Array.isArray(title) ? title[0] : title;
@@ -226,7 +296,8 @@ class blogController{
                     youtubeLink = Array.isArray(youtubeLink) ? youtubeLink[0] : youtubeLink;
                     citation = Array.isArray(citation) ? citation[0] : citation;
                     tags = Array.isArray(tags) ? tags[0] : tags;
-                    
+                    status = Array.isArray(status) ? status[0] : status; // Handle status update via form
+
                     title = title.trim();
                     content = content.trim();
                     description = description.trim();
@@ -234,7 +305,7 @@ class blogController{
                     youtubeLink = youtubeLink.trim();
                     citation = citation.trim();
                     tags = tags.trim().split(',').map((t) => t.trim());
-                    
+
                     const slug = slugify(title, { lower: true })
 
                     cloudinary.config({
@@ -250,12 +321,12 @@ class blogController{
                     let newImage = blog.image;
                     let newYoutubeThumb = blog.youtubeThumbnail;
 
-                    if(blog_image){
-                        if(blog.image?.publicId){
+                    if (blog_image) {
+                        if (blog.image?.publicId) {
                             await cloudinary.uploader.destroy(blog.image.publicId, { invalidate: true });
                         }
 
-                        const imageResult = await cloudinary.uploader.upload(blog_image.filepath,{
+                        const imageResult = await cloudinary.uploader.upload(blog_image.filepath, {
                             folder: 'blogs/images',
                         })
 
@@ -265,12 +336,12 @@ class blogController{
                         }
                     }
 
-                    if (youtube_image){
-                        if(blog.youtubeThumbnail?.publicId){
+                    if (youtube_image) {
+                        if (blog.youtubeThumbnail?.publicId) {
                             await cloudinary.uploader.destroy(blog.youtubeThumbnail.publicId, { invalidate: true })
                         }
 
-                        const youtubeThumbResult = await cloudinary.uploader.upload(youtube_image.filepath,{
+                        const youtubeThumbResult = await cloudinary.uploader.upload(youtube_image.filepath, {
                             folder: 'blogs/thumbnails',
                         })
 
@@ -280,24 +351,28 @@ class blogController{
                         }
                     }
 
+                    // Preserve existing status if not provided, or update if provided
+                    const newStatus = status && ['approved', 'pending'].includes(status) ? status : blog.status;
+
                     await blogModel.findByIdAndUpdate(id, {
                         title, content, desc: description, blockquote: blockQuote, youtubeLink,
-                        citation, tags, slug, image: newImage, youtubeThumbnail: newYoutubeThumb
+                        citation, tags, slug, image: newImage, youtubeThumbnail: newYoutubeThumb,
+                        status: newStatus
                     })
 
                     return responseReturn(res, 200, {
                         message: 'Blog updated successfully',
                         blog,
                     });
-                }catch(innerErr){
+                } catch (innerErr) {
                     return responseReturn(res, 500, {
                         message: innerErr.message,
                         error: innerErr.message
                     })
                 }
             })
-        }catch(err){
-            return responseReturn(res, 500, {message: err.message, error: err.message})
+        } catch (err) {
+            return responseReturn(res, 500, { message: err.message, error: err.message })
         }
     }
 
@@ -471,17 +546,19 @@ class blogController{
             }
 
             if (!hasUpdates) {
-                return responseReturn(res, 200, { message: 'No changes were applied.', comment: {
-                    _id: comment._id,
-                    name: comment.name,
-                    email: comment.email,
-                    message: comment.message,
-                    status: comment.status,
-                    moderationReason: comment.moderationReason || '',
-                    isEdited: Boolean(comment.isEdited),
-                    createdAt: comment.createdAt,
-                    updatedAt: comment.updatedAt
-                }});
+                return responseReturn(res, 200, {
+                    message: 'No changes were applied.', comment: {
+                        _id: comment._id,
+                        name: comment.name,
+                        email: comment.email,
+                        message: comment.message,
+                        status: comment.status,
+                        moderationReason: comment.moderationReason || '',
+                        isEdited: Boolean(comment.isEdited),
+                        createdAt: comment.createdAt,
+                        updatedAt: comment.updatedAt
+                    }
+                });
             }
 
             comment.updatedAt = new Date();
@@ -548,27 +625,27 @@ class blogController{
         }
     }
 
-    get_adjacent_blog = async(req, res)=> {
-        try{
-            const {id} = req.params;
+    get_adjacent_blog = async (req, res) => {
+        try {
+            const { id } = req.params;
             const currentBlog = await blogModel.findById(id);
-    
-            const prevBlog = await blogModel.findOne({ createdAt: { $lt: currentBlog.createdAt } }).sort({ createdAt: -1 });
-            const nextBlog = await blogModel.findOne({ createdAt: { $gt: currentBlog.createdAt } }).sort({ createdAt: 1 });
-          
-            return responseReturn(res, 200, {prev: prevBlog || null, next: nextBlog || null});
-        }catch(error){
-            return responseReturn(res, 500, {message: error.message})
+
+            const prevBlog = await blogModel.findOne({ createdAt: { $lt: currentBlog.createdAt }, status: 'approved' }).sort({ createdAt: -1 });
+            const nextBlog = await blogModel.findOne({ createdAt: { $gt: currentBlog.createdAt }, status: 'approved' }).sort({ createdAt: 1 });
+
+            return responseReturn(res, 200, { prev: prevBlog || null, next: nextBlog || null });
+        } catch (error) {
+            return responseReturn(res, 500, { message: error.message })
         }
     }
 
-    get_recent_blogs = async(req, res) => {
-        try{
-            const blogs = await blogModel.find().sort({createdAt: -1}).limit(5);
+    get_recent_blogs = async (req, res) => {
+        try {
+            const blogs = await blogModel.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(5);
 
-            return responseReturn(res, 200, {blogs})
-        }catch(error){
-            return responseReturn(res, 500, {message: error.message})
+            return responseReturn(res, 200, { blogs })
+        } catch (error) {
+            return responseReturn(res, 500, { message: error.message })
         }
     }
 }

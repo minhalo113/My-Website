@@ -5,10 +5,10 @@ import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const BlogEdit = () => {
-    const dispatch = useDispatch();
-    const {id} = useParams();
+  const dispatch = useDispatch();
+  const { id } = useParams();
 
-    const {blog, successMessage, errorMessage} = useSelector(state => state.blog)
+  const { blog, successMessage, errorMessage } = useSelector(state => state.blog)
   const [formData, setFormData] = useState({
     image: '',
     title: '',
@@ -19,23 +19,24 @@ const BlogEdit = () => {
     youtubeThumbnail: '',
     citation: '',
     tags: '',
+    status: 'approved',
   });
 
   const [previewImage, setPreviewImage] = useState(null);
   const [previewYoutubeThumbnail, setPreviewYoutubeThumbnail] = useState(null);
 
   useEffect(() => {
-    if(successMessage){
-        toast.success(successMessage);
-        dispatch(messageClear());
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
     }
-    if(errorMessage){
-        toast.error(errorMessage);
-        dispatch(messageClear());
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
     }
-    if(id){
-        dispatch(get_blog(id))
-
+    if (id) {
+      // This now calls the admin endpoint via redux
+      dispatch(get_blog(id))
     }
   }, [successMessage, errorMessage, dispatch, id])
 
@@ -51,10 +52,11 @@ const BlogEdit = () => {
         youtubeThumbnail: blog.youtubeThumbnail,
         citation: blog.citation,
         tags: blog.tags,
+        status: blog.status || 'approved',
       });
     }
   }, [blog]);
-  
+
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -73,14 +75,14 @@ const BlogEdit = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     const data = new FormData();
     for (let key in formData) {
       data.append(key, formData[key]);
     }
-  
+
     data.append("id", id);
-  
+
     dispatch(update_blog(data));
   };
 
@@ -89,15 +91,28 @@ const BlogEdit = () => {
       <h2 className="text-2xl font-bold mb-4">Edit Blog Post</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
+          <label className="block text-sm font-medium">Status</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          >
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+
+        <div>
           <label className="block text-sm font-medium">Blog Image</label>
           <input type="file" name="image" accept="image/*" onChange={handleChange} className="mt-1" />
           {(previewImage || blog?.image?.url) && (
-                <img
-                    src={previewImage || blog.image.url}
-                    alt="Blog Preview"
-                    className="mt-2 w-48 h-auto rounded"
-                />
-                )}
+            <img
+              src={previewImage || blog.image.url}
+              alt="Blog Preview"
+              className="mt-2 w-48 h-auto rounded"
+            />
+          )}
         </div>
 
         <div>
@@ -130,11 +145,11 @@ const BlogEdit = () => {
           <input type="file" name="youtubeThumbnail" accept="image/*" onChange={handleChange} className="mt-1" />
           {(previewYoutubeThumbnail || blog?.youtubeThumbnail?.url) && (
             <img
-                src={previewYoutubeThumbnail || blog.youtubeThumbnail.url}
-                alt="YouTube Thumbnail Preview"
-                className="mt-2 w-48 h-auto rounded"
+              src={previewYoutubeThumbnail || blog.youtubeThumbnail.url}
+              alt="YouTube Thumbnail Preview"
+              className="mt-2 w-48 h-auto rounded"
             />
-            )}
+          )}
         </div>
 
         <div>

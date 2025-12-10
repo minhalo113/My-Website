@@ -18,4 +18,8 @@ blogRouter.get('/blog/:id/comments/manage', authMiddleware, blogController.get_a
 blogRouter.patch('/blog/:blogId/comments/:commentId', authMiddleware, blogController.update_comment);
 blogRouter.delete('/blog/:blogId/comments/:commentId', authMiddleware, blogController.delete_comment);
 
+blogRouter.get('/get_admin_blogs', authMiddleware, blogController.get_admin_blogs);
+blogRouter.get('/get_admin_blog/:id', authMiddleware, blogController.get_admin_blog);
+blogRouter.patch('/update_blog_status', authMiddleware, blogController.update_blog_status);
+
 export default blogRouter;

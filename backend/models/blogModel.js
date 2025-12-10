@@ -24,31 +24,36 @@ const commentSchema = new Schema(
 );
 
 const blogSchema = new Schema({
-    image: {
-      url: String,
-      publicId: String
-    },
-    title: { type: String, required: true },
-    desc: { type: String, required: true },
-    content: { type: String, required: true },
+  image: {
+    url: String,
+    publicId: String
+  },
+  title: { type: String, required: true },
+  desc: { type: String, required: true },
+  content: { type: String, required: true },
 
-    slug: { type: String, unique: true },
-    commentCount: { type: Number, default: 0 },
-    comments: [commentSchema],
-    btnText: { type: String, default: "Read More" },
-    metaList: [
-      {
-        key: String,
-        value: String
-      }
-    ],
-    blockquote: String,
-    citation: String,
-    youtubeThumbnail: {
-        url: String, publicId: String
-    },
-    youtubeLink: String,
-    tags: [String]
-  }, { timestamps: true });
-  
-  export default model('blogs', blogSchema)
+  slug: { type: String, unique: true },
+  commentCount: { type: Number, default: 0 },
+  comments: [commentSchema],
+  btnText: { type: String, default: "Read More" },
+  metaList: [
+    {
+      key: String,
+      value: String
+    }
+  ],
+  blockquote: String,
+  citation: String,
+  youtubeThumbnail: {
+    url: String, publicId: String
+  },
+  youtubeLink: String,
+  tags: [String],
+  status: {
+    type: String,
+    enum: ['approved', 'pending'],
+    default: 'approved'
+  }
+}, { timestamps: true });
+
+export default model('blogs', blogSchema)
