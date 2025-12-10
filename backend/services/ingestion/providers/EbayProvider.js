@@ -158,6 +158,7 @@ class EbayProvider {
                     name: item.title,
                     price: priceValue,
                     currency: currency,
+                    discount: item.discount || 0,
                     images: images,
                     description: item.shortDescription || `eBay Listing: ${item.title}`,
                     affiliateLink: this.generateAffiliateLink(item),

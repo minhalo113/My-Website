@@ -57,7 +57,7 @@ class IngestionService {
                             sellerId,
                         };
 
-                        const { name, price, stock, images, description, currency, affiliateLink, sourceId, link, productType } = item;
+                        const { name, price, stock, images, description, currency, affiliateLink, sourceId, link, productType, category, discount, videos } = item;
 
                         await productModel.findOneAndUpdate(
                             query,
@@ -72,12 +72,14 @@ class IngestionService {
                                     affiliateLink,
                                     link,
                                     productType,
+                                    category,
+                                    discount,
+                                    videos,
                                     updatedAt: new Date()
                                 },
                                 $setOnInsert: {
                                     sellerId,
                                     slug,
-                                    discount: 0,
                                     colors: [],
                                     sizes: [],
                                     createdAt: new Date()
