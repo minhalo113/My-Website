@@ -6,7 +6,7 @@ import apiTokenModel from '../../../models/apiTokenModel.js';
 class AliExpressProvider {
     constructor() {
         this.name = 'AliExpress';
-        this.baseUrl = 'https://api-sg.aliexpress.com/rest';
+        this.baseUrl = 'https://api-sg.aliexpress.com/sync';
         this.tokenUrl = 'https://oauth.aliexpress.com/token'; // Or use global endpoint
     }
 
@@ -48,8 +48,10 @@ class AliExpressProvider {
             }
         }
 
-        const str = appSecret + query + appSecret;
-        return crypto.createHash('md5').update(str).digest('hex').toUpperCase();
+        return crypto.createHmac('sha256', appSecret)
+            .update(query, 'utf8')
+            .digest('hex')
+            .toUpperCase();
     }
 
     async refreshAccessToken() {
@@ -92,7 +94,7 @@ class AliExpressProvider {
                     { provider: 'aliexpress' },
                     {
                         accessToken: data.access_token,
-                        refreshToken: data.refresh_token || refreshToken, // Some APIs don't rotate refresh token every time
+                        refreshToken: data.refresh_token || refreshToken,
                         expiresAt: moment().add(data.expires_in, 'seconds').toDate(),
                         updatedAt: new Date()
                     },
@@ -117,10 +119,10 @@ class AliExpressProvider {
 
         const systemParams = {
             app_key: creds.appKey,
-            timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
+            timestamp: String(Date.now()),
             format: 'json',
             v: '2.0',
-            sign_method: 'md5',
+            sign_method: 'sha256',
             method: method,
         };
 
@@ -140,6 +142,10 @@ class AliExpressProvider {
                 }
             });
 
+            if (!response.data) {
+                console.error(response);
+                return null;
+            }
             const err = response.data.error_response;
             if (err) {
                 if (!isRetry && (err.code === 27 || err.msg?.includes('Session') || err.sub_msg?.includes('expired'))) {
@@ -218,7 +224,6 @@ class AliExpressProvider {
         if (creds.trackingId) {
             businessParams.tracking_id = creds.trackingId;
         }
-
         const data = await this.makeRequest('aliexpress.affiliate.product.query', businessParams);
 
         if (!data || !data.aliexpress_affiliate_product_query_response ||
@@ -229,8 +234,6 @@ class AliExpressProvider {
             return [];
         }
 
-        console.log("fetched data")
-        console.log(data)
         const products = data.aliexpress_affiliate_product_query_response.resp_result.result.products.product;
 
         return products.map(item => {
