@@ -59,6 +59,8 @@ class IngestionService {
 
                         const { name, price, stock, images, description, currency, affiliateLink, sourceId, link, productType, category, discount, videos } = item;
 
+                        let finalDiscount = discount ? parseFloat(String(discount).replace('%', '')) : 0;
+                        if (isNaN(finalDiscount)) finalDiscount = 0;
                         await productModel.findOneAndUpdate(
                             query,
                             {
@@ -73,7 +75,7 @@ class IngestionService {
                                     link,
                                     productType,
                                     category,
-                                    discount,
+                                    discount: finalDiscount,
                                     videos,
                                     updatedAt: new Date()
                                 },

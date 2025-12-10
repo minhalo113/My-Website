@@ -12,6 +12,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.alicdn.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**.aliexpress-media.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.aliexpress.com',
+      },
 
       // --- OTHER DOMAINS ---
       { protocol: 'https', hostname: 'res.cloudinary.com' },
