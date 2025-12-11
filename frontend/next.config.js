@@ -3,7 +3,14 @@ const nextConfig = {
   trailingSlash: false,
   images: {
     remotePatterns: [
-      // --- ALIEXPRESS / ALIBABA 
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.myanimelist.net',
+      },
       {
         protocol: 'https',
         hostname: '*.alicdn.com',

@@ -2,13 +2,12 @@ import formidable from "formidable";
 import responseReturn from "../../utils/response.js";
 import { v2 as cloudinary } from 'cloudinary';
 import productModel from "../../models/productModel.js";
-import crypto from 'crypto';
-import axios from 'axios';
 import parseColorPrices from '../../utils/parseColorPrices.js';
 import { createEffectivePriceExpression, computeEffectivePrice } from '../../utils/effectivePrice.js';
 import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
 import { generateProductSocialCopy } from '../../services/aiProductSocialService.js';
 import { publishProductSocialPost } from '../../services/metaPublisher.js';
+import AliExpressProvider from '../../services/ingestion/providers/AliExpressProvider.js';
 import {
     extractPublicId,
     fingerprintFromUploadResult,
@@ -779,108 +778,20 @@ class productController {
         }
 
         try {
-            const APP_KEY = process.env.APP_KEY;
-            const APP_SECRET = process.env.APP_SECRET;
-            const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-
-            const sha256HexUpper = (s) =>
-                crypto.createHash('sha256').update(s, 'utf8').digest('hex').toUpperCase();
-            const hmacSha256HexUpper = (key, s) =>
-                crypto.createHmac('sha256', key).update(s, 'utf8').digest('hex').toUpperCase();
-            const concatSortedKV = (params) =>
-                Object.keys(params).sort().map(k => k + String(params[k])).join('');
-            const buildQuery = (params) => {
-                const usp = new URLSearchParams();
-                for (const [k, v] of Object.entries(params)) usp.append(k, String(v));
-                return usp.toString();
-            };
-
-            const refreshAccessToken = async () => {
-                const apiPath = '/auth/token/refresh';
-                const timestamp = String(Date.now());
-
-                const paramsForSign = {
-                    app_key: APP_KEY,
-                    refresh_token: REFRESH_TOKEN,
-                    sign_method: 'sha256',
-                    timestamp,
-                };
-
-                const toSign = apiPath + concatSortedKV(paramsForSign);
-                const sign = hmacSha256HexUpper(APP_SECRET, toSign);
-
-                const sendParams = { ...paramsForSign, sign };
-                const url = `https://api-sg.aliexpress.com/rest${apiPath}`;
-                const body = buildQuery(sendParams);
-
-                const { data } = await axios.post(url, body, {
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
-                });
-
-                const payload = typeof data === 'string' ? JSON.parse(data) : data;
-                if (payload.error_response) {
-                    throw new Error(`Token refresh failed: ${JSON.stringify(payload.error_response, null, 2)}`);
-                }
-                const accessToken =
-                    payload.access_token ||
-                    payload?.response?.access_token ||
-                    payload?.body?.access_token;
-
-                if (!accessToken) {
-                    throw new Error(`No access_token in response: ${JSON.stringify(payload, null, 2)}`);
-                }
-                return accessToken;
-            };
-
-            const getProduct = async ({ accessToken, productId, shipTo = 'CA', currency = 'CAD' }) => {
-                const method = 'aliexpress.ds.product.get';
-                const timestamp = String(Date.now());
-
-                const paramsForSign = {
-                    access_token: accessToken,
-                    app_key: APP_KEY,
-                    method,
-                    ship_to_country: shipTo,
-                    product_id: productId,
-                    target_currency: currency,
-                    sign_method: 'sha256',
-                    timestamp,
-                };
-
-                const toSign = concatSortedKV(paramsForSign);
-                const sign = hmacSha256HexUpper(APP_SECRET, toSign);
-
-                const sendParams = { ...paramsForSign, sign };
-                const qs = buildQuery(sendParams);
-                const url = `https://api-sg.aliexpress.com/sync?method=${encodeURIComponent(method)}&${qs}`;
-
-                const { data } = await axios.get(url);
-
-                const payload = typeof data === 'string' ? JSON.parse(data) : data;
-
-                if (payload.error_response) {
-                    throw new Error(`Business call failed: ${JSON.stringify(payload.error_response, null, 2)}`);
-                }
-                return payload;
-            };
-
-            if (!APP_KEY || !APP_SECRET || !REFRESH_TOKEN) {
-                throw new Error('Missing AliExpress API credentials');
+            const productResp = await AliExpressProvider.getDSProduct(productId, 'CA', 'CAD');
+            if (!productResp) {
+                return responseReturn(res, 404, { error: 'Product not found on AliExpress' });
             }
 
-            const accessToken = await refreshAccessToken();
-            const productResp = await getProduct({ accessToken, productId, shipTo: 'CA', currency: 'CAD' });
-
-            console.log(productResp)
             const extracted = extractSkuImagesAndPrices(productResp);
             return res.status(200).json(extracted);
         } catch (error) {
             console.error('import_aliexpress_product error:', error);
-            return responseReturn(res, 500, { error: 'Failed to import product' });
+            const msg = error.message || 'Failed to import product';
+            return responseReturn(res, 500, { error: msg });
         }
-
-
     }
+
     get_product_reviews = async (req, res) => {
         if (req.role !== 'admin') {
             return responseReturn(res, 403, { error: 'Only administrators can manage product reviews.' });

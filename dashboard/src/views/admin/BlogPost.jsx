@@ -3,7 +3,7 @@ import { IoMdAdd } from "react-icons/io";
 import { FaTrash, FaEdit, FaRegCommentDots } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
-import { get_blogs, messageClear, delete_blog, update_blog_status } from "../../store/Reducers/blogReducer";
+import { get_blogs, messageClear, delete_blog, update_blog_status, generate_anime_blog } from "../../store/Reducers/blogReducer";
 import toast from "react-hot-toast";
 import Pagination from "../Pagination";
 
@@ -73,13 +73,33 @@ const BlogPost = () => {
     navigate(`/admin/dashboard/blog-comments/${id}`);
   };
 
+  const handleGenerateAnimeBlog = async () => {
+    if (loader) return;
+    const confirmed = window.confirm("Generate a new anime blog post? This process may take a few moments.");
+    if (!confirmed) return;
+
+    await dispatch(generate_anime_blog());
+    // Refresh the list
+    dispatch(get_blogs({ parPage, page: currentPage, searchValue: null }));
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Blog Posts</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => navigate('/admin/dashboard/add-blog')}>
-          <IoMdAdd size={20} /> Add Blog
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={handleGenerateAnimeBlog}
+            disabled={loader}
+            className={`flex items-center gap-2 px-4 py-2 text-white rounded shadow-md transition-colors ${loader ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+              }`}
+          >
+            {loader ? 'Generating...' : 'Generate Anime Blog'}
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => navigate('/admin/dashboard/add-blog')}>
+            <IoMdAdd size={20} /> Add Blog
+          </button>
+        </div>
       </div>
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden">

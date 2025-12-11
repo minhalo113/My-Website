@@ -21,5 +21,6 @@ blogRouter.delete('/blog/:blogId/comments/:commentId', authMiddleware, blogContr
 blogRouter.get('/get_admin_blogs', authMiddleware, blogController.get_admin_blogs);
 blogRouter.get('/get_admin_blog/:id', authMiddleware, blogController.get_admin_blog);
 blogRouter.patch('/update_blog_status', authMiddleware, blogController.update_blog_status);
+blogRouter.post('/generate-anime-blog', authMiddleware, blogController.generate_anime_blog);
 
 export default blogRouter;

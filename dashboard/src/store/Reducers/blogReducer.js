@@ -13,6 +13,18 @@ export const add_blog = createAsyncThunk(
     }
 )
 
+export const generate_anime_blog = createAsyncThunk(
+    'blog/generate_anime_blog',
+    async (_, { rejectWithValue, fulfillWithValue }) => {
+        try {
+            const res = await api.post('/generate-anime-blog', {}, { withCredentials: true });
+            return fulfillWithValue(res.data);
+        } catch (err) {
+            return rejectWithValue(err.response.data);
+        }
+    }
+)
+
 export const delete_blog = createAsyncThunk(
     'blog/delete_blog',
     async (id, { rejectWithValue, fulfillWithValue }) => {
@@ -243,6 +255,20 @@ export const blogReducer = createSlice({
                 if (index !== -1) {
                     state.blogs[index].status = payload.blog.status;
                 }
+            })
+
+            .addCase(generate_anime_blog.pending, (state) => {
+                state.loader = true;
+                state.errorMessage = "";
+                state.successMessage = "";
+            })
+            .addCase(generate_anime_blog.rejected, (state, { payload }) => {
+                state.loader = false;
+                state.errorMessage = payload?.message || 'Failed to generate anime blog';
+            })
+            .addCase(generate_anime_blog.fulfilled, (state, { payload }) => {
+                state.loader = false;
+                state.successMessage = payload.message;
             })
 
             .addCase(get_blog_comments_admin.pending, (state) => {

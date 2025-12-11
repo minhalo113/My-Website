@@ -4,10 +4,20 @@ import { v2 as cloudinary } from 'cloudinary';
 import blogModel from "../../models/blogModel.js"
 import slugify from 'slugify'
 import { generateBlogEnhancement } from './../../services/aiBlogService.js';
+import animeBlogService from './../../services/blog/AnimeBlogService.js';
 import mongoose from 'mongoose';
 import { evaluateCommentModeration } from '../../utils/moderation.js'
 
 class blogController {
+    generate_anime_blog = async (req, res) => {
+        try {
+            await animeBlogService.createBlogPost();
+            return responseReturn(res, 200, { message: 'Anime blog generation triggered successfully' });
+        } catch (err) {
+            console.error('[blogController] Anime blog generation failed:', err);
+            return responseReturn(res, 500, { message: 'Failed to generate anime blog: ' + err.message });
+        }
+    }
     add_blog = async (req, res) => {
         try {
             const form = formidable({});
@@ -263,7 +273,7 @@ class blogController {
             });
         } catch (err) {
             console.error('Failed to automate blog creation', err);
-            const errorMessage = err?.response?.data?.message || err?.response?.data?.error?.message || err?.message || 'Failed to generate AI blog content';
+            const errorMessage = err?.response?.data?.error || err?.response?.data?.message || err?.response?.data?.error?.message || err?.message || 'Failed to generate AI blog content';
             return responseReturn(res, 500, {
                 message: errorMessage,
             });

@@ -11,12 +11,12 @@ class AliExpressProvider {
     }
 
     async getCredentials() {
-        const appKey = process.env.ALIEXPRESS_APP_KEY;
-        const appSecret = process.env.ALIEXPRESS_APP_SECRET;
+        const appKey = process.env.ALIEXPRESS_APP_KEY || process.env.APP_KEY;
+        const appSecret = process.env.ALIEXPRESS_APP_SECRET || process.env.APP_SECRET;
         const trackingId = 'default';
 
         if (!appKey || !appSecret) {
-            console.error('[AliExpressProvider] Missing credentials (ALIEXPRESS_APP_KEY or ALIEXPRESS_APP_SECRET)');
+            console.error('[AliExpressProvider] Missing credentials (ALIEXPRESS_APP_KEY/APP_KEY or ALIEXPRESS_APP_SECRET/APP_SECRET)');
             return null;
         }
 
@@ -32,7 +32,7 @@ class AliExpressProvider {
         }
 
         if (!accessToken) {
-            accessToken = process.env.ALIEXPRESS_ACCESS_TOKEN;
+            accessToken = process.env.ALIEXPRESS_ACCESS_TOKEN || process.env.ACCESS_TOKEN;
         }
 
         return { appKey, appSecret, trackingId, accessToken };
@@ -56,10 +56,10 @@ class AliExpressProvider {
 
     async refreshAccessToken() {
         console.log('[AliExpressProvider] Attempting to refresh access token...');
-        const appKey = process.env.ALIEXPRESS_APP_KEY;
-        const appSecret = process.env.ALIEXPRESS_APP_SECRET;
+        const appKey = process.env.ALIEXPRESS_APP_KEY || process.env.APP_KEY;
+        const appSecret = process.env.ALIEXPRESS_APP_SECRET || process.env.APP_SECRET;
 
-        let refreshToken = process.env.ALIEXPRESS_REFRESH_TOKEN;
+        let refreshToken = process.env.ALIEXPRESS_REFRESH_TOKEN || process.env.REFRESH_TOKEN;
 
         try {
             const tokenDoc = await apiTokenModel.findOne({ provider: 'aliexpress' });
@@ -314,6 +314,25 @@ class AliExpressProvider {
                 videos: item.product_video_url ? [item.product_video_url] : undefined
             };
         });
+    }
+
+    async getDSProduct(productId, shipTo = 'CA', currency = 'CAD') {
+        const creds = await this.getCredentials();
+        if (!creds) throw new Error('Missing AliExpress credentials');
+
+        const businessParams = {
+            ship_to_country: shipTo,
+            product_id: productId,
+            target_currency: currency,
+        };
+
+        const data = await this.makeRequest('aliexpress.ds.product.get', businessParams);
+
+        if (!data) {
+            throw new Error('Failed to fetch product data (No response)');
+        }
+
+        return data;
     }
 }
 
