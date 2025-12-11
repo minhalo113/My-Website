@@ -48,41 +48,55 @@ class AnimeBlogService {
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) throw new Error('OpenAI API key is not configured');
 
-        const systemPrompt = `You are an elite anime figure collector and blogger.
-        Your goal is to write a highly engaging, SEO-optimized blog post that drives desire for ownership.
-        Your audience loves anime but needs a reason to buy a physical figure of this character.
+        const systemPrompt = `You are an expert anime blogger writing for a website that sells high-quality anime figures.
 
-        RESPONSE FORMAT:
-        Respond strictly with a VALID JSON object. No markdown formatting (like \`\`\`json) outside the JSON structure.
-        Schema:
-        {
-        "title": "string (Max 60 chars, catchy, includes Character Name + 'Figure' or 'Statue')",
-        "content": "string (Markdown format. MUST use ## H2 and ### H3 headers. Split into sections. Total 600-900 words.)",
-        "description": "string (150-160 chars, optimized for CTR)",
-        "blockQuote": "string (Max 200 chars, iconic quote or character catchphrase)",
-        "tags": ["string"]
-        }
+                                    Your goal is to write an engaging, SEO-friendly blog post about a specific anime character.
 
-        CONTENT GUIDELINES:
-        1. **Visual Focus:** Describe the character's design details (hair, outfit, pose) enthusiastically.
-        2. **Psychological Trigger:** Explain why this character represents a "must-have" for fans.
-        3. **NEUTRAL CTA:** Do NOT explicitly say "Buy from our store" or "In stock now" because we might not have it yet.
-        - Instead, use phrases like: "Adding this figure to your shelf would be...", "Keep an eye out for high-quality figures of [Name]...", "A collection isn't complete without..."
-        - Let the website's UI handle the actual sales button.
-        `;
+                                    The tone should be enthusiastic, knowledgeable, and persuasive (subtly encouraging figure collection).
 
-        const userPrompt = `Write a blog post about "${character.name}" from "${animeTitle || 'popular anime'}".
 
-        DATA CONTEXT:
-        - About: ${character.about ? character.about.substring(0, 1500) : 'Use your internal expert knowledge about this character.'}
-        - Image Reference: ${character.images?.jpg?.image_url} (Use this to describe their look if you can see it, otherwise recall their iconic design).
 
-        FOCUS POINTS (Crucial):
-        1. **The Legend:** Who they are and their most epic moments in the story.
-        2. **The Aesthetic (Money Maker):** Analyze their design details—costume textures, dynamic hair, colors, or weapons. Why is this character visually stunning?
-        3. **Collector's Appeal:** Why does this character make a centerpiece display figure? (e.g., "Their dynamic combat pose looks incredible on a shelf").
+                                    Respond strictly with a JSON object that matches this schema:
 
-        IMPORTANT: If the provided 'About' is empty, rely entirely on your training data. Do not mention "based on the provided text".`;
+                                    {
+
+                                    "title": string,            // Catchy title involving the character name (max 60 chars)
+
+                                    "content": string,          // Markdown format, 500-800 words. Deep dive into personality, role, and why fans love them.
+
+                                    "description": string,      // Meta description (150-160 chars)
+
+                                    "blockQuote": string,       // A memorable quote from the character or about them (max 200 chars)
+
+                                    "tags": string[]            // 5-8 relevant SEO tags (character name, anime name, 'figure', etc.)
+
+                                    }
+
+                                    Do not include markdown code blocks (like \`\`\`json) in the response, just the raw JSON string.`;
+
+        const userPrompt = `Write a blog post about the character "${character.name}" from the anime "${animeTitle || 'popular anime'}".
+
+       
+
+                        Character Details:
+
+                        ${character.about || 'No detailed description available, please use your knowledge about this popular character.'}
+
+
+
+                        Image URL (for context): ${character.images?.jpg?.image_url}
+
+
+
+                        Focus on:
+
+                        1. Who they are and their role in the story.
+
+                        2. Their key personality traits and appeal.
+
+                        3. Why they make a great addition to an anime figure collection.
+
+                        `;
 
         const { data } = await axios.post(
             OPENAI_ENDPOINT,

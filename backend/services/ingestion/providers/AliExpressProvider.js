@@ -10,9 +10,14 @@ class AliExpressProvider {
         this.tokenUrl = 'https://oauth.aliexpress.com/token'; // Or use global endpoint
     }
 
-    async getCredentials() {
+    async getCredentials(method) {
         const appKey = process.env.ALIEXPRESS_APP_KEY || process.env.APP_KEY;
         const appSecret = process.env.ALIEXPRESS_APP_SECRET || process.env.APP_SECRET;
+
+        if (method === 'aliexpress.ds.product.get') {
+            appKey = process.env.APP_KEY;
+            appSecret = process.env.APP_SECRET;
+        }
         const trackingId = 'default';
 
         if (!appKey || !appSecret) {
