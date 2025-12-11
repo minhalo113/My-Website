@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import PropTypes from 'prop-types';
 import { ensureHttps } from '../../src/utils/imageUtils';
 
 const RelatedProducts = ({ products }) => {
@@ -42,6 +43,19 @@ const RelatedProducts = ({ products }) => {
             </ul>
         </div>
     );
+};
+
+RelatedProducts.propTypes = {
+    products: PropTypes.arrayOf(
+        PropTypes.shape({
+            _id: PropTypes.string,
+            slug: PropTypes.string,
+            name: PropTypes.string,
+            price: PropTypes.number,
+            currency: PropTypes.string,
+            images: PropTypes.arrayOf(PropTypes.string),
+        })
+    ),
 };
 
 export default RelatedProducts;
