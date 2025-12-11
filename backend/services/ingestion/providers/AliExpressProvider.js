@@ -32,7 +32,8 @@ class AliExpressProvider {
         }
 
         if (!accessToken) {
-            accessToken = process.env.ALIEXPRESS_ACCESS_TOKEN || process.env.ACCESS_TOKEN;
+            await this.refreshAccessToken();
+            accessToken = await apiTokenModel.findOne({ provider: 'aliexpress' });
         }
 
         return { appKey, appSecret, trackingId, accessToken };
@@ -115,6 +116,10 @@ class AliExpressProvider {
 
     async makeRequest(method, businessParams, isRetry = false) {
         let creds = await this.getCredentials();
+        if (method === 'aliexpress.ds.product.get') {
+            creds.appKey = process.env.APP_KEY;
+            creds.appSecret = process.env.APP_SECRET;
+        }
         if (!creds) return null;
 
         const systemParams = {

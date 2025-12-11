@@ -53,7 +53,8 @@ const blogSchema = new Schema({
     type: String,
     enum: ['approved', 'pending'],
     default: 'approved'
-  }
+  },
+  products: [{ type: Schema.Types.ObjectId, ref: 'products' }]
 }, { timestamps: true });
 
 export default model('blogs', blogSchema)

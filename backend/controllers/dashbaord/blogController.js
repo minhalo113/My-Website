@@ -134,7 +134,8 @@ class blogController {
     get_blog = async (req, res) => {
         try {
             const { id } = req.params;
-            const blog = await blogModel.findOne({ _id: id, status: 'approved' });
+            const blog = await blogModel.findOne({ _id: id, status: 'approved' })
+                .populate('products', 'name images price discount slug shopName category productType currency');
 
             if (!blog) {
                 return responseReturn(res, 404, { message: 'Blog not found' });
@@ -157,7 +158,8 @@ class blogController {
     get_admin_blog = async (req, res) => {
         try {
             const { id } = req.params;
-            const blog = await blogModel.findById(id);
+            const blog = await blogModel.findById(id)
+                .populate('products', 'name images price discount slug shopName category productType currency');
 
             if (!blog) {
                 return responseReturn(res, 404, { message: 'Blog not found' });
@@ -292,7 +294,7 @@ class blogController {
                 }
 
                 try {
-                    let { id, title, content, description, blockQuote, youtubeLink, citation, tags, status } = fields
+                    let { id, title, content, description, blockQuote, youtubeLink, citation, tags, status, products } = fields
 
                     const blog = await blogModel.findById(id);
                     if (!blog) {
@@ -307,6 +309,19 @@ class blogController {
                     citation = Array.isArray(citation) ? citation[0] : citation;
                     tags = Array.isArray(tags) ? tags[0] : tags;
                     status = Array.isArray(status) ? status[0] : status; // Handle status update via form
+
+                    let productIds = [];
+                    if (products) {
+                        const rawProducts = Array.isArray(products) ? products[0] : products;
+                        try {
+                            const parsed = JSON.parse(rawProducts);
+                            if (Array.isArray(parsed)) {
+                                productIds = parsed;
+                            }
+                        } catch (e) {
+                            productIds = rawProducts.split(',').map(p => p.trim()).filter(Boolean);
+                        }
+                    }
 
                     title = title.trim();
                     content = content.trim();
@@ -367,7 +382,8 @@ class blogController {
                     await blogModel.findByIdAndUpdate(id, {
                         title, content, desc: description, blockquote: blockQuote, youtubeLink,
                         citation, tags, slug, image: newImage, youtubeThumbnail: newYoutubeThumb,
-                        status: newStatus
+                        status: newStatus,
+                        products: productIds.length > 0 ? productIds : blog.products
                     })
 
                     return responseReturn(res, 200, {

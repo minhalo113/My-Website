@@ -1,6 +1,7 @@
 import axios from 'axios';
 import blogModel from '../../models/blogModel.js';
 import adminModel from '../../models/adminModel.js';
+import productModel from '../../models/productModel.js';
 
 const JIKAN_API_BASE = 'https://api.jikan.moe/v4';
 const OPENAI_ENDPOINT = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions';
@@ -113,6 +114,42 @@ class AnimeBlogService {
         }
     }
 
+    async findRelatedProducts(characterName, animeTitle) {
+        try {
+            // Escape special characters for regex
+            const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            const nameRegex = new RegExp(escapeRegex(characterName), 'i');
+            const animeRegex = new RegExp(escapeRegex(animeTitle), 'i');
+
+            const query = {
+                $or: [
+                    { name: { $regex: nameRegex } },
+                    { name: { $regex: animeRegex } }
+                ],
+                isHidden: false
+            };
+
+            // Fetch potential matches
+            const products = await productModel.find(query)
+                .select('_id productType name price images slug')
+                .limit(20); // Fetch a bit more to sort in memory if needed
+
+            // Sort: Standard products first, then others
+            products.sort((a, b) => {
+                const typeA = a.productType === 'standard' ? 0 : 1;
+                const typeB = b.productType === 'standard' ? 0 : 1;
+                return typeA - typeB;
+            });
+
+            // Take top 5
+            return products.slice(0, 5).map(p => p._id);
+        } catch (err) {
+            console.error('[AnimeBlogService] Error finding related products:', err);
+            return [];
+        }
+    }
+
     async createBlogPost() {
         console.log('[AnimeBlogService] Starting blog generation job...');
 
@@ -177,7 +214,11 @@ class AnimeBlogService {
         try {
             console.log(`[AnimeBlogService] Generating blog for ${character.name} from ${anime.title}...`);
 
-            const blogData = await this.generateBlogContent(character, anime.title);
+            // Parallel execution for content generation and product search
+            const [blogData, relatedProductIds] = await Promise.all([
+                this.generateBlogContent(character, anime.title),
+                this.findRelatedProducts(character.name, anime.title)
+            ]);
 
             const imageUrl = character.images?.jpg?.image_url;
 
@@ -198,14 +239,15 @@ class AnimeBlogService {
                     { key: 'source', value: 'auto-generated-jikan' },
                     { key: 'original_anime', value: anime.title }
                 ],
-                slug: `${Date.now()}-${blogData.tags?.[0] || 'anime'}`
+                slug: `${Date.now()}-${blogData.tags?.[0] || 'anime'}`,
+                products: relatedProductIds
             });
 
             await newBlog.save();
-            console.log(`[AnimeBlogService] Successfully created blog: "${newBlog.title}"`);
+            console.log(`[AnimeBlogService] Successfully created blog: "${newBlog.title}" with ${relatedProductIds.length} related products.`);
 
         } catch (err) {
-            console.error('[AnimeBlogService] Error generating/saving blog:', err.response.data.error);
+            console.error('[AnimeBlogService] Error generating/saving blog:', err?.response?.data?.error || err.message);
         }
     }
 }

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import PageHeader from '../../components/PageHeader';
 import PopularPost from '../shop/PopularPost';
+import RelatedProducts from '../shop/RelatedProducts.jsx';
 import api from '../../src/api/api';
 import { toast } from 'react-hot-toast';
 import SEO from '../../components/SEO';
@@ -438,6 +439,9 @@ const SingleBlog = () => {
                         <div className='col-lg-4 col-12'>
                             <aside>
                                 <PopularPost />
+                                {blog?.products && blog.products.length > 0 && (
+                                    <RelatedProducts products={blog.products} />
+                                )}
                             </aside>
                         </div>
                     </div>
