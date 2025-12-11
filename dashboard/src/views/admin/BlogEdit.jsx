@@ -5,6 +5,7 @@ import { get_products } from '../../store/Reducers/productReducer';
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FaTrash, FaPlus, FaSearch } from "react-icons/fa";
+import { US, CA } from 'country-flag-icons/react/3x2';
 
 const BlogEdit = () => {
   const dispatch = useDispatch();
@@ -182,28 +183,92 @@ const BlogEdit = () => {
               {/* Attached Products List */}
               <div className="space-y-2 mb-4">
                 {attachedProducts.length === 0 && <p className="text-sm text-gray-500">No products linked.</p>}
-                {attachedProducts.map(product => (
-                  <div key={product._id} className="flex items-center justify-between bg-white p-2 rounded border">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={product.images?.[0] || '/images/placeholder.png'}
-                        alt={product.name}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                      <div className="text-sm">
-                        <p className="font-medium truncate max-w-[150px]">{product.name}</p>
-                        <p className="text-xs text-gray-500">${product.price}</p>
-                      </div>
+                {attachedProducts.map(product => {
+                  const hasVariant = product.colors && product.colors.length > 0 && Array.isArray(product.colorPrices) && product.colorPrices.length > 0;
+                  let variantRange = null;
+                  if (hasVariant) {
+                    const prices = product.colors.map((c, idx) => product.colorPrices[idx]).filter(v => v !== undefined);
+                    const min = Math.min(...prices);
+                    const max = Math.max(...prices);
+                    variantRange = {
+                      minBase: min.toFixed(2),
+                      maxBase: max.toFixed(2),
+                      minDiscount: (min - (min * (product.discount || 0)) / 100).toFixed(2),
+                      maxDiscount: (max - (max * (product.discount || 0)) / 100).toFixed(2)
+                    };
+                  }
+                  const discountedPrice = (!hasVariant && (product.discount || 0) > 0) ? (product.price - (product.price * product.discount) / 100).toFixed(2) : null;
+
+                  let shippingFlag = (
+                    <div className="flex items-center gap-1">
+                      <US className="w-4 h-auto" />
+                      <CA className="w-4 h-auto" />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeProduct(product._id)}
-                      className="text-red-500 hover:text-red-700 p-1"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                ))}
+                  );
+                  let currencyLabel = 'USD';
+                  if (product.shippingDestination === 'canada_only') {
+                    shippingFlag = (
+                      <div className="flex items-center gap-1">
+                        <CA className="w-4 h-auto" />
+                      </div>
+                    );
+                    currencyLabel = 'CAD';
+                  } else if (product.shippingDestination === 'us_only') {
+                    shippingFlag = (
+                      <div className="flex items-center gap-1">
+                        <US className="w-4 h-auto" />
+                      </div>
+                    );
+                    currencyLabel = 'USD';
+                  }
+
+                  return (
+                    <div key={product._id} className="flex items-center justify-between bg-white p-2 rounded border">
+                      <div className="flex items-center gap-2">
+                        <div className="relative w-10 h-10">
+                          <img
+                            src={product.images?.[0] || '/images/placeholder.png'}
+                            alt={product.name}
+                            className="w-full h-full object-cover rounded"
+                          />
+                          {product.productType !== 'affiliate' && (
+                            <span className="absolute bottom-0 right-0 bg-slate-800 text-white text-[8px] font-bold px-1 rounded shadow-md z-10 opacity-90 flex items-center justify-center">
+                              {shippingFlag}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm">
+                          <p className="font-medium truncate max-w-[150px]">{product.name}</p>
+                          <div className="text-xs text-gray-500">
+                            {hasVariant ? (
+                              (product.discount || 0) > 0 ? (
+                                <>
+                                  ${variantRange.minDiscount} - ${variantRange.maxDiscount}
+                                </>
+                              ) : (
+                                variantRange.minBase === variantRange.maxBase ? `$${variantRange.minBase}` : `$${variantRange.minBase} - $${variantRange.maxBase}`
+                              )
+                            ) : (product.discount || 0) > 0 ? (
+                              <>
+                                ${discountedPrice} <del className="text-gray-400">${product.price}</del>
+                              </>
+                            ) : (
+                              `$${product.price}`
+                            )}
+                            <span className="text-[10px] ml-1">{currencyLabel}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeProduct(product._id)}
+                        className="text-red-500 hover:text-red-700 p-1"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Search to Add */}

@@ -135,7 +135,7 @@ class blogController {
         try {
             const { id } = req.params;
             const blog = await blogModel.findOne({ _id: id, status: 'approved' })
-                .populate('products', 'name images price discount slug shopName category productType currency');
+                .populate('products', 'name images price discount slug shopName category productType currency colors colorPrices shippingDestination');
 
             if (!blog) {
                 return responseReturn(res, 404, { message: 'Blog not found' });
@@ -159,7 +159,7 @@ class blogController {
         try {
             const { id } = req.params;
             const blog = await blogModel.findById(id)
-                .populate('products', 'name images price discount slug shopName category productType currency');
+                .populate('products', 'name images price discount slug shopName category productType currency colors colorPrices shippingDestination');
 
             if (!blog) {
                 return responseReturn(res, 404, { message: 'Blog not found' });
@@ -310,8 +310,8 @@ class blogController {
                     tags = Array.isArray(tags) ? tags[0] : tags;
                     status = Array.isArray(status) ? status[0] : status; // Handle status update via form
 
-                    let productIds = [];
-                    if (products) {
+                    let productIds = null;
+                    if (products !== undefined && products !== null) {
                         const rawProducts = Array.isArray(products) ? products[0] : products;
                         try {
                             const parsed = JSON.parse(rawProducts);
@@ -319,7 +319,11 @@ class blogController {
                                 productIds = parsed;
                             }
                         } catch (e) {
-                            productIds = rawProducts.split(',').map(p => p.trim()).filter(Boolean);
+                            if (rawProducts.trim() === '') {
+                                productIds = [];
+                            } else {
+                                productIds = rawProducts.split(',').map(p => p.trim()).filter(Boolean);
+                            }
                         }
                     }
 
@@ -383,7 +387,7 @@ class blogController {
                         title, content, desc: description, blockquote: blockQuote, youtubeLink,
                         citation, tags, slug, image: newImage, youtubeThumbnail: newYoutubeThumb,
                         status: newStatus,
-                        products: productIds.length > 0 ? productIds : blog.products
+                        products: productIds !== null ? productIds : blog.products
                     })
 
                     return responseReturn(res, 200, {

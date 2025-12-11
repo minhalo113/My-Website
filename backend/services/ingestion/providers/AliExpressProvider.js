@@ -3,54 +3,45 @@ import crypto from 'crypto';
 import moment from 'moment';
 import apiTokenModel from '../../../models/apiTokenModel.js';
 
+// Constants cho các Base URL
+const BASE_URL_GATEWAY = 'https://api-sg.aliexpress.com/sync';
+const BASE_URL_REST = 'https://api-sg.aliexpress.com/rest';
+
 class AliExpressProvider {
     constructor() {
         this.name = 'AliExpress';
-        this.baseUrl = 'https://api-sg.aliexpress.com/sync';
-        this.tokenUrl = 'https://oauth.aliexpress.com/token'; // Or use global endpoint
+    }
+    _getEnvCreds(type = 'AFF') {
+        if (type === 'DS') {
+            return {
+                appKey: process.env.APP_KEY,
+                appSecret: process.env.APP_SECRET,
+                trackingId: null,
+                refreshToken: process.env.REFRESH_TOKEN
+            };
+        }
+
+        return {
+            appKey: process.env.ALIEXPRESS_APP_KEY,
+            appSecret: process.env.ALIEXPRESS_APP_SECRET,
+            trackingId: 'default',
+            refreshToken: process.env.ALIEXPRESS_REFRESH_TOKEN
+        };
     }
 
-    async getCredentials(method) {
-        const appKey = process.env.ALIEXPRESS_APP_KEY || process.env.APP_KEY;
-        const appSecret = process.env.ALIEXPRESS_APP_SECRET || process.env.APP_SECRET;
+    signRequest(apiPath, params, appSecret) {
 
-        if (method === 'aliexpress.ds.product.get') {
-            appKey = process.env.APP_KEY;
-            appSecret = process.env.APP_SECRET;
-        }
-        const trackingId = 'default';
-
-        if (!appKey || !appSecret) {
-            console.error('[AliExpressProvider] Missing credentials (ALIEXPRESS_APP_KEY/APP_KEY or ALIEXPRESS_APP_SECRET/APP_SECRET)');
-            return null;
-        }
-
-        let accessToken = null;
-
-        try {
-            const tokenDoc = await apiTokenModel.findOne({ provider: 'aliexpress' });
-            if (tokenDoc) {
-                accessToken = tokenDoc.accessToken;
-            }
-        } catch (err) {
-            console.error('[AliExpressProvider] Error reading token from DB:', err.message);
-        }
-
-        if (!accessToken) {
-            await this.refreshAccessToken();
-            accessToken = await apiTokenModel.findOne({ provider: 'aliexpress' });
-        }
-
-        return { appKey, appSecret, trackingId, accessToken };
-    }
-
-    signRequest(params, appSecret) {
         const sortedKeys = Object.keys(params).sort();
+
         let query = '';
 
+        if (apiPath && apiPath.includes('/')) {
+            query += apiPath;
+        }
         for (const key of sortedKeys) {
-            if (params[key] !== undefined && params[key] !== null) {
-                query += key + params[key];
+            const value = params[key];
+            if (value !== undefined && value !== null && value !== '') {
+                query += key + String(value);
             }
         }
 
@@ -60,179 +51,231 @@ class AliExpressProvider {
             .toUpperCase();
     }
 
-    async refreshAccessToken() {
-        console.log('[AliExpressProvider] Attempting to refresh access token...');
-        const appKey = process.env.ALIEXPRESS_APP_KEY || process.env.APP_KEY;
-        const appSecret = process.env.ALIEXPRESS_APP_SECRET || process.env.APP_SECRET;
+    async refreshAccessToken(type = 'AFF') {
+        console.log(`[AliExpress] Refreshing token for type: ${type}...`);
 
-        let refreshToken = process.env.ALIEXPRESS_REFRESH_TOKEN || process.env.REFRESH_TOKEN;
+        const creds = this._getEnvCreds(type);
+        let currentRefreshToken = creds.refreshToken;
 
         try {
             const tokenDoc = await apiTokenModel.findOne({ provider: 'aliexpress' });
-            if (tokenDoc && tokenDoc.refreshToken) {
-                refreshToken = tokenDoc.refreshToken;
+            if (tokenDoc?.refreshToken) {
+                currentRefreshToken = tokenDoc.refreshToken;
             }
         } catch (err) {
-            console.error('[AliExpressProvider] DB Error during refresh:', err.message);
+            console.error('[AliExpress] DB Error:', err.message);
         }
 
-        if (!refreshToken) {
-            console.error('[AliExpressProvider] No refresh token available in DB or ENV.');
-            return false;
+        if (!currentRefreshToken) {
+            console.error('[AliExpress] No refresh token found.');
+            return null;
         }
+
+        const apiPath = '/auth/token/refresh';
+        const timestamp = String(Date.now());
+
+        const params = {
+            app_key: creds.appKey,
+            timestamp: timestamp,
+            sign_method: 'sha256',
+            refresh_token: currentRefreshToken,
+            partner_id: 'iop-sdk-nodejs-2025',
+            method: 'aliexpress.auth.token.refresh',
+            v: '2.0',
+            format: 'json',
+            simplify: 'true'
+        };
+
+        params.sign = this.signRequest(apiPath, params, creds.appSecret);
 
         try {
-            const response = await axios.post('https://oauth.aliexpress.com/token', new URLSearchParams({
-                grant_type: 'refresh_token',
-                client_id: appKey,
-                client_secret: appSecret,
-                refresh_token: refreshToken
-            }), {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            const response = await axios.post(BASE_URL_REST + apiPath, new URLSearchParams(params), {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }
             });
 
             const data = response.data;
-            if (data.access_token) {
-                console.log('[AliExpressProvider] Token refreshed successfully.');
 
-                // Save to DB
+            if (data.code && data.code !== '0') {
+                console.error('[AliExpress] Refresh Logic Failed:', data);
+                return null;
+            }
+            if (data.access_token) {
+                console.log('[AliExpress] Token refreshed successfully.');
+
                 await apiTokenModel.findOneAndUpdate(
                     { provider: 'aliexpress' },
                     {
                         accessToken: data.access_token,
-                        refreshToken: data.refresh_token || refreshToken,
+                        refreshToken: data.refresh_token || currentRefreshToken,
                         expiresAt: moment().add(data.expires_in, 'seconds').toDate(),
                         updatedAt: new Date()
                     },
                     { upsert: true, new: true }
                 );
-                return true;
-            } else {
-                console.error('[AliExpressProvider] Refresh failed. Response:', data);
-                return false;
+                return data.access_token;
             }
 
+            console.error('[AliExpress] Refresh returned weird data:', data);
+            return null;
+
         } catch (error) {
-            console.error('[AliExpressProvider] Error refreshing token:', error.message);
-            if (error.response) console.error(error.response.data);
-            return false;
+            console.error('[AliExpress] Refresh Network Error:', error.response?.data || error.message);
+            return null;
         }
     }
 
-    async makeRequest(method, businessParams, isRetry = false) {
-        let creds = await this.getCredentials();
-        if (method === 'aliexpress.ds.product.get') {
-            creds.appKey = process.env.APP_KEY;
-            creds.appSecret = process.env.APP_SECRET;
+    async execute({ apiMethod, params, type = 'AFF', authRequired = false, isRetry = false }) {
+        const creds = this._getEnvCreds(type);
+        if (!creds.appKey) throw new Error(`Missing credentials for type ${type}`);
+
+        let session = null;
+        if (authRequired) {
+            const tokenDoc = await apiTokenModel.findOne({ provider: 'aliexpress' });
+            session = tokenDoc?.accessToken;
+
+            if (!session) {
+                session = await this.refreshAccessToken(type);
+            }
+            if (!session) throw new Error('Authentication required but failed to get token.');
         }
-        if (!creds) return null;
 
         const systemParams = {
             app_key: creds.appKey,
             timestamp: String(Date.now()),
             format: 'json',
             v: '2.0',
-            sign_method: 'sha256',
-            method: method,
+            sign_method: 'sha256'
         };
 
-        if (creds.accessToken) {
-            systemParams.session = creds.accessToken;
+        if (session) {
+            systemParams.session = session;
         }
 
-        const allParams = { ...systemParams, ...businessParams };
-        allParams.sign = this.signRequest(allParams, creds.appSecret);
+        const isRestCall = apiMethod.startsWith('/');
+        let url = '';
+        let apiPathForSign = '';
 
-        const params = new URLSearchParams(allParams);
+        if (isRestCall) {
+            url = BASE_URL_REST + apiMethod;
+            apiPathForSign = apiMethod;
+        } else {
+            url = BASE_URL_GATEWAY;
+            systemParams.method = apiMethod;
+            apiPathForSign = '';
+        }
+
+        const allParams = { ...systemParams, ...params };
+        allParams.sign = this.signRequest(apiPathForSign, allParams, creds.appSecret);
 
         try {
-            const response = await axios.post(this.baseUrl, params.toString(), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
-                }
+            const response = await axios.post(url, new URLSearchParams(allParams), {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }
             });
 
-            if (!response.data) {
-                console.error(response);
-                return null;
-            }
-            const err = response.data.error_response;
+            const data = response.data;
+            const err = data.error_response;
+
             if (err) {
                 if (!isRetry && (err.code === 27 || err.msg?.includes('Session') || err.sub_msg?.includes('expired'))) {
-                    console.log(`[AliExpressProvider] Session expired (Code: ${err.code}). Refreshing...`);
-                    const refreshed = await this.refreshAccessToken();
-                    if (refreshed) {
-                        return this.makeRequest(method, businessParams, true);
+                    console.log(`[AliExpress] Session expired (${err.code}). Retrying...`);
+                    const newToken = await this.refreshAccessToken(type);
+                    if (newToken) {
+                        return this.execute({ apiMethod, params, type, authRequired, isRetry: true });
                     }
                 }
-
-                console.error(`[AliExpressProvider] API Error: ${JSON.stringify(err)}`);
+                console.error(`[AliExpress] API Error [${apiMethod}]:`, JSON.stringify(err));
                 return null;
             }
 
-            return response.data;
+            return data;
 
         } catch (error) {
-            console.error(`[AliExpressProvider] Network/Request Error: ${error.message}`);
+            console.error(`[AliExpress] Network Error [${apiMethod}]:`, error.message);
             return null;
         }
+    }
+
+    async getDSProduct(productId, shipTo = 'CA', currency = 'CAD') {
+        return this.execute({
+            apiMethod: 'aliexpress.ds.product.get',
+            type: 'DS',
+            authRequired: true,
+            params: {
+                product_id: productId,
+                ship_to_country: shipTo,
+                target_currency: currency
+            }
+        });
     }
 
     async generateAffiliateLink(url) {
-        const creds = await this.getCredentials();
-        if (!creds || !creds.trackingId) return url;
-
-        const response = await this.makeRequest('aliexpress.affiliate.link.generate', {
-            source_values: url,
-            promotion_link_type: 0,
-            tracking_id: creds.trackingId
+        const creds = this._getEnvCreds('AFF');
+        const res = await this.execute({
+            apiMethod: 'aliexpress.affiliate.link.generate',
+            type: 'AFF',
+            authRequired: false,
+            params: {
+                source_values: url,
+                promotion_link_type: 0,
+                tracking_id: creds.trackingId
+            }
         });
 
-        if (response && response.aliexpress_affiliate_link_generate_response &&
-            response.aliexpress_affiliate_link_generate_response.resp_result &&
-            response.aliexpress_affiliate_link_generate_response.resp_result.result &&
-            response.aliexpress_affiliate_link_generate_response.resp_result.result.promotion_links &&
-            response.aliexpress_affiliate_link_generate_response.resp_result.result.promotion_links.promotion_link) {
+        return res?.aliexpress_affiliate_link_generate_response?.resp_result?.result?.promotion_links?.promotion_link?.[0]?.promotion_link || url;
+    }
+    async fetchProducts() {
+        const creds = this._getEnvCreds('AFF');
+        const keywords = ["Anime Figure", "Genshin Impact Figure", "Honkai Star Rail Figure"];
+        const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
 
-            return response.aliexpress_affiliate_link_generate_response.resp_result.result.promotion_links.promotion_link[0].promotion_link;
-        }
+        console.log(`[AliExpress] Searching: ${randomKeyword}`);
 
-        return url;
+        const res = await this.execute({
+            apiMethod: 'aliexpress.affiliate.product.query',
+            type: 'AFF',
+            authRequired: false,
+            params: {
+                keywords: randomKeyword,
+                target_currency: 'USD',
+                page_no: Math.floor(Math.random() * 3) + 1,
+                page_size: 20,
+                sort: 'LAST_VOLUME_DESC',
+                tracking_id: creds.trackingId
+            }
+        });
+
+        const products = res?.aliexpress_affiliate_product_query_response?.resp_result?.result?.products?.product || [];
+
+        // Map data
+        return products.map(item => this._mapAffiliateProduct(item));
     }
 
     async fetchProductDetails(sourceId) {
-        const creds = await this.getCredentials();
-        if (!creds) return null;
+        const creds = this._getEnvCreds('AFF');
+        const res = await this.execute({
+            apiMethod: 'aliexpress.affiliate.product.detail.get',
+            type: 'AFF',
+            authRequired: false,
+            params: {
+                product_ids: sourceId,
+                target_currency: 'USD',
+                target_language: 'EN',
+                tracking_id: creds.trackingId
+            }
+        });
 
-        const businessParams = {
-            product_ids: sourceId,
-            target_currency: 'USD',
-            target_language: 'EN',
-        };
+        const item = res?.aliexpress_affiliate_product_detail_get_response?.resp_result?.result?.products?.product?.[0];
+        if (!item) return null;
+        return this._mapAffiliateProduct(item);
+    }
 
-        if (creds.trackingId) {
-            businessParams.tracking_id = creds.trackingId;
-        }
-
-        const data = await this.makeRequest('aliexpress.affiliate.product.detail.get', businessParams);
-
-        if (!data || !data.aliexpress_affiliate_product_detail_get_response ||
-            !data.aliexpress_affiliate_product_detail_get_response.resp_result ||
-            !data.aliexpress_affiliate_product_detail_get_response.resp_result.result ||
-            !data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products ||
-            !data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products.product ||
-            data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products.product.length === 0) {
-            return null;
-        }
-
-        const item = data.aliexpress_affiliate_product_detail_get_response.resp_result.result.products.product[0];
-
-        const images = [item.product_main_image_url];
-        if (item.product_small_image_urls && item.product_small_image_urls.string) {
-            const smallImgs = Array.isArray(item.product_small_image_urls.string)
+    _mapAffiliateProduct(item) {
+        let images = [item.product_main_image_url];
+        if (item.product_small_image_urls?.string) {
+            const small = Array.isArray(item.product_small_image_urls.string)
                 ? item.product_small_image_urls.string
                 : [item.product_small_image_urls.string];
-            images.push(...smallImgs);
+            images.push(...small);
         }
 
         return {
@@ -245,104 +288,10 @@ class AliExpressProvider {
             productType: 'affiliate',
             category: 'Aliexpress',
             sourceId: item.product_id.toString(),
-            stock: 1, // Assume available if returned
+            stock: 1,
             link: item.product_detail_url,
-            discount: item.discount,
-            videos: item.product_video_url ? [item.product_video_url] : undefined
+            discount: item.discount
         };
-    }
-
-    async fetchProducts() {
-        const creds = await this.getCredentials();
-        if (!creds) return [];
-
-        const keywords = [
-            "Anime Figure",
-            "Scale Statue",
-            "Nendoroid",
-            "Figma",
-            "Pop Up Parade",
-            "Kotobukiya",
-            "SH Figuarts",
-            "Genshin Impact Figure",
-            "One Piece Figure",
-            "Miku Figure"
-        ];
-
-        const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-        const pageNo = Math.floor(Math.random() * 10) + 1;
-
-        console.log(`[AliExpressProvider] Searching for "${randomKeyword}" (Page ${pageNo})`);
-
-        const businessParams = {
-            keywords: randomKeyword,
-            target_currency: 'USD',
-            target_language: 'EN',
-            page_no: pageNo,
-            page_size: 40,
-            sort: 'LAST_VOLUME_DESC',
-        };
-
-        if (creds.trackingId) {
-            businessParams.tracking_id = creds.trackingId;
-        }
-        const data = await this.makeRequest('aliexpress.affiliate.product.query', businessParams);
-
-        if (!data || !data.aliexpress_affiliate_product_query_response ||
-            !data.aliexpress_affiliate_product_query_response.resp_result ||
-            !data.aliexpress_affiliate_product_query_response.resp_result.result ||
-            !data.aliexpress_affiliate_product_query_response.resp_result.result.products ||
-            !data.aliexpress_affiliate_product_query_response.resp_result.result.products.product) {
-            return [];
-        }
-
-        const products = data.aliexpress_affiliate_product_query_response.resp_result.result.products.product;
-        console.log(products)
-
-        return products.map(item => {
-            const images = [item.product_main_image_url];
-            if (item.product_small_image_urls && item.product_small_image_urls.string) {
-                const smallImgs = Array.isArray(item.product_small_image_urls.string)
-                    ? item.product_small_image_urls.string
-                    : [item.product_small_image_urls.string];
-                images.push(...smallImgs);
-            }
-
-            return {
-                name: item.product_title,
-                price: parseFloat(item.target_sale_price || item.target_original_price),
-                currency: item.target_sale_price_currency || 'USD',
-                images: images,
-                description: `AliExpress Product: ${item.product_title}`,
-                affiliateLink: item.promotion_link || item.product_url,
-                productType: 'affiliate',
-                category: 'Aliexpress',
-                sourceId: item.product_id.toString(),
-                stock: 1,
-                link: item.product_detail_url,
-                discount: item.discount,
-                videos: item.product_video_url ? [item.product_video_url] : undefined
-            };
-        });
-    }
-
-    async getDSProduct(productId, shipTo = 'CA', currency = 'CAD') {
-        const creds = await this.getCredentials();
-        if (!creds) throw new Error('Missing AliExpress credentials');
-
-        const businessParams = {
-            ship_to_country: shipTo,
-            product_id: productId,
-            target_currency: currency,
-        };
-
-        const data = await this.makeRequest('aliexpress.ds.product.get', businessParams);
-
-        if (!data) {
-            throw new Error('Failed to fetch product data (No response)');
-        }
-
-        return data;
     }
 }
 
