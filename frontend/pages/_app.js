@@ -43,6 +43,7 @@ function MyApp({ Component, pageProps }) {
   return (
     <>
       <Suspense>
+        {/* eslint-disable-next-line no-undef */}
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_CONTAINER_ID} />
         <Head>
           <title>A Figure A Day</title>
