@@ -9,6 +9,8 @@ import { toast } from "react-hot-toast"
 import api from '../../src/api/api';
 import { ensureHttps } from '../../src/utils/imageUtils';
 import { US, CA } from 'country-flag-icons/react/3x2';
+import { pushToDataLayer } from '../../src/utils/gtm';
+import { useEffect } from 'react';
 
 const desc = "This is the detail of the product."
 
@@ -85,6 +87,25 @@ const ProductDisplay = ({ item, onSelectImage }) => {
             `${prequantity} × ${name} added to cart`,
             { duration: 2500 }
         );
+
+        pushToDataLayer({
+            event: 'add_to_cart',
+            ecommerce: {
+                currency: currencyLabel,
+                value: (variantPrice * prequantity).toFixed(2),
+                items: [
+                    {
+                        item_id: _id,
+                        item_name: name,
+                        price: variantPrice,
+                        currency: currencyLabel,
+                        item_category: productType,
+                        quantity: prequantity,
+                        item_variant: selectedColor
+                    }
+                ]
+            }
+        });
     }
 
     const isAffiliate = productType === 'affiliate' && affiliateLink;
@@ -113,6 +134,28 @@ const ProductDisplay = ({ item, onSelectImage }) => {
         );
         currencyLabel = 'USD';
     }
+
+    useEffect(() => {
+        if (item) {
+            pushToDataLayer({
+                event: 'view_item',
+                ecommerce: {
+                    currency: currencyLabel,
+                    value: getVariantPrice(),
+                    items: [
+                        {
+                            item_id: _id,
+                            item_name: name,
+                            price: getVariantPrice(),
+                            currency: currencyLabel,
+                            item_category: productType,
+                            quantity: 1
+                        }
+                    ]
+                }
+            });
+        }
+    }, [item, selectedColorIndex]);
 
     return (
         <div>

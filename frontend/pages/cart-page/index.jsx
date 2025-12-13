@@ -8,6 +8,7 @@ import api from './../../src/api/api';
 import { AuthContext } from '../../context/AuthContext';
 import SEO from '../../components/SEO';
 import { ensureHttps } from '../../src/utils/imageUtils';
+import { pushToDataLayer } from '../../src/utils/gtm';
 
 const CartPage = () => {
     const { cart: cartItems, add, remove, clear, handleQuantityChange } = useCart();
@@ -91,6 +92,24 @@ const CartPage = () => {
             alert("Your cart contains items that ship to Canada Only and items that ship to US Only. Please separate your orders to proceed.");
             return;
         }
+
+        // GTM: Begin Checkout
+        pushToDataLayer({
+            event: 'begin_checkout',
+            ecommerce: {
+                currency: cartCurrency,
+                value: orderTotal.toFixed(2),
+                coupon: coupon.code,
+                items: cartItems.map(item => ({
+                    item_id: item.id,
+                    item_name: item.name,
+                    price: calculateTotalPrice(item) / item.qty, // Unit price in correct currency
+                    currency: cartCurrency,
+                    quantity: item.qty,
+                    item_variant: item.color
+                }))
+            }
+        });
 
         try {
             let is_login = null
