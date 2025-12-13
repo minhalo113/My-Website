@@ -1,4 +1,4 @@
-import {Resend} from 'resend';
+import { Resend } from 'resend';
 import dotenv from "dotenv"
 import process from "process"
 dotenv.config();
@@ -6,15 +6,16 @@ dotenv.config();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendMail = async (opts) => {
-    try{
+    try {
+        console.log("Sending email to: ", opts.to);
         const result = await resend.emails.send(opts);
         console.log("Email send result:", result);
 
-        if (result.error){
+        if (result.error) {
             console.error("Email send errorL ", result.error)
         }
         return result
-    }catch(e){
+    } catch (e) {
         console.log("Not good: ", e);
 
     }

@@ -1,40 +1,84 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
 import { useRef, useEffect } from "react";
+import Image from 'next/image';
 import PropTypes from 'prop-types';
+import { ensureHttps } from "../../src/utils/imageUtils";
 
-const ProductSwiper = ({ images }) => {
-    const swiperRef = useRef(null); 
+const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
+    const swiperRef = useRef(null);
 
     useEffect(() => {
         if (swiperRef.current && swiperRef.current.swiper) {
-            swiperRef.current.swiper.navigation.init(); 
-            swiperRef.current.swiper.navigation.update(); 
+            swiperRef.current.swiper.navigation.init();
+            swiperRef.current.swiper.navigation.update();
         }
     }, []);
+
+    useEffect(() => {
+        const swiper = swiperRef.current?.swiper;
+        if (!swiper) return;
+
+        if (previewImage) {
+            swiper.autoplay?.stop();
+            swiper.slideTo(0);
+
+            const handleSlideChange = () => {
+                if (swiper.activeIndex !== 0) {
+                    onPreviewEnd && onPreviewEnd();
+                }
+            };
+
+            swiper.on('slideChange', handleSlideChange);
+
+            return () => {
+                swiper.off('slideChange', handleSlideChange);
+            };
+        } else {
+            if (videos.length === 0) {
+                swiper.autoplay?.start();
+            }
+        }
+    }, [previewImage, onPreviewEnd, videos]);
+
+    const displayImages = previewImage ? [previewImage, ...images] : images;
+    const autoplayConfig = videos.length > 0 ? false : {
+        delay: 2000, disableOnInteraction: false,
+    }
 
     return (
         <div className="swiper-container pro-single-top">
             <Swiper
-                ref={swiperRef} 
+                ref={swiperRef}
                 spaceBetween={30}
                 slidesPerView={1}
-                loop={true} 
-                autoplay={{
-                    delay: 2000,
-                    disableOnInteraction: false
-                }}
+                loop={true}
+                autoplay={autoplayConfig}
                 navigation={{
-                    prevEl: ".pro-single-next", 
-                    nextEl: ".pro-single-prev"  
+                    prevEl: ".pro-single-next",
+                    nextEl: ".pro-single-prev"
                 }}
                 modules={[Autoplay, Navigation]}
                 className="mySwiper"
             >
-                {images.map((image, index) => (
-                    <SwiperSlide key={index}> 
+                {displayImages.map((image, index) => (
+                    <SwiperSlide key={`img-${index}`}>
+                        <div className="single-thumb flex items-center justify-center h-[500px] w-full relative py-4" style={{ height: '500px' }}>
+                            <Image
+                                src={ensureHttps(image)}
+                                alt={`Product Image ${index + 1}`}
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                    </SwiperSlide>
+                ))}
+                {videos.map((video, index) => (
+                    <SwiperSlide key={`vid-${index}`}>
                         <div className="single-thumb flex items-center justify-center min-h-[400px] py-4">
-                        <img src={image} alt={`Product Image ${index + 1}`} className="max-h-[500px] object-contain" />
+                            <video controls className="max-h-[500px] object-contain">
+                                <source src={video} type="video/mp4" />
+                            </video>
                         </div>
                     </SwiperSlide>
                 ))}
@@ -52,10 +96,15 @@ const ProductSwiper = ({ images }) => {
 
 ProductSwiper.propTypes = {
     images: PropTypes.arrayOf(PropTypes.string).isRequired,
+    videos: PropTypes.arrayOf(PropTypes.string),
+    previewImage: PropTypes.string,
+    onPreviewEnd: PropTypes.func,
 };
 
 ProductSwiper.defaultProps = {
-    images: [],
+    images: [], videos: [],
+    previewImage: null,
+    onPreviewEnd: undefined,
 };
 
 export default ProductSwiper;

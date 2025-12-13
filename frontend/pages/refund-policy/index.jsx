@@ -1,27 +1,65 @@
 import React from 'react'
 import PageHeader from '../../components/PageHeader'
+import SEO from '../../components/SEO'
 
 const RefundPolicy = () => {
   return (
     <div>
-        <PageHeader title="Refund Policy" curPage="Refund Plicy"></PageHeader>
-        <div className='container'>
-        <p><strong>Refund Policy</strong></p>
-        <p>We have a 30-day return policy, which means you have 30 days after receiving your item to request a return. To be eligible for a return, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You’ll also need the receipt or proof of purchase. To start a return, you can contact us at <a href="mailto:ahistoryfactaday@gmail.com">ahistoryfactaday@gmail.com</a>. Items sent back to us without first requesting a return will not be accepted. You can always contact us for any return question at <a href="mailto:ahistoryfactaday@gmail.com">ahistoryfactaday@gmail.com</a>. </p>
-        <p><strong>Damages and issues</strong></p>
-        <p>Please inspect your order upon reception and contact us immediately if the item is defective, damaged or if you receive the wrong item, so that we can evaluate the issue and make it right.</p>
-        <p><strong>Exceptions / non-returnable items</strong></p> 
-        <p>Certain types of items cannot be returned. Please get in touch if you have questions or concerns about your specific item. Unfortunately, we cannot accept returns on sale items or gift cards.</p>
-        <p><strong>Exchanges</strong> </p>
-        <p>The fastest way to ensure you get what you want is to return the item you have, and once the return is accepted, make a separate purchase for the new item.</p>
+      <SEO
+        title="Refund Policy | A Figure A Day"
+        description="Our customer-friendly refund and cancellation policy. We ensure your figures arrive safe and sound."
+        canonical="https://www.afigureaday.com/refund-policy"
+      />
+      <PageHeader title="Refund Policy" curPage="Refund Policy"></PageHeader>
 
-        <p><strong>European Union 14 day cooling off period</strong> </p>
-        <p>Notwithstanding the above, if the merchandise is being shipped into the European Union, you have the right to cancel or return your order within 14 days, for any reason and without a justification. As above, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You’ll also need the receipt or proof of purchase.</p>
+      <div className='container' style={{ paddingBottom: "50px", maxWidth: "800px" }}>
 
-        <p><strong>Refunds</strong></p> 
-        <p>We will notify you once we’ve received and inspected your return, and let you know if the refund was approved or not. If approved, you’ll be automatically refunded on your original payment method within 10 business days. Please remember it can take some time for your bank or credit card company to process and post the refund too. If more than 15 business days have passed since we’ve approved your return, please contact us at ahistoryfactaday@gmail.com.</p>
+        {/* Intro */}
+        <div style={{ marginBottom: "30px" }}>
+          <p>At <strong>A Figure A Day</strong>, we want you to build your collection with confidence. We understand that collecting figures is a passion, and we aim to make your experience as smooth as possible.</p>
+        </div>
 
-    </div>
+        {/* Section 1: Cancellations */}
+        <div style={{ marginBottom: "30px" }}>
+          <h3 style={{ borderBottom: "2px solid #f0f0f0", paddingBottom: "10px", marginBottom: "15px" }}>1. Order Cancellations</h3>
+          <p>We understand that plans change. Because we value your peace of mind, our cancellation policy is flexible:</p>
+          <ul style={{ listStyleType: "disc", paddingLeft: "20px", marginTop: "10px" }}>
+            <li style={{ marginBottom: "10px" }}>
+              <strong>Before Confirmation (Risk-Free):</strong> You can request a full cancellation <strong>free of charge</strong> at any time <strong>before you receive the official payment receipt</strong> via email. Since we verify stock before capturing payment, your card is not charged until this receipt is sent.
+            </li>
+            <li>
+              <strong>After Confirmation:</strong> Once the <strong>official payment receipt has been sent</strong> to your email, your order is considered processed and secured. At this stage, we cannot cancel it. However, you are welcome to return the item once it arrives (see details below).
+            </li>
+          </ul>
+        </div>
+
+        {/* Section 2: Damaged / Defective */}
+        <div style={{ marginBottom: "30px" }}>
+          <h3 style={{ borderBottom: "2px solid #f0f0f0", paddingBottom: "10px", marginBottom: "15px" }}>2. Damaged or Defective Items (&quot;Arrive Safe&quot; Guarantee)</h3>
+          <p>Shipping can be rough, but we have you covered. If your figure arrives significantly damaged, broken, or with major defects:</p>
+
+          <p><strong>How to claim:</strong></p>
+          <ol style={{ paddingLeft: "20px", marginTop: "10px" }}>
+            <li style={{ marginBottom: "10px" }}>
+              <strong>Contact us within 7 days of delivery:</strong>
+              <ul style={{ marginTop: "5px", listStyleType: "circle", paddingLeft: "20px" }}>
+                <li style={{ marginBottom: "5px" }}>Email: <strong>figureaday.store@gmail.com</strong></li>
+              </ul>
+            </li>
+            <li style={{ marginBottom: "10px" }}>Include your Order Number.</li>
+            <li>Attach clear <strong>PHOTOS</strong> of the damaged product and the packaging (Video is optional but helpful).</li>
+          </ol>
+          <p style={{ marginTop: "15px" }}>We will review your claim and offer a <strong>full refund</strong> immediately.</p>
+        </div>
+
+        {/* Section 4: Disclaimer - Fixed quotes in this section */}
+        <div style={{ marginTop: "40px", padding: "20px", border: "1px solid #e0e0e0", backgroundColor: "#fffbea", borderRadius: "5px" }}>
+          <p style={{ fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+            Please note that for certain budget-friendly figures products, minor paint imperfections or slight box damage during transit may occur. These are standard for this category of figures and are not considered &quot;defects&quot; eligible for a full refund. However, if the figure is broken or missing parts, our <strong>&quot;Arrive Safe&quot; Guarantee</strong> still applies.
+          </p>
+        </div>
+
+      </div>
     </div>
   )
 }

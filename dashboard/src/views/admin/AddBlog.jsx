@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { add_blog, automate_create_blog } from '../../store/Reducers/blogReducer';
 import toast from "react-hot-toast";
-import { messageClear } from "../../store/Reducers/blogReducer";
+import { clearAiBlogData, messageClear } from "../../store/Reducers/blogReducer";
 
-const AddBlog = () => {
-    const dispatch = useDispatch();
-  const [formData, setFormData] = useState({
+const initialFormState = {
     image: '',
     title: '',
     content: '',
@@ -16,23 +14,23 @@ const AddBlog = () => {
     youtubeThumbnail: '',
     citation: '',
     tags: '',
-  });
+  };
 
-  const {loader, successMessage, errorMessage} = useSelector(state => state.blog)
+const AddBlog = () => {
+  const dispatch = useDispatch();
+  const [formData, setFormData] = useState(initialFormState);
+  const {loader, successMessage, errorMessage, aiBlogData} = useSelector(state => state.blog)
 
   const [previewImage, setPreviewImage] = useState(null);
-  const [previewYoutubeThumbnail, setPreviewYoutubeThumbnail] = useState(null);
-  const [showPromptInput, setShowPromptInput] = useState(false);
-  const [aiTitleInput, setAiTitleInput] = useState('');
+  const formRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image' || name === 'youtubeThumbnail') {
+    if (name === 'image') {
       const file = files[0];
       if (file) {
         const previewUrl = URL.createObjectURL(file);
-        if (name === 'image') setPreviewImage(previewUrl);
-        if (name === 'youtubeThumbnail') setPreviewYoutubeThumbnail(previewUrl);
+        setPreviewImage(previewUrl);
       }
       setFormData({ ...formData, [name]: file });
     } else {
@@ -44,12 +42,31 @@ const AddBlog = () => {
     if (successMessage){
         toast.success(successMessage)
         dispatch(messageClear());
+        setFormData({ ...initialFormState });
+        setPreviewImage(null);
+        if (formRef.current) {
+            formRef.current.reset();
+        }
     }
     if(errorMessage){
         toast.error(errorMessage);
         dispatch(messageClear());
     }
-  }, [successMessage, errorMessage, dispatch]) 
+  }, [successMessage, errorMessage, dispatch])
+
+  useEffect(() => {
+    if (aiBlogData){
+        setFormData((prev) => ({
+            ...prev,
+            title: aiBlogData.title || prev.title,
+            content: aiBlogData.content || prev.content,
+            description: aiBlogData.description || prev.description,
+            blockQuote: aiBlogData.blockQuote || prev.blockQuote,
+            tags: Array.isArray(aiBlogData.tags) ? aiBlogData.tags.join(', ') : prev.tags,
+        }));
+        dispatch(clearAiBlogData());
+    }
+  }, [aiBlogData, dispatch])
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -62,19 +79,23 @@ const AddBlog = () => {
   };
 
   const handleAutoGenerate = async () => {
-    if (!aiTitleInput.trim()) return;
+    const trimmedTitle = formData.title.trim();
+    const trimmedContent = formData.content.trim();
 
-    try {
-        dispatch(automate_create_blog(aiTitleInput))
-    } catch (error) {
-      console.error("Failed to generate blog:", error);
+    if (!trimmedTitle || !trimmedContent){
+        toast.error('Please add a title and content before requesting AI suggestions.');
+        return;
     }
+    dispatch(automate_create_blog({
+      title: trimmedTitle,
+      content: trimmedContent,
+    }));
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Add New Blog Post</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" ref={formRef}>
         <div>
           <label className="block text-sm font-medium">Blog Image</label>
           <input type="file" name="image" accept="image/*" onChange={handleChange} className="mt-1" />
@@ -107,12 +128,6 @@ const AddBlog = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium">YouTube Thumbnail</label>
-          <input type="file" name="youtubeThumbnail" accept="image/*" onChange={handleChange} className="mt-1" />
-          {previewYoutubeThumbnail && <img src={previewYoutubeThumbnail} alt="YouTube Thumbnail Preview" className="mt-2 w-48 h-auto rounded" />}
-        </div>
-
-        <div>
           <label className="block text-sm font-medium">Citation</label>
           <input type="text" name="citation" value={formData.citation} onChange={handleChange} className="w-full p-2 border rounded" />
         </div>
@@ -124,28 +139,16 @@ const AddBlog = () => {
 
         <div className="flex gap-4 items-center">
           <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Blog</button>
-          <button type="button" onClick={() => setShowPromptInput(prev => !prev)} className="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Auto Generate with AI</button>
+          <button
+            type="button"
+            onClick={handleAutoGenerate}
+            disabled={loader}
+            className={`px-6 py-2 rounded text-white ${loader ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+          >
+            {loader ? 'Generating…' : 'Auto Generate with AI'}
+          </button>
         </div>
 
-        {showPromptInput && (
-          <div className="mt-4 bg-gray-100 p-4 rounded border">
-            <label className="block text-sm font-medium mb-1">Enter Blog Title for AI:</label>
-            <input
-              type="text"
-              value={aiTitleInput}
-              onChange={(e) => setAiTitleInput(e.target.value)}
-              placeholder="e.g., Best Laptops for Students in 2025"
-              className="w-full p-2 border rounded mb-2"
-            />
-            <button
-              onClick={handleAutoGenerate}
-              type="button"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Generate Now
-            </button>
-          </div>
-        )}
       </form>
     </div>
   );

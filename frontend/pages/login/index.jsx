@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import api from '../../src/api/api.js'
 import { useRouter } from "next/router";
 import { AuthContext } from "../../context/AuthContext.jsx";
+import SEO from "../../components/SEO";
 
 const title = "Login";
 const btnText = "Login Now";
@@ -44,6 +45,12 @@ const Login = () => {
 
   return (
     <div>
+      <SEO
+        title="Login | A Figure A Day"
+        description="Access your A Figure A Day account to manage orders, wishlist, and collector profile."
+        canonical="https://www.afigureaday.com/login"
+        noindex
+      />
       <div className='login-section padding-tb section-bg' style={{
           width: "100vw",
           height: "100vh",

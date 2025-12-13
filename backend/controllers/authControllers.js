@@ -31,19 +31,19 @@ class authControllers{
                         httpOnly: true,
                         secure: process.env.NODE_ENV !== 'development',
                         sameSite: 'none',
-                        domain: '.ahistoryfactaday.org',
+                        domain: '.afigureaday.com',
                         path: '/',
                         maxAge: ONE_WEEK,
                     });
-                    responseReturn(res, 200, {token, message: "Login Success", userInfo: admin});
+                    return responseReturn(res, 200, {token, message: "Login Success", userInfo: admin});
                 }else{
-                    responseReturn(res, 401, {error: "Password Wrong"});
+                    return responseReturn(res, 401, {error: "Password Wrong"});
                 }
             }else{
-                responseReturn(res, 500, {error: "Email not Found"})
+                return responseReturn(res, 500, {error: "Email Not Found"})
             }
         }catch(error){
-            responseReturn(res, 500, {error: "Unknown error"})
+            return responseReturn(res, 500, {error: "Unknown error"})
         }
     }
 }

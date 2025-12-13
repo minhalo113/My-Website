@@ -9,6 +9,17 @@ productRouter.get('/products-get', authMiddleware, productController.products_ge
 productRouter.get('/product-get/:productId', authMiddleware, productController.product_get)
 productRouter.post('/product-update', authMiddleware, productController.product_update)
 productRouter.post('/product-image-update', authMiddleware, productController.product_image_update)
+productRouter.post('/product-image-search', authMiddleware, productController.product_image_search)
+productRouter.post('/product-image-precheck', authMiddleware, productController.product_image_batch_check)
+productRouter.post('/product-visibility', authMiddleware, productController.product_visibility)
+productRouter.post('/product-social-preview', authMiddleware, productController.generate_product_social_preview)
+productRouter.post('/product-social-publish', authMiddleware, productController.publish_product_social_post)
+productRouter.post('/product/:productId/reviews', authMiddleware, productController.create_fake_product_review)
+productRouter.get('/product/:productId/reviews', authMiddleware, productController.get_product_reviews)
+productRouter.patch('/product/:productId/reviews/:reviewId', authMiddleware, productController.update_product_review)
+productRouter.delete('/product/:productId/reviews/:reviewId', authMiddleware, productController.delete_product_review)
 productRouter.delete('/product/:id', authMiddleware, productController.deleteProduct)
+productRouter.post('/product-import-aliexpress', authMiddleware, productController.import_aliexpress_product)
+productRouter.post('/product-ingest', authMiddleware, productController.trigger_ingestion)
 
 export default productRouter

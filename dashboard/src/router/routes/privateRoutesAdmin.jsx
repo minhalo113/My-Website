@@ -2,20 +2,23 @@ import { lazy } from "react"
 import AdminDashboard from './../../views/admin/AdminDashboard';
 import Orders from "../../views/admin/Order";
 import Category from "../../views/admin/Category";
-import ChatSeller from "../../views/admin/ChatSeller";
+
 import ChatCustomer from "../../views/admin/ChatCustomer";
 import PaymentRequest from "../../views/admin/PaymentRequest";
 import AddProduct from './../../views/admin/AddProduct';
 import Products from './../../views/admin/Products';
+import ProductImageSearch from './../../views/admin/ProductImageSearch';
 import DiscountProducts from './../../views/admin/DiscountProducts';
 import EditProduct from './../../views/admin/EditProduct';
 import OrderDetails from './../../views/admin/OrderDetails';
 import BlogPost from "../../views/admin/BlogPost";
 import BlogEdit from "../../views/admin/BlogEdit";
 import AddBlog from "../../views/admin/AddBlog";
+import BlogComments from "../../views/admin/BlogComments";
 import Coupon from "../../views/admin/Coupon";
 
 import HomeSwiper from "../../views/admin/HomeSwiper";
+import ProductReviews from "../../views/admin/ProductReviews";
 
 export const privateRoutesAdmin = [
     {
@@ -31,11 +34,6 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/category',
         element : <Category/>,
-        role : 'admin'
-    },
-    {
-        path: 'admin/dashboard/chat-sellers',
-        element : <ChatSeller/> ,
         role : 'admin'
     },
     {
@@ -59,6 +57,11 @@ export const privateRoutesAdmin = [
         role : 'admin'
     },
     {
+        path: 'admin/dashboard/product-image-search',
+        element : <ProductImageSearch/> ,
+        role : 'admin'
+    },
+    {
         path: 'admin/dashboard/discount-product',
         element : <DiscountProducts/> ,
         role : 'admin'
@@ -66,6 +69,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/edit-product/:productId',
         element: <EditProduct/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/product-reviews/:productId',
+        element: <ProductReviews/>,
         role: 'admin'
     },
     {
@@ -81,6 +89,11 @@ export const privateRoutesAdmin = [
     {
         path: 'admin/dashboard/blog-edit/:id',
         element: <BlogEdit/>,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/blog-comments/:id',
+        element: <BlogComments/>,
         role: 'admin'
     },
     {

@@ -1,13 +1,19 @@
 import React from 'react'
 import PageHeader from '../../components/PageHeader'
+import SEO from '../../components/SEO'
 
 const PrivacyPolicy = () => {
   return (
     <div>
+        <SEO
+            title="Privacy Policy | A Figure A Day"
+            description="Read A Figure A Day's privacy policy to learn how we collect, use, and protect your data."
+            canonical="https://www.afigureaday.com/privacy-policy"
+        />
         <PageHeader title="Privacy Policy" curPage="Privacy Policy"/>
         <div className='container'>
             <p>Last updated: November 21, 2024</p>
-            <p>This Privacy Policy describes how Toy Haven (the &quot;Site&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and discloses your personal information when you visit, use our services, or make a purchase from <a rel="noopener" title="ahistoryfactadaystore.com" href="ahistoryfactadaystore.com" target="_blank">ahistoryfactadaystore.com</a> (the &quot;Site&quot;) or otherwise communicate with us regarding the Site (collectively, the &quot;Services&quot;). For purposes of this Privacy Policy, &quot;you&quot; and &quot;your&quot; means you as the user of the Services, whether you are a customer, website visitor, or another individual whose information we have collected pursuant to this Privacy Policy.</p>
+            <p>This Privacy Policy describes how A Figure A Day (the &quot;Site&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and discloses your personal information when you visit, use our services, or make a purchase from <a rel="noopener" title="afigureaday.com" href="https://www.afigureaday.com" target="_blank">afigureaday.com</a> (the &quot;Site&quot;) or otherwise communicate with us regarding the Site (collectively, the &quot;Services&quot;). For purposes of this Privacy Policy, &quot;you&quot; and &quot;your&quot; means you as the user of the Services, whether you are a customer, website visitor, or another individual whose information we have collected pursuant to this Privacy Policy.</p>
             <p>Please read this Privacy Policy carefully. By using and accessing any of the Services, you agree to the collection, use, and disclosure of your information as described in this Privacy Policy. If you do not agree to this Privacy Policy, please do not use or access any of the Services.</p>
 
             <h2>Changes to This Privacy Policy</h2>
@@ -155,7 +161,7 @@ const PrivacyPolicy = () => {
             <p>Please note that we may transfer, store and process your personal information outside the country you live in. Your personal information is also processed by staff and third party service providers and partners in these countries.</p>
             <p>If we transfer your personal information out of Europe, we will rely on recognized transfer mechanisms like the European Commission&apos;s Standard Contractual Clauses, or any equivalent contracts issued by the relevant competent authority of the UK, as relevant, unless the data transfer is to a country that has been determined to provide an adequate level of protection.</p>
             <h2>Contact</h2>
-            <p>Should you have any questions about our privacy practices or this Privacy Policy, or if you would like to exercise any of the rights available to you, please call or email us at ahistoryfactaday@gmail.com.</p>
+            <p>Should you have any questions about our privacy practices or this Privacy Policy, or if you would like to exercise any of the rights available to you, please call or email us at figureaday.store@gmail.com.</p>
 
         </div>
     </div>

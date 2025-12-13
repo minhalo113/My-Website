@@ -1,4 +1,4 @@
-import {Schema, model} from "mongoose";
+import { Schema, model } from "mongoose";
 
 const productSchema = new Schema({
     sellerId: {
@@ -21,6 +21,30 @@ const productSchema = new Schema({
         type: String,
         required: true
     },
+    link: {
+        type: String,
+        default: ''
+    },
+    sourceId: {
+        type: String,
+        default: ''
+    },
+    currency: {
+        type: String,
+        default: 'USD'
+    },
+    affiliateLink: {
+        type: String,
+        default: ''
+    },
+    productType: {
+        type: String,
+        default: 'standard'
+    },
+    shippingDestination: {
+        type: String,
+        default: 'both' // 'canada_only', 'us_only', 'both'
+    },
     colors: {
         type: [String],
         default: []
@@ -29,11 +53,7 @@ const productSchema = new Schema({
         type: [String],
         default: []
     },
-    typeImages: {
-        type: [String],
-        default: []
-    },
-    types: {
+    colorImageFingerprints: {
         type: [String],
         default: []
     },
@@ -45,13 +65,17 @@ const productSchema = new Schema({
         type: Number,
         required: true
     },
-    stock:{
+    stock: {
         type: Number,
         required: true
     },
     discount: {
         type: Number,
         required: true
+    },
+    deliveryTime: {
+        type: String,
+        default: ''
     },
     description: {
         type: String,
@@ -65,22 +89,42 @@ const productSchema = new Schema({
         type: Array,
         required: true
     },
+    videos: {
+        type: [String],
+        default: []
+    },
+    imageFingerprints: {
+        type: [String],
+        default: []
+    },
+    colorPrices: {
+        type: [Number],
+        default: []
+    },
     ratings: [
         {
-            user: {type: Schema.Types.ObjectId, ref: 'Customer'},
+            user: { type: Schema.Types.ObjectId, ref: 'Customer' },
             userImage: {
-                public_id: {type: String},
-                url: {type: String}
+                public_id: { type: String },
+                url: { type: String }
             },
-            name: {type: String, required: false},
-            rating: {type: Number, required: true, min: 1, max: 5},
+            name: { type: String, required: false },
+            rating: { type: Number, required: true, min: 1, max: 5 },
             comment: String,
-            createdAt: {type: Date, default: Date.now}
+            images: { type: [Schema.Types.Mixed], default: [] },
+            reviewDate: { type: Date },
+            createdAt: { type: Date, default: Date.now },
+            updatedAt: { type: Date, default: Date.now },
+            isEdited: { type: Boolean, default: false }
         }
     ],
-    averageRating: {type: Number, default: 0},
-    reviewCount: {type: Number, default: 0}
-}, {timestamps: true})
+    averageRating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+    isHidden: {
+        type: Boolean,
+        default: false
+    }
+}, { timestamps: true })
 
 productSchema.index({
     name: 'text',

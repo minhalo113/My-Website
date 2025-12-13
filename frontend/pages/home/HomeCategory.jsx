@@ -1,63 +1,86 @@
-import React from 'react'
-import Banner from './Banner'
 import Link from 'next/link';
+import Image from 'next/image';
+import PropTypes from 'prop-types';
+import { ensureHttps } from '../../src/utils/imageUtils';
 import { useState, useEffect } from 'react';
 import api from '../../src/api/api.js'
 
-const subTitle = "Discover the Joy of Play!";
-const title = "Find the Perfect Toy for Every Adventure";
+const subTitle = "Celebrate Your Fandom";
+const title = "Find the Perfect Figure for Every Collection";
 
 const HomeCategory = () => {
-    const [productData, setProductData] = useState([])
-    
-    useEffect(() =>{
-        const fetchData = async() => {
-            try{
-                const allProducts = await api.get('/customers-products-get', {withCredentials: true})
+    const [categories, setCategories] = useState([])
 
-                setProductData(allProducts.data.products);
-            }catch(err){
+    useEffect(() => {
+        let mounted = true;
+        const loadCategories = async () => {
+            try {
+                const response = await api.get('/customers-featured-categories', {
+                    params: { limit: 6 },
+                    withCredentials: true
+                });
+                if (mounted) {
+                    setCategories(response?.data?.categories || []);
+                }
+            } catch (err) {
                 console.log(err)
             }
         };
 
-        fetchData();
+        loadCategories();
+        return () => { mounted = false; }
     }, [])
+    return (
+        <div className='category-section style-4 padding-tb'>
+            <div className="container">
+                <div className='section-header text-center'>
+                    <span className='subtitle'>{subTitle}</span>
+                    <h2 className='title'>{title}</h2>
+                </div>
+                {/* section card */}
+                <div className='section-wrapper' style={{ display: "flex", justifyContent: 'center' }}>
+                    <div className='row g-4 justify-content-center row-cols-md-3 row-cols-sm-2 row-cols-1' style={{ width: "100%" }}>
+                        {
+                            categories.slice(0, 6).map((val) => (
+                                <div key={val.productId || val.category} className='col' style={{ display: "flex", justifyContent: 'center' }}>
+                                    <Link
+                                        href={{
+                                            pathname: '/shop',
+                                            query: val?.category ? { category: val.category } : {},
+                                        }}
+                                        className='category-item'
+                                        style={{ width: '100%', display: 'block' }}
+                                    >
+                                        <div className='category-inner'>
+                                            <div className='category-thumb relative' style={{ position: 'relative', width: '100%', aspectRatio: '1/1' }}>
+                                                <Image
+                                                    src={ensureHttps(val.image)}
+                                                    alt={val.category}
+                                                    fill
+                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                    style={{ objectFit: 'cover' }}
+                                                />
+                                            </div>
 
-  return (
-    <div className='category-section style-4 padding-tb'>
-        <div className = "container">
-            <div className='section-header text-center'>
-                <span className='subtitle'>{subTitle}</span>
-                <h2 className='title'>{title}</h2>
-            </div>
-            {/* section card */}
-            <div className='section-wrapper' style={{display:"flex", justifyContent: 'center'}}>
-                <div className='row g-4 justify-content-center row-cols-md-3 row-cols-sm-2 row-cols-1'>
-                    {
-                        productData.slice(0, 6).map((val, i) => (
-                        <div key={i} className='col' style={{display:"flex", justifyContent: 'center'}}>
-                            <Link href = "/shop" className='category-item'>
-                                <div className='category-inner'>
-                                    <div className='category-thumb'>
-                                        <img src = {Array.isArray(val.images) ? val.images[0] : val.images}></img>
-                                    </div>
-
-                                    <div className='category-content'>
-                                        <span>{val.category}</span>
-                                    </div>
+                                            <div className='category-content'>
+                                                <span>{val.category}</span>
+                                            </div>
+                                        </div>
+                                    </Link>
                                 </div>
-                            </Link>
-                        </div>
-                        )
-                        )
-                    }
+                            )
+                            )
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </div>
-  )
+        </div>
+    )
 }
+
+HomeCategory.propTypes = {
+    categories: PropTypes.array,
+};
 
 export default HomeCategory

@@ -93,9 +93,11 @@ const OrderDetails = () => {
                             <span>Color: {p.color || 'N/A'}</span><br />
                             <span>Size: {p.size || 'N/A'}</span><br />
                             <span>Type: {p.type || 'N/A'}</span><br />
+                            <span>Option ID: {p.variantId ?? p.colorIndex ?? 'N/A'}</span><br />
                             <span className='text-lg'>Quantity: {p.qty}</span><br/>
                             <span className='text-lg'>Price: {p.price}</span><br/>
                             <span className='text-lg'>Product ID: {p.id}</span><br/>
+                            <span className='text-lg'>Link: {p.link ? <a href={p.link} target='_blank' rel='noreferrer' className='text-blue-300 underline break-all'>{p.link}</a> : 'N/A'}</span><br/>
                         </p>
 
                         </div>

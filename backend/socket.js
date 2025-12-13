@@ -9,6 +9,8 @@ const messages = []
 const DASHBOARD_URL = process.env.DASHBOARD_URL
 const WEB_URL = process.env.WEB_URL
 const GIT_WEB_URL = process.env.GIT_WEB_URL
+const REAL_WEB_URL_1 = process.env.REAL_WEB_URL_1
+const REAL_WEB_URL_2 = process.env.REAL_WEB_URL_2
 
 export const initSocket = (server) => {
     io = new Server(server, {
@@ -18,7 +20,8 @@ export const initSocket = (server) => {
                 'http://localhost:3001',
                 DASHBOARD_URL,
                 WEB_URL,
-                GIT_WEB_URL
+                GIT_WEB_URL,
+                REAL_WEB_URL_1, REAL_WEB_URL_2
             ],
             credentials: true
         }

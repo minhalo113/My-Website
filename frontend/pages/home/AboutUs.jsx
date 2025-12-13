@@ -2,63 +2,80 @@ import React from 'react'
 import CountUp from 'react-countup';
 import Link from 'next/link';
 
-const subTitle = "Why Choose Us"; 
-const title = "Explore Our Collection"; 
-const desc = "Browse our vast collection of exciting toys on any device with ease. Discover the latest playtime innovations, fun accessories, and must-have toys at your fingertips. Just explore, shop, and bring joy to every adventure!"; 
+const subTitle = "Why Choose Us";
+const title = "Explore Our Collection";
+const desc = "Browse our growing collection of anime statues, scale figures, and desk companions with ease. Discover limited drops, everyday essentials, and display-ready pieces curated for collectors.";
 const btnText = "Shop Now";
 
-const countList = [ 
-    { iconName: 'icofont-users-alt-4', count: '12600', text: 'Happy Customers', }, 
-    { iconName: 'icofont-computer', count: '50', text: 'Products Available', }, 
-    { iconName: 'icofont-gift', count: '100', text: 'Special Offers & Rewards', }, 
+const countList = [
+    {
+        icon: "👥",
+        count: "7000",
+        text: "Community Members",
+        suffix: "+"
+    },
+    {
+        icon: "⭐",
+        count: "100",
+        text: "Satisfaction Guarantee",
+        suffix: "%"
+    },
+    {
+        icon: "🍁",
+        count: "100",
+        text: "Canadian Owned",
+        suffix: "%"
+    },
 ];
 
 const AboutUs = () => {
-  return (
-    <div className='instructor-section style-2 padding-tb section-bg-ash'>
-        <div className='container'>
-            <div className='section-wrapper'>
-                <div className='row g-4 justify-content-center align-item-center row-cols-1 row-cols-md-2 row-cols-xl-3'>
-                    <div className='col'>
-                        {
-                            countList.map((val, i) => (
-                                <div key = {i} className='count-item'>
-                                    <div className='count-inner'>
-                                        <div className='count-icon'>
-                                            <i className={val.iconName}></i>
-                                        </div>
+    return (
+        <div className='instructor-section style-2 padding-tb section-bg-ash'>
+            <div className='container'>
+                <div className='section-wrapper'>
+                    <div className='row g-4 justify-content-center align-item-center row-cols-1 row-cols-md-2 row-cols-xl-3'>
+                        <div className='col'>
+                            {
+                                countList.map((val, i) => (
+                                    <div key={i} className='count-item'>
+                                        <div className='count-inner'>
+                                            <div className='count-icon'>
+                                                <i className="flex items-center justify-center text-4xl w-16 h-16 rounded-full">
+                                                    {val.icon}
+                                                </i>
+                                            </div>
 
-                                        <div className='count-content'>
-                                            <h2>
-                                                <span><CountUp end = {val.count}/>+</span>
-                                                <span></span>
-                                            </h2>
-                                            <p>{val.text}</p>
+                                            <div className='count-content'>
+                                                <h2>
+                                                    <span><CountUp end={val.count} />{val.suffix}</span>
+                                                    <span></span>
+                                                </h2>
+                                                <p>{val.text}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
-                        }
-                    </div>
-
-                    <div className='col'>
-                        <div className='instructor-content'>
-                            <span className='subtitle'>{subTitle}</span>
-                            <h2 className='title'>{title}</h2>
-                            <p>{desc}</p>
-                            <Link href = "/shop" className='lab-btn' style={{background: "#DCA54A"}}>{btnText}</Link>
+                                ))
+                            }
                         </div>
-                    </div>
 
-                    <div className='col'>
-                        <div className='instructor-thumb'>
+                        <div className='col'>
+                            <div className='instructor-content'>
+                                <span className='subtitle'>{subTitle}</span>
+                                <h2 className='title'>{title}</h2>
+                                <p>{desc}</p>
+                                <Link href="/shop" className='lab-btn' style={{ background: "#ffffff" }}>{btnText}</Link>
+                            </div>
+                        </div>
+
+                        <div className='col'>
+                            <div className='instructor-thumb'>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            </div>
         </div>
-  )
+    )
 }
 
 export default AboutUs

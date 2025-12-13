@@ -10,22 +10,22 @@ import SEO from '../components/SEO'
 export const Home = () => {
   return (
     <>
-        <SEO
-            title="Toy Haven Store | Home"
-            description="Discover the latest toys and deals at Toy Haven Store."
-            canonical="https://www.toyhaven.store/"
-        />
-        <div>
-            <Banner/>
-            <HomeCategory/>
-            <CategoryShowCase/>
+      <SEO
+        title="A Figure A Day | Home"
+        description="Discover daily deals on curated anime figures and collectibles from A Figure A Day."
+        canonical="https://www.afigureaday.com/"
+      />
+      <div>
+        <Banner />
+        <HomeCategory />
+        <CategoryShowCase />
 
-            {/* <Register/> */}
-            {/* <LocationSprade/> */}
-            <AboutUs/>
-            {/*<AppSection/>*/}
-            {/* <Sponsor/> */}
-        </div>
+        {/* <Register/> */}
+        {/* <LocationSprade/> */}
+        <AboutUs />
+        {/*<AppSection/>*/}
+        {/* <Sponsor/> */}
+      </div>
     </>
   )
 }

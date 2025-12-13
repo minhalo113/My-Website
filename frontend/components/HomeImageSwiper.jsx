@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
-import api from '../src/api/api';
+import Image from 'next/image';
+import PropTypes from 'prop-types';
 import 'swiper/css';
+import api from '../src/api/api';
+import { ensureHttps } from '../src/utils/imageUtils';
 
 const HomeImageSwiper = () => {
   const [items, setItems] = useState([]);
@@ -27,15 +30,18 @@ const HomeImageSwiper = () => {
         loop={true}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
         modules={[Autoplay]}
-        className="w-full max-h-[500px]" 
+        className="w-full max-h-[500px]"
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <SwiperSlide key={item._id} className="flex justify-center items-center">
-            <a href={item.link} className="block w-full h-full">
-              <img
-                src={item.image.url}
-                className="mx-auto w-full max-h-[500px] object-contain"
+            <a href={item.link} className="block w-full h-full relative" style={{ height: '500px' }}>
+              <Image
+                src={ensureHttps(item.image.url)}
                 alt="Banner"
+                fill
+                sizes="100vw"
+                style={{ objectFit: 'contain' }}
+                priority={index === 0}
               />
             </a>
           </SwiperSlide>
@@ -43,6 +49,10 @@ const HomeImageSwiper = () => {
       </Swiper>
     </div>
   );
+};
+
+HomeImageSwiper.propTypes = {
+  items: PropTypes.array,
 };
 
 export default HomeImageSwiper;

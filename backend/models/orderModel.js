@@ -3,15 +3,18 @@ import mongoose, { model, Schema } from "mongoose";
 const orderSchema = new Schema({
     customerId: {
         type: Schema.ObjectId,
-        required: true
+        required: false,
+        default: null,
     },
     customerEmail: {
         type: String,
-        required: true
+        required: false,
+        default: null,
     },
     customerName: {
         type: String,
-        required: true        
+        required: false,
+        default: 'Guest',        
     },
     products: {
         type: Array,

@@ -181,6 +181,12 @@ const Orders = () => {
                                         </span>
                                         {p.type || 'N/A'}
                                     </div>
+                                    <div>
+                                        <span className='font-semibold text-red-900'>
+                                            Option ID:
+                                        </span>
+                                        {p.variantId ?? p.colorIndex ?? 'N/A'}
+                                    </div>
                                     <div><span className='font-semibold text-red-900'>Price: </span>{p.price}</div>
                                     <div><span className='font-semibold text-red-900'>Quantity: </span>{p.qty}</div>
                                 </li>

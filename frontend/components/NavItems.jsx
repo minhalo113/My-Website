@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
+import Image from 'next/image';
 
 import toast from "react-hot-toast"
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
 
 import { AuthContext } from "../context/AuthContext";
 import api from '../src/api/api.js'
@@ -17,7 +18,7 @@ const NavItems = () => {
   const [accountOpen, setAccountOpen] = useState(false);
 
   // authInfo
-  const {user, setUser, loading} = useContext(AuthContext)
+  const { user, setUser, loading } = useContext(AuthContext)
   const router = useRouter();
 
   useEffect(() => {
@@ -28,157 +29,173 @@ const NavItems = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []); 
+  }, []);
 
   const logOut = async () => {
-    try{
+    try {
       setUser(null)
-      const {data} = await api.get('/customer/logout', {withCredentials: true})
+      const { data } = await api.get('/customer/logout', { withCredentials: true })
       localStorage.removeItem("chatUserId");
       toast.success(data.message)
       router.push("/")
-    }catch(error){
+    } catch (error) {
       const msg = error?.response?.data?.error || "Unexpected error occurred."
       toast.error("Error signing out: ", msg);
     }
   }
 
-  if(loading) return null
+  if (loading) return null
 
   return (
     <>
-    <style>
-    {`
+      <style>
+        {`
       .custom-hover-override:hover {
         background: #000000 !important;
       }
     `}
-    </style>
+      </style>
 
-    <header className={`header-section style-4 ${headerFixed ? "header-fixed fadeInUp" : ""}`}>
-      {/* header top start */}
-      <div className={`header-top d-md-none ${socialToggle ? "open" : ""}`} >
+      <header className={`header-section style-4 ${headerFixed ? "header-fixed fadeInUp" : ""}`}>
+        {/* header top start */}
+        <div className={`header-top d-md-none ${socialToggle ? "open" : ""}`} >
 
-            <div className='container'>
-              <div className='header-top-area'>
-                <Link href = "/sign-up" className='custom-lab-btn lab-btn me-3'>
-                  <span>Create Account</span>
-                </Link>
-                <Link href = "/login">
-                  Log in
-                </Link>
-              </div>
+          <div className='container'>
+            <div className='header-top-area'>
+              <Link href="/sign-up" className='custom-lab-btn lab-btn me-3'>
+                <span>Create Account</span>
+              </Link>
+              <Link href="/login">
+                Log in
+              </Link>
             </div>
+          </div>
 
         </div>
-        
-      {/* header botton */}
-      <div className='header-bottom'>
-        <div className='container' >
-          <div className='header-wrapper'>
-            {/*logo */}
-            <div className='logo-search-acte'>
-              <div className='logo'>
-                <Link href = {"/"}>
-                  <img src = "/images/logo/myLogo.webp" alt = ""   style={{width: "120px", height: "120px"}}/>
-                </Link>
+
+        {/* header botton */}
+        <div className='header-bottom'>
+          <div className='container' >
+            <div className='header-wrapper'>
+              {/*logo */}
+              <div className='logo-search-acte'>
+                <div className='logo'>
+                  <Link href={"/"}>
+                    <Image src="/images/logo/myLogo.png" alt="" width={120} height={120} />
+                  </Link>
+
+                </div>
+
 
               </div>
-
-
-            </div>
               {/* menu area */}
               <div className='menu-area'>
                 <div className='menu'>
-                  <ul className={`lab-ul ${menuToggle ? "active": ""}`}>
-                      <li>
+                  <ul className={`lab-ul ${menuToggle ? "active" : ""}`}>
+                    <li>
                       <Link
                         href="/"
-                        className="inline-block transition-transform duration-200 hover:-translate-y-1"
+                        className="inline-block transition-transform duration-200"
                       >
                         Home
                       </Link>
                     </li>
 
                     <li>
-                    <Link
-                      href="/shop"
-                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
-                    >
-                      Shop
-                    </Link>
-                  </li>
+                      <Link
+                        href="/shop"
+                        className="inline-block transition-transform duration-200"
+                      >
+                        Shop
+                      </Link>
+                    </li>
 
-                  <li >
-                    <Link
-                      href="/blog"
-                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
-                    >
-                      Blog
-                    </Link>
-                  </li>
+                    <li >
+                      <Link
+                        href="/blog"
+                        className="inline-block transition-transform duration-200"
+                      >
+                        Blog
+                      </Link>
+                    </li>
 
-                  <li>
-                    <Link
-                      href="/about"
-                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
-                    >
-                      About
-                    </Link>
-                  </li>
+                    <li>
+                      <Link
+                        href="/about"
+                        className="inline-block transition-transform duration-200"
+                      >
+                        About
+                      </Link>
+                    </li>
 
-                  <li >
-                    <Link
-                      href="/cart-page"
-                      className="inline-block transition-transform duration-200 hover:-translate-y-1"
-                    >
-                      Cart
-                    </Link>
-                  </li>
+                    <li>
+                      <Link
+                        href="/contact"
+                        className="inline-block transition-transform duration-200"
+                      >
+                        Contact
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/track-order"
+                        className="inline-block transition-transform duration-200"
+                      >
+                        Track Order
+                      </Link>
+                    </li>
+                    <li >
+                      <Link
+                        href="/cart-page"
+                        className="inline-block transition-transform duration-200"
+                      >
+                        Cart
+                      </Link>
+                    </li>
 
-            
+
                     {user && (
                       <li
-                      className = "flex flex-col border-t border-[rgba(16,17,21,0.1)] lg:border-none">
+                        className="flex flex-col border-t border-[rgba(16,17,21,0.1)] lg:border-none">
                         <button
-                        className="cursor-pointer hover:bg-amber-500/80 text-black button-custom-hover-override"
-                        style={{
-                          padding: '10px 25px',
-                          fontWeight: 700,
-                          textTransform: 'capitalize',
-                          color: '#101115',
-                          width: '100%',
-                          fontSize: '15px',
-                          textAlign: 'left',
-                          height: '100%',
-                        }}                        
-                        onClick={() => setAccountOpen(!accountOpen)}
+                          className="cursor-pointer hover:bg-amber-500/80 text-black button-custom-hover-override"
+                          style={{
+                            padding: '10px 25px',
+                            fontWeight: 700,
+                            textTransform: 'capitalize',
+                            color: '#101115',
+                            width: '100%',
+                            fontSize: '15px',
+                            textAlign: 'left',
+                            height: '100%',
+                          }}
+                          onClick={() => setAccountOpen(!accountOpen)}
                         >
                           Account
                         </button>
 
                         {accountOpen && (
                           <ul style={{
-                              display: 'block',
-                            }}>
-                            <li><Link href="/profile" className="block py-1 custom-hover-override" style = {{paddingLeft: '2.5rem'}}>Profile</Link></li>
-                            <li><Link href="/wishlist" className="block py-1 custom-hover-override" style = {{paddingLeft: '2.5rem'}}>Wishlist</Link></li>
-                            <li><Link href="/history" className="block py-1 custom-hover-override" style = {{paddingLeft: '2.5rem'}}>History</Link></li>
+                            display: 'block',
+                          }}>
+                            <li><Link href="/profile" className="block py-1 custom-hover-override" style={{ paddingLeft: '2.5rem' }}>Profile</Link></li>
+                            <li><Link href="/wishlist" className="block py-1 custom-hover-override" style={{ paddingLeft: '2.5rem' }}>Wishlist</Link></li>
+                            <li><Link href="/history" className="block py-1 custom-hover-override" style={{ paddingLeft: '2.5rem' }}>Orders</Link></li>
                           </ul>
                         )}
 
-                    </li>
+                      </li>
                     )}
                   </ul>
                 </div>
 
                 {/* sign in and log in */}
-                { user ? 
-                (<><Link href = "/" className='d-none d-md-block' onClick={logOut}>Log Out</Link></>
-                ): 
-                (<>
-                    <Link href = "/sign-up" className='custom-lab-btn lab-btn me-3 d-none d-md-block'>Create Account</Link>
-                    <Link href = "/login" className='d-none d-md-block'>Log In</Link>
+                {user ?
+                  (<><Link href="/" className='d-none d-md-block' onClick={logOut}>Log Out</Link></>
+                  ) :
+                  (<>
+                    <Link href="/sign-up" className='custom-lab-btn lab-btn me-3 d-none d-md-block'>Create Account</Link>
+                    <Link href="/login" className='d-none d-md-block'>Log In</Link>
                   </>)
                 }
                 {/* {
@@ -194,20 +211,20 @@ const NavItems = () => {
                 {/* social toggler*/}
                 {!user ? (
                   <div className='ellepsis-bar d-md-none' onClick={() => setSocialToggle(!socialToggle)}>
-                    <i className = "icofont-info-square"></i>
+                    <i className="icofont-info-square"></i>
                   </div>
                 ) : (
                   <div className='ellepsis-bar d-md-none'>
-                    <i className="icofont-exit" onClick={()  => {logOut(); setSocialToggle(true)}}>
+                    <i className="icofont-exit" onClick={() => { logOut(); setSocialToggle(true) }}>
                     </i>
                   </div>
                 )
-              }
+                }
               </div>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
     </>
   )
 }
