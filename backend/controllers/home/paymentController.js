@@ -142,7 +142,7 @@ class paymentController {
                         couponId: couponId || ''
                     }
                 },
-                success_url: `${process.env.GIT_WEB_URL}/checkout-success?status=success`,
+                success_url: `${process.env.GIT_WEB_URL}/checkout-success?status=success&orderId=${order._id}`,
             })
 
             return responseReturn(res, 200, { url: session.url });

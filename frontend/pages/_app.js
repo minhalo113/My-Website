@@ -28,9 +28,11 @@ import { privateRoutesAdmin } from "../router/routes/privateRoutesAdmin"
 
 import { CartProvider } from "./../context/CartContext.jsx"
 import { AuthProvider } from "../context/AuthContext.jsx"
+import { GoogleTagManager } from '@next/third-parties/google'
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
+
   const adminPrivateRoutes = privateRoutesAdmin.find((r) => r.path === router.pathname)
   const customerPrivateRoutes = null
 
@@ -41,6 +43,7 @@ function MyApp({ Component, pageProps }) {
   return (
     <>
       <Suspense>
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_CONTAINER_ID} />
         <Head>
           <title>A Figure A Day</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />

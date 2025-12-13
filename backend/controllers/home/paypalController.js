@@ -245,7 +245,7 @@ class paypalController {
                                 landingPage: PaypalExperienceLandingPage.Login,
                                 userAction: PaypalExperienceUserAction.PayNow,
                                 paymentMethodPreference: PayeePaymentMethodPreference.ImmediatePaymentRequired,
-                                returnUrl: `${process.env.GIT_WEB_URL}/checkout-success?status=success`,
+                                returnUrl: `${process.env.GIT_WEB_URL}/checkout-success?status=success&orderId=${order._id}`,
                                 cancelUrl: `${process.env.GIT_WEB_URL}/cart-page`
                             }
                         }
