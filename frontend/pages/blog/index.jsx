@@ -76,13 +76,13 @@ export const Blog = () => {
                             <div className='post-inner'>
 
                               <div className='post-thumb' style={{ position: 'relative', width: '100%', height: '250px' }}>
-                                <Link href={`/blog/${blog._id}`} style={{ display: 'block', width: '100%', height: '100%' }}>
+                                <Link href={`/blog/${blog._id}${blog.slug ? `-${blog.slug}` : ''}`} style={{ display: 'block', width: '100%', height: '100%' }}>
                                   <Image src={ensureHttps(blog.image?.url)} alt={blog.title || ""} fill style={{ objectFit: 'cover' }} />
                                 </Link>
                               </div>
 
                               <div className='post-content'>
-                                <Link href={`/blog/${blog._id}`}><h4>{blog.title}</h4></Link>
+                                <Link href={`/blog/${blog._id}${blog.slug ? `-${blog.slug}` : ''}`}><h4>{blog.title}</h4></Link>
                                 <div className='meta-post'>
                                   <ul className='lab-ul'>
                                     {
@@ -101,7 +101,7 @@ export const Blog = () => {
 
                               <div className='post-footer'>
                                 <div className='pf-left'>
-                                  <Link href={`/blog/${blog._id}`} className='lab-btn-text'>{blog.btnText}
+                                  <Link href={`/blog/${blog._id}${blog.slug ? `-${blog.slug}` : ''}`} className='lab-btn-text'>{blog.btnText}
                                     <i className='icofont-external-link'></i>
                                   </Link>
                                 </div>
