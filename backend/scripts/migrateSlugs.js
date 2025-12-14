@@ -25,8 +25,11 @@ const migrateSlugs = async () => {
                     const newSlug = generateSlug(product.name);
 
                     if (product.slug !== newSlug) {
-                        product.slug = newSlug;
-                        await product.save();
+
+                        await productModel.updateOne(
+                            { _id: product._id },
+                            { $set: { slug: newSlug } }
+                        );
                         updatedCount++;
                     }
                 }
