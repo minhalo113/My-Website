@@ -33,7 +33,7 @@ const PopularPost = () => {
                 {postList.map((blog, i) => (
                     <li key={blog._id || i} className="d-flex gap-3 mb-4">
                         <div className="post-thumb rounded overflow-hidden shadow-sm">
-                            <Link href={`/blog/${blog._id}`}>
+                            <Link href={`/blog/${blog._id}${blog.slug ? `-${blog.slug}` : ''}`}>
                                 <Image
                                     src={ensureHttps(blog.image?.url || "/images/default-thumb.jpg")}
                                     alt={blog.title}
@@ -45,7 +45,7 @@ const PopularPost = () => {
                         </div>
 
                         <div className="post-content flex-1">
-                            <Link href={`/blog/${blog._id}`}>
+                            <Link href={`/blog/${blog._id}${blog.slug ? `-${blog.slug}` : ''}`}>
                                 <h5 className="text-lg font-semibold hover:underline text-gray-800">{blog.title}</h5>
                             </Link>
                             <p className="text-sm text-gray-500 mt-1">
