@@ -8,6 +8,7 @@ import PopularPost from './PopularPost';
 import api from '../../src/api/api.js';
 import DiscountBadge from '../../components/DiscountBadge.jsx';
 import SEO from '../../components/SEO';
+import PropTypes from 'prop-types';
 
 // Server-side props to handle ID extraction and redirection
 export async function getServerSideProps(context) {
@@ -271,5 +272,10 @@ const SingleProduct = ({ productId, slugParam }) => {
         </div>
     )
 }
+
+SingleProduct.propTypes = {
+    productId: PropTypes.string,
+    slugParam: PropTypes.string,
+};
 
 export default SingleProduct
