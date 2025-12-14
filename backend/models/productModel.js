@@ -19,7 +19,7 @@ const productSchema = new Schema({
     },
     brand: {
         type: String,
-        required: true
+        required: false
     },
     link: {
         type: String,
@@ -83,7 +83,7 @@ const productSchema = new Schema({
     },
     shopName: {
         type: String,
-        required: true
+        required: false
     },
     images: {
         type: Array,
