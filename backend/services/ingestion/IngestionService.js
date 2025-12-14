@@ -1,6 +1,6 @@
 import productModel from '../../models/productModel.js';
 import adminModel from '../../models/adminModel.js';
-import slugify from 'slugify';
+import { generateSlug } from '../../utils/slugUtils.js';
 
 import ebayProvider from './providers/EbayProvider.js';
 import aliExpressProvider from './providers/AliExpressProvider.js';
@@ -102,7 +102,7 @@ class IngestionService {
 
                 for (const item of products) {
                     try {
-                        const slug = slugify(item.name, { lower: true, strict: true }) + '-' + Date.now();
+                        const slug = generateSlug(item.name);
 
                         const query = item.sourceId ? { sourceId: item.sourceId } : { link: item.link };
 

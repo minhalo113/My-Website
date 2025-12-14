@@ -8,6 +8,7 @@ import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js'
 import { generateProductSocialCopy } from '../../services/aiProductSocialService.js';
 import { publishProductSocialPost } from '../../services/metaPublisher.js';
 import AliExpressProvider from '../../services/ingestion/providers/AliExpressProvider.js';
+import { generateSlug } from '../../utils/slugUtils.js';
 import {
     extractPublicId,
     fingerprintFromUploadResult,
@@ -136,7 +137,7 @@ class productController {
             let { images, colorImages, videos } = files;
 
             name = String(name).trim()
-            const slug = name.split(' ').join('-')
+            const slug = generateSlug(name)
 
             cloudinary.config({
                 cloud_name: process.env.cloud_name,
@@ -328,7 +329,7 @@ class productController {
         let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link, affiliateLink, productType } = req.body;
 
         name = String(name).trim()
-        const slug = name.split(' ').join('-')
+        const slug = generateSlug(name)
 
         const colorArr = colors ? String(colors).split(',').map(c => c.trim()).filter(Boolean) : []
         const sizeArr = sizes ? String(sizes).split(',').map(s => s.trim()).filter(Boolean) : []

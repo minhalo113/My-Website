@@ -151,7 +151,7 @@ const ProductCards = ({ GridList, products }) => {
 
                   {/* product action link */}
                   <div className="product-action-link flex items-center gap-3">
-                    <Link href={`/shop/${product._id.toString()}`}>
+                    <Link href={`/shop/${product._id.toString()}-${product.slug}`}>
                       <i className="icofont-eye text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-indigo-400" />
                     </Link>
 
@@ -168,7 +168,7 @@ const ProductCards = ({ GridList, products }) => {
                 {/* product content */}
                 <div className='product-content'>
                   <h5>
-                    <Link href={`/shop/${product._id.toString()}`}>{product.name}</Link>
+                    <Link href={`/shop/${product._id.toString()}-${product.slug}`}>{product.name}</Link>
                   </h5>
 
                   <p className='productRating flex justify-center'>
@@ -234,7 +234,7 @@ const ProductCards = ({ GridList, products }) => {
                   </div>
 
                   <div className="product-action-link flex items-center gap-3">
-                    <Link href={`/shop/${product._id.toString()}`}>
+                    <Link href={`/shop/${product._id.toString()}-${product.slug}`}>
                       <i className="icofont-eye text-xl text-slate-700 transition-transform duration-200 hover:scale-125 hover:text-indigo-400" />
                     </Link>
 
@@ -250,7 +250,7 @@ const ProductCards = ({ GridList, products }) => {
 
                 <div className='product-content'>
                   <h5>
-                    <Link href={`/shop/${product._id.toString()}`}>{product.name}</Link>
+                    <Link href={`/shop/${product._id.toString()}-${product.slug}`}>{product.name}</Link>
                   </h5>
 
                   <p className='productRating'>
