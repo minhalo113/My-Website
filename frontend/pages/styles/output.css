@@ -46,6 +46,7 @@
     --color-gray-50: oklch(0.985 0.002 247.839);
     --color-gray-200: oklch(0.928 0.006 264.531);
     --color-gray-300: oklch(0.872 0.01 258.338);
+    --color-gray-400: oklch(0.707 0.022 261.325);
     --color-gray-500: oklch(0.551 0.027 264.364);
     --color-gray-600: oklch(0.446 0.03 256.802);
     --color-gray-700: oklch(0.373 0.034 259.733);
@@ -90,6 +91,7 @@
     --radius-2xl: 1rem;
     --radius-3xl: 1.5rem;
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --animate-spin: spin 1s linear infinite;
     --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -278,9 +280,6 @@
   .relative {
     position: relative;
   }
-  .sticky {
-    position: sticky;
-  }
   .-top-1 {
     top: calc(var(--spacing) * -1);
   }
@@ -322,6 +321,9 @@
   }
   .left-0 {
     left: calc(var(--spacing) * 0);
+  }
+  .left-1 {
+    left: calc(var(--spacing) * 1);
   }
   .left-2 {
     left: calc(var(--spacing) * 2);
@@ -2555,17 +2557,26 @@
   .h-96 {
     height: calc(var(--spacing) * 96);
   }
+  .h-100 {
+    height: calc(var(--spacing) * 100);
+  }
   .h-\[90px\] {
     height: 90px;
   }
   .h-\[500px\] {
     height: 500px;
   }
+  .h-auto {
+    height: auto;
+  }
   .h-full {
     height: 100%;
   }
   .h-px {
     height: 1px;
+  }
+  .h-screen {
+    height: 100vh;
   }
   .max-h-72 {
     max-height: calc(var(--spacing) * 72);
@@ -2584,6 +2595,9 @@
   }
   .w-2\.5 {
     width: calc(var(--spacing) * 2.5);
+  }
+  .w-4 {
+    width: calc(var(--spacing) * 4);
   }
   .w-5 {
     width: calc(var(--spacing) * 5);
@@ -2654,20 +2668,11 @@
   .flex-none {
     flex: none;
   }
-  .flex-shrink {
-    flex-shrink: 1;
-  }
   .shrink-0 {
     flex-shrink: 0;
   }
-  .flex-grow {
-    flex-grow: 1;
-  }
   .flex-grow-1 {
     flex-grow: 1;
-  }
-  .border-collapse {
-    border-collapse: collapse;
   }
   .rotate-0 {
     rotate: 0deg;
@@ -2680,6 +2685,9 @@
   }
   .animate-pulse {
     animation: var(--animate-pulse);
+  }
+  .animate-spin {
+    animation: var(--animate-spin);
   }
   .cursor-pointer {
     cursor: pointer;
@@ -2871,6 +2879,9 @@
   .border-yellow-200 {
     border-color: var(--color-yellow-200);
   }
+  .border-t-emerald-500 {
+    border-top-color: var(--color-emerald-500);
+  }
   .bg-\[\#D09A40\] {
     background-color: #D09A40;
   }
@@ -3017,9 +3028,6 @@
   }
   .\!py-2 {
     padding-block: calc(var(--spacing) * 2) !important;
-  }
-  .py-0 {
-    padding-block: calc(var(--spacing) * 0);
   }
   .py-0\.5 {
     padding-block: calc(var(--spacing) * 0.5);
@@ -3175,6 +3183,9 @@
   }
   .text-gray-300 {
     color: var(--color-gray-300);
+  }
+  .text-gray-400 {
+    color: var(--color-gray-400);
   }
   .text-gray-500 {
     color: var(--color-gray-500);
@@ -4033,6 +4044,11 @@
   syntax: "*";
   inherits: false;
   initial-value: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 @keyframes pulse {
   50% {
