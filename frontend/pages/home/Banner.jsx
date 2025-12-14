@@ -135,7 +135,7 @@ const Banner = () => {
                                                         style={{ objectFit: "contain" }}
                                                     />
                                                 </div>
-                                                <Link href={`/shop/${product._id.toString()}`} style={{ flexGrow: 1, textAlign: 'center' }}>{product.name}</Link>
+                                                <Link href={`/shop/${product._id.toString()}-${product.slug}`} style={{ flexGrow: 1, textAlign: 'center' }}>{product.name}</Link>
                                             </li>)
                                     }
                                 </ul>

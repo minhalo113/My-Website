@@ -685,7 +685,7 @@ const Search = ({
                             </div>
                         )} */}
                             {textResults.slice(0, 20).map((product) => (
-                                <Link key={product._id?.toString() || product._id} href={`/shop/${product._id?.toString() || product._id}`}>
+                                <Link key={product._id?.toString() || product._id} href={`/shop/${product._id?.toString() || product._id}-${product.slug}`}>
                                     <div className='d-flex gap-3 p-2'>
                                         <div className="pro-thumb" style={{ flex: "0 0 64px", width: 64, height: 64 }}>
                                             <Image
@@ -728,7 +728,7 @@ const Search = ({
                             const matchSimilarity = Number(bestMatch?.similarity ?? match.similarity);
                             const matchKey = match.productId || `${match.productName}-${match.slug || ''}`;
                             return (
-                                <Link key={matchKey} href={`/shop/${match.productId}`}>
+                                <Link key={matchKey} href={`/shop/${match.productId}-${match.slug}`}>
                                     <div className='d-flex flex-column gap-2 p-2'>
                                         <div className='d-flex gap-3 align-items-center'>
                                             <div className='pro-thumb h-25'>

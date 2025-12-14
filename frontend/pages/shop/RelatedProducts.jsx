@@ -57,7 +57,7 @@ const RelatedProducts = ({ products }) => {
                     return (
                         <li key={product._id || i} className="d-flex gap-3 mb-4">
                             <div className="post-thumb rounded overflow-hidden shadow-sm relative" style={{ width: '90px', height: '90px', flexShrink: 0 }}>
-                                <Link href={`/shop/${product._id}`}>
+                                <Link href={`/shop/${product._id}-${product.slug}`}>
                                     <Image
                                         src={ensureHttps(product.images?.[0] || "/images/default-product.jpg")}
                                         alt={product.name}
@@ -74,7 +74,7 @@ const RelatedProducts = ({ products }) => {
                             </div>
 
                             <div className="post-content flex-1">
-                                <Link href={`/shop/${product._id}`}>
+                                <Link href={`/shop/${product._id}-${product.slug}`}>
                                     <h5 className="text-base font-semibold hover:underline text-gray-800 line-clamp-2" style={{ lineHeight: '1.2em' }}>
                                         {product.name}
                                     </h5>

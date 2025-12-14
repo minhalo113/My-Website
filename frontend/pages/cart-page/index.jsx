@@ -173,7 +173,7 @@ const CartPage = () => {
                                             <tr key={item.cartId}>
                                                 <td className='product-item cat-product'>
                                                     <div className='p-thumb'>
-                                                        <Link href={`/shop/${item.id.toString()}`}>
+                                                        <Link href={`/shop/${item.id.toString()}-${item.slug || 'product'}`}>
                                                             <Image
                                                                 src={ensureHttps(Array.isArray(item.img) ? item.img[0] : item.img)}
                                                                 alt={item.name || "Product"}
@@ -184,7 +184,7 @@ const CartPage = () => {
                                                         </Link>
                                                     </div>
                                                     <div className='p-content'>
-                                                        <Link href={`/shop/${item.id.toString()}`}>{item.name}</Link>
+                                                        <Link href={`/shop/${item.id.toString()}-${item.slug || 'product'}`}>{item.name}</Link>
                                                     </div>
                                                 </td>
 

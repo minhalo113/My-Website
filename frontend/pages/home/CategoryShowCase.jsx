@@ -170,12 +170,12 @@ const CategoryShowCase = () => {
                                                 />
                                                 <DiscountBadge discount={product.discount} />
                                                 <div className='course-category'>
-                                                    <div className='course-cate'><a href={`/shop/${product._id.toString()}`}>{product.category}</a></div>
+                                                    <div className='course-cate'><a href={`/shop/${product._id.toString()}-${product.slug}`}>{product.category}</a></div>
                                                 </div>
                                             </div>
 
                                             <div className='course-content'>
-                                                <Link href={`/shop/${product._id.toString()}`}><h6>{product.name}</h6></Link>
+                                                <Link href={`/shop/${product._id.toString()}-${product.slug}`}><h6>{product.name}</h6></Link>
                                                 <div className='mt-2'>
                                                     <Rating
                                                         rating={product.averageRating}
@@ -185,7 +185,7 @@ const CategoryShowCase = () => {
                                                 </div>
                                                 <div className='course-footer'>
                                                     <div className='course-author'>
-                                                        <Link href={`/shop/${product._id.toString()}`} className='ca-name'>{product.seller}</Link>
+                                                        <Link href={`/shop/${product._id.toString()}-${product.slug}`} className='ca-name'>{product.seller}</Link>
                                                     </div>
                                                     <div className='course-price flex flex-col items-end text-right gap-1' style={{ color: "#DCA54A" }}>
                                                         {renderPrice(product)}

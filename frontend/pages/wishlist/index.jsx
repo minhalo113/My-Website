@@ -156,7 +156,7 @@ const WishList = () => {
                       </a>
 
                       <a
-                        href={`/shop/${product.productId.toString()}`}
+                        href={`/shop/${product.productId.toString()}-${product.slug}`}
                         className="text-indigo-600 hover:text-indigo-400 relative transition-all duration-200 ease-in-out hover:scale-[1.05] after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-indigo-400 hover:after:w-full after:transition-all after:duration-300"
                       >
                         Product Details
