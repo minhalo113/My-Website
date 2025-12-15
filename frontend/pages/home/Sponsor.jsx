@@ -1,7 +1,7 @@
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import Image from 'next/image';
-import ensureHttps from '../../src/utils/imageUtils';
+import { ensureHttps } from '../../src/utils/imageUtils';
 
 import 'swiper/css'
 import 'swiper/css/pagination'
