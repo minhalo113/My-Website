@@ -26,6 +26,11 @@ const Search = ({
     minPrice = null,
     maxPrice = null,
     onPriceChange = null,
+    category = '',
+    setCategory = null,
+    categories = [],
+    productType = 'All',
+    setProductType = null
 }) => {
     const fileInputRef = useRef(null);
     const [localMinPrice, setLocalMinPrice] = useState(minPrice != null ? String(minPrice) : '');
@@ -39,7 +44,7 @@ const Search = ({
         event.target.value = '';
     };
 
-       useEffect(() => {
+    useEffect(() => {
         const parsed = parsePriceValue(minPrice);
         if (parsed != null) {
             setLocalMinPrice(String(parsed));
@@ -127,6 +132,42 @@ const Search = ({
                     placeholder='Search products'
                 />
             </div>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                {/* Category Filter */}
+                {setCategory && (
+                    <div className='flex flex-col gap-1'>
+                        <label htmlFor='dash-category-filter' className='text-xs font-medium text-[#d0d2d6]'>Category</label>
+                        <select
+                            id='dash-category-filter'
+                            onChange={(e) => setCategory(e.target.value)}
+                            value={category}
+                            className='px-3 py-2 rounded-md bg-[#6a5fdf] border border-slate-700 text-[#d0d2d6] focus:border-indigo-400 outline-none'
+                        >
+                            <option value=''>All Categories</option>
+                            {categories.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                )}
+
+                {/* Product Type Filter */}
+                {setProductType && (
+                    <div className='flex flex-col gap-1'>
+                        <label htmlFor='dash-product-type-filter' className='text-xs font-medium text-[#d0d2d6]'>Product Type</label>
+                        <select
+                            id='dash-product-type-filter'
+                            onChange={(e) => setProductType(e.target.value)}
+                            value={productType}
+                            className='px-3 py-2 rounded-md bg-[#6a5fdf] border border-slate-700 text-[#d0d2d6] focus:border-indigo-400 outline-none'
+                        >
+                            <option value='All'>All</option>
+                            <option value='standard'>Standard</option>
+                            <option value='affiliate'>Affiliate</option>
+                        </select>
+                    </div>
+                )}
+            </div>
+
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                 <div className='flex flex-col gap-1'>
                     <label htmlFor='dash-min-price' className='text-xs font-medium text-[#d0d2d6]'>Min price</label>
@@ -178,6 +219,11 @@ Search.propTypes = {
     minPrice: PropTypes.number,
     maxPrice: PropTypes.number,
     onPriceChange: PropTypes.func,
+    category: PropTypes.string,
+    setCategory: PropTypes.func,
+    categories: PropTypes.array,
+    productType: PropTypes.string,
+    setProductType: PropTypes.func,
 };
 
 export default Search;
