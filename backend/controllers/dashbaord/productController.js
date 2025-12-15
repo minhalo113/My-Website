@@ -275,7 +275,7 @@ class productController {
             // The request is to "get all products" and "reduce return result".
             // We'll apply the field selection to all branches to ensure reduction.
 
-            const selectFields = '_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand stock isHidden link shopName';
+            const selectFields = '_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand stock isHidden link shopName productType';
 
             if (searchValue) {
                 const searchQuery = {
