@@ -9,13 +9,13 @@ const startIngestionJob = () => {
         await ingestionService.run();
     });
 
-    cron.schedule('0 9,21 * * *', async () => {
+    cron.schedule('0 9 * * *', async () => {
         console.log('[Scheduler] Triggering automated anime blog generation...');
         await animeBlogService.createBlogPost();
     });
 
     console.log('[Scheduler] Ingestion job scheduled (Daily at 00:00).');
-    console.log('[Scheduler] Anime blog generation scheduled (Twice daily at 09:00 & 21:00).');
+    console.log('[Scheduler] Anime blog generation scheduled (Daily at 09:00).');
 };
 
 export default startIngestionJob;

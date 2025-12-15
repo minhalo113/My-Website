@@ -27,8 +27,11 @@ const Products = () => {
     const [parPage, setParPage] = useState(5)
     const [minPrice, setMinPrice] = useState(null)
     const [maxPrice, setMaxPrice] = useState(null)
+    const [category, setCategory] = useState('')
+    const [productType, setProductType] = useState('All')
     const [allProducts, setAllProducts] = useState([])
     const [filteredProducts, setFilteredProducts] = useState([])
+    const [categories, setCategories] = useState([])
 
     // Fetch all products once
     useEffect(() => {
@@ -39,6 +42,8 @@ const Products = () => {
         if (Array.isArray(products)) {
             setAllProducts(products)
             setFilteredProducts(products)
+            const uniqueCategories = [...new Set(products.map(p => p.category))].filter(Boolean).sort()
+            setCategories(uniqueCategories)
         }
     }, [products])
 
@@ -55,9 +60,15 @@ const Products = () => {
         if (maxPrice !== null) {
             result = result.filter(p => p.price <= maxPrice);
         }
+        if (category) {
+            result = result.filter(p => p.category === category);
+        }
+        if (productType && productType !== 'All') {
+            result = result.filter(p => p.productType === productType);
+        }
         setFilteredProducts(result);
         if (currentPage > 1) setCurrentPage(1);
-    }, [allProducts, searchValue, minPrice, maxPrice])
+    }, [allProducts, searchValue, minPrice, maxPrice, category, productType])
 
     const truncateText = (text, maxLength) => {
         if (!text || text.length < maxLength) return text;
@@ -181,6 +192,11 @@ const Products = () => {
                     minPrice={minPrice}
                     maxPrice={maxPrice}
                     onPriceChange={handlePriceFilterChange}
+                    category={category}
+                    setCategory={setCategory}
+                    categories={categories}
+                    productType={productType}
+                    setProductType={setProductType}
                 />
 
                 {(imageSearchLoading || (imageSearchResults && imageSearchResults.length > 0)) && (

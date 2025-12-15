@@ -130,7 +130,6 @@ class AnimeBlogService {
 
     async findRelatedProducts(characterName, animeTitle) {
         try {
-            // Escape special characters for regex
             const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
             const nameRegex = new RegExp(escapeRegex(characterName), 'i');
@@ -144,19 +143,20 @@ class AnimeBlogService {
                 isHidden: false
             };
 
-            // Fetch potential matches
             const products = await productModel.find(query)
                 .select('_id productType name price images slug')
-                .limit(20); // Fetch a bit more to sort in memory if needed
+                .limit(20);
 
-            // Sort: Standard products first, then others
+            if (products.length === 0) {
+                products = await productModel.find({ isHidden: false }).limit(20);
+            }
+
             products.sort((a, b) => {
                 const typeA = a.productType === 'standard' ? 0 : 1;
                 const typeB = b.productType === 'standard' ? 0 : 1;
                 return typeA - typeB;
             });
 
-            // Take top 5
             return products.slice(0, 5).map(p => p._id);
         } catch (err) {
             console.error('[AnimeBlogService] Error finding related products:', err);
