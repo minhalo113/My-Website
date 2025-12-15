@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import PropTypes from 'prop-types'; // <--- MỚI THÊM: Import thư viện kiểm tra kiểu
 import PageHeader from '../../components/PageHeader.jsx';
 import PopularPost from '../shop/PopularPost.jsx';
 import RelatedProducts from '../shop/RelatedProducts.jsx';
@@ -23,9 +24,6 @@ export async function getServerSideProps(context) {
     }
 
     try {
-        // Since we are server-side, we need to ensure the api call works. 
-        // frontend/src/api/api.js uses process.env.NEXT_PUBLIC_API_BASE.
-        // We assume this is set correctly for the server environment as well.
         const response = await api.get(`/get_blog/${blogId}`);
         const blog = response.data.blog;
 
@@ -59,6 +57,7 @@ export async function getServerSideProps(context) {
     }
 }
 
+// Helper functions (Không export những cái này để tránh lỗi Fast Refresh)
 const extractStartTime = (searchParams) => {
     if (!searchParams) return '';
 
@@ -487,6 +486,28 @@ const SingleBlog = ({ serverBlog }) => {
 
         </div>
     );
+};
+
+SingleBlog.propTypes = {
+    serverBlog: PropTypes.shape({
+        _id: PropTypes.string,
+        title: PropTypes.string,
+        slug: PropTypes.string,
+        content: PropTypes.string,
+        createdAt: PropTypes.string,
+        updatedAt: PropTypes.string,
+        image: PropTypes.shape({
+            url: PropTypes.string,
+        }),
+        youtubeLink: PropTypes.string,
+        tags: PropTypes.arrayOf(PropTypes.string),
+        metaList: PropTypes.array,
+        products: PropTypes.array,
+        blogDetail: PropTypes.object,
+        commentCount: PropTypes.number,
+        blockquote: PropTypes.string,
+        citation: PropTypes.string,
+    }),
 };
 
 export default SingleBlog;
