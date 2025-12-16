@@ -326,7 +326,7 @@ class productController {
     }
 
     product_update = async (req, res) => {
-        let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link, affiliateLink, productType } = req.body;
+        let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link, affiliateLink, productType, shippingDestination } = req.body;
 
         name = String(name).trim()
         const slug = generateSlug(name)
@@ -354,7 +354,7 @@ class productController {
             }
 
             await productModel.findByIdAndUpdate(productId, {
-                name, description, stock, price, category, discount, deliveryTime, brand,
+                name, description, stock, price, category, discount, deliveryTime, brand, shippingDestination,
                 link: link ? String(link).trim() : '',
                 affiliateLink: affiliateLink ? String(affiliateLink).trim() : '',
                 productType: productType ? String(productType).trim() : 'standard',
