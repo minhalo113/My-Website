@@ -224,7 +224,7 @@ class productController {
                     colorImages: allColorImageUrl,
                     colorImageFingerprints,
                     colorPrices: parseColorPrices(colorPrices),
-                    shippingDestination
+                    shippingDestination: shippingDestination ? String(shippingDestination).trim() : 'both'
                 })
                 return responseReturn(res, 201, { message: "Product Added Successfully" })
             } catch (error) {

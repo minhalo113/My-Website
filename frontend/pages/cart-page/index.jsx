@@ -26,7 +26,6 @@ const CartPage = () => {
     const [couponError, setCouponError] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('stripe');
 
-    // Validation Logic
     const destinations = new Set(cartItems.map(item => item.shippingDestination || 'both'));
     const hasCanadaOnly = destinations.has('canada_only');
     const hasUsOnly = destinations.has('us_only');
@@ -42,8 +41,6 @@ const CartPage = () => {
     const calculateTotalPrice = (item) => {
         let price = item.price - (item.price * (item.discount || 0)) / 100;
 
-        // Frontend conversion logic: If cart is CAD, convert USD items (both) to CAD
-        // If item is 'both' (USD) and cart is CAD
         if (cartCurrency === 'CAD' && (item.shippingDestination === 'both' || !item.shippingDestination)) {
             price = price * USD_TO_CAD_RATE;
         }
