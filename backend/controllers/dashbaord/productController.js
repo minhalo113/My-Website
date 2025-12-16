@@ -130,7 +130,7 @@ class productController {
         const form = formidable({ multiples: true });
 
         form.parse(req, async (err, field, files) => {
-            let { name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link, affiliateLink, productType } = field;
+            let { name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link, affiliateLink, productType, shippingDestination } = field;
 
             shopName = String(shopName).trim()
 
@@ -223,7 +223,8 @@ class productController {
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
                     colorImageFingerprints,
-                    colorPrices: parseColorPrices(colorPrices)
+                    colorPrices: parseColorPrices(colorPrices),
+                    shippingDestination
                 })
                 return responseReturn(res, 201, { message: "Product Added Successfully" })
             } catch (error) {
