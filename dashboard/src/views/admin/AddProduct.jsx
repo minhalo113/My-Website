@@ -275,7 +275,11 @@ const AddProduct = () => {
                 sizes: '',
                 deliveryTime: '',
                 colorPrices: '',
-                link: ''
+                link: '',
+                shippingDestination: state.shippingDestination,
+                currency: state.currency,
+                productType: 'standard',
+                affiliateLink: ''
             })
             setImageShow([])
             setImages([])
@@ -284,7 +288,6 @@ const AddProduct = () => {
             setVideos([])
             setVideoNames([])
             setCategory('')
-            setState(prev => ({ ...prev, productType: 'standard' }))
         }
         if (errorMessage) {
             toast.error(errorMessage)
