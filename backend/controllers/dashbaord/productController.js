@@ -130,7 +130,7 @@ class productController {
         const form = formidable({ multiples: true });
 
         form.parse(req, async (err, field, files) => {
-            let { name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link, affiliateLink, productType } = field;
+            let { name, category, description, stock, price, discount, deliveryTime, shopName, brand, colors, sizes, colorPrices, link, affiliateLink, productType, shippingDestination } = field;
 
             shopName = String(shopName).trim()
 
@@ -223,7 +223,8 @@ class productController {
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
                     colorImageFingerprints,
-                    colorPrices: parseColorPrices(colorPrices)
+                    colorPrices: parseColorPrices(colorPrices),
+                    shippingDestination
                 })
                 return responseReturn(res, 201, { message: "Product Added Successfully" })
             } catch (error) {
@@ -326,7 +327,7 @@ class productController {
     }
 
     product_update = async (req, res) => {
-        let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link, affiliateLink, productType } = req.body;
+        let { name, description, stock, price, category, discount, deliveryTime, brand, colors, sizes, colorPrices, productId, link, affiliateLink, productType, shippingDestination } = req.body;
 
         name = String(name).trim()
         const slug = generateSlug(name)
@@ -354,7 +355,7 @@ class productController {
             }
 
             await productModel.findByIdAndUpdate(productId, {
-                name, description, stock, price, category, discount, deliveryTime, brand,
+                name, description, stock, price, category, discount, deliveryTime, brand, shippingDestination,
                 link: link ? String(link).trim() : '',
                 affiliateLink: affiliateLink ? String(affiliateLink).trim() : '',
                 productType: productType ? String(productType).trim() : 'standard',

@@ -387,6 +387,7 @@ const AddProduct = () => {
         formData.append('sizes', state.sizes)
         formData.append('shopName', 'A Figure A Day')
         formData.append('category', category)
+        formData.append('shippingDestination', state.shippingDestination)
 
         for (let i = 0; i < images.length; i++) {
             formData.append('images', images[i])
