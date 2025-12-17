@@ -143,7 +143,7 @@ class AnimeBlogService {
                 isHidden: false
             };
 
-            const products = await productModel.find(query)
+            let products = await productModel.find(query)
                 .select('_id productType name price images slug')
                 .limit(20);
 
