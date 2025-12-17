@@ -1,70 +1,52 @@
-# Getting Started with Create React App
+# Admin Dashboard - A Figure A Day
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The admin dashboard for "A Figure A Day", allowing administrators to control products, orders, and content.
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+This allows authorized admins to:
+*   **Manage Products**: Edit details, import new products via ID (AliExpress/eBay), and toggle visibility.
+*   **Review Blogs**: Edit and approve AI-generated blog posts before they go live.
+*   **Process Orders**: View customer orders and payment statuses.
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+*   **React 19**: Built with Create React App.
+*   **Bootstrap**: Core layout and components.
+*   **Tailwind CSS**: Utility classes for custom styling.
+*   **ApexCharts**: Visualizing sales data.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Getting Started
 
-### `npm test`
+### 1. Installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+cd dashboard
+npm install
+```
 
-### `npm run build`
+### 2. Environment Variables
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Create a `.env` file in the `dashboard` directory:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```env
+# Socket Connection (for real-time updates)
+REACT_APP_SOCKET_URL='..'
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# API Base URL
+API_CALL='..' (replace the url in src/api/api.js to this .env url )
+```
 
-### `npm run eject`
+### 3. Development
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Open [http://localhost:3001](http://localhost:3001) to view the dashboard.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Key Features
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+*   **Product Importer**: A dedicated interface to import products directly by ID from supported suppliers.
+*   **Blog Editor**: A rich-text editor environment to refine the raw output from the AI generator.
+*   **Live Updates**: Uses Socket.io to receive real-time notifications about new orders.
