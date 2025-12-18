@@ -15,7 +15,7 @@ const PopularPost = () => {
             const { data } = await api.get('/recent-blogs', { withCredentials: true });
             setPostList(data.blogs)
         } catch (error) {
-            console.log(error.response.data.message || "Something went wrong")
+            console.log(error?.response?.data?.message || error.message || "Something went wrong")
         }
     }
 

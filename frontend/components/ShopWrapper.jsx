@@ -192,7 +192,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
 
     const pageTitleMap = {
         'all': 'Our Shop Page',
-        'standard': 'Direct Store',
+        'standard': 'Shop',
         'affiliate': 'Global Finds'
     };
 
@@ -222,24 +222,6 @@ const ShopWrapper = ({ productType = 'all' }) => {
                     >
 
                         <Link
-                            href="/shop"
-                            style={{
-                                padding: "8px 24px",
-                                borderRadius: "9999px",
-                                fontSize: "0.875rem",
-                                fontWeight: 600,
-                                textDecoration: "none",
-                                transition: "all 0.3s",
-                                backgroundColor: productType === "all" ? "#ffffff" : "transparent",
-                                color: productType === "all" ? "#059669" : "#6b7280",
-                                boxShadow: productType === "all" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-                                cursor: "pointer"
-                            }}
-                        >
-                            All Collection
-                        </Link>
-
-                        <Link
                             href="/shop/direct-store"
                             style={{
                                 padding: "8px 24px",
@@ -255,7 +237,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
                             }}
                         >
                             <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                                Direct Store <CA style={{ width: "16px", height: "auto" }} />
+                                Shop <CA style={{ width: "16px", height: "auto" }} />
                             </span>
                         </Link>
 

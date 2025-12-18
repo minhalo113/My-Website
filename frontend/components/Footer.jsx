@@ -20,8 +20,8 @@ const socialList = [
     { iconName: 'icofont-youtube', siteLink: 'https://youtube.com/@randohistoryfacts_?si=bfMKRbRI-BHjwOOJ', className: 'youtube', },
 ]
 
-const ItemList = [{ text: 'All Products', link: '/shop', },
-{ text: 'Shop', link: '/shop', }, { text: 'Blog', link: '/blog', },
+const ItemList = [{ text: 'All Products', link: '/shop/direct-store', },
+{ text: 'Shop', link: '/shop/direct-store', }, { text: 'Blog', link: '/blog', },
 { text: 'About', link: '/about', }, { text: 'Refund Policy', link: '/refund-policy', },
 { text: 'Shipping Policy', link: '/shipping-policy', },
 {/*{ text: 'FAQs', link: '/about', }*/ }]

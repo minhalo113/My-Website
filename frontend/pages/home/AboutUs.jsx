@@ -63,7 +63,7 @@ const AboutUs = () => {
                                 <span className='subtitle'>{subTitle}</span>
                                 <h2 className='title'>{title}</h2>
                                 <p>{desc}</p>
-                                <Link href="/shop" className='lab-btn' style={{ background: "#ffffff" }}>{btnText}</Link>
+                                <Link href="/shop/direct-store" className='lab-btn' style={{ background: "#ffffff" }}>{btnText}</Link>
                             </div>
                         </div>
 

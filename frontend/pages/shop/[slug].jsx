@@ -165,7 +165,7 @@ const SingleProduct = ({ serverProduct }) => {
                 image={firstImage}
                 structuredData={productStructuredData}
             />
-            <PageHeader title={"OUR SHOP"} curPage={productData.name} additionalLink={[{ label: "Shop", path: "/shop" }]} />
+            <PageHeader title={"OUR SHOP"} curPage={productData.name} additionalLink={[{ label: "Shop", path: "/shop/direct-store" }]} />
             <div className='shop-single padding-tb aside-bg'>
                 <div className='container'>
                     <div className='row justify-content-center'>

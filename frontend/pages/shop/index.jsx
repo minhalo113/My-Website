@@ -1,8 +1,15 @@
-import React from 'react';
-import ShopWrapper from '../../components/ShopWrapper';
+
+export async function getServerSideProps() {
+  return {
+    redirect: {
+      destination: '/shop/direct-store',
+      permanent: false,
+    },
+  };
+}
 
 const Shop = () => {
-  return <ShopWrapper productType="all" />;
+  return null;
 };
 
 export default Shop;
