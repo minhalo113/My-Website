@@ -45,7 +45,7 @@ const HomeCategory = () => {
                                 <div key={val.productId || val.category} className='col' style={{ display: "flex", justifyContent: 'center' }}>
                                     <Link
                                         href={{
-                                            pathname: '/shop',
+                                            pathname: '/shop/direct-store',
                                             query: val?.category ? { category: val.category } : {},
                                         }}
                                         className='category-item'

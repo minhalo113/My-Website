@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import moment from 'moment';
 import apiTokenModel from '../../../models/apiTokenModel.js';
 
-// Constants cho các Base URL
 const BASE_URL_GATEWAY = 'https://api-sg.aliexpress.com/sync';
 const BASE_URL_REST = 'https://api-sg.aliexpress.com/rest';
 
@@ -225,7 +224,16 @@ class AliExpressProvider {
     }
     async fetchProducts() {
         const creds = this._getEnvCreds('AFF');
-        const keywords = ["Anime Figure", "Genshin Impact Figure", "Honkai Star Rail Figure"];
+        const keywords = ["Anime Figure",
+            "Scale Statue",
+            "Nendoroid",
+            "Figma",
+            "Pop Up Parade",
+            "Kotobukiya",
+            "SH Figuarts",
+            "Genshin Impact Figure",
+            "One Piece Figure",
+            "Miku Figure"];
         const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
 
         console.log(`[AliExpress] Searching: ${randomKeyword}`);
@@ -237,8 +245,8 @@ class AliExpressProvider {
             params: {
                 keywords: randomKeyword,
                 target_currency: 'USD',
-                page_no: Math.floor(Math.random() * 3) + 1,
-                page_size: 20,
+                page_no: Math.floor(Math.random() * 20) + 1,
+                page_size: 50,
                 sort: 'LAST_VOLUME_DESC',
                 tracking_id: creds.trackingId
             }
