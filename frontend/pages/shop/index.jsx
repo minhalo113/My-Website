@@ -1,15 +1,8 @@
-
-export async function getServerSideProps() {
-  return {
-    redirect: {
-      destination: '/shop/direct-store',
-      permanent: false,
-    },
-  };
-}
+import React from 'react';
+import ShopWrapper from '../../components/ShopWrapper';
 
 const Shop = () => {
-  return null;
+  return <ShopWrapper productType="all" />;
 };
 
 export default Shop;
