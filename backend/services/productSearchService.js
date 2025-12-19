@@ -103,6 +103,14 @@ const mapFacetEntries = (entries = []) => {
         }));
 };
 
+const mapBucketEntries = (buckets = []) => {
+    if (!Array.isArray(buckets)) return [];
+    return buckets.map(b => ({
+        value: b._id,
+        count: Number(b.count) || 0
+    }));
+};
+
 const computeRelevanceLabel = (normalizedScore) => {
     if (normalizedScore >= 0.66) return 'high';
     if (normalizedScore >= 0.33) return 'medium';
@@ -135,6 +143,7 @@ const normalizeResults = (docs, { sanitizedTerm }) => {
         product.price = computeEffectivePrice(product);
 
         delete product.score;
+        delete product.totalCount; // Remove metadata from doc
 
         if (!sanitizedTerm || !Number.isFinite(rawScore)) {
             return product;
@@ -301,6 +310,7 @@ export const searchCatalogProducts = async ({
     minPrice,
     maxPrice,
     sort,
+    includeHidden = false,
 } = {}) => {
     const sanitizedTerm = sanitizeTerm(term);
     const sanitizedCategory = sanitizeCategory(category);
@@ -333,6 +343,7 @@ export const searchCatalogProducts = async ({
             minPrice: sanitizedMinPrice,
             maxPrice: sanitizedMaxPrice,
             sort: sortKey,
+            includeHidden,
         })
         : null;
 
@@ -349,94 +360,196 @@ export const searchCatalogProducts = async ({
         }
     }
 
-    const initialMatchStage = { isHidden: false };
+    const searchCompound = {};
+    if (sanitizedTerm) {
+        searchCompound.should = [
+            {
+                autocomplete: {
+                    query: sanitizedTerm,
+                    path: 'name',
+                    fuzzy: { maxEdits: 1, prefixLength: 1 },
+                },
+            },
+            {
+                text: {
+                    query: sanitizedTerm,
+                    path: 'name',
+                    score: { boost: { value: 3 } },
+                },
+            },
+            {
+                text: {
+                    query: sanitizedTerm,
+                    path: 'description',
+                },
+            },
+        ];
+    }
 
     if (sanitizedCategory) {
-        initialMatchStage.category = sanitizedCategory;
+        if (!searchCompound.filter) searchCompound.filter = [];
+        searchCompound.filter.push({
+            equals: {
+                value: sanitizedCategory,
+                path: 'category',
+            },
+        });
     }
 
-    if (sanitizedProductType) {
-        initialMatchStage.productType = sanitizedProductType;
-    }
-
-    const pipeline = [];
+    const resultsPipeline = [];
 
     if (sanitizedTerm) {
-        pipeline.push({ $match: { ...initialMatchStage, $text: { $search: sanitizedTerm } } });
+        resultsPipeline.push({
+            $search: {
+                index: 'default',
+                compound: searchCompound,
+            }
+        });
     } else {
-        pipeline.push({ $match: initialMatchStage });
+        const matchStage = {};
+        if (sanitizedCategory) {
+            matchStage.category = sanitizedCategory;
+        }
+        resultsPipeline.push({ $match: matchStage });
     }
 
-    pipeline.push({ $addFields: { effectivePrice: createEffectivePriceExpression() } });
+    // 2. Filter non-indexed fields
+    const postSearchMatch = {};
+    if (!includeHidden) postSearchMatch.isHidden = false;
+    if (sanitizedProductType) postSearchMatch.productType = sanitizedProductType;
+    if (Object.keys(postSearchMatch).length > 0) {
+        resultsPipeline.push({ $match: postSearchMatch });
+    }
 
+    // 3. Price Calculation & Filtering
+    resultsPipeline.push({ $addFields: { effectivePrice: createEffectivePriceExpression() } });
     if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
         const priceMatch = {};
-        if (sanitizedMinPrice != null) {
-            priceMatch.$gte = sanitizedMinPrice;
-        }
-        if (sanitizedMaxPrice != null) {
-            priceMatch.$lte = sanitizedMaxPrice;
-        }
-        pipeline.push({ $match: { effectivePrice: priceMatch } });
+        if (sanitizedMinPrice != null) priceMatch.$gte = sanitizedMinPrice;
+        if (sanitizedMaxPrice != null) priceMatch.$lte = sanitizedMaxPrice;
+        resultsPipeline.push({ $match: { effectivePrice: priceMatch } });
     }
 
+    // 4. Sorting
     if (sanitizedTerm) {
-        pipeline.push({ $addFields: { score: { $meta: 'textScore' } } });
-        pipeline.push({ $sort: { score: -1, createdAt: -1 } });
+        resultsPipeline.push({ $addFields: { score: { $meta: 'searchScore' } } });
+        if (sort) {
+            resultsPipeline.push({ $sort: sortStage });
+        } else {
+            resultsPipeline.push({ $sort: { score: -1 } });
+        }
     } else {
-        pipeline.push({ $sort: sortStage });
+        resultsPipeline.push({ $sort: sortStage });
     }
 
-    const projectStage = {
-        _id: 1,
-        name: 1,
-        brand: 1,
-        category: 1,
-        price: '$effectivePrice',
-        discount: 1,
-        images: { $slice: ['$images', 5] },
-        slug: 1,
-        shopName: 1,
-        sellerId: 1,
-        stock: 1,
-        colors: 1,
-        colorPrices: 1,
-        link: 1,
-        averageRating: 1,
-        reviewCount: 1,
-        createdAt: 1,
-        updatedAt: 1,
-    };
+    const canUseFacetCount = Boolean(sanitizedTerm && includeFacets);
 
-    if (sanitizedTerm) {
-        projectStage.score = '$score';
+    if (!canUseFacetCount) {
+        resultsPipeline.push({
+            $setWindowFields: {
+                output: {
+                    totalCount: { $count: {} }
+                }
+            }
+        });
     }
 
-    const facetStage = {
-        results: [
-            { $skip: skip },
-            { $limit: normalizedLimit },
-            { $project: projectStage },
-        ],
-        totalCount: [
-            { $count: 'value' },
-        ],
-    };
+    // 6. Pagination & Projection
+    resultsPipeline.push({ $skip: skip });
+    resultsPipeline.push({ $limit: normalizedLimit });
+    resultsPipeline.push({
+        $project: {
+            _id: 1,
+            name: 1,
+            brand: 1,
+            category: 1,
+            price: '$effectivePrice',
+            discount: 1,
+            images: { $slice: ['$images', 5] },
+            slug: 1,
+            shopName: 1,
+            sellerId: 1,
+            stock: 1,
+            colors: 1,
+            colorPrices: 1,
+            link: 1,
+            averageRating: 1,
+            reviewCount: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            isHidden: 1,
+            productType: 1,
+            score: sanitizedTerm ? '$score' : undefined,
+            totalCount: 1 // Will only be present if $setWindowFields was run
+        }
+    });
 
-    if (includeFacets) {
-        facetStage.categoryFacets = [
-            { $group: { _id: '$category', count: { $sum: 1 } } },
-            { $sort: { count: -1, _id: 1 } },
-        ];
+    // --- Pipeline 2: Facets (Metadata) ---
+    const facetsPipeline = [];
+    if (sanitizedTerm && includeFacets) {
+        facetsPipeline.push({
+            $searchMeta: {
+                index: "default",
+                facet: {
+                    operator: {
+                        compound: searchCompound
+                    },
+                    facets: {
+                        "categories": {
+                            "type": "string",
+                            "path": "category"
+                        },
+                        "brands": {
+                            "type": "string",
+                            "path": "brand"
+                        }
+                    }
+                }
+            }
+        });
+    } else if (includeFacets) {
+        // Fallback for non-text search facets (standard aggregation)
+        const matchStage = {};
+        if (sanitizedCategory) matchStage.category = sanitizedCategory;
+        if (!includeHidden) matchStage.isHidden = false;
+        if (sanitizedProductType) matchStage.productType = sanitizedProductType;
 
-        facetStage.brandFacets = [
-            { $group: { _id: '$brand', count: { $sum: 1 } } },
-            { $sort: { count: -1, _id: 1 } },
-        ];
+        facetsPipeline.push({ $match: matchStage });
+        facetsPipeline.push({
+            $facet: {
+                categories: [
+                    { $group: { _id: '$category', count: { $sum: 1 } } },
+                    { $sort: { count: -1, _id: 1 } }
+                ],
+                brands: [
+                    { $group: { _id: '$brand', count: { $sum: 1 } } },
+                    { $sort: { count: -1, _id: 1 } }
+                ]
+            }
+        });
     }
 
+    const start = Date.now();
+
+    // Execute Parallel
+    const promises = [productModel.aggregate(resultsPipeline)];
+    if (includeFacets && facetsPipeline.length > 0) {
+        promises.push(productModel.aggregate(facetsPipeline));
+    }
+
+    let suggestionsPromise = Promise.resolve([]);
     if (includeSuggestions && sanitizedTerm) {
-        facetStage.suggestions = [
+        const suggestionPipeline = [
+            {
+                $search: {
+                    index: 'default',
+                    autocomplete: {
+                        query: sanitizedTerm,
+                        path: 'name',
+                        fuzzy: { maxEdits: 1, prefixLength: 1 }
+                    }
+                }
+            },
             { $limit: SUGGESTION_LIMIT },
             {
                 $project: {
@@ -446,22 +559,62 @@ export const searchCatalogProducts = async ({
                     slug: '$slug',
                     brand: '$brand',
                     category: '$category',
-                    score: '$score',
-                },
-            },
+                    score: { $meta: 'searchScore' }
+                }
+            }
         ];
+        suggestionsPromise = productModel.aggregate(suggestionPipeline);
     }
 
-    pipeline.push({ $facet: facetStage });
+    const [resultsArr, facetsResultArr, suggestionsResultArr] = await Promise.all([
+        promises[0],
+        includeFacets && facetsPipeline.length > 0 ? promises[1] : Promise.resolve([]),
+        suggestionsPromise
+    ]);
 
-    const start = Date.now();
-    const [aggregationResult = {}] = await productModel.aggregate(pipeline);
     const elapsed = Date.now() - start;
 
-    const aggregatedResults = Array.isArray(aggregationResult.results) ? aggregationResult.results : [];
-    const results = normalizeResults(aggregatedResults, { sanitizedTerm });
-    const total = Number(aggregationResult.totalCount?.[0]?.value) || 0;
+    const normalizedResults = normalizeResults(resultsArr, { sanitizedTerm });
+
+    // Extract Facets & Total Count
+    let finalFacets = undefined;
+    let total = 0;
+
+    if (canUseFacetCount) {
+        // Optimization: Read total from $searchMeta result
+        // Structure: { count: { lowerBound: 100 }, facet: { ... } }
+        // NOTE: This count represents "Search Matches" (from Atlas index).
+        // It DOES NOT account for post-search filtering (e.g. price, hidden status, productType)
+        // because those fields are not in the provided Atlas Search index.
+        // This is a known trade-off accepted for performance to avoid $setWindowFields.
+        const meta = facetsResultArr[0] || {};
+        total = meta.count?.lowerBound || 0;
+    } else {
+        total = resultsArr.length > 0 ? (resultsArr[0].totalCount || 0) : 0;
+    }
+
     const totalPages = Math.max(1, Math.ceil(total / normalizedLimit));
+
+    if (includeFacets) {
+        const meta = facetsResultArr[0];
+        if (sanitizedTerm) {
+            // $searchMeta result structure
+            const bucketData = meta?.facet || {};
+            finalFacets = {
+                categories: mapBucketEntries(bucketData.categories?.buckets),
+                brands: mapBucketEntries(bucketData.brands?.buckets)
+            };
+        } else {
+            // Standard $facet result structure
+            finalFacets = {
+                categories: mapFacetEntries(meta?.categories),
+                brands: mapFacetEntries(meta?.brands)
+            };
+        }
+    }
+
+    // Extract Suggestions
+    const finalSuggestions = mapSuggestions(suggestionsResultArr || []);
 
     const response = {
         searchTerm: sanitizedTerm,
@@ -472,7 +625,7 @@ export const searchCatalogProducts = async ({
                 max: sanitizedMaxPrice,
             },
         },
-        results,
+        results: normalizedResults,
         total,
         page: normalizedPage,
         perPage: normalizedLimit,
@@ -487,14 +640,11 @@ export const searchCatalogProducts = async ({
     };
 
     if (includeFacets) {
-        response.facets = {
-            categories: mapFacetEntries(aggregationResult.categoryFacets),
-            brands: mapFacetEntries(aggregationResult.brandFacets),
-        };
+        response.facets = finalFacets;
     }
 
     if (includeSuggestions && sanitizedTerm) {
-        response.suggestions = mapSuggestions(aggregationResult.suggestions);
+        response.suggestions = finalSuggestions;
     } else {
         response.suggestions = [];
     }

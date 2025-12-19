@@ -135,7 +135,7 @@ class homeControllers {
                     productType: mappedType,
                     page,
                     limit: parPage,
-                    includeFacets: Boolean(trimmedSearch),
+                    includeFacets: true,
                     includeSuggestions: Boolean(trimmedSearch),
                     minPrice,
                     maxPrice,
