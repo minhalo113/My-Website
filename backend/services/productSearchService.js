@@ -384,14 +384,45 @@ export const searchCatalogProducts = async ({
         ];
     }
 
+    const filters = [];
+
     if (sanitizedCategory) {
-        if (!searchCompound.filter) searchCompound.filter = [];
-        searchCompound.filter.push({
+        filters.push({
             equals: {
                 value: sanitizedCategory,
                 path: 'category',
             },
         });
+    }
+
+    if (!includeHidden) {
+        filters.push({
+            equals: {
+                value: false,
+                path: 'isHidden',
+            },
+        });
+    }
+
+    if (sanitizedProductType) {
+        filters.push({
+            equals: {
+                value: sanitizedProductType,
+                path: 'productType',
+            },
+        });
+    }
+
+    if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
+        const range = { path: 'effectivePrice' };
+        if (sanitizedMinPrice != null) range.gte = sanitizedMinPrice;
+        if (sanitizedMaxPrice != null) range.lte = sanitizedMaxPrice;
+        filters.push({ range });
+    }
+
+    // Assign filters to compound operator if any exist
+    if (filters.length > 0) {
+        searchCompound.filter = filters;
     }
 
     const resultsPipeline = [];
@@ -408,22 +439,21 @@ export const searchCatalogProducts = async ({
         if (sanitizedCategory) {
             matchStage.category = sanitizedCategory;
         }
+        if (!includeHidden) {
+            matchStage.isHidden = false;
+        }
+        if (sanitizedProductType) {
+            matchStage.productType = sanitizedProductType;
+        }
+        if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
+            const priceMatch = {};
+            if (sanitizedMinPrice != null) priceMatch.$gte = sanitizedMinPrice;
+            if (sanitizedMaxPrice != null) priceMatch.$lte = sanitizedMaxPrice;
+            matchStage.effectivePrice = priceMatch;
+        }
         resultsPipeline.push({ $match: matchStage });
     }
 
-    const postSearchMatch = {};
-    if (!includeHidden) postSearchMatch.isHidden = false;
-    if (sanitizedProductType) postSearchMatch.productType = sanitizedProductType;
-    if (Object.keys(postSearchMatch).length > 0) {
-        resultsPipeline.push({ $match: postSearchMatch });
-    }
-
-    if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
-        const priceMatch = {};
-        if (sanitizedMinPrice != null) priceMatch.$gte = sanitizedMinPrice;
-        if (sanitizedMaxPrice != null) priceMatch.$lte = sanitizedMaxPrice;
-        resultsPipeline.push({ $match: { effectivePrice: priceMatch } });
-    }
 
     if (sanitizedTerm) {
         resultsPipeline.push({ $addFields: { score: { $meta: 'searchScore' } } });
@@ -474,11 +504,14 @@ export const searchCatalogProducts = async ({
             isHidden: 1,
             productType: 1,
             score: sanitizedTerm ? '$score' : undefined,
-            totalCount: 1 // Will only be present if $setWindowFields was run
+            totalCount: 1,
+            affiliateLink: 1,
+            shippingDestination: 1,
+            sizes: 1,
+            colorImages: 1,
         }
     });
 
-    // --- Pipeline 2: Facets (Metadata) ---
     const facetsPipeline = [];
     if (sanitizedTerm && includeFacets) {
         facetsPipeline.push({
@@ -506,6 +539,13 @@ export const searchCatalogProducts = async ({
         if (sanitizedCategory) matchStage.category = sanitizedCategory;
         if (!includeHidden) matchStage.isHidden = false;
         if (sanitizedProductType) matchStage.productType = sanitizedProductType;
+
+        if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
+            const priceMatch = {};
+            if (sanitizedMinPrice != null) priceMatch.$gte = sanitizedMinPrice;
+            if (sanitizedMaxPrice != null) priceMatch.$lte = sanitizedMaxPrice;
+            matchStage.effectivePrice = priceMatch;
+        }
 
         facetsPipeline.push({ $match: matchStage });
         facetsPipeline.push({
@@ -574,12 +614,6 @@ export const searchCatalogProducts = async ({
     let total = 0;
 
     if (canUseFacetCount) {
-        // Optimization: Read total from $searchMeta result
-        // Structure: { count: { lowerBound: 100 }, facet: { ... } }
-        // NOTE: This count represents "Search Matches" (from Atlas index).
-        // It DOES NOT account for post-search filtering (e.g. price, hidden status, productType)
-        // because those fields are not in the provided Atlas Search index.
-        // This is a known trade-off accepted for performance to avoid $setWindowFields.
         const meta = facetsResultArr[0] || {};
         total = meta.count?.lowerBound || 0;
     } else {

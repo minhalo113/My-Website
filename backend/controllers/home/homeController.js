@@ -123,78 +123,46 @@ class homeControllers {
         if (type === 'global-finds') mappedType = 'affiliate';
 
         const trimmedSearch = typeof searchValue === 'string' ? searchValue.trim() : ''
-        const hasPriceFilter = minPrice !== undefined || maxPrice !== undefined
-        const hasSort = typeof sort === 'string' && sort.trim() !== ''
-        const shouldUseSearchServie = Boolean(trimmedSearch) || (page && parPage) || (category && category !== 'all') || hasPriceFilter || hasSort
-
-        if (shouldUseSearchServie) {
-            try {
-                const searchResponse = await searchCatalogProducts({
-                    term: trimmedSearch,
-                    category,
-                    productType: mappedType,
-                    page,
-                    limit: parPage,
-                    includeFacets: true,
-                    includeSuggestions: Boolean(trimmedSearch),
-                    minPrice,
-                    maxPrice,
-                    sort,
-                })
-
-                const payload = {
-                    products: searchResponse.results,
-                    totalProduct: searchResponse.total,
-                    page: searchResponse.page,
-                    parPage: searchResponse.perPage,
-                }
-
-                if (searchResponse.facets) {
-                    payload.facets = searchResponse.facets
-                }
-
-                if (Array.isArray(searchResponse.suggestions)) {
-                    payload.suggestions = searchResponse.suggestions
-                }
-
-                if (searchResponse.metrics) {
-                    payload.metrics = searchResponse.metrics
-                }
-                if (searchResponse.filters) {
-                    payload.filters = searchResponse.filters
-                }
-                return responseReturn(res, 200, payload)
-            } catch (error) {
-                console.log(error)
-                return responseReturn(res, 500, { error: "Unable to load products right now." })
-            }
-        }
 
         try {
-            const matchQuery = { isHidden: false }
-            if (mappedType && ['standard', 'affiliate'].includes(mappedType)) {
-                matchQuery.productType = mappedType
-            }
-            const products = await productModel.find(matchQuery)
-                .select('_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand productType affiliateLink link shippingDestination')
-                .sort({ createdAt: -1 })
-
-            const normalizedProducts = products.map((product) => {
-                const effectivePrice = computeEffectivePrice(product)
-                if (typeof product?.set === 'function') {
-                    product.set('price', effectivePrice)
-                    return product
-                }
-                return {
-                    ...product,
-                    price: effectivePrice
-                }
+            const searchResponse = await searchCatalogProducts({
+                term: trimmedSearch,
+                category,
+                productType: mappedType,
+                page,
+                limit: parPage,
+                includeFacets: true,
+                includeSuggestions: Boolean(trimmedSearch),
+                minPrice,
+                maxPrice,
+                sort,
             })
-            const totalProduct = await productModel.countDocuments(matchQuery)
 
-            return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
+            const payload = {
+                products: searchResponse.results,
+                totalProduct: searchResponse.total,
+                page: searchResponse.page,
+                parPage: searchResponse.perPage,
+            }
+
+            if (searchResponse.facets) {
+                payload.facets = searchResponse.facets
+            }
+
+            if (Array.isArray(searchResponse.suggestions)) {
+                payload.suggestions = searchResponse.suggestions
+            }
+
+            if (searchResponse.metrics) {
+                payload.metrics = searchResponse.metrics
+            }
+            if (searchResponse.filters) {
+                payload.filters = searchResponse.filters
+            }
+            return responseReturn(res, 200, payload)
         } catch (error) {
-            return responseReturn(res, 500, { error: error.message })
+            console.log(error)
+            return responseReturn(res, 500, { error: "Unable to load products right now." })
         }
     }
 
