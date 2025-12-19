@@ -3,7 +3,7 @@ import responseReturn from "../../utils/response.js";
 import { v2 as cloudinary } from 'cloudinary';
 import productModel from "../../models/productModel.js";
 import parseColorPrices from '../../utils/parseColorPrices.js';
-import { createEffectivePriceExpression, computeEffectivePrice } from '../../utils/effectivePrice.js';
+import { computeEffectivePrice } from '../../utils/effectivePrice.js';
 import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
 import { generateProductSocialCopy } from '../../services/aiProductSocialService.js';
 import { publishProductSocialPost } from '../../services/metaPublisher.js';
@@ -28,6 +28,7 @@ import {
     repositionReviewInPlace,
 } from '../../utils/reviewFormatter.js';
 import ingestionService from '../../services/ingestion/IngestionService.js';
+import { searchCatalogProducts } from "../../services/productSearchService.js";
 
 const normalizeUploadList = (value) => {
     if (!value) return [];
@@ -37,20 +38,6 @@ const normalizeUploadList = (value) => {
     return value ? [value] : [];
 }
 
-const applyEffectivePriceToDocs = (items = []) => {
-    if (!Array.isArray(items)) return [];
-    return items.map((product) => {
-        const effectivePrice = computeEffectivePrice(product);
-        if (product && typeof product.set === 'function') {
-            product.set('price', effectivePrice);
-            return product;
-        }
-        return {
-            ...product,
-            price: effectivePrice,
-        };
-    });
-};
 
 const computeAverageRatingValue = (ratings = []) => {
     if (!Array.isArray(ratings) || ratings.length === 0) {
@@ -201,6 +188,13 @@ class productController {
                     }
                 }
 
+                const parsedColorPrices = parseColorPrices(colorPrices);
+                const effectivePrice = computeEffectivePrice({
+                    price: parseInt(price),
+                    colorPrices: parsedColorPrices,
+                    discount: parseInt(discount)
+                });
+
                 await productModel.create({
                     sellerId: id,
                     name,
@@ -210,6 +204,7 @@ class productController {
                     description: String(description).trim(),
                     stock: parseInt(stock),
                     price: parseInt(price),
+                    effectivePrice,
                     discount: parseInt(discount),
                     deliveryTime: deliveryTime ? String(deliveryTime).trim() : '',
                     images: allImageUrl,
@@ -223,7 +218,7 @@ class productController {
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
                     colorImageFingerprints,
-                    colorPrices: parseColorPrices(colorPrices),
+                    colorPrices: parsedColorPrices,
                     shippingDestination: shippingDestination ? String(shippingDestination).trim() : 'both'
                 })
                 return responseReturn(res, 201, { message: "Product Added Successfully" })
@@ -235,84 +230,29 @@ class productController {
     }
 
     products_get = async (req, res) => {
-        const { page, searchValue, parPage, minPrice, maxPrice } = req.query
-        const { id } = req;
-
-        const parsedParPage = parseInt(parPage)
-        const parsedPage = parseInt(page)
-        const limitValue = Number.isFinite(parsedParPage) && parsedParPage > 0 ? parsedParPage : 0
-        const skipPage = limitValue && Number.isFinite(parsedPage) ? limitValue * (parsedPage - 1) : 0
-
-        const parsedMinPrice = Number(minPrice)
-        const parsedMaxPrice = Number(maxPrice)
-
-        let normalizedMin = Number.isFinite(parsedMinPrice) && parsedMinPrice >= 0 ? Number(parsedMinPrice.toFixed(2)) : null
-        let normalizedMax = Number.isFinite(parsedMaxPrice) && parsedMaxPrice >= 0 ? Number(parsedMaxPrice.toFixed(2)) : null
-
-        if (normalizedMin != null && normalizedMax != null && normalizedMax < normalizedMin) {
-            const temp = normalizedMin
-            normalizedMin = normalizedMax
-            normalizedMax = temp
-        }
-        const priceConditions = []
-        if (normalizedMin != null) {
-            priceConditions.push({ $gte: [createEffectivePriceExpression(), normalizedMin] })
-        }
-
-        if (normalizedMax != null) {
-            priceConditions.push({ $lte: [createEffectivePriceExpression(), normalizedMax] })
-        }
-
-        const baseQuery = {}
-        if (priceConditions.length === 1) {
-            baseQuery.$expr = priceConditions[0]
-        } else if (priceConditions.length === 2) {
-            baseQuery.$expr = { $and: priceConditions }
-        }
+        const { page, searchValue, parPage, minPrice, maxPrice } = req.query;
 
         try {
-            // Fetch all products (compact) if no specific pagination/search is requested,
-            // OR if the client explicitly requests "all" via a flag (though here we infer from absence of pagination if typical usage).
-            // The request is to "get all products" and "reduce return result".
-            // We'll apply the field selection to all branches to ensure reduction.
 
-            const selectFields = '_id name slug category images price discount rating averageRating reviewCount colors colorPrices sizes colorImages seller createdAt brand stock isHidden link shopName productType';
+            const searchResponse = await searchCatalogProducts({
+                term: searchValue,
+                page,
+                limit: parPage,
+                minPrice,
+                maxPrice,
+                includeFacets: false,
+                includeSuggestions: false,
+                includeHidden: true
+            });
 
-            if (searchValue) {
-                const searchQuery = {
-                    ...baseQuery,
-                    $text: { $search: searchValue }
-                }
+            return responseReturn(res, 200, {
+                products: searchResponse.results,
+                totalProduct: searchResponse.total
+            });
 
-                const products = await productModel.find(searchQuery).select(selectFields).skip(skipPage).limit(limitValue).sort({ createAt: -1 })
-                const normalizedProducts = applyEffectivePriceToDocs(products)
-
-                const totalProduct = await productModel.find(searchQuery).countDocuments()
-
-
-                return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
-            } else if (limitValue && Number.isFinite(parsedPage)) {
-                const products = await productModel.find(baseQuery)
-                    .select(selectFields)
-                    .skip(skipPage)
-                    .limit(limitValue)
-                    .sort({ createdAt: -1 })
-
-                const normalizedProducts = applyEffectivePriceToDocs(products)
-
-                const totalProduct = await productModel.find(baseQuery).countDocuments()
-
-                return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
-            } else {
-                // Fetch ALL compact
-                const products = await productModel.find(baseQuery).select(selectFields).sort({ createdAt: -1 })
-                const normalizedProducts = applyEffectivePriceToDocs(products)
-                const totalProduct = await productModel.find(baseQuery).countDocuments()
-
-                return responseReturn(res, 200, { products: normalizedProducts, totalProduct })
-            }
         } catch (error) {
-            return responseReturn(res, 500, { error: error.message })
+            console.log(error);
+            return responseReturn(res, 500, { error: error.message });
         }
     }
 
@@ -354,13 +294,20 @@ class productController {
                 }
             }
 
+            const parsedColorPrices = parseColorPrices(colorPrices);
+            const effectivePrice = computeEffectivePrice({
+                price: parseInt(price),
+                colorPrices: parsedColorPrices,
+                discount: parseInt(discount)
+            });
+
             await productModel.findByIdAndUpdate(productId, {
-                name, description, stock, price, category, discount, deliveryTime, brand, shippingDestination,
+                name, description, stock, price, effectivePrice, category, discount, deliveryTime, brand, shippingDestination,
                 link: link ? String(link).trim() : '',
                 affiliateLink: affiliateLink ? String(affiliateLink).trim() : '',
                 productType: productType ? String(productType).trim() : 'standard',
                 colors: colorArr,
-                colorPrices: parseColorPrices(colorPrices),
+                colorPrices: parsedColorPrices,
                 productId, slug
             })
             const updatedProduct = await productModel.findById(productId)

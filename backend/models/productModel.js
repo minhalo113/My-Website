@@ -123,8 +123,14 @@ const productSchema = new Schema({
     isHidden: {
         type: Boolean,
         default: false
+    },
+    effectivePrice: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true })
+
+productSchema.index({ effectivePrice: 1 });
 
 productSchema.index({
     name: 'text',
