@@ -1,6 +1,7 @@
 import productModel from '../../models/productModel.js';
 import adminModel from '../../models/adminModel.js';
 import { generateSlug } from '../../utils/slugUtils.js';
+import { computeEffectivePrice } from '../../utils/effectivePrice.js';
 
 import ebayProvider from './providers/EbayProvider.js';
 import aliExpressProvider from './providers/AliExpressProvider.js';
@@ -45,12 +46,19 @@ class IngestionService {
             let finalDiscount = discount ? parseFloat(String(discount).replace('%', '')) : 0;
             if (isNaN(finalDiscount)) finalDiscount = 0;
 
+            const effectivePrice = computeEffectivePrice({
+                price,
+                discount: finalDiscount,
+                colorPrices: []
+            });
+
             const updatedProduct = await productModel.findByIdAndUpdate(
                 product._id,
                 {
                     $set: {
                         name,
                         price,
+                        effectivePrice,
                         stock,
                         images,
                         description,
@@ -116,12 +124,19 @@ class IngestionService {
                         let finalDiscount = discount ? parseFloat(String(discount).replace('%', '')) : 0;
                         if (isNaN(finalDiscount)) finalDiscount = 0;
 
+                        const effectivePrice = computeEffectivePrice({
+                            price,
+                            discount: finalDiscount,
+                            colorPrices: []
+                        });
+
                         await productModel.findOneAndUpdate(
                             query,
                             {
                                 $set: {
                                     name,
                                     price,
+                                    effectivePrice,
                                     stock,
                                     images,
                                     description,

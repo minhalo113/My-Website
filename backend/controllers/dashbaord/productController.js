@@ -3,7 +3,7 @@ import responseReturn from "../../utils/response.js";
 import { v2 as cloudinary } from 'cloudinary';
 import productModel from "../../models/productModel.js";
 import parseColorPrices from '../../utils/parseColorPrices.js';
-import { createEffectivePriceExpression, computeEffectivePrice } from '../../utils/effectivePrice.js';
+import { computeEffectivePrice } from '../../utils/effectivePrice.js';
 import extractSkuImagesAndPrices from '../../utils/extractSkuImagesAndPrices.js';
 import { generateProductSocialCopy } from '../../services/aiProductSocialService.js';
 import { publishProductSocialPost } from '../../services/metaPublisher.js';
@@ -38,20 +38,6 @@ const normalizeUploadList = (value) => {
     return value ? [value] : [];
 }
 
-const applyEffectivePriceToDocs = (items = []) => {
-    if (!Array.isArray(items)) return [];
-    return items.map((product) => {
-        const effectivePrice = computeEffectivePrice(product);
-        if (product && typeof product.set === 'function') {
-            product.set('price', effectivePrice);
-            return product;
-        }
-        return {
-            ...product,
-            price: effectivePrice,
-        };
-    });
-};
 
 const computeAverageRatingValue = (ratings = []) => {
     if (!Array.isArray(ratings) || ratings.length === 0) {
@@ -202,6 +188,13 @@ class productController {
                     }
                 }
 
+                const parsedColorPrices = parseColorPrices(colorPrices);
+                const effectivePrice = computeEffectivePrice({
+                    price: parseInt(price),
+                    colorPrices: parsedColorPrices,
+                    discount: parseInt(discount)
+                });
+
                 await productModel.create({
                     sellerId: id,
                     name,
@@ -211,6 +204,7 @@ class productController {
                     description: String(description).trim(),
                     stock: parseInt(stock),
                     price: parseInt(price),
+                    effectivePrice,
                     discount: parseInt(discount),
                     deliveryTime: deliveryTime ? String(deliveryTime).trim() : '',
                     images: allImageUrl,
@@ -224,7 +218,7 @@ class productController {
                     sizes: sizes ? String(sizes).split(',').map(c => c.trim()).filter(Boolean) : [],
                     colorImages: allColorImageUrl,
                     colorImageFingerprints,
-                    colorPrices: parseColorPrices(colorPrices),
+                    colorPrices: parsedColorPrices,
                     shippingDestination: shippingDestination ? String(shippingDestination).trim() : 'both'
                 })
                 return responseReturn(res, 201, { message: "Product Added Successfully" })
@@ -300,13 +294,20 @@ class productController {
                 }
             }
 
+            const parsedColorPrices = parseColorPrices(colorPrices);
+            const effectivePrice = computeEffectivePrice({
+                price: parseInt(price),
+                colorPrices: parsedColorPrices,
+                discount: parseInt(discount)
+            });
+
             await productModel.findByIdAndUpdate(productId, {
-                name, description, stock, price, category, discount, deliveryTime, brand, shippingDestination,
+                name, description, stock, price, effectivePrice, category, discount, deliveryTime, brand, shippingDestination,
                 link: link ? String(link).trim() : '',
                 affiliateLink: affiliateLink ? String(affiliateLink).trim() : '',
                 productType: productType ? String(productType).trim() : 'standard',
                 colors: colorArr,
-                colorPrices: parseColorPrices(colorPrices),
+                colorPrices: parsedColorPrices,
                 productId, slug
             })
             const updatedProduct = await productModel.findById(productId)

@@ -1,5 +1,4 @@
 import productModel from '../models/productModel.js';
-import { createEffectivePriceExpression, computeEffectivePrice } from '../utils/effectivePrice.js';
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 60;
@@ -140,10 +139,9 @@ const normalizeResults = (docs, { sanitizedTerm }) => {
             coverImage: images[0] || null,
         };
 
-        product.price = computeEffectivePrice(product);
 
         delete product.score;
-        delete product.totalCount; // Remove metadata from doc
+        delete product.totalCount;
 
         if (!sanitizedTerm || !Number.isFinite(rawScore)) {
             return product;
@@ -413,7 +411,6 @@ export const searchCatalogProducts = async ({
         resultsPipeline.push({ $match: matchStage });
     }
 
-    // 2. Filter non-indexed fields
     const postSearchMatch = {};
     if (!includeHidden) postSearchMatch.isHidden = false;
     if (sanitizedProductType) postSearchMatch.productType = sanitizedProductType;
@@ -421,8 +418,6 @@ export const searchCatalogProducts = async ({
         resultsPipeline.push({ $match: postSearchMatch });
     }
 
-    // 3. Price Calculation & Filtering
-    resultsPipeline.push({ $addFields: { effectivePrice: createEffectivePriceExpression() } });
     if (sanitizedMinPrice != null || sanitizedMaxPrice != null) {
         const priceMatch = {};
         if (sanitizedMinPrice != null) priceMatch.$gte = sanitizedMinPrice;
@@ -430,7 +425,6 @@ export const searchCatalogProducts = async ({
         resultsPipeline.push({ $match: { effectivePrice: priceMatch } });
     }
 
-    // 4. Sorting
     if (sanitizedTerm) {
         resultsPipeline.push({ $addFields: { score: { $meta: 'searchScore' } } });
         if (sort) {
@@ -508,7 +502,6 @@ export const searchCatalogProducts = async ({
             }
         });
     } else if (includeFacets) {
-        // Fallback for non-text search facets (standard aggregation)
         const matchStage = {};
         if (sanitizedCategory) matchStage.category = sanitizedCategory;
         if (!includeHidden) matchStage.isHidden = false;

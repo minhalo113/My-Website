@@ -1,74 +1,3 @@
-export const createEffectivePriceExpression = () => ({
-    $let: {
-        vars: {
-            variantPrices: {
-                $filter: {
-                    input: {
-                        $map: {
-                            input: { $ifNull: ['$colorPrices', []] },
-                            as: 'price',
-                            in: {
-                                $cond: [
-                                    {
-                                        $in: [
-                                            { $type: '$$price' },
-                                            ['double', 'decimal', 'int', 'long']
-                                        ],
-                                    },
-                                    { $toDouble: '$$price' },
-                                    {
-                                        $cond: [
-                                            { $eq: [{ $type: '$$price' }, 'string'] },
-                                            {
-                                                $convert: {
-                                                    input: '$$price',
-                                                    to: 'double',
-                                                    onError: null,
-                                                    onNull: null,
-                                                },
-                                            },
-                                            null,
-                                        ],
-                                    },
-                                ],
-                            },
-                        },
-                    },
-                    as: 'variantPrice',
-                    cond: {
-                        $and: [
-                            { $ne: ['$$variantPrice', null] },
-                            { $gte: ['$$variantPrice', 0] },
-                        ],
-                    },
-                },
-            },
-            basePrice: {
-                $convert: {
-                    input: '$price',
-                    to: 'double',
-                    onError: 0,
-                    onNull: 0,
-                },
-            },
-        },
-        in: {
-            $let: {
-                vars: {
-                    variantCount: { $size: '$$variantPrices' },
-                },
-                in: {
-                    $cond: [
-                        { $gt: ['$$variantCount', 0] },
-                        { $min: '$$variantPrices' },
-                        '$$basePrice',
-                    ],
-                },
-            },
-        },
-    },
-});
-
 export const computeEffectivePrice = (product) => {
     if (!product) return 0;
 
@@ -81,15 +10,19 @@ export const computeEffectivePrice = (product) => {
             .filter((value) => value !== null)
         : [];
 
+    let basePrice = 0;
+
     if (variantPrices.length > 0) {
-        const minVariant = Math.min(...variantPrices);
-        return Math.round(minVariant * 100) / 100;
+        basePrice = Math.min(...variantPrices);
+    } else {
+        const priceValue = Number(product.price);
+        if (Number.isFinite(priceValue) && priceValue >= 0) {
+            basePrice = priceValue;
+        }
     }
 
-    const priceValue = Number(product.price);
-    if (Number.isFinite(priceValue) && priceValue >= 0) {
-        return Math.round(priceValue * 100) / 100;
-    }
+    const discount = Number(product.discount) || 0;
+    const finalPrice = basePrice * (1 - Math.max(0, Math.min(100, discount)) / 100);
 
-    return 0;
+    return Math.round(finalPrice * 100) / 100;
 };
