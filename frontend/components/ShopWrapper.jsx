@@ -43,7 +43,6 @@ const ShopWrapper = ({ productType = 'all' }) => {
 
     const [GridList, setGridList] = useState(true);
 
-    const [allProducts, setAllProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 30;
     const [searchValue, setSearchValue] = useState('');
@@ -54,31 +53,68 @@ const ShopWrapper = ({ productType = 'all' }) => {
     useEffect(() => {
         if (!router.isReady) return;
 
-        const rawCategory = Array.isArray(router.query?.category)
-            ? router.query.category[0]
-            : router.query?.category;
+        const { category, page, search, min, max } = router.query;
 
-        if (rawCategory) {
-            setSelectedCategory(rawCategory);
+        if (category) {
+            setSelectedCategory(Array.isArray(category) ? category[0] : category);
+        } else {
+            setSelectedCategory('all');
+        }
+
+        if (page) {
+            const pageNum = parseInt(Array.isArray(page) ? page[0] : page, 10);
+            if (!isNaN(pageNum) && pageNum > 0) setCurrentPage(pageNum);
+        } else {
             setCurrentPage(1);
         }
-    }, [router.isReady, router.query?.category]);
+
+        if (search) {
+            setSearchValue(Array.isArray(search) ? search[0] : search);
+        } else {
+            setSearchValue('');
+        }
+
+        if (min) {
+            const minVal = parseFloat(Array.isArray(min) ? min[0] : min);
+            if (!isNaN(minVal)) setMinPrice(minVal);
+        } else {
+            setMinPrice(null);
+        }
+
+        if (max) {
+            const maxVal = parseFloat(Array.isArray(max) ? max[0] : max);
+            if (!isNaN(maxVal)) setMaxPrice(maxVal);
+        } else {
+            setMaxPrice(null);
+        }
+
+    }, [router.isReady, router.query]);
+
 
     useEffect(() => {
+        if (!router.isReady) return;
+
         let ignore = false;
         const fetchProducts = async () => {
             setIsLoadingProducts(true);
             setProductsError('');
             try {
-                const params = {};
-                if (productType && productType !== 'all') {
+                const params = {
+                    page: currentPage,
+                    parPage: productsPerPage,
+                };
 
+                if (productType && productType !== 'all') {
                     if (productType === 'standard') params.type = 'direct';
                     else if (productType === 'affiliate') params.type = 'global-finds';
                     else params.type = productType;
                 }
 
-                // Fetch products
+                if (searchValue) params.searchValue = searchValue;
+                if (selectedCategory && selectedCategory !== 'all') params.category = selectedCategory;
+                if (minPrice !== null) params.minPrice = minPrice;
+                if (maxPrice !== null) params.maxPrice = maxPrice;
+
                 const { data } = await api.get('/customers-products-get', {
                     withCredentials: true,
                     params
@@ -87,13 +123,22 @@ const ShopWrapper = ({ productType = 'all' }) => {
                 if (ignore) return;
 
                 const fetched = Array.isArray(data?.products) ? data.products : [];
-                setAllProducts(fetched);
                 setProducts(fetched);
-                setTotalProducts(fetched.length);
+                setTotalProducts(data?.totalProduct || 0);
+
+                const query = { ...router.query };
+                if (currentPage > 1) query.page = currentPage; else delete query.page;
+                if (searchValue) query.search = searchValue; else delete query.search;
+                if (selectedCategory !== 'all') query.category = selectedCategory; else delete query.category;
+                if (minPrice !== null) query.min = minPrice; else delete query.min;
+                if (maxPrice !== null) query.max = maxPrice; else delete query.max;
+
+
+                router.push({ pathname: router.pathname, query }, undefined, { shallow: true });
+
             } catch (err) {
                 if (ignore) return;
                 console.log(err);
-                setAllProducts([]);
                 setProducts([]);
                 setTotalProducts(0);
                 setProductsError('Failed to load products. Please try again.');
@@ -109,40 +154,8 @@ const ShopWrapper = ({ productType = 'all' }) => {
         return () => {
             ignore = true;
         };
-    }, [productType]);
+    }, [router.isReady, currentPage, productType, searchValue, selectedCategory, minPrice, maxPrice]);
 
-    // Client-side filtering
-    useEffect(() => {
-        let filtered = allProducts;
-
-        if (searchValue) {
-            const lowerTerm = searchValue.toLowerCase();
-            filtered = filtered.filter(p => p.name.toLowerCase().includes(lowerTerm));
-        }
-
-        if (selectedCategory && selectedCategory !== 'all') {
-            filtered = filtered.filter(p => p.category === selectedCategory);
-        }
-
-        if (minPrice != null) {
-            filtered = filtered.filter(p => p.price >= minPrice);
-        }
-        if (maxPrice != null) {
-            filtered = filtered.filter(p => p.price <= maxPrice);
-        }
-
-        setProducts(filtered);
-        setTotalProducts(filtered.length);
-        setCurrentPage(1);
-    }, [allProducts, searchValue, selectedCategory, minPrice, maxPrice]);
-
-    // Client-side pagination
-    const indexOfLastProduct = currentPage * productsPerPage;
-    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-    const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
-
-    const startResult = totalProducts === 0 ? 0 : indexOfFirstProduct + 1;
-    const endResult = Math.min(indexOfLastProduct, totalProducts);
 
     const paginate = (pageNumber) => {
         setCurrentPage(pageNumber)
@@ -153,14 +166,8 @@ const ShopWrapper = ({ productType = 'all' }) => {
     const filterItem = useCallback((curcat) => {
         const normalizedCategory = curcat || 'all';
         setSelectedCategory(normalizedCategory);
-        setCurrentPage(1);
-        const query = normalizedCategory === 'all' ? {} : { category: normalizedCategory };
-
-        const newQuery = { ...router.query, ...query };
-        if (normalizedCategory === 'all') delete newQuery.category;
-
-        router.push({ pathname: router.pathname, query: newQuery }, undefined, { shallow: true });
-    }, [router]);
+        setCurrentPage(1); // Reset to page 1 on filter change
+    }, []);
 
     const handleSearchTermChange = useCallback((value) => {
         setSearchValue(value);
@@ -197,6 +204,9 @@ const ShopWrapper = ({ productType = 'all' }) => {
     };
 
     const title = pageTitleMap[productType] || 'Our Shop Page';
+
+    const startResult = totalProducts === 0 ? 0 : ((currentPage - 1) * productsPerPage) + 1;
+    const endResult = Math.min(currentPage * productsPerPage, totalProducts);
 
     return (
         <div>
@@ -343,7 +353,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
                                         <div className='py-4 text-center text-muted'>Loading products...</div>
                                     )}
                                     {!isLoadingProducts && !productsError && (
-                                        <ProductCards GridList={GridList} products={currentProducts} />
+                                        <ProductCards GridList={GridList} products={products} />
                                     )}
                                 </div>
 

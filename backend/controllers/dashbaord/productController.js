@@ -230,7 +230,7 @@ class productController {
     }
 
     products_get = async (req, res) => {
-        const { page, searchValue, parPage, minPrice, maxPrice } = req.query;
+        const { page, searchValue, parPage, minPrice, maxPrice, category, type } = req.query;
 
         try {
 
@@ -240,6 +240,8 @@ class productController {
                 limit: parPage,
                 minPrice,
                 maxPrice,
+                category,
+                productType: type,
                 includeFacets: false,
                 includeSuggestions: false,
                 includeHidden: true

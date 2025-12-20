@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link';
 import SelectedCategory from '../../components/SelectedCategory';
 import HomeImageSwiper from '../../components/HomeImageSwiper';
@@ -15,62 +15,32 @@ const title = (
 )
 
 const desc = "✨ Fresh collectible highlights, carefully packed for your shelf."
+const DEBOUNCE_DELAY = 300;
 
 const Banner = () => {
-    const [productData, setProductData] = useState([])
     const [categorys, setCategorys] = useState([])
     const [selectedCategory, setSelectedCategory] = useState('all')
 
     useEffect(() => {
+        let ignore = false;
         const fetchData = async () => {
             try {
-                const allProducts = await api.get('/customers-products-get', { withCredentials: true })
                 const allCategorys = await api.get('/customers-category-get', { withCredentials: true })
-
-                setProductData(allProducts.data.products);
-                setCategorys(allCategorys.data.categorys);
+                if (!ignore) {
+                    setCategorys(allCategorys.data.categorys || []);
+                }
             } catch (err) {
                 console.log(err)
-            } finally {
-                // setLoading(false);
             }
         }
         fetchData();
+        return () => { ignore = true; }
     }, [])
 
     const [searchInput, setSearchInput] = useState("");
-    const [filteredProducts, setfilteredProducts] = useState(productData);
-
+    const [suggestions, setSuggestions] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null)
-
-    const handleSearch = (e) => {
-        const searchTerm = e.target.value;
-        setSearchInput(searchTerm)
-
-        const filtered = productData.filter((product) => {
-            const matchesName = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-            return matchesName && matchesCategory;
-        });
-
-        setfilteredProducts(filtered)
-        setShowDropdown(true);
-    }
-
-    const handleCategoryChange = (e) => {
-        const newCategory = e.target.value;
-        setSelectedCategory(newCategory);
-
-        const filtered = productData.filter((product) => {
-            const matchesName = product.name.toLowerCase().includes(searchInput.toLowerCase());
-            const matchesCategory = newCategory === "all" || product.category === newCategory;
-            return matchesName && matchesCategory;
-        })
-
-        setfilteredProducts(filtered);
-        setShowDropdown(true);
-    }
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -83,60 +53,102 @@ const Banner = () => {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-
     }, []);
+
+    useEffect(() => {
+        const trimmed = searchInput.trim();
+        if (!trimmed) {
+            setSuggestions([]);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            try {
+                const params = {
+                    q: trimmed,
+                    limit: 10
+                };
+                if (selectedCategory !== 'all') {
+                    params.category = selectedCategory;
+                }
+
+                const { data } = await api.get('/customers-products-search', {
+                    params,
+                    withCredentials: true
+                });
+
+                if (Array.isArray(data?.results)) {
+                    setSuggestions(data.results);
+                    setShowDropdown(true);
+                }
+            } catch (error) {
+                console.error("Banner search error:", error);
+            }
+        }, DEBOUNCE_DELAY);
+
+        return () => clearTimeout(timer);
+    }, [searchInput, selectedCategory]);
+
+    const handleSearchInput = (e) => {
+        setSearchInput(e.target.value);
+    }
+
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
+    }
 
     return (
         <div>
             <div className="banner-section style-4" style={{ overflow: 'hidden', flexWrap: 'wrap', paddingBottom: "50px", position: 'relative' }}>
-
-                {/* <Image
-                    src="/images/bg-img/shopBackground.jpg"
-                    alt="A Figure A Day Shop Background"
-                    fill
-                    priority={true}
-                    fetchPriority="high"
-                    quality={80}
-                    sizes="100vw"
-                    style={{
-                        objectFit: 'cover',
-                        zIndex: -1,
-                        pointerEvents: 'none'
-                    }}
-                /> */}
-
                 <div className='container-fluid px-0'>
                     <div className='banner-content'>
                         {title}
-                        <form style={{ boxShadow: "0 0 0" }} ref={dropdownRef} onFocus={() => setShowDropdown(true)}>
+                        <form style={{ boxShadow: "0 0 0" }} ref={dropdownRef} onSubmit={(e) => e.preventDefault()}>
                             <SelectedCategory
                                 select={selectedCategory}
                                 allCategorys={categorys}
                                 onChange={handleCategoryChange}
                             />
 
-                            <input type="text" name="search" id="search" placeholder='What treasure are you hunting for today?'
-                                value={searchInput} onChange={handleSearch} />
+                            <input
+                                type="text"
+                                name="search"
+                                id="search"
+                                placeholder='What treasure are you hunting for today?'
+                                value={searchInput}
+                                onChange={handleSearchInput}
+                                onFocus={() => {
+                                    if (searchInput && suggestions.length > 0) setShowDropdown(true);
+                                }}
+                                autoComplete="off"
+                            />
                             <button type="submit">
                                 <i className='icofont-search'></i>
                             </button>
 
-                            {searchInput && showDropdown && filteredProducts.length > 0 && (
+                            {showDropdown && suggestions.length > 0 && (
                                 <ul className="dropdown" style={{ marginBottom: "0" }}>
                                     {
-                                        searchInput && filteredProducts.slice(0, 10).map((product, i) =>
-                                            <li key={i} style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <div style={{ width: "100px", height: 'auto', marginRight: '10px', position: 'relative', aspectRatio: '1/1' }}>
+                                        suggestions.map((product, i) =>
+                                            <li key={product._id?.toString() || i} style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ width: "60px", height: '60px', marginRight: '10px', position: 'relative', flexShrink: 0 }}>
                                                     <Image
-                                                        src={ensureHttps(product.images[0])}
+                                                        src={ensureHttps(product.images?.[0] || "/placeholder.png")}
                                                         alt={product.name}
                                                         fill
-                                                        sizes="100px"
-                                                        style={{ objectFit: "contain" }}
+                                                        sizes="60px"
+                                                        style={{ objectFit: "cover", borderRadius: "4px" }}
                                                     />
                                                 </div>
-                                                <Link href={`/shop/${product._id.toString()}-${product.slug}`} style={{ flexGrow: 1, textAlign: 'center' }}>{product.name}</Link>
-                                            </li>)
+                                                <Link
+                                                    href={`/shop/${product._id.toString()}-${product.slug}`}
+                                                    style={{ flexGrow: 1, textAlign: 'left', textDecoration: 'none', color: 'inherit', fontWeight: '500' }}
+                                                    onClick={() => setShowDropdown(false)}
+                                                >
+                                                    {product.name}
+                                                </Link>
+                                            </li>
+                                        )
                                     }
                                 </ul>
                             )}
@@ -146,10 +158,10 @@ const Banner = () => {
                 </div>
 
             </div>
-            {/* <HomeImageSwiper/> */}
         </div>
     )
 }
+
 Banner.propTypes = {
     products: PropTypes.array,
     categorys: PropTypes.array,

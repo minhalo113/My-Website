@@ -117,7 +117,6 @@ class homeControllers {
     products_get = async (req, res) => {
         const { page, searchValue, parPage, category, minPrice, maxPrice, sort, type } = req.query
 
-        // Map public type names to internal productType values
         let mappedType = type;
         if (type === 'direct') mappedType = 'standard';
         if (type === 'global-finds') mappedType = 'affiliate';
