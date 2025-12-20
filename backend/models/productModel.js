@@ -127,6 +127,10 @@ const productSchema = new Schema({
     effectivePrice: {
         type: Number,
         default: 0
+    },
+    embedding: {
+        type: [Number],
+        select: false
     }
 }, { timestamps: true })
 

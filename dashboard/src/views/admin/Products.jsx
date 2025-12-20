@@ -5,6 +5,7 @@ import Pagination from '../Pagination';
 import { FaEdit, FaEye, FaEyeSlash, FaTrash, FaComments, FaSync } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { get_products, deleteProduct, product_visibility, messageClear, search_product_by_image, trigger_ingestion } from '../../store/Reducers/productReducer';
+import { get_category } from '../../store/Reducers/categoryReducer';
 import toast from 'react-hot-toast';
 
 const Products = () => {
@@ -22,63 +23,50 @@ const Products = () => {
         ingestionLoading
     } = useSelector(state => state.product)
 
+    // Fetch categories from the category store for the filter dropdown
+    const { categorys: allCategories } = useSelector(state => state.category)
+
     const [currentPage, setCurrentPage] = useState(1)
     const [searchValue, setSearchValue] = useState('')
-    const [parPage, setParPage] = useState(5)
+    const [parPage, setParPage] = useState(10)
     const [minPrice, setMinPrice] = useState(null)
     const [maxPrice, setMaxPrice] = useState(null)
     const [category, setCategory] = useState('')
     const [productType, setProductType] = useState('All')
-    const [allProducts, setAllProducts] = useState([])
-    const [filteredProducts, setFilteredProducts] = useState([])
-    const [categories, setCategories] = useState([])
-
-    // Fetch all products once
-    useEffect(() => {
-        dispatch(get_products({})) // No params to fetch all (compact)
-    }, [])
 
     useEffect(() => {
-        if (Array.isArray(products)) {
-            setAllProducts(products)
-            setFilteredProducts(products)
-            const uniqueCategories = [...new Set(products.map(p => p.category))].filter(Boolean).sort()
-            setCategories(uniqueCategories)
-        }
-    }, [products])
+        // Fetch categories for the filter
+        dispatch(get_category({
+            searchValue: '',
+            parPage: '', // Fetch all or a large number
+            page: ''
+        }))
+    }, [dispatch])
 
-    // Client-side filtering
     useEffect(() => {
-        let result = allProducts;
-        if (searchValue) {
-            const lower = searchValue.toLowerCase();
-            result = result.filter(p => p.name.toLowerCase().includes(lower));
+        const params = {
+            page: currentPage,
+            parPage: parPage,
+            searchValue: searchValue || undefined,
+            minPrice: minPrice || undefined,
+            maxPrice: maxPrice || undefined,
         }
-        if (minPrice !== null) {
-            result = result.filter(p => p.price >= minPrice);
-        }
-        if (maxPrice !== null) {
-            result = result.filter(p => p.price <= maxPrice);
-        }
-        if (category) {
-            result = result.filter(p => p.category === category);
-        }
-        if (productType && productType !== 'All') {
-            result = result.filter(p => p.productType === productType);
-        }
-        setFilteredProducts(result);
-        if (currentPage > 1) setCurrentPage(1);
-    }, [allProducts, searchValue, minPrice, maxPrice, category, productType])
+
+        if (category) params.category = category;
+        if (productType && productType !== 'All') params.productType = productType;
+
+        dispatch(get_products(params))
+
+    }, [dispatch, currentPage, parPage, searchValue, minPrice, maxPrice, category, productType])
+
+    const categories = allCategories && allCategories.length > 0
+        ? allCategories.map(c => c.name).sort()
+        : [];
 
     const truncateText = (text, maxLength) => {
         if (!text || text.length < maxLength) return text;
         return text.slice(0, maxLength) + '...'
     }
-
-    // Pagination logic
-    const indexOfLastProduct = currentPage * parPage
-    const indexOfFirstProduct = indexOfLastProduct - parPage
-    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure to delete this product?")) {
@@ -296,8 +284,8 @@ const Products = () => {
 
                         <tbody>
                             {
-                                (currentProducts || []).map((d, i) => <tr key={i}>
-                                    <td scope='row' className='py-1 px-4 font-medium whitespace-nowrap'>{indexOfFirstProduct + i + 1}</td>
+                                (products || []).map((d, i) => <tr key={i}>
+                                    <td scope='row' className='py-1 px-4 font-medium whitespace-nowrap'>{((currentPage - 1) * parPage) + i + 1}</td>
                                     <td scope='row' className='py-1 px-4 font-medium whitespace-nowrap'>
                                         <img className='w-[45px] h-[45px]' src={d.images[0]} alt="" />
                                     </td>
@@ -341,11 +329,11 @@ const Products = () => {
                 </div>
 
                 {
-                    filteredProducts.length <= parPage ? "" : <div className='w-full flex justify-end mt-4 bottom-4 right-4'>
+                    totalProduct > parPage && <div className='w-full flex justify-end mt-4 bottom-4 right-4'>
                         <Pagination
                             pageNumber={currentPage}
                             setPageNumber={setCurrentPage}
-                            totalItem={filteredProducts.length}
+                            totalItem={totalProduct}
                             parPage={parPage}
                         />
                     </div>
