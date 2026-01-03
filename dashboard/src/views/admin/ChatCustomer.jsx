@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
-import dotenv from 'dotenv';
-dotenv.config();
+
 let customerId = '';
 if (typeof window !== 'undefined') {
   customerId = localStorage.getItem('chatUserId') || uuid();
