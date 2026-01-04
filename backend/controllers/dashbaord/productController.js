@@ -29,6 +29,7 @@ import {
 } from '../../utils/reviewFormatter.js';
 import ingestionService from '../../services/ingestion/IngestionService.js';
 import { searchCatalogProducts } from "../../services/productSearchService.js";
+import aiChatService from '../../services/aiChatService.js';
 
 const normalizeUploadList = (value) => {
     if (!value) return [];
@@ -195,6 +196,15 @@ class productController {
                     discount: parseInt(discount)
                 });
 
+                const finalShippingDestination = shippingDestination ? String(shippingDestination).trim() : 'both';
+                const currency = finalShippingDestination === 'canada_only' ? 'CAD' : 'USD';
+
+                const embedding = await aiChatService.generateProductEmbedding({
+                    name,
+                    category: String(category).trim(),
+                    description: String(description).trim()
+                });
+
                 await productModel.create({
                     sellerId: id,
                     name,
@@ -219,7 +229,9 @@ class productController {
                     colorImages: allColorImageUrl,
                     colorImageFingerprints,
                     colorPrices: parsedColorPrices,
-                    shippingDestination: shippingDestination ? String(shippingDestination).trim() : 'both'
+                    shippingDestination: finalShippingDestination,
+                    currency,
+                    embedding
                 })
                 return responseReturn(res, 201, { message: "Product Added Successfully" })
             } catch (error) {
@@ -303,14 +315,25 @@ class productController {
                 discount: parseInt(discount)
             });
 
+            const finalShippingDestination = shippingDestination ? String(shippingDestination).trim() : 'both';
+            const currency = finalShippingDestination === 'canada_only' ? 'CAD' : 'USD';
+
+            const embedding = await aiChatService.generateProductEmbedding({
+                name,
+                category,
+                description
+            });
+
             await productModel.findByIdAndUpdate(productId, {
-                name, description, stock, price, effectivePrice, category, discount, deliveryTime, brand, shippingDestination,
+                name, description, stock, price, effectivePrice, category, discount, deliveryTime, brand, shippingDestination: finalShippingDestination,
                 link: link ? String(link).trim() : '',
                 affiliateLink: affiliateLink ? String(affiliateLink).trim() : '',
                 productType: productType ? String(productType).trim() : 'standard',
                 colors: colorArr,
                 colorPrices: parsedColorPrices,
-                productId, slug
+                productId, slug,
+                currency,
+                embedding
             })
             const updatedProduct = await productModel.findById(productId)
             return responseReturn(res, 200, { product: updatedProduct, message: "Product Updated Successfully" })

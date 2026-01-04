@@ -1,15 +1,38 @@
 import OpenAI from "openai";
 import productModel from '../models/productModel.js'
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
-})
+let openai;
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
 const CHAT_MODEL = 'gpt-5-nano';
 
 class AiChatService {
+    constructor() {
+        this._initOpenAI();
+    }
+
+    _initOpenAI() {
+        if (!openai && process.env.OPENAI_API_KEY) {
+            openai = new OpenAI({
+                apiKey: process.env.OPENAI_API_KEY
+            });
+        }
+    }
+
+    _ensureOpenAI() {
+        if (!openai) {
+            this._initOpenAI();
+            if (!openai) {
+                console.warn('[AiChatService] OpenAI client not initialized. Missing API Key?');
+            }
+        }
+        return openai;
+    }
+
     async extractFilters(userQuery) {
+        const client = this._ensureOpenAI();
+        if (!client) return { searchTerm: userQuery, filters: {} };
+
         const systemPrompt = `
         You are a helpful assistant for an anime figure shop.
         Your task is to extract search filters and a search term from the user's natural language query.
@@ -36,7 +59,7 @@ class AiChatService {
         `;
 
         try {
-            const response = await openai.chat.completions.create({
+            const response = await client.chat.completions.create({
                 model: CHAT_MODEL,
                 messages: [
                     { role: 'system', content: systemPrompt },
@@ -56,9 +79,11 @@ class AiChatService {
     }
 
     async getEmbedding(text) {
-        if (!text) return null;
+        const client = this._ensureOpenAI();
+        if (!client || !text) return null;
+
         try {
-            const response = await openai.embeddings.create({
+            const response = await client.embeddings.create({
                 model: EMBEDDING_MODEL,
                 input: text,
                 encoding_format: 'float'
@@ -68,6 +93,17 @@ class AiChatService {
             console.error('[AiChatService] Error getting embedding:', error)
             return null;
         }
+    }
+
+    async generateProductEmbedding(product) {
+        if (!product) return null;
+        const name = product.name || '';
+        const category = product.category || 'Unknown';
+        const description = product.description || '';
+
+        const text = `Name: ${name}. Category: ${category}. Description: ${description}`;
+
+        return await this.getEmbedding(text);
     }
 
     async searchProducts(queryVector, filters) {
@@ -134,6 +170,15 @@ class AiChatService {
     }
 
     async generateResponse(userQuery, products) {
+        const client = this._ensureOpenAI();
+        if (!client) {
+            return {
+                headline: "Here are my finds",
+                content: "Check out these figures below.",
+                highlights: {}
+            };
+        }
+
         const productContext = products.map(
             p => {
                 return `-ID: ${p._id} , Name: ${p.name}, Price: ${p.effectivePrice || p.price} ${p.currency || 'USD'}): ${p.description ? p.description.substring(0, 150) + '...' : 'No description'}`;
@@ -166,7 +211,7 @@ class AiChatService {
         `;
 
         try {
-            const response = await openai.chat.completions.create({
+            const response = await client.chat.completions.create({
                 model: CHAT_MODEL,
                 messages: [
                     { role: 'system', content: systemPrompt },

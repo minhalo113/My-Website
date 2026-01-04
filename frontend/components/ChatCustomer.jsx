@@ -205,7 +205,7 @@ const ChatCustomer = () => {
                               {aiReason && (
                                 <div
                                   className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 font-bold px-1 py-1 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 whitespace-normal leading-3"
-                                  style={{ fontSize: '8px' }}
+                                  style={{ fontSize: '5px' }}
                                 >
                                   ✨ {aiReason}
                                 </div>
@@ -220,18 +220,17 @@ const ChatCustomer = () => {
                                 />
                               </div>
 
-                              <div className="p-1.5 flex flex-col flex-1 gap-1">
-
+                              <div className="p-1 flex flex-col gap-0">
                                 <p
-                                  className="font-medium text-gray-700 line-clamp-2 leading-3"
-                                  style={{ fontSize: '9px', minHeight: '18px' }}
+                                  className="font-medium text-gray-700 line-clamp-2 leading-3 mb-0.5"
+                                  style={{ fontSize: '9px' }}
                                 >
                                   {p.name}
                                 </p>
 
-                                <div className="mt-auto pt-1 border-t border-dashed border-gray-100">
+                                <div className="mt-0 pt-0.5 border-t border-dashed border-gray-100">
                                   <p
-                                    className="text-[#DCA54A] font-bold"
+                                    className="text-[#DCA54A] font-bold leading-3"
                                     style={{ fontSize: '10px' }}
                                   >
                                     ${p.effectivePrice || p.price} {p.currency}
