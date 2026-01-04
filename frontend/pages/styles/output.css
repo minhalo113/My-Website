@@ -2528,6 +2528,9 @@
   .table {
     display: table;
   }
+  .h-1 {
+    height: calc(var(--spacing) * 1);
+  }
   .h-1\.5 {
     height: calc(var(--spacing) * 1.5);
   }
@@ -2576,6 +2579,12 @@
   .h-100 {
     height: calc(var(--spacing) * 100);
   }
+  .h-\[20px\] {
+    height: 20px;
+  }
+  .h-\[24px\] {
+    height: 24px;
+  }
   .h-\[90px\] {
     height: 90px;
   }
@@ -2605,6 +2614,9 @@
   }
   .min-h-screen {
     min-height: 100vh;
+  }
+  .w-1 {
+    width: calc(var(--spacing) * 1);
   }
   .w-1\.5 {
     width: calc(var(--spacing) * 1.5);
@@ -2696,14 +2708,23 @@
   .flex-none {
     flex: none;
   }
+  .flex-shrink {
+    flex-shrink: 1;
+  }
   .flex-shrink-0 {
     flex-shrink: 0;
   }
   .shrink-0 {
     flex-shrink: 0;
   }
+  .flex-grow {
+    flex-grow: 1;
+  }
   .flex-grow-1 {
     flex-grow: 1;
+  }
+  .border-collapse {
+    border-collapse: collapse;
   }
   .rotate-0 {
     rotate: 0deg;
@@ -2767,6 +2788,12 @@
   }
   .justify-start {
     justify-content: flex-start;
+  }
+  .gap-0 {
+    gap: calc(var(--spacing) * 0);
+  }
+  .gap-0\.5 {
+    gap: calc(var(--spacing) * 0.5);
   }
   .gap-1 {
     gap: calc(var(--spacing) * 1);
@@ -2934,6 +2961,9 @@
   .border-yellow-200 {
     border-color: var(--color-yellow-200);
   }
+  .border-yellow-500 {
+    border-color: var(--color-yellow-500);
+  }
   .border-yellow-500\/20 {
     border-color: color-mix(in oklab, var(--color-yellow-500) 20%, transparent);
   }
@@ -3018,6 +3048,9 @@
   .bg-white\/90 {
     background-color: color-mix(in oklab, var(--color-white) 90%, transparent);
   }
+  .bg-yellow-400 {
+    background-color: var(--color-yellow-400);
+  }
   .bg-yellow-400\/95 {
     background-color: color-mix(in oklab, var(--color-yellow-400) 95%, transparent);
   }
@@ -3044,6 +3077,9 @@
   }
   .p-1 {
     padding: calc(var(--spacing) * 1);
+  }
+  .p-1\.5 {
+    padding: calc(var(--spacing) * 1.5);
   }
   .p-2 {
     padding: calc(var(--spacing) * 2);
@@ -3095,6 +3131,9 @@
   }
   .\!py-2 {
     padding-block: calc(var(--spacing) * 2) !important;
+  }
+  .py-0 {
+    padding-block: calc(var(--spacing) * 0);
   }
   .py-0\.5 {
     padding-block: calc(var(--spacing) * 0.5);
@@ -3179,6 +3218,9 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+  .text-\[7px\] {
+    font-size: 7px;
+  }
   .text-\[8px\] {
     font-size: 8px;
   }
@@ -3252,6 +3294,9 @@
   }
   .break-words {
     overflow-wrap: break-word;
+  }
+  .whitespace-normal {
+    white-space: normal;
   }
   .whitespace-pre-wrap {
     white-space: pre-wrap;
