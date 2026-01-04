@@ -72,7 +72,7 @@ class AiChatService {
     async searchProducts(queryVector, filters) {
         const vectorSearchStage = {
             $vectorSearch: {
-                index: 'default',
+                index: 'vector_index',
                 path: 'embedding',
                 queryVector: queryVector,
                 numCandidates: 100,
