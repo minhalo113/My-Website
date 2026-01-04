@@ -203,7 +203,10 @@ const ChatCustomer = () => {
                               className="min-w-[120px] w-[120px] bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all flex-shrink-0 flex flex-col no-underline text-black group relative"
                             >
                               {aiReason && (
-                                <div className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 text-[7px] font-bold px-1 py-1 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 whitespace-normal leading-tight">
+                                <div
+                                  className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 font-bold px-1 py-1 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 whitespace-normal leading-3"
+                                  style={{ fontSize: '8px' }}
+                                >
                                   ✨ {aiReason}
                                 </div>
                               )}
@@ -217,15 +220,20 @@ const ChatCustomer = () => {
                                 />
                               </div>
 
-                              <div className="p-1.5 flex flex-col flex-1 gap-0.5">
+                              <div className="p-1.5 flex flex-col flex-1 gap-1">
 
-
-                                <p className="text-[9px] font-medium line-clamp-2 leading-tight text-gray-700 h-[20px]">
+                                <p
+                                  className="font-medium text-gray-700 line-clamp-2 leading-3"
+                                  style={{ fontSize: '9px', minHeight: '18px' }}
+                                >
                                   {p.name}
                                 </p>
 
                                 <div className="mt-auto pt-1 border-t border-dashed border-gray-100">
-                                  <p className="text-[8px] text-[#DCA54A] font-bold">
+                                  <p
+                                    className="text-[#DCA54A] font-bold"
+                                    style={{ fontSize: '10px' }}
+                                  >
                                     ${p.effectivePrice || p.price} {p.currency}
                                   </p>
                                 </div>
