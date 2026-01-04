@@ -111,11 +111,11 @@ const WishList = () => {
 
         {loading ? (
           <p className="text-slate-400">Loading...</p>
-        ) : wishlist.length === 0 ? (
+        ) : (!wishlist || wishlist.length === 0) ? (
           <p className="text-slate-400">Your wishlist is empty.</p>
         ) : (
           <ul className="flex flex-col gap-6 list-none pl-0">
-            {wishlist.map((product) => (
+            {wishlist?.map((product) => (
               <li
                 key={product._id}
                 className="rounded-2xl bg-amber-500/80 p-4 shadow-md transition hover:-translate-y-0.5 hover:shadow-indigo-500/40"
