@@ -14,11 +14,24 @@ const generateEmbeddings = async () => {
         console.log('Connected to database.');
 
         let processedCount = 0;
-        let skip = 0;
+        const failedIds = [];
 
         while (true) {
-            const products = await productModel.find({})
-                .skip(skip)
+
+            const query = {
+                $and: [
+                    {
+                        $or: [
+                            { embedding: { $exists: false } },
+                            { embedding: null },
+                            { embedding: [] }
+                        ]
+                    },
+                    { _id: { $nin: failedIds } }
+                ]
+            };
+
+            const products = await productModel.find(query)
                 .limit(BATCH_SIZE)
                 .select('name description category');
 
@@ -27,7 +40,7 @@ const generateEmbeddings = async () => {
                 break;
             }
 
-            console.log(`Processing batch of ${products.length} products (Skip: ${skip})...`);
+            console.log(`Processing batch of ${products.length} products...`);
 
             const operations = [];
 
@@ -35,16 +48,20 @@ const generateEmbeddings = async () => {
                 try {
                     const embeddingVector = await aiChatService.generateProductEmbedding(product);
 
-                    if (embeddingVector) {
+                    if (embeddingVector && embeddingVector.length > 0) {
                         operations.push({
                             updateOne: {
                                 filter: { _id: product._id },
                                 update: { $set: { embedding: embeddingVector } }
                             }
                         });
+                    } else {
+                        console.warn(`Generated empty embedding for product ${product._id}`);
+                        failedIds.push(product._id);
                     }
                 } catch (err) {
                     console.error(`Failed to generate embedding for product ${product._id}: ${err.message}`);
+                    failedIds.push(product._id);
                 }
             }
 
@@ -53,11 +70,14 @@ const generateEmbeddings = async () => {
                 processedCount += operations.length;
                 console.log(`Successfully updated ${operations.length} products. Total processed: ${processedCount}`);
             }
-
-            skip += BATCH_SIZE;
         }
 
-        console.log('Embedding generation script finished.');
+        if (failedIds.length > 0) {
+            console.warn(`Script finished with ${failedIds.length} failed products.`);
+        } else {
+            console.log('Embedding generation script finished successfully.');
+        }
+
         process.exit(0);
 
     } catch (error) {

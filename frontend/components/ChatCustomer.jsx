@@ -204,14 +204,14 @@ const ChatCustomer = () => {
                             >
                               {aiReason && (
                                 <div
-                                  className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 font-bold px-1 py-1 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 whitespace-normal leading-3"
-                                  style={{ fontSize: '5px' }}
+                                  className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 font-bold px-1 py-1 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 whitespace-normal"
+                                  style={{ fontSize: '7px' }}
                                 >
                                   ✨ {aiReason}
                                 </div>
                               )}
 
-                              <div className="relative w-full h-24 bg-gray-50 rounded-t-lg overflow-hidden mt-0">
+                              <div className="relative w-full h-30 bg-gray-50 rounded-t-lg overflow-hidden mt-0">
                                 <Image
                                   src={ensureHttps(p.images?.[0])}
                                   alt={p.name}
