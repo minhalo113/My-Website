@@ -105,11 +105,18 @@ const ChatCustomer = () => {
       try {
         const { data } = await api.post('/ai-chat', { message: text });
 
+        const aiResponseData = typeof data.text === 'string'
+          ? JSON.parse(data.text)
+          : data.text;
+
         const aiMsg = {
           sender: 'ai',
-          message: data.text,
+          headline: aiResponseData.headline,
+          message: aiResponseData.content,
+          highlights: aiResponseData.highlights,
           products: data.products || []
         };
+
         setAiMessages(prev => [...prev, aiMsg]);
       } catch (err) {
         console.error("AI Chat Error:", err);
@@ -171,40 +178,65 @@ const ChatCustomer = () => {
               <>
                 {aiMessages.map((m, i) => (
                   <div key={i} className={`flex flex-col gap-1 ${m.sender === "ai" ? "items-start" : "items-end"}`}>
-                    <div className={`text-sm max-w-[85%] px-3 py-2 rounded-xl break-words shadow-sm ${m.sender === "ai" ? "bg-white border border-gray-100 text-gray-800" : "bg-[#DCA54A] text-white"}`}>
-                      {m.message}
+                    <div className={`text-sm max-w-[90%] px-3 py-2 rounded-xl break-words shadow-sm ${m.sender === "ai" ? "bg-white border border-gray-100 text-gray-800" : "bg-[#DCA54A] text-white"}`}>
+                      {m.sender === 'ai' && m.headline && (
+                        <div className="font-bold text-[#DCA54A] mb-1 text-xs uppercase tracking-wide border-b border-gray-100 pb-1">
+                          {m.headline}
+                        </div>
+                      )}
+
+                      <div className="whitespace-pre-wrap leading-relaxed">
+                        {m.message}
+                      </div>
                     </div>
 
-                    {/* Product Cards for AI responses */}
                     {m.products && m.products.length > 0 && (
-                      <div className="flex gap-2 overflow-x-auto w-full py-2 px-1">
-                        {m.products.map(p => (
-                          <Link href={`/shop/${p._id}-${p.slug || 'product'}`} key={p._id} className="min-w-[120px] w-[120px] bg-white rounded-lg shadow border border-gray-100 hover:shadow-md transition-shadow flex-shrink-0 flex flex-col no-underline text-black">
-                            <div className="relative w-full h-24 bg-gray-100 rounded-t-lg overflow-hidden">
-                              <Image
-                                src={p.images?.[0] || 'https://placehold.co/400'}
-                                alt={p.name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div className="p-2 flex flex-col flex-1">
-                              <p className="text-[10px] font-bold line-clamp-2 leading-tight mb-1">{p.name}</p>
-                              <p className="text-[10px] text-green-600 font-semibold mt-auto">
-                                ${p.effectivePrice || p.price} {p.currency}
-                              </p>
-                            </div>
-                          </Link>
-                        ))}
+                      <div className="flex gap-2 overflow-x-auto w-full py-2 px-1 scrollbar-hide">
+                        {m.products.map(p => {
+                          const aiReason = m.highlights ? m.highlights[p._id] : null;
+
+                          return (
+                            <Link href={`/shop/${p._id}-${p.slug || 'product'}`} key={p._id} className="min-w-[130px] w-[130px] bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all flex-shrink-0 flex flex-col no-underline text-black group relative">
+                              {aiReason && (
+                                <div className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 text-[9px] font-bold px-1 py-1 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 truncate">
+                                  ✨ {aiReason}
+                                </div>
+                              )}
+
+                              <div className="relative w-full h-28 bg-gray-50 rounded-t-lg overflow-hidden">
+                                <Image
+                                  src={ensureHttps(p.images?.[0])}
+                                  alt={p.name}
+                                  fill
+                                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                              </div>
+
+                              <div className="p-2 flex flex-col flex-1">
+                                <p className="text-[10px] font-bold line-clamp-2 leading-tight mb-1 text-gray-700 h-8">
+                                  {p.name}
+                                </p>
+                                <div className="mt-auto pt-1 border-t border-dashed border-gray-100">
+                                  <p className="text-[10px] text-[#DCA54A] font-bold">
+                                    ${p.effectivePrice || p.price} {p.currency}
+                                  </p>
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
                 ))}
                 {isAiLoading && (
-                  <div className="text-sm flex justify-start">
-                    <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded-xl">
-                      Thinking...
-                    </span>
+                  <div className="text-sm flex justify-start items-center gap-2 mt-2">
+                    <div className="bg-gray-100 text-gray-500 px-3 py-2 rounded-xl text-xs italic flex items-center gap-1 shadow-inner">
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                      <span className="ml-1 not-italic">AI searching...</span>
+                    </div>
                   </div>
                 )}
               </>
