@@ -47,6 +47,7 @@ class AiChatService {
                 }
             })
             const content = response.choices[0].message.content
+            console.log(content)
             return JSON.parse(content)
         } catch (error) {
             console.error('[AiChatService] Error extracting filters:', error)
@@ -135,25 +136,33 @@ class AiChatService {
     async generateResponse(userQuery, products) {
         const productContext = products.map(
             p => {
-                return `- ${p.name}, Price: ${p.effectivePrice || p.price} ${p.currency || 'USD'}): ${p.description ? p.description.substring(0, 150) + '...' : 'No description'}`;
+                return `-ID: ${p._id} , Name: ${p.name}, Price: ${p.effectivePrice || p.price} ${p.currency || 'USD'}): ${p.description ? p.description.substring(0, 150) + '...' : 'No description'}`;
             }
         ).join('\n')
+
         const systemPrompt = `
-        You are an expert anime figure sales assistant.
-        Answer the user's question based ONLY on the provided product context.
+        You are an expert figure curator. The user asked: "${userQuery}"
         
-        If products are found:
-        - Recommend the specific products that match the user's request best.
-        - Mention their key features or why they fit the request (e.g., "looking cool").
-        - Be enthusiastic and helpful.
-        - Do not list URLs directly in the text, the system will display product cards separately.
+        Your goal is to explain WHY specific products match their request.
         
-        If NO products are found in the context that match well, apologize and suggest general categories.
-        
-        User Question: "${userQuery}"
-        
+        Respond strictly with this JSON structure:
+        {
+            "headline": string, // Short, exciting summary (e.g. "Top picks for aggressive poses!")
+            "content": string, // General advice or comment on the collection found.
+            "highlights": {
+                // Key must be the Product ID exactly as provided in context.
+                // Value is a sentence explaining the match.
+                "product_id_1": "Best detail for under $100",
+                "product_id_2": "Perfect matches the 'sexy' keyword"
+            }
+        }
+
         Product Context:
         ${productContext}
+        
+        Rules:
+        - Only highlight the top 1-3 most relevant products in the "highlights" object. You don't need to list all.
+        - Keep highlight text VERY short and punchy.
         `;
 
         try {
@@ -162,12 +171,18 @@ class AiChatService {
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userQuery }
-                ]
-            })
-            return response.choices[0].message.content
+                ],
+                response_format: { type: 'json_object' }
+            });
+
+            return JSON.parse(response.choices[0].message.content);
         } catch (error) {
-            console.error('[AiChatService] Error generating response:', error);
-            return "I'm having trouble thinking of a response right now. Please check the products below!";
+            console.error('[AiChatService] Error:', error);
+            return {
+                headline: "Here are my finds",
+                content: "Check out these figures below.",
+                highlights: {}
+            };
         }
     }
 
@@ -181,6 +196,7 @@ class AiChatService {
         }
 
         const answer = await this.generateResponse(message, products);
+
         return {
             text: answer,
             products: products
