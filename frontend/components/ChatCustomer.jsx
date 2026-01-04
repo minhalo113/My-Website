@@ -197,14 +197,17 @@ const ChatCustomer = () => {
                           const aiReason = m.highlights ? m.highlights[p._id] : null;
 
                           return (
-                            <Link href={`/shop/${p._id}-${p.slug || 'product'}`} key={p._id} className="min-w-[130px] w-[130px] bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all flex-shrink-0 flex flex-col no-underline text-black group relative">
+                            <Link
+                              href={`/shop/${p._id}-${p.slug || 'product'}`}
+                              key={p._id}
+                              className="min-w-[120px] w-[120px] bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all flex-shrink-0 flex flex-col no-underline text-black group relative"
+                            >
                               {aiReason && (
-                                <div className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 text-[9px] font-bold px-1 py-1 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 truncate">
+                                <div className="absolute top-0 left-0 right-0 z-10 bg-yellow-400/95 text-yellow-900 text-[8px] font-bold px-1 py-0.5 text-center rounded-t-lg shadow-sm border-b border-yellow-500/20 truncate tracking-tight">
                                   ✨ {aiReason}
                                 </div>
                               )}
-
-                              <div className="relative w-full h-28 bg-gray-50 rounded-t-lg overflow-hidden">
+                              <div className="relative w-full h-24 bg-gray-50 rounded-t-lg overflow-hidden mt-0">
                                 <Image
                                   src={ensureHttps(p.images?.[0])}
                                   alt={p.name}
@@ -213,12 +216,12 @@ const ChatCustomer = () => {
                                 />
                               </div>
 
-                              <div className="p-2 flex flex-col flex-1">
-                                <p className="text-[10px] font-bold line-clamp-2 leading-tight mb-1 text-gray-700 h-8">
+                              <div className="p-2 flex flex-col flex-1 gap-1">
+                                <p className="text-[10px] font-medium line-clamp-2 leading-3 text-gray-700 h-6">
                                   {p.name}
                                 </p>
                                 <div className="mt-auto pt-1 border-t border-dashed border-gray-100">
-                                  <p className="text-[10px] text-[#DCA54A] font-bold">
+                                  <p className="text-[9px] text-[#DCA54A] font-bold">
                                     ${p.effectivePrice || p.price} {p.currency}
                                   </p>
                                 </div>
