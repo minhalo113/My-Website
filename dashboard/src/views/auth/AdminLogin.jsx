@@ -25,7 +25,6 @@ const AdminLogin = () => {
 
     const submit = (e) => {
         e.preventDefault()
-        console.log(process.env.API_CALL)
         dispatch(admin_login(state))
     }
 

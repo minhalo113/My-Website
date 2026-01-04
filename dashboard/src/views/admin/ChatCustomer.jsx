@@ -131,8 +131,8 @@ const ChatCustomer = () => {
                 >
                   <div
                     className={`px-4 py-2 rounded-xl max-w-[70%] break-words shadow-sm ${m.sender === 'admin'
-                      ? 'bg-indigo-100 text-indigo-900'
-                      : 'bg-slate-100 text-slate-800'
+                        ? 'bg-indigo-100 text-indigo-900'
+                        : 'bg-slate-100 text-slate-800'
                       }`}
                   >
                     {m.message}
