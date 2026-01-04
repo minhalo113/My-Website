@@ -27,6 +27,7 @@ import contactRouter from "./routes/home/contactRoutes.js";
 import couponRouter from './routes/dashboard/couponRoutes.js';
 import homeSwiperRouter from './routes/dashboard/homeSwiperRoutes.js';
 import dashboardRouter from './routes/dashboard/dashboardRoutes.js';
+import aiChatRouter from './routes/home/aiChatRoutes.js';
 import startIngestionJob from './services/ingestion/scheduler.js';
 
 const PORT = process.env.PORT || 8080;
@@ -66,6 +67,7 @@ app.use('/api', couponRouter);
 app.use('/api', homeSwiperRouter);
 app.use('/api', dashboardRouter);
 app.use('/api', ebayRouter);
+app.use('/api', aiChatRouter)
 
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
