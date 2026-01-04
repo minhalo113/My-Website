@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AuthContext } from "../context/AuthContext";
 import api from '../src/api/api';
-import ensureHttps from '../src/utils/ensureHttps';
+import { ensureHttps } from '../src/utils/imageUtils';
 
 const ChatCustomer = () => {
   const { user } = useContext(AuthContext)
