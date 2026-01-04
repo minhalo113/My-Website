@@ -173,6 +173,7 @@ class AiChatService {
 
     async processUserMessage(message) {
         const extraction = await this.extractFilters(message);
+        const searchTerm = extraction.searchTerm || message;
         const vector = await this.getEmbedding(searchTerm);
         let products = [];
         if (vector) {
