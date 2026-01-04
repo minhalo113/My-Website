@@ -1,20 +1,12 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import axios from 'axios';
 import dbConnect from '../utils/db.js';
 import productModel from '../models/productModel.js';
+import aiChatService from '../services/aiChatService.js';
 
 dotenv.config();
 
-const BATCH_SIZE = 50;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_EMBEDDING_URL = 'https://api.openai.com/v1/embeddings';
-const MODEL = 'text-embedding-3-small';
-
-if (!OPENAI_API_KEY) {
-    console.error('Error: OPENAI_API_KEY is not defined in environment variables.');
-    process.exit(1);
-}
+const BATCH_SIZE = 10;
 
 const generateEmbeddings = async () => {
     try {
@@ -22,9 +14,11 @@ const generateEmbeddings = async () => {
         console.log('Connected to database.');
 
         let processedCount = 0;
+        let skip = 0;
 
         while (true) {
-            const products = await productModel.find({ embedding: { $exists: false } })
+            const products = await productModel.find({})
+                .skip(skip)
                 .limit(BATCH_SIZE)
                 .select('name description category');
 
@@ -33,54 +27,34 @@ const generateEmbeddings = async () => {
                 break;
             }
 
-            console.log(`Processing batch of ${products.length} products...`);
+            console.log(`Processing batch of ${products.length} products (Skip: ${skip})...`);
 
-            const inputs = products.map(p => {
-                const name = p.name || '';
-                const category = p.category || 'Unknown';
-                const description = p.description || '';
+            const operations = [];
 
-                return `Name: ${name}. Category: ${category}. Description: ${description}`;
-            });
+            for (const product of products) {
+                try {
+                    const embeddingVector = await aiChatService.generateProductEmbedding(product);
 
-            try {
-                const response = await axios.post(
-                    OPENAI_EMBEDDING_URL,
-                    {
-                        input: inputs,
-                        model: MODEL
-                    },
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${OPENAI_API_KEY}`,
-                            'Content-Type': 'application/json'
-                        }
+                    if (embeddingVector) {
+                        operations.push({
+                            updateOne: {
+                                filter: { _id: product._id },
+                                update: { $set: { embedding: embeddingVector } }
+                            }
+                        });
                     }
-                );
-
-                const embeddings = response.data.data;
-
-                const operations = products.map((product, index) => {
-                    const embeddingVector = embeddings[index].embedding;
-                    return {
-                        updateOne: {
-                            filter: { _id: product._id },
-                            update: { $set: { embedding: embeddingVector } }
-                        }
-                    };
-                });
-
-                if (operations.length > 0) {
-                    await productModel.bulkWrite(operations);
-                    processedCount += operations.length;
-                    console.log(`Successfully updated ${operations.length} products. Total processed: ${processedCount}`);
+                } catch (err) {
+                    console.error(`Failed to generate embedding for product ${product._id}: ${err.message}`);
                 }
-
-            } catch (apiError) {
-                console.error('Error calling OpenAI API:', apiError.response?.data || apiError.message);
-                console.error('Aborting batch due to API error.');
-                break;
             }
+
+            if (operations.length > 0) {
+                await productModel.bulkWrite(operations);
+                processedCount += operations.length;
+                console.log(`Successfully updated ${operations.length} products. Total processed: ${processedCount}`);
+            }
+
+            skip += BATCH_SIZE;
         }
 
         console.log('Embedding generation script finished.');

@@ -5,6 +5,7 @@ import { computeEffectivePrice } from '../../utils/effectivePrice.js';
 
 import ebayProvider from './providers/EbayProvider.js';
 import aliExpressProvider from './providers/AliExpressProvider.js';
+import aiChatService from '../aiChatService.js';
 
 class IngestionService {
     constructor() {
@@ -52,24 +53,40 @@ class IngestionService {
                 colorPrices: []
             });
 
+            // Generate embedding
+            let embedding = null;
+            try {
+                embedding = await aiChatService.generateProductEmbedding({
+                    name,
+                    category: product.category,
+                    description
+                });
+            } catch (err) {
+                console.error(`[IngestionService] Failed to generate embedding for ${name}:`, err.message);
+            }
+
+            const updateFields = {
+                name,
+                price,
+                effectivePrice,
+                stock,
+                images,
+                description,
+                currency,
+                affiliateLink,
+                link,
+                discount: finalDiscount,
+                videos,
+                updatedAt: new Date()
+            };
+
+            if (embedding) {
+                updateFields.embedding = embedding;
+            }
+
             const updatedProduct = await productModel.findByIdAndUpdate(
                 product._id,
-                {
-                    $set: {
-                        name,
-                        price,
-                        effectivePrice,
-                        stock,
-                        images,
-                        description,
-                        currency,
-                        affiliateLink,
-                        link,
-                        discount: finalDiscount,
-                        videos,
-                        updatedAt: new Date()
-                    }
-                },
+                { $set: updateFields },
                 { new: true }
             );
 
@@ -130,25 +147,43 @@ class IngestionService {
                             colorPrices: []
                         });
 
+                        // Generate embedding
+                        let embedding = null;
+                        try {
+                            embedding = await aiChatService.generateProductEmbedding({
+                                name,
+                                category,
+                                description
+                            });
+                        } catch (err) {
+                            console.error(`[IngestionService] Failed to generate embedding for ${name}:`, err.message);
+                        }
+
+                        const updateFields = {
+                            name,
+                            price,
+                            effectivePrice,
+                            stock,
+                            images,
+                            description,
+                            currency,
+                            affiliateLink,
+                            link,
+                            productType,
+                            category,
+                            discount: finalDiscount,
+                            videos,
+                            updatedAt: new Date()
+                        };
+
+                        if (embedding) {
+                            updateFields.embedding = embedding;
+                        }
+
                         await productModel.findOneAndUpdate(
                             query,
                             {
-                                $set: {
-                                    name,
-                                    price,
-                                    effectivePrice,
-                                    stock,
-                                    images,
-                                    description,
-                                    currency,
-                                    affiliateLink,
-                                    link,
-                                    productType,
-                                    category,
-                                    discount: finalDiscount,
-                                    videos,
-                                    updatedAt: new Date()
-                                },
+                                $set: updateFields,
                                 $setOnInsert: {
                                     sellerId,
                                     slug,
