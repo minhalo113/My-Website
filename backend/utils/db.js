@@ -10,6 +10,7 @@ const dbConnect = async () => {
         console.log("Database connected", conn.connections[0].name)
     } catch (error) {
         console.log(error.message)
+        throw new Error("Missing CONNECTURI or DATABASENAME env");
     }
 }
 export default dbConnect
