@@ -17,7 +17,7 @@ export const Home = () => {
       />
       <div>
         <Banner />
-        <HomeCategory />
+        {/* <HomeCategory /> */}
         <CategoryShowCase />
 
         {/* <Register/> */}
