@@ -136,6 +136,7 @@ const productSchema = new Schema({
 
 productSchema.index({ effectivePrice: 1 });
 productSchema.index({ isHidden: 1, _id: -1 });
+productSchema.index({ isHidden: 1, productType: 1, _id: -1 });
 
 productSchema.index({
     name: 'text',

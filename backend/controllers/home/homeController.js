@@ -116,8 +116,11 @@ class homeControllers {
 
     get_newest_products = async (req, res) => {
         try {
-            const products = await productModel.find({ isHidden: false }).sort({ _id: -1 }).limit(6);
-            return responseReturn(res, 200, { products });
+            const [standardProducts, affiliateProducts] = await Promise.all([
+                productModel.find({ isHidden: false, productType: 'standard' }).sort({ _id: -1 }).limit(6),
+                productModel.find({ isHidden: false, productType: 'affiliate' }).sort({ _id: -1 }).limit(6)
+            ]);
+            return responseReturn(res, 200, { standardProducts, affiliateProducts });
         } catch (error) {
             console.log(error);
             return responseReturn(res, 500, { error: "Internal Server Error" });
