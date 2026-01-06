@@ -55,12 +55,12 @@ const CategoryShowCase = () => {
         fetchProducts('All Categories');
     }, [fetchProducts])
 
-    const formatCurrency = (value) => {
+    const formatCurrency = (value, currency) => {
         const numericValue = typeof value === 'number' ? value : parseFloat(value);
         if (!Number.isFinite(numericValue)) {
             return value;
         }
-        return `$${numericValue.toFixed(2)}`;
+        return `${currency} ${numericValue.toFixed(2)}`;
     };
 
     const renderDiscountedPrice = (discountedLabel, originalLabel) => (
@@ -92,19 +92,21 @@ const CategoryShowCase = () => {
             const min = Math.min(...prices);
             const max = Math.max(...prices);
             const hasRange = min !== max;
+
+            let currency = product.shippingDestination === 'canada_only' ? 'CAD' : 'USD';
             const baseLabel = hasRange
-                ? `${formatCurrency(min)} - ${formatCurrency(max)}`
-                : formatCurrency(min);
+                ? `${formatCurrency(min, currency)} - ${formatCurrency(max, currency)}`
+                : formatCurrency(min, currency);
 
             if (product.discount > 0) {
                 const discountMultiplier = 1 - product.discount / 100;
                 const minDiscount = min * discountMultiplier;
                 const maxDiscount = max * discountMultiplier;
                 const discountedLabel = hasRange
-                    ? `${formatCurrency(minDiscount)} - ${formatCurrency(maxDiscount)}`
-                    : formatCurrency(minDiscount);
+                    ? `${formatCurrency(minDiscount, currency)} - ${formatCurrency(maxDiscount, currency)}`
+                    : formatCurrency(minDiscount, currency);
 
-                return renderDiscountedPrice(discountedLabel, baseLabel);
+                return renderDiscountedPrice(discountedLabel, baseLabel, currency);
             }
 
             return <span className="font-semibold text-lg text-[#DCA54A]">{baseLabel}</span>;
