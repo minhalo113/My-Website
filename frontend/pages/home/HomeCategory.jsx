@@ -98,7 +98,7 @@ import 'swiper/css/navigation';
 const title = "Newest Arrivals";
 
 const CompactProductCard = ({ product, type }) => {
-    const { _id, slug, images, name, price, discount, affiliateLink } = product;
+    const { _id, slug, images, name, currency, effectivePrice, discount, affiliateLink } = product;
 
     // Determine the target link
     const productLink = `/shop/${_id}-${slug}`;
@@ -132,7 +132,7 @@ const CompactProductCard = ({ product, type }) => {
                 </div>
                 <div className="flex items-center justify-between mt-auto">
                     <span className="text-[#DCA54A] font-bold text-sm">
-                        ${price}
+                        ${currency} {effectivePrice}
                     </span>
                     {isAffiliate ? (
                         <a
@@ -156,16 +156,22 @@ const CompactProductCard = ({ product, type }) => {
 
 const ProductSection = ({ title, products, type }) => {
     if (!products || products.length === 0) return null;
-
+    let isAffiliate = type === 'affiliate';
     return (
         <div className="w-full">
             <div className="flex items-center justify-between mb-3 px-1">
                 <h5 className="text-md font-bold text-gray-700 uppercase tracking-wide border-l-4 border-[#DCA54A] pl-2">
                     {title}
                 </h5>
-                <Link href="/shop" className="text-xs font-semibold text-gray-500 hover:text-[#DCA54A]">
-                    View All &rarr;
-                </Link>
+                {isAffiliate ? (
+                    <Link href="/shop/global-finds" className="text-xs font-semibold text-gray-500 hover:text-[#DCA54A]">
+                        View All &rarr;
+                    </Link>
+                ) : (
+                    <Link href="/shop/direct-store" className="text-xs font-semibold text-gray-500 hover:text-[#DCA54A]">
+                        View All &rarr;
+                    </Link>
+                )}
             </div>
             <Swiper
                 modules={[Autoplay, Navigation]}
