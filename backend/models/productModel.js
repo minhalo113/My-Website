@@ -135,6 +135,7 @@ const productSchema = new Schema({
 }, { timestamps: true })
 
 productSchema.index({ effectivePrice: 1 });
+productSchema.index({ isHidden: 1, _id: -1 });
 
 productSchema.index({
     name: 'text',
