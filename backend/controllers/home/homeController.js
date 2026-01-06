@@ -114,6 +114,16 @@ class homeControllers {
         }
     }
 
+    get_newest_products = async (req, res) => {
+        try {
+            const products = await productModel.find({ isHidden: false }).sort({ _id: -1 }).limit(6);
+            return responseReturn(res, 200, { products });
+        } catch (error) {
+            console.log(error);
+            return responseReturn(res, 500, { error: "Internal Server Error" });
+        }
+    }
+
     products_get = async (req, res) => {
         const { page, searchValue, parPage, category, minPrice, maxPrice, sort, type } = req.query
 
