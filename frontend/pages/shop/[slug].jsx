@@ -17,9 +17,12 @@ export async function getServerSideProps(context) {
     const productId = slug.substring(0, 24);
     const isValidId = /^[0-9a-fA-F]{24}$/.test(productId);
 
+    // Case 1: Invalid ID format -> Return null to show unavailable message
     if (!isValidId) {
         return {
-            notFound: true,
+            props: {
+                serverProduct: null,
+            }
         };
     }
 
@@ -27,9 +30,12 @@ export async function getServerSideProps(context) {
         const { data } = await api.get(`/customers-product-get/${productId}`);
         const product = data.product;
 
+        // Case 2: Product not found in DB -> Return null
         if (!product) {
             return {
-                notFound: true,
+                props: {
+                    serverProduct: null,
+                }
             };
         }
 
@@ -50,24 +56,48 @@ export async function getServerSideProps(context) {
         }
     } catch (error) {
         console.error("SSR Error fetching product:", error);
+        // Case 3: API Error -> Return null so user sees the message instead of a crash
         return {
-            notFound: true,
+            props: {
+                serverProduct: null,
+            }
         };
     }
 }
 
 const SingleProduct = ({ serverProduct }) => {
-    const [productData, setProduct] = useState(serverProduct);
-    const [loading, setLoading] = useState(!serverProduct);
-    const [errorMsg, setErrorMsg] = useState('');
-
-    const [reviewList, setReviewList] = useState([])
-    const [reviewPage, setReviewPage] = useState(1)
-    const [reviewTotalPages, setReviewTotalPages] = useState(1)
-    const [reviewTotalCount, setReviewTotalCount] = useState(0)
-    const [previewImage, setPreviewImage] = useState(null)
-
     const router = useRouter();
+
+    // 1. Logic: If no product came from server, show Unavailable Message immediately
+    if (!serverProduct) {
+        return (
+            <div>
+                <PageHeader title={"Product Not Found"} curPage={"Unavailable"} />
+                <div className="w-full h-[60vh] flex flex-col items-center justify-center gap-6 p-4">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold text-gray-800 mb-2">Product Unavailable</h2>
+                        <p className="text-lg text-gray-600 mb-6">
+                            This product is no longer available or has been removed.
+                        </p>
+                        <button
+                            onClick={() => router.push('/shop')}
+                            className="px-8 py-3 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 transition-colors duration-300"
+                        >
+                            Return to Shop
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // 2. State Initialization (Only runs if product exists)
+    const [productData, setProduct] = useState(serverProduct);
+    const [reviewList, setReviewList] = useState([]);
+    const [reviewPage, setReviewPage] = useState(1);
+    const [reviewTotalPages, setReviewTotalPages] = useState(1);
+    const [reviewTotalCount, setReviewTotalCount] = useState(0);
+    const [previewImage, setPreviewImage] = useState(null);
 
     const REVIEW_PAGE_SIZE = 10;
 
@@ -76,60 +106,39 @@ const SingleProduct = ({ serverProduct }) => {
             const { data } = await api.get(`/get-reviews/${_id}`, {
                 withCredentials: true,
                 params: { page, limit: REVIEW_PAGE_SIZE },
-            })
-            setReviewList(data.reviewList || [])
-            setReviewPage(data.page || page)
-            setReviewTotalPages(data.totalPages || 1)
-            setReviewTotalCount(data.totalReviews || 0)
+            });
+            setReviewList(data.reviewList || []);
+            setReviewPage(data.page || page);
+            setReviewTotalPages(data.totalPages || 1);
+            setReviewTotalCount(data.totalReviews || 0);
         } catch (err) {
-            console.log(err?.response?.data?.message || err.message)
+            console.log(err?.response?.data?.message || err.message);
         }
-    }
+    };
 
     const handleReviewPageChange = (page) => {
         if (!productData?._id || page === reviewPage || page < 1 || page > reviewTotalPages) {
-            return
+            return;
         }
-        setReviewPage(page)
-        fetchReviews(productData._id, page)
-    }
+        setReviewPage(page);
+        fetchReviews(productData._id, page);
+    };
 
+    // 3. Effects
     useEffect(() => {
         if (serverProduct) {
             setProduct(serverProduct);
             fetchReviews(serverProduct._id, 1);
-            setLoading(false);
-        } else {
-            setErrorMsg("Product data missing");
         }
-    }, [serverProduct])
+    }, [serverProduct]);
 
-    if (loading) {
-        return (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-4">
-                <div className="w-12 h-12 border-4 border-gray-300 border-t-emerald-500 rounded-full animate-spin"></div>
-                <p className="text-lg font-medium text-gray-700">Loading product...</p>
-            </div>
-        )
-    }
-
-    if (!productData) return (
-        <div className="w-full h-screen flex items-center justify-center">
-            <p className="text-xl font-bold text-red-500">{errorMsg || "Product Not Found."}</p>
-        </div>
-    )
-
-    const fallbackDescription =
-        productData?.description || `${productData.name} available at A Figure A Day.`
-    const firstImage = productData?.images?.[0] || '/images/logo/myLogoResize.png'
-    const priceNumber = productData?.colorPrices?.[0] ?? productData?.price ?? 0
-    const priceCurrency = 'USD'
-    const availability =
-        productData?.stock > 0
-            ? 'http://schema.org/InStock'
-            : 'http://schema.org/OutOfStock'
-
-    const productUrl = `https://www.afigureaday.com/shop/${productData._id}-${productData.slug}`
+    // 4. Derived Values & Render Helpers
+    const fallbackDescription = productData?.description || `${productData.name} available at A Figure A Day.`;
+    const firstImage = productData?.images?.[0] || '/images/logo/myLogoResize.png';
+    const priceNumber = productData?.colorPrices?.[0] ?? productData?.price ?? 0;
+    const priceCurrency = 'USD';
+    const availability = productData?.stock > 0 ? 'http://schema.org/InStock' : 'http://schema.org/OutOfStock';
+    const productUrl = `https://www.afigureaday.com/shop/${productData._id}-${productData.slug}`;
 
     const productStructuredData = {
         '@context': 'https://schema.org',
@@ -153,7 +162,7 @@ const SingleProduct = ({ serverProduct }) => {
                 reviewCount: productData.reviewCount || productData.reviews?.length || 0,
             }
             : undefined,
-    }
+    };
 
     return (
         <div>
@@ -176,7 +185,12 @@ const SingleProduct = ({ serverProduct }) => {
                                         <div className='col-md-6 col-12'>
                                             <div className='product-thumb relative'>
                                                 <DiscountBadge discount={productData.discount} />
-                                                <ProductSwiper images={productData.images} videos={productData.videos} previewImage={previewImage} onPreviewEnd={() => setPreviewImage(null)} />
+                                                <ProductSwiper
+                                                    images={productData.images}
+                                                    videos={productData.videos}
+                                                    previewImage={previewImage}
+                                                    onPreviewEnd={() => setPreviewImage(null)}
+                                                />
                                             </div>
                                         </div>
 
@@ -196,8 +210,8 @@ const SingleProduct = ({ serverProduct }) => {
                                         totalReviews={reviewTotalCount}
                                         onPageChange={handleReviewPageChange}
                                         reloadFunction={() => {
-                                            setReviewPage(1)
-                                            fetchReviews(productData._id, 1)
+                                            setReviewPage(1);
+                                            fetchReviews(productData._id, 1);
                                         }}
                                     />
                                 </div>
@@ -207,18 +221,17 @@ const SingleProduct = ({ serverProduct }) => {
                         <div className="col-lg-4 col-12">
                             <aside className='ps-lg-4'>
                                 <PopularPost />
-                                {/* <Tags/> */}
                             </aside>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 SingleProduct.propTypes = {
     serverProduct: PropTypes.object,
 };
 
-export default SingleProduct
+export default SingleProduct;
