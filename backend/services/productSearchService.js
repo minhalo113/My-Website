@@ -5,7 +5,7 @@ const MAX_PAGE_SIZE = 60;
 const DEFAULT_CACHE_SIZE = parseInt(process.env.PRODUCT_SEARCH_CACHE_SIZE, 10);
 const DEFAULT_CACHE_TTL = parseInt(process.env.PRODUCT_SEARCH_CACHE_TTL, 10);
 const CACHE_SIZE = Number.isFinite(DEFAULT_CACHE_SIZE) && DEFAULT_CACHE_SIZE > 0 ? DEFAULT_CACHE_SIZE : 200;
-const CACHE_TTL = Number.isFinite(DEFAULT_CACHE_TTL) && DEFAULT_CACHE_TTL > 0 ? DEFAULT_CACHE_TTL : 60 * 1000;
+const CACHE_TTL = Number.isFinite(DEFAULT_CACHE_TTL) && DEFAULT_CACHE_TTL > 0 ? DEFAULT_CACHE_TTL : 60 * 1000 * 60;
 const DEFAULT_SUGGESTION_LIMIT = parseInt(process.env.PRODUCT_SEARCH_SUGGESTION_LIMIT, 10);
 const SUGGESTION_LIMIT = Number.isFinite(DEFAULT_SUGGESTION_LIMIT) && DEFAULT_SUGGESTION_LIMIT > 0
     ? Math.min(DEFAULT_SUGGESTION_LIMIT, 20)
@@ -92,7 +92,7 @@ const sanitizePrice = (value) => {
     return Number(parsed.toFixed(2));
 };
 
-const mapFacetEntries = (entries = []) => {
+const mapEntries = (entries = []) => {
     if (!Array.isArray(entries)) return [];
     return entries
         .filter((entry) => entry && entry._id)
@@ -102,13 +102,13 @@ const mapFacetEntries = (entries = []) => {
         }));
 };
 
-const mapBucketEntries = (buckets = []) => {
-    if (!Array.isArray(buckets)) return [];
-    return buckets.map(b => ({
-        value: b._id,
-        count: Number(b.count) || 0
-    }));
-};
+// const mapBucketEntries = (buckets = []) => {
+//     if (!Array.isArray(buckets)) return [];
+//     return buckets.map(b => ({
+//         value: b._id,
+//         count: Number(b.count) || 0
+//     }));
+// };
 
 const computeRelevanceLabel = (normalizedScore) => {
     if (normalizedScore >= 0.66) return 'high';
@@ -285,15 +285,15 @@ const sanitizeSort = (value) => {
         case 'review':
         case 'mostreviewed':
         case 'most-reviewed':
-            return { key: 'reviews', stage: { reviewCount: -1, averageRating: -1, createdAt: -1 } };
-        case 'price-asc':
+            return { key: 'reviews', stage: { reviewCount: -1, averageRating: -1, _id: -1 } };
+        // case 'price-asc':
         case 'price_asc':
-            return { key: 'price-asc', stage: { effectivePrice: 1, createdAt: -1 } };
-        case 'price-desc':
+            return { key: 'price-asc', stage: { effectivePrice: 1, _id: -1 } };
+        // case 'price-desc':
         case 'price_desc':
-            return { key: 'price-desc', stage: { effectivePrice: -1, createdAt: -1 } };
+            return { key: 'price-desc', stage: { effectivePrice: -1, _id: -1 } };
         default:
-            return { key: 'newest', stage: { createdAt: -1 } };
+            return { key: 'newest', stage: { _id: -1 } };
     }
 };
 
@@ -460,6 +460,7 @@ export const searchCatalogProducts = async ({
         if (sort) {
             resultsPipeline.push({ $sort: sortStage });
         } else {
+            // resultsPipeline.push({ $sort: { score: -1, _id: 1 } });
             resultsPipeline.push({ $sort: { score: -1 } });
         }
     } else {
@@ -628,14 +629,14 @@ export const searchCatalogProducts = async ({
             // $searchMeta result structure
             const bucketData = meta?.facet || {};
             finalFacets = {
-                categories: mapBucketEntries(bucketData.categories?.buckets),
-                brands: mapBucketEntries(bucketData.brands?.buckets)
+                categories: mapEntries(bucketData.categories?.buckets),
+                brands: mapEntries(bucketData.brands?.buckets)
             };
         } else {
             // Standard $facet result structure
             finalFacets = {
-                categories: mapFacetEntries(meta?.categories),
-                brands: mapFacetEntries(meta?.brands)
+                categories: mapEntries(meta?.categories),
+                brands: mapEntries(meta?.brands)
             };
         }
     }
