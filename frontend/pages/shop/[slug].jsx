@@ -49,7 +49,7 @@ export async function getServerSideProps(context) {
             }
         }
     } catch (error) {
-        console.error("SSR Error fetching product:", error.error);
+        console.error("SSR Error fetching product:", error);
         return {
             notFound: true,
         };

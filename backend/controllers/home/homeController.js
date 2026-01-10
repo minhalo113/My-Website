@@ -236,6 +236,7 @@ class homeControllers {
         const { productId } = req.params;
         try {
             let product = await productModel.findOne({ _id: productId, isHidden: false }).lean();
+            console.log('test')
             console.log(product);
             if (!product) {
                 return responseReturn(res, 404, { error: 'Product not found' });
