@@ -32,7 +32,7 @@ export const Blog = () => {
 
         setBlogList(response.data.blogs || []);
         setTotalBlogs(response.data.totalBlogs || 0);
-        console.log('Fetched blogs:', response.data.blogs);
+        // console.log('Fetched blogs:', response.data.blogs);
       } catch (err) {
         setError('Error loading blogs. Please try again later.');
         console.log('Error fetching blogs:', err);
