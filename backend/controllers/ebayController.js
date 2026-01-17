@@ -41,12 +41,6 @@ class ebayController {
             const payload = req.body;
             const headers = req.headers;
 
-            console.log("[eBay Deletion POST] headers:", {
-                "content-type": headers["content-type"],
-                "user-agent": headers["user-agent"],
-            });
-            console.log("[eBay Deletion POST] payload:", JSON.stringify(payload));
-
             return res.sendStatus(204);
         } catch (error) {
             console.error("[eBay Deletion POST] Error:", error);
