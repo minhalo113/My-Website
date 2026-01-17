@@ -261,7 +261,7 @@ class AliExpressProvider {
     async fetchProductDetails(sourceId) {
         const creds = this._getEnvCreds('AFF');
         const res = await this.execute({
-            apiMethod: 'aliexpress.affiliate.product.detail.get',
+            apiMethod: 'aliexpress.affiliate.productdetail.get',
             type: 'AFF',
             authRequired: false,
             params: {
