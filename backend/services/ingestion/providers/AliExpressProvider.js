@@ -271,7 +271,6 @@ class AliExpressProvider {
                 tracking_id: creds.trackingId
             }
         });
-        console.log(`[AliExpress] Response:`, JSON.stringify(res));
         const item = res?.aliexpress_affiliate_productdetail_get_response?.resp_result?.result?.products?.product?.[0];
         if (!item) return null;
         return this._mapAffiliateProduct(item);

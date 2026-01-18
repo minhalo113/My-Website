@@ -467,9 +467,9 @@ export const searchCatalogProducts = async ({
         resultsPipeline.push({ $sort: sortStage });
     }
 
-    const canUseFacetCount = Boolean(sanitizedTerm && includeFacets);
+    const useSplitExecution = Boolean(sanitizedTerm);
 
-    if (!canUseFacetCount) {
+    if (!useSplitExecution) {
         resultsPipeline.push({
             $setWindowFields: {
                 output: {
@@ -514,7 +514,7 @@ export const searchCatalogProducts = async ({
     });
 
     const facetsPipeline = [];
-    if (sanitizedTerm && includeFacets) {
+    if (useSplitExecution) {
         facetsPipeline.push({
             $searchMeta: {
                 index: "default",
@@ -522,7 +522,7 @@ export const searchCatalogProducts = async ({
                     operator: {
                         compound: searchCompound
                     },
-                    facets: {
+                    facets: includeFacets ? {
                         "categories": {
                             "type": "string",
                             "path": "category"
@@ -531,11 +531,13 @@ export const searchCatalogProducts = async ({
                             "type": "string",
                             "path": "brand"
                         }
-                    }
+                    } : {}
                 }
             }
         });
+
     } else if (includeFacets) {
+        // Standard non-search aggregation facets
         const matchStage = {};
         if (sanitizedCategory) matchStage.category = sanitizedCategory;
         if (!includeHidden) matchStage.isHidden = false;
@@ -565,10 +567,10 @@ export const searchCatalogProducts = async ({
 
     const start = Date.now();
 
-    // Execute Parallel
-    const promises = [productModel.aggregate(resultsPipeline)];
-    if (includeFacets && facetsPipeline.length > 0) {
-        promises.push(productModel.aggregate(facetsPipeline));
+    const promises = [productModel.aggregate(resultsPipeline).allowDiskUse(true)];
+
+    if (useSplitExecution || (includeFacets && facetsPipeline.length > 0)) {
+        promises.push(productModel.aggregate(facetsPipeline).allowDiskUse(true));
     }
 
     let suggestionsPromise = Promise.resolve([]);
@@ -602,7 +604,7 @@ export const searchCatalogProducts = async ({
 
     const [resultsArr, facetsResultArr, suggestionsResultArr] = await Promise.all([
         promises[0],
-        includeFacets && facetsPipeline.length > 0 ? promises[1] : Promise.resolve([]),
+        (useSplitExecution || (includeFacets && facetsPipeline.length > 0)) ? promises[1] : Promise.resolve([]),
         suggestionsPromise
     ]);
 
@@ -610,38 +612,34 @@ export const searchCatalogProducts = async ({
 
     const normalizedResults = normalizeResults(resultsArr, { sanitizedTerm });
 
-    // Extract Facets & Total Count
     let finalFacets = undefined;
     let total = 0;
 
-    if (canUseFacetCount) {
+    if (useSplitExecution) {
         const meta = facetsResultArr[0] || {};
         total = meta.count?.lowerBound || 0;
+
+        if (includeFacets) {
+            const bucketData = meta.facet || {};
+            finalFacets = {
+                categories: mapEntries(bucketData.categories?.buckets),
+                brands: mapEntries(bucketData.brands?.buckets)
+            };
+        }
+
+    } else if (includeFacets) {
+        const meta = facetsResultArr[0];
+        total = resultsArr.length > 0 ? (resultsArr[0].totalCount || 0) : 0;
+        finalFacets = {
+            categories: mapEntries(meta?.categories),
+            brands: mapEntries(meta?.brands)
+        };
     } else {
         total = resultsArr.length > 0 ? (resultsArr[0].totalCount || 0) : 0;
     }
 
     const totalPages = Math.max(1, Math.ceil(total / normalizedLimit));
 
-    if (includeFacets) {
-        const meta = facetsResultArr[0];
-        if (sanitizedTerm) {
-            // $searchMeta result structure
-            const bucketData = meta?.facet || {};
-            finalFacets = {
-                categories: mapEntries(bucketData.categories?.buckets),
-                brands: mapEntries(bucketData.brands?.buckets)
-            };
-        } else {
-            // Standard $facet result structure
-            finalFacets = {
-                categories: mapEntries(meta?.categories),
-                brands: mapEntries(meta?.brands)
-            };
-        }
-    }
-
-    // Extract Suggestions
     const finalSuggestions = mapSuggestions(suggestionsResultArr || []);
 
     const response = {
