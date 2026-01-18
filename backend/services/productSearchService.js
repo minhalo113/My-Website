@@ -571,7 +571,7 @@ export const searchCatalogProducts = async ({
 
     const promises = [productModel.aggregate(resultsPipeline).allowDiskUse(true)];
 
-    if (useSplitExecution && (includeFacets && facetsPipeline.length > 0)) {
+    if (useSplitExecution || (includeFacets && facetsPipeline.length > 0)) {
         promises.push(productModel.aggregate(facetsPipeline).allowDiskUse(true));
     }
 
