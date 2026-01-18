@@ -138,6 +138,24 @@ productSchema.index({ effectivePrice: 1 });
 productSchema.index({ isHidden: 1, _id: -1 });
 productSchema.index({ isHidden: 1, productType: 1, _id: -1 });
 
+// Category Filter + Sorts
+productSchema.index({ category: 1, _id: -1 }); // Default Sort
+productSchema.index({ category: 1, effectivePrice: 1, _id: -1 }); // Price ASC
+productSchema.index({ category: 1, effectivePrice: -1, _id: -1 }); // Price DESC
+productSchema.index({ category: 1, reviewCount: -1, _id: -1 }); // Most Reviewed
+
+// ProductType Filter + Sorts
+productSchema.index({ productType: 1, _id: -1 }); // Default Sort
+productSchema.index({ productType: 1, effectivePrice: 1, _id: -1 }); // Price ASC
+productSchema.index({ productType: 1, effectivePrice: -1, _id: -1 }); // Price DESC
+productSchema.index({ productType: 1, reviewCount: -1, _id: -1 }); // Most Reviewed
+
+// IsHidden Filter + Sorts (expanding existing one)
+productSchema.index({ isHidden: 1, effectivePrice: 1, _id: -1 });
+productSchema.index({ isHidden: 1, effectivePrice: -1, _id: -1 });
+productSchema.index({ isHidden: 1, reviewCount: -1, _id: -1 });
+
+
 productSchema.index({
     name: 'text',
     category: 'text',
