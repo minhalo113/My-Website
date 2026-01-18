@@ -171,6 +171,7 @@ class AliExpressProvider {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }
             });
 
+            console.log(`[AliExpress] Response:`, JSON.stringify(response.data));
             const data = response.data;
             const err = data.error_response;
 
@@ -271,7 +272,7 @@ class AliExpressProvider {
                 tracking_id: creds.trackingId
             }
         });
-
+        console.log(`[AliExpress] Response:`, JSON.stringify(res));
         const item = res?.resp_result?.result?.products?.[0];
         if (!item) return null;
         return this._mapAffiliateProduct(item);
