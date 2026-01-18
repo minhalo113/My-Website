@@ -536,6 +536,14 @@ export const searchCatalogProducts = async ({
                     }
                 }
             });
+        } else {
+            facetsPipeline.push({
+                $searchMeta: {
+                    index: "default",
+                    count: { type: "lowerBound" },
+                    compound: searchCompound
+                }
+            });
         }
 
     } else if (includeFacets) {
