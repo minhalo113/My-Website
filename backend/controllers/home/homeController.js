@@ -243,7 +243,8 @@ class homeControllers {
             if ((product.productType === 'affiliate' || product.category === 'eBay' || product.category === 'Aliexpress') && product.updatedAt) {
                 const now = new Date();
                 const updatedAt = new Date(product.updatedAt);
-                const threeDaysInMillis = 3 * 24 * 60 * 60 * 1000;
+                // const threeDaysInMillis = 3 * 24 * 60 * 60 * 1000;
+                const threeDaysInMillis = 1;
 
                 if (now - updatedAt > threeDaysInMillis) {
                     try {
