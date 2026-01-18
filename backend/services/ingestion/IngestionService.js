@@ -35,7 +35,6 @@ class IngestionService {
         try {
             console.log(`[IngestionService] Updating individual product: ${product.name} (${product.sourceId}) via ${provider.name}`);
             const updatedItem = await provider.fetchProductDetails(product.sourceId);
-            console.log(updatedItem)
 
             if (!updatedItem) {
                 console.log(`[IngestionService] Product no longer available: ${product.name}. Deleting.`);
