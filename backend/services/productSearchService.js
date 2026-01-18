@@ -515,26 +515,28 @@ export const searchCatalogProducts = async ({
 
     const facetsPipeline = [];
     if (useSplitExecution) {
-        facetsPipeline.push({
-            $searchMeta: {
-                index: "default",
-                facet: {
-                    operator: {
-                        compound: searchCompound
-                    },
-                    facets: includeFacets ? {
-                        "categories": {
-                            "type": "string",
-                            "path": "category"
+        if (includeFacets) {
+            facetsPipeline.push({
+                $searchMeta: {
+                    index: "default",
+                    facet: {
+                        operator: {
+                            compound: searchCompound
                         },
-                        "brands": {
-                            "type": "string",
-                            "path": "brand"
+                        facets: {
+                            "categories": {
+                                "type": "string",
+                                "path": "category"
+                            },
+                            "brands": {
+                                "type": "string",
+                                "path": "brand"
+                            }
                         }
-                    } : {}
+                    }
                 }
-            }
-        });
+            });
+        }
 
     } else if (includeFacets) {
         // Standard non-search aggregation facets
@@ -569,7 +571,7 @@ export const searchCatalogProducts = async ({
 
     const promises = [productModel.aggregate(resultsPipeline).allowDiskUse(true)];
 
-    if (useSplitExecution || (includeFacets && facetsPipeline.length > 0)) {
+    if (useSplitExecution && (includeFacets && facetsPipeline.length > 0)) {
         promises.push(productModel.aggregate(facetsPipeline).allowDiskUse(true));
     }
 
