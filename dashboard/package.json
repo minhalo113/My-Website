@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
-    "@tailwindcss/cli": "^4.0.15",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -55,7 +54,6 @@
     ]
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.11",
     "ajv": "^7.2.4"
   }
 }
