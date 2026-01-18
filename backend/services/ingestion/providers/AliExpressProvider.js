@@ -272,7 +272,7 @@ class AliExpressProvider {
             }
         });
 
-        const item = res?.aliexpress_affiliate_product_detail_get_response?.resp_result?.result?.products?.product?.[0];
+        const item = res?.resp_result?.result?.products?.[0];
         if (!item) return null;
         return this._mapAffiliateProduct(item);
     }
