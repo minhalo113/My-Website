@@ -69,7 +69,7 @@ export const import_aliexpress_product = createAsyncThunk(
 
 export const get_products = createAsyncThunk(
     'product/get_products',
-    async ({ parPage, page, searchValue, minPrice, maxPrice }, { rejectWithValue, fulfillWithValue }) => {
+    async ({ parPage, page, searchValue, minPrice, maxPrice, category, productType }, { rejectWithValue, fulfillWithValue }) => {
         try {
             const params = new URLSearchParams()
             if (page !== undefined && page !== null) {
@@ -86,6 +86,12 @@ export const get_products = createAsyncThunk(
             }
             if (maxPrice !== undefined && maxPrice !== null) {
                 params.append('maxPrice', maxPrice)
+            }
+            if (category) {
+                params.append('category', category)
+            }
+            if (productType) {
+                params.append('type', productType)
             }
 
             const query = params.toString()
