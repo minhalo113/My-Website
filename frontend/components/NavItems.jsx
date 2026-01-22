@@ -102,8 +102,14 @@ const NavItems = () => {
                     </li>
 
                     <li>
-                      <Link
+                      {/* <Link
                         href="/shop"
+                        className="inline-block transition-transform duration-200"
+                      >
+                        Shop
+                      </Link> */}
+                      <Link
+                        href="/shop/direct-store"
                         className="inline-block transition-transform duration-200"
                       >
                         Shop
