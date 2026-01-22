@@ -80,7 +80,8 @@ const SingleProduct = ({ serverProduct }) => {
                             This product is no longer available or has been removed.
                         </p>
                         <button
-                            onClick={() => router.push('/shop')}
+                            // onClick={() => router.push('/shop')}
+                            onClick={() => router.push('/shop/direct-store')}
                             className="px-8 py-3 bg-yellow-500 text-white font-bold rounded hover:bg-yellow-600 transition-colors duration-300"
                         >
                             Return to Shop
@@ -174,7 +175,8 @@ const SingleProduct = ({ serverProduct }) => {
                 image={firstImage}
                 structuredData={productStructuredData}
             />
-            <PageHeader title={"OUR SHOP"} curPage={productData.name} additionalLink={[{ label: "Shop", path: "/shop" }]} />
+            {/* <PageHeader title={"OUR SHOP"} curPage={productData.name} additionalLink={[{ label: "Shop", path: "/shop" }]} /> */}
+            <PageHeader title={"OUR SHOP"} curPage={productData.name} additionalLink={[{ label: "Shop", path: "/shop/direct-store" }]} />
             <div className='shop-single padding-tb aside-bg'>
                 <div className='container'>
                     <div className='row justify-content-center'>

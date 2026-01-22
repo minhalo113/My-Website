@@ -202,7 +202,8 @@ const CategoryShowCase = () => {
                         </div>
                     )}
                     <div className='text-center mt-5'>
-                        <Link href="/shop" className='lab-btn' style={{ background: "#DCA54A" }}><span style={{ color: '#101115' }}>{btnText}</span></Link>
+                        {/* <Link href="/shop" className='lab-btn' style={{ background: "#DCA54A" }}><span style={{ color: '#101115' }}>{btnText}</span></Link> */}
+                        <Link href="/shop/direct-store" className='lab-btn' style={{ background: "#DCA54A" }}><span style={{ color: '#101115' }}>{btnText}</span></Link>
                     </div>
                 </div>
             </div>

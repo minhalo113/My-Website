@@ -231,7 +231,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
                         }}
                     >
 
-                        <Link
+                        {/* <Link
                             href="/shop"
                             style={{
                                 padding: "8px 24px",
@@ -247,7 +247,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
                             }}
                         >
                             All Collection
-                        </Link>
+                        </Link> */}
 
                         <Link
                             href="/shop/direct-store"

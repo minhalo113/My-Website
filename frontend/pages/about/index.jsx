@@ -85,8 +85,15 @@ export default function AboutUsPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-5 p-4">
-          <Link
+          {/* <Link
             href="/shop"
+            className="inline-flex items-center justify-center rounded-xl px-2 py-3 font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.03] hover:opacity-90"
+            style={{ backgroundColor: "#DCA54A" }}
+          >
+            Browse the collection
+          </Link> */}
+          <Link
+            href="/shop/direct-store"
             className="inline-flex items-center justify-center rounded-xl px-2 py-3 font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.03] hover:opacity-90"
             style={{ backgroundColor: "#DCA54A" }}
           >
