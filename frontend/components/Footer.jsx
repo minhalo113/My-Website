@@ -17,7 +17,7 @@ const socialList = [
     // { iconName: 'icofont-x', siteLink: 'https://x.com/fact_a8206', className: 'twitter', },
     //     { iconName: 'icofont-tiktok', siteLink: 'https://www.tiktok.com/@ahistoryfactaday', className: 'tiktok', },
     { iconName: 'icofont-instagram', siteLink: 'https://www.instagram.com/afigureaday123/?hl=en', className: 'instagram', },
-    { iconName: 'icofont-youtube', siteLink: 'https://youtube.com/@randohistoryfacts_?si=bfMKRbRI-BHjwOOJ', className: 'youtube', },
+    { iconName: 'icofont-youtube', siteLink: 'https://youtube.com/@afigureaday?si=Do3n3-JRXskMmYX0', className: 'youtube', },
 ]
 
 const ItemList = [{ text: 'All Products', link: '/shop', },
