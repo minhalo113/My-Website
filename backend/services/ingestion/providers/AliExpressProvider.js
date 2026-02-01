@@ -246,7 +246,7 @@ class AliExpressProvider {
                 keywords: randomKeyword,
                 target_currency: 'USD',
                 page_no: Math.floor(Math.random() * 20) + 1,
-                page_size: 50,
+                page_size: 10,
                 sort: 'LAST_VOLUME_DESC',
                 tracking_id: creds.trackingId
             }
