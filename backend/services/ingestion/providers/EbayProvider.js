@@ -87,7 +87,7 @@ class EbayProvider {
         const token = await this.getAccessToken();
         if (!token) return [];
 
-        const limit = 50;
+        const limit = 10;
 
         const randomPage = Math.floor(Math.random() * 20);
         const validOffset = randomPage * limit;
