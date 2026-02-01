@@ -43,6 +43,14 @@ const nextConfig = {
 
       // --- LOCALHOST ---
       { protocol: 'http', hostname: 'localhost' },
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'res.cloudinary.com',
+          port: '',
+          pathname: '/doee23zrc/**',
+        },
+      ],
     ],
   },
 };
