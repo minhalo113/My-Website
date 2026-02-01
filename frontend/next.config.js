@@ -2,6 +2,11 @@
 const nextConfig = {
   trailingSlash: false,
   images: {
+    // QUAN TRỌNG: Dòng này sẽ tắt bộ xử lý ảnh của Vercel/Next.js.
+    // Ảnh sẽ load trực tiếp từ Cloudinary (vốn đã nhanh rồi).
+    // Hết lỗi 402 Payment Required ngay lập tức.
+    unoptimized: true,
+
     remotePatterns: [
       {
         protocol: 'https',
@@ -17,21 +22,21 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '**.alicdn.com',
-      },
-      {
-        protocol: 'https',
         hostname: '**.aliexpress-media.com',
       },
       {
         protocol: 'https',
         hostname: '**.aliexpress.com',
       },
-
+      // --- CLOUDINARY (Đã gộp và sửa lại cho gọn) ---
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/doee23zrc/**', // Chỉ cho phép bucket của cậu
+      },
       // --- OTHER DOMAINS ---
-      { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'assets.adidas.com' },
-      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'graph.facebook.com' },
       { protocol: 'https', hostname: 'platform-lookaside.fbsbx.com' },
@@ -43,14 +48,6 @@ const nextConfig = {
 
       // --- LOCALHOST ---
       { protocol: 'http', hostname: 'localhost' },
-      remotePatterns: [
-        {
-          protocol: 'https',
-          hostname: 'res.cloudinary.com',
-          port: '',
-          pathname: '/doee23zrc/**',
-        },
-      ],
     ],
   },
 };
