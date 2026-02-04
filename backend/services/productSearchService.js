@@ -460,8 +460,8 @@ export const searchCatalogProducts = async ({
         if (sort) {
             resultsPipeline.push({ $sort: sortStage });
         } else {
-            // resultsPipeline.push({ $sort: { score: -1, _id: 1 } });
-            resultsPipeline.push({ $sort: { score: -1 } });
+            resultsPipeline.push({ $sort: { score: -1, _id: 1 } });
+            // resultsPipeline.push({ $sort: { score: -1 } });
         }
     } else {
         resultsPipeline.push({ $sort: sortStage });
