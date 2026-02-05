@@ -13,7 +13,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 class paymentController {
     create_payment_session = async (req, res) => {
         try {
-            const { cartItems, shipping, is_login, couponId } = req.body;
+            const { cartItems, shipping, is_login, couponId, url } = req.body;
 
             if (!cartItems || !shipping) {
                 return responseReturn(res, 400, { error: "Missing cart or shipping information." })
@@ -140,6 +140,7 @@ class paymentController {
                     price: item.price
                 })),
                 content_type: 'product',
+                page_url: url,
                 user: {
                     email: customerEmail,
                     external_id: customerId,

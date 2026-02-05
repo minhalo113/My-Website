@@ -118,7 +118,7 @@ class paypalController {
 
     create_paypal_payment = async (req, res) => {
         try {
-            const { cartItems, shipping, is_login, couponId } = req.body;
+            const { cartItems, shipping, is_login, couponId, url } = req.body;
 
             if (!cartItems || !shipping) {
                 return responseReturn(res, 400, { error: "Missing cart or shipping information." });
@@ -236,6 +236,7 @@ class paypalController {
                     price: item.price
                 })),
                 content_type: 'product',
+                page_url: url,
                 user: {
                     email: customerEmail,
                     external_id: customerId,
