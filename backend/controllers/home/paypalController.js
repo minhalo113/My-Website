@@ -225,7 +225,7 @@ class paypalController {
 
             const order = await customerOrder.create(orderPayload);
 
-            await sendTikTokEvent(req, 'InitiateCheckout', {
+            await sendTikTokEvent(req, 'Purchase', {
                 orderId: order._id.toString(),
                 value: finalPrice,
                 currency: orderCurrency,
@@ -235,6 +235,7 @@ class paypalController {
                     quantity: item.qty,
                     price: item.price
                 })),
+                content_type: 'product',
                 user: {
                     email: customerEmail,
                     external_id: customerId,
