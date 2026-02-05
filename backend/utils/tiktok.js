@@ -56,7 +56,7 @@ export const sendTikTokEvent = async (req, eventName, data) => {
         const payload = {
             event_source: "web",
             event_source_id: pixelId,
-            test_event_code: "TEST13892",
+            // test_event_code: "TEST13892",
             data: [
                 {
                     event: eventName,
