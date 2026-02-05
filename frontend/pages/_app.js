@@ -70,7 +70,7 @@ function MyApp({ Component, pageProps }) {
 
           {/* TikTok Pixel Code Start */}
           <script
-            dangerouslySetInnerHTML={{
+            tiktokPixel={{
               __html: `
             !function (w, d, t) {
               w.TiktokAnalyticsObject = t;
