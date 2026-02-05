@@ -68,6 +68,13 @@ const CartPage = () => {
         }
     };
 
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
 
     const handleCheckout = async (e) => {
         e.preventDefault();
@@ -114,14 +121,18 @@ const CartPage = () => {
                 is_login = user
             }
 
+            const ttclid = getCookie('ttclid');
+            const ttp = getCookie('_ttp');
+            const url = window.location.href;
+
             if (paymentMethod === 'paypal') {
                 const { data } = await api.post("/create-paypal-payment", {
-                    cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount
+                    cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount, ttclid, ttp, url
                 });
                 window.location.href = data.url;
             } else {
                 const { data } = await api.post("/create-payment-session", {
-                    cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount
+                    cartItems, shipping, is_login, couponId: coupon.id, discount: coupon.discount, ttclid, ttp, url
                 });
                 window.location.href = data.url;
             }
