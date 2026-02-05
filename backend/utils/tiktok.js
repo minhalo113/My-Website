@@ -1,20 +1,12 @@
 import axios from 'axios';
 import crypto from 'crypto';
 
-/**
- * @param {string} value 
- * @returns {string|null}
- */
+
 const sha256 = (value) => {
     if (!value) return null;
     return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
 };
 
-/**
- * @param {Object} req 
- * @param {string} eventName 
- * @param {Object} data 
- */
 export const sendTikTokEvent = async (req, eventName, data) => {
     try {
         const accessToken = process.env.TIKTOK_ACCESS_TOKEN;
@@ -30,6 +22,8 @@ export const sendTikTokEvent = async (req, eventName, data) => {
             value,
             currency,
             contents,
+            content_type,
+            page_url,
             user: userData
         } = data;
 
@@ -72,7 +66,11 @@ export const sendTikTokEvent = async (req, eventName, data) => {
                     properties: {
                         contents: contents || [],
                         currency: currency || 'USD',
-                        value: value || 0
+                        value: value || 0,
+                        content_type: content_type || null
+                    },
+                    page: {
+                        url: page_url || null
                     }
                 }
             ]
