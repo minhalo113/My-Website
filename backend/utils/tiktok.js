@@ -33,7 +33,7 @@ export const sendTikTokEvent = async (req, eventName, data) => {
         }
 
         const userAgent = req.headers['user-agent'];
-        const ttclid = req.cookies?.ttclid || req.body?.ttclid || null;
+        const ttclid = req.cookies?.ttclid || req.body?.ttclid || "afigureaday";
         const ttp = req.cookies?.ttp || req.body?.ttp || null;
 
         const userPayload = {
