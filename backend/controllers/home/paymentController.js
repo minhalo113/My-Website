@@ -6,6 +6,7 @@ import productModel from '../../models/productModel.js';
 import couponModel from '../../models/couponModel.js';
 import moment from 'moment'
 import couponController from '../dashbaord/couponController.js';
+import { sendTikTokEvent } from '../../utils/tiktok.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -127,6 +128,23 @@ class paymentController {
             }
 
             const order = await customerOrder.create(orderPayload)
+
+            await sendTikTokEvent(req, 'InitiateCheckout', {
+                orderId: order._id.toString(),
+                value: finalPrice,
+                currency: orderCurrency.toUpperCase(),
+                contents: trustedCartItems.map(item => ({
+                    content_id: item.id,
+                    content_name: item.name,
+                    quantity: item.qty,
+                    price: item.price
+                })),
+                user: {
+                    email: customerEmail,
+                    external_id: customerId,
+                    phone: shipping?.phoneNumber || null
+                }
+            });
 
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
