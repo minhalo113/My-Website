@@ -16,6 +16,7 @@ import couponModel from '../../models/couponModel.js';
 import moment from 'moment';
 import couponController from '../dashbaord/couponController.js';
 import { sendMail } from '../../utils/mail.js';
+import { sendTikTokEvent } from '../../utils/tiktok.js';
 
 class paypalController {
 
@@ -223,6 +224,23 @@ class paypalController {
             }
 
             const order = await customerOrder.create(orderPayload);
+
+            await sendTikTokEvent(req, 'InitiateCheckout', {
+                orderId: order._id.toString(),
+                value: finalPrice,
+                currency: orderCurrency,
+                contents: trustedCartItems.map(item => ({
+                    content_id: item.id,
+                    content_name: item.name,
+                    quantity: item.qty,
+                    price: item.price
+                })),
+                user: {
+                    email: customerEmail,
+                    external_id: customerId,
+                    phone: shipping?.phoneNumber || null
+                }
+            });
 
             // Encode orderId and couponId in custom_id for webhook reference
             const customId = `${order._id.toString()}|${couponId || ''}`;
