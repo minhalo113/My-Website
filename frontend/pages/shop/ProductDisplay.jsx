@@ -121,7 +121,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
         shippingFlag = (
             <div className="inline-flex items-center gap-1 align-middle">
                 <CA className="w-4 h-auto" />
-                <span>Only</span>
+                {/* <span>Only</span> */}
             </div>
         );
         currencyLabel = 'CAD';
@@ -129,7 +129,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
         shippingFlag = (
             <div className="inline-flex items-center gap-1 align-middle">
                 <US className="w-4 h-auto" />
-                <span>Only</span>
+                {/* <span>Only</span> */}
             </div>
         );
         currencyLabel = 'USD';
