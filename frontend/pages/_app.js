@@ -8,7 +8,15 @@ import "./styles/style.min.css"
 import "./styles/icofont.min.css"
 import "./styles/modal.css"
 import "./styles/output.css"
+import { Barlow } from 'next/font/google'
 import dynamic from 'next/dynamic'
+
+const barlow = Barlow({
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-barlow',
+})
 
 import Head from "next/head"
 import NavItems from "../components/NavItems.jsx";
@@ -94,16 +102,18 @@ function MyApp({ Component, pageProps }) {
         <CartProvider>
 
           <AuthProvider>
-            {!noLayoutRoutes.includes(router.pathname) && !router.pathname.startsWith('/admin') && <AnnouncementBar />}
-            {!noLayoutRoutes.includes(router.pathname) && <NavItems />}
-            <div className="min-vh-100">
-              {
-                <Component {...pageProps} />
-              }
-            </div>
+            <main className={barlow.className}>
+              {!noLayoutRoutes.includes(router.pathname) && !router.pathname.startsWith('/admin') && <AnnouncementBar />}
+              {!noLayoutRoutes.includes(router.pathname) && <NavItems />}
+              <div className="min-vh-100">
+                {
+                  <Component {...pageProps} />
+                }
+              </div>
 
-            {!noLayoutRoutes.includes(router.pathname) && <Footer />}
-            {!router.pathname.startsWith('/admin') && <ChatCustomer />}
+              {!noLayoutRoutes.includes(router.pathname) && <Footer />}
+              {!router.pathname.startsWith('/admin') && <ChatCustomer />}
+            </main>
           </AuthProvider>
 
           <Toaster
