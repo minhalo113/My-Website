@@ -105,7 +105,7 @@ const ProductCards = ({ GridList, products }) => {
             shippingFlag = (
               <div className="flex items-center gap-1">
                 <CA className="w-4 h-auto" />
-                <span>Only</span>
+                {/* <span>Only</span> */}
               </div>
             );
             currencyLabel = 'CAD';
@@ -113,7 +113,7 @@ const ProductCards = ({ GridList, products }) => {
             shippingFlag = (
               <div className="flex items-center gap-1">
                 <US className="w-4 h-auto" />
-                <span>Only</span>
+                {/* <span>Only</span> */}
               </div>
             );
             currencyLabel = 'USD';
