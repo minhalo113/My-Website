@@ -164,7 +164,7 @@ const ProductDisplay = ({ item, onSelectImage }) => {
                     {name}
                     {!isAffiliate && (
                         <span className="ml-3 text-sm bg-slate-800 text-white px-2 py-1 rounded shadow-sm align-middle inline-flex items-center gap-1">
-                            Ships to: {shippingFlag}
+                            Ships within: {shippingFlag}
                         </span>
                     )}
                 </h4>
