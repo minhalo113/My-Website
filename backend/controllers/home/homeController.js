@@ -179,7 +179,11 @@ class homeControllers {
     }
 
     products_search = async (req, res) => {
-        const { q, searchValue, page, limit, parPage, category, minPrice, maxPrice } = req.query
+        const { q, searchValue, page, limit, parPage, category, minPrice, maxPrice, type } = req.query
+
+        let mappedType = type;
+        if (type === 'direct') mappedType = 'standard';
+        if (type === 'global-finds') mappedType = 'affiliate';
 
         const rawTerm = typeof q === 'string' ? q : searchValue
         const trimmedTerm = typeof rawTerm === 'string' ? rawTerm.trim() : ''
@@ -214,6 +218,7 @@ class homeControllers {
             const searchResponse = await searchCatalogProducts({
                 term: trimmedTerm,
                 category,
+                productType: mappedType,
                 page,
                 limit: sizeParam,
                 includeFacets: true,

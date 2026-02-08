@@ -66,7 +66,8 @@ const Banner = () => {
             try {
                 const params = {
                     q: trimmed,
-                    limit: 10
+                    limit: 10,
+                    type: 'direct'
                 };
                 if (selectedCategory !== 'all') {
                     params.category = selectedCategory;
