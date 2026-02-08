@@ -8,6 +8,7 @@ import { ensureHttps } from "../../src/utils/imageUtils";
 const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
     const swiperRef = useRef(null);
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
+    const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
         if (swiperRef.current && swiperRef.current.swiper) {
@@ -22,6 +23,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
 
         if (previewImage) {
             swiper.slideTo(0);
+            setActiveIndex(0);
 
             const handleSlideChange = () => {
                 if (swiper.activeIndex !== 0) {
@@ -46,6 +48,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                 spaceBetween={30}
                 slidesPerView={1}
                 loop={true}
+                onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
                 navigation={{
                     prevEl: ".pro-single-next",
                     nextEl: ".pro-single-prev"
@@ -104,11 +107,18 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                     }}
                 >
                     {displayImages.map((image, index) => (
-                        <SwiperSlide key={`thumb-${index}`} style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.3s' }}
-                            onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}
+                        <SwiperSlide key={`thumb-${index}`} style={{ cursor: 'pointer', opacity: activeIndex === index ? 1 : 0.7, transition: 'opacity 0.3s' }}
+                            onMouseEnter={(e) => { if (activeIndex !== index) e.currentTarget.style.opacity = 1 }}
+                            onMouseLeave={(e) => { if (activeIndex !== index) e.currentTarget.style.opacity = 0.7 }}
                         >
-                            <div style={{ width: '100%', height: '80px', position: 'relative', border: '1px solid #e5e7eb', borderRadius: '0.25rem', overflow: 'hidden' }}>
+                            <div style={{
+                                width: '100%',
+                                height: '80px',
+                                position: 'relative',
+                                border: activeIndex === index ? '2px solid #059669' : '1px solid #e5e7eb',
+                                borderRadius: '0.25rem',
+                                overflow: 'hidden'
+                            }}>
                                 <Image
                                     src={ensureHttps(image)}
                                     alt={`Thumbnail ${index + 1}`}
@@ -118,16 +128,30 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                             </div>
                         </SwiperSlide>
                     ))}
-                    {videos.map((video, index) => (
-                        <SwiperSlide key={`thumb-vid-${index}`} style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.3s' }}
-                            onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}
-                        >
-                            <div style={{ width: '100%', height: '80px', position: 'relative', border: '1px solid #e5e7eb', borderRadius: '0.25rem', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
-                                <i className="icofont-play-alt-2 text-2xl text-gray-600"></i>
-                            </div>
-                        </SwiperSlide>
-                    ))}
+                    {videos.map((video, index) => {
+                        const globalIndex = displayImages.length + index;
+                        return (
+                            <SwiperSlide key={`thumb-vid-${index}`} style={{ cursor: 'pointer', opacity: activeIndex === globalIndex ? 1 : 0.7, transition: 'opacity 0.3s' }}
+                                onMouseEnter={(e) => { if (activeIndex !== globalIndex) e.currentTarget.style.opacity = 1 }}
+                                onMouseLeave={(e) => { if (activeIndex !== globalIndex) e.currentTarget.style.opacity = 0.7 }}
+                            >
+                                <div style={{
+                                    width: '100%',
+                                    height: '80px',
+                                    position: 'relative',
+                                    border: activeIndex === globalIndex ? '2px solid #059669' : '1px solid #e5e7eb',
+                                    borderRadius: '0.25rem',
+                                    overflow: 'hidden',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: '#f3f4f6'
+                                }}>
+                                    <i className="icofont-play-alt-2 text-2xl text-gray-600"></i>
+                                </div>
+                            </SwiperSlide>
+                        );
+                    })}
                 </Swiper>
             </div>
         </div>
