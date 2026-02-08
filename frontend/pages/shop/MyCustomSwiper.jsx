@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper/modules";
+import { Autoplay, Navigation, Zoom } from "swiper/modules";
 import { useRef, useEffect } from "react";
 import Image from 'next/image';
 import PropTypes from 'prop-types';
@@ -58,18 +58,21 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                     prevEl: ".pro-single-next",
                     nextEl: ".pro-single-prev"
                 }}
-                modules={[Autoplay, Navigation]}
+                modules={[Autoplay, Navigation, Zoom]}
+                zoom={true}
                 className="mySwiper"
             >
                 {displayImages.map((image, index) => (
                     <SwiperSlide key={`img-${index}`}>
                         <div className="single-thumb flex items-center justify-center h-[500px] w-full relative py-4" style={{ height: '500px' }}>
-                            <Image
-                                src={ensureHttps(image)}
-                                alt={`Product Image ${index + 1}`}
-                                fill
-                                className="object-contain"
-                            />
+                            <div className="swiper-zoom-container w-full h-full">
+                                <Image
+                                    src={ensureHttps(image)}
+                                    alt={`Product Image ${index + 1}`}
+                                    fill
+                                    className="object-contain"
+                                />
+                            </div>
                         </div>
                     </SwiperSlide>
                 ))}
