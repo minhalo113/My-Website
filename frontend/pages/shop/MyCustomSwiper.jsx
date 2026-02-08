@@ -108,7 +108,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                             onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
                             onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}
                         >
-                            <div style={{ width: '100%', height: '80px', position: 'relative', border: '1px solid #e5e7eb', borderRadius: '0.25rem', overflow: 'hidden' }}>
+                            <div style={{ width: '100%', height: '80px', position: 'relative', border: '3px solid #1eff00ff', borderRadius: '0.25rem', overflow: 'hidden' }}>
                                 <Image
                                     src={ensureHttps(image)}
                                     alt={`Thumbnail ${index + 1}`}
