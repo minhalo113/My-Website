@@ -1,12 +1,13 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Zoom } from "swiper/modules";
-import { useRef, useEffect } from "react";
+import { Navigation, Zoom, Thumbs, FreeMode } from "swiper/modules";
+import { useRef, useEffect, useState } from "react";
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import { ensureHttps } from "../../src/utils/imageUtils";
 
 const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
     const swiperRef = useRef(null);
+    const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
     useEffect(() => {
         if (swiperRef.current && swiperRef.current.swiper) {
@@ -49,7 +50,8 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                     prevEl: ".pro-single-next",
                     nextEl: ".pro-single-prev"
                 }}
-                modules={[Navigation, Zoom]}
+                thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
+                modules={[Navigation, Zoom, Thumbs]}
                 zoom={true}
                 className="mySwiper"
             >
@@ -83,6 +85,44 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
             </div>
             <div className="pro-single-next">
                 <i className="icofont-rounded-left"></i>
+            </div>
+
+            <div className="mt-4">
+                <Swiper
+                    onSwiper={setThumbsSwiper}
+                    loop={false}
+                    spaceBetween={10}
+                    slidesPerView={4}
+                    freeMode={true}
+                    watchSlidesProgress={true}
+                    modules={[FreeMode, Navigation, Thumbs]}
+                    className="mySwiper2"
+                    breakpoints={{
+                        640: { slidesPerView: 4 },
+                        768: { slidesPerView: 5 },
+                        1024: { slidesPerView: 6 },
+                    }}
+                >
+                    {displayImages.map((image, index) => (
+                        <SwiperSlide key={`thumb-${index}`} className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                            <div className="w-full h-20 relative border border-gray-200 rounded overflow-hidden">
+                                <Image
+                                    src={ensureHttps(image)}
+                                    alt={`Thumbnail ${index + 1}`}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        </SwiperSlide>
+                    ))}
+                    {videos.map((video, index) => (
+                        <SwiperSlide key={`thumb-vid-${index}`} className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                            <div className="w-full h-20 relative border border-gray-200 rounded overflow-hidden flex items-center justify-center bg-gray-100">
+                                <i className="icofont-play-alt-2 text-2xl text-gray-600"></i>
+                            </div>
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
         </div>
     );
