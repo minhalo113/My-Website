@@ -142,3 +142,9 @@ button.m-2.bg-warning {
     display: table-cell !important;
   }
 }
+
+@media(max-width: 767px) {
+  .shop-cart .section-wrapper .cart-top {
+    overflow-x: auto;
+  }
+}
