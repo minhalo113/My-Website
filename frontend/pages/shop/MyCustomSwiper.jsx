@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Zoom } from "swiper/modules";
+import { Autoplay, Navigation, Zoom } from "swiper/modules";
 import { useRef, useEffect } from "react";
 import Image from 'next/image';
 import PropTypes from 'prop-types';
@@ -20,6 +20,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
         if (!swiper) return;
 
         if (previewImage) {
+            swiper.autoplay?.stop();
             swiper.slideTo(0);
 
             const handleSlideChange = () => {
@@ -33,10 +34,17 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
             return () => {
                 swiper.off('slideChange', handleSlideChange);
             };
+        } else {
+            if (videos.length === 0) {
+                swiper.autoplay?.start();
+            }
         }
     }, [previewImage, onPreviewEnd, videos]);
 
     const displayImages = previewImage ? [previewImage, ...images] : images;
+    const autoplayConfig = videos.length > 0 ? false : {
+        delay: 2000, disableOnInteraction: false,
+    }
 
     return (
         <div className="swiper-container pro-single-top">
@@ -45,11 +53,12 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                 spaceBetween={30}
                 slidesPerView={1}
                 loop={true}
+                autoplay={autoplayConfig}
                 navigation={{
                     prevEl: ".pro-single-next",
                     nextEl: ".pro-single-prev"
                 }}
-                modules={[Navigation, Zoom]}
+                modules={[Autoplay, Navigation, Zoom]}
                 zoom={true}
                 className="mySwiper"
             >
