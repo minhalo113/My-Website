@@ -136,3 +136,9 @@ ul {
 button.m-2.bg-warning {
   background-color: #DCA54A !important;
 }
+
+@media(max-width: 767px) {
+  .shop-cart .section-wrapper .cart-top table .cat-price {
+    display: table-cell !important;
+  }
+}
