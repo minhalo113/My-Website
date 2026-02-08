@@ -87,7 +87,7 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                 <i className="icofont-rounded-left"></i>
             </div>
 
-            <div className="mt-4">
+            <div style={{ marginTop: '1rem' }}>
                 <Swiper
                     onSwiper={setThumbsSwiper}
                     loop={false}
@@ -104,20 +104,26 @@ const ProductSwiper = ({ images, videos, previewImage, onPreviewEnd }) => {
                     }}
                 >
                     {displayImages.map((image, index) => (
-                        <SwiperSlide key={`thumb-${index}`} className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                            <div className="w-full h-20 relative border border-gray-200 rounded overflow-hidden">
+                        <SwiperSlide key={`thumb-${index}`} style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.3s' }}
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}
+                        >
+                            <div style={{ width: '100%', height: '80px', position: 'relative', border: '1px solid #e5e7eb', borderRadius: '0.25rem', overflow: 'hidden' }}>
                                 <Image
                                     src={ensureHttps(image)}
                                     alt={`Thumbnail ${index + 1}`}
                                     fill
-                                    className="object-cover"
+                                    style={{ objectFit: 'cover' }}
                                 />
                             </div>
                         </SwiperSlide>
                     ))}
                     {videos.map((video, index) => (
-                        <SwiperSlide key={`thumb-vid-${index}`} className="cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                            <div className="w-full h-20 relative border border-gray-200 rounded overflow-hidden flex items-center justify-center bg-gray-100">
+                        <SwiperSlide key={`thumb-vid-${index}`} style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.3s' }}
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = 0.7}
+                        >
+                            <div style={{ width: '100%', height: '80px', position: 'relative', border: '1px solid #e5e7eb', borderRadius: '0.25rem', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
                                 <i className="icofont-play-alt-2 text-2xl text-gray-600"></i>
                             </div>
                         </SwiperSlide>
