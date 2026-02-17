@@ -14,12 +14,13 @@ const DEFAULT_UNSELECTED_COLOR = "grey";
 const DEFAULT_COLOR = "#facc15";
 
 const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, totalReviews = 0, onPageChange }) => {
-  const { description, _id } = item || {}
+  const { description, _id, images = [], videos = [] } = item || {}
 
   const [comment, setComment] = useState("")
   const [rating, setRating] = useState(0);
   const [temporaryRating, setTemporaryRating] = useState(0);
   const [imageEntries, setImageEntries] = useState([]);
+  const [reviewImageModal, setReviewImageModal] = useState(null);
   const objectUrlRef = useRef(new Set());
   const fileInputRef = useRef(null);
 
@@ -236,6 +237,26 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
           <p style={{ whiteSpace: 'pre-wrap' }}>
             {description}
           </p>
+          <div className="flex flex-col gap-4 mt-6">
+            {images.map((img, index) => (
+              <div key={index} className="w-full">
+                <img
+                  src={ensureHttps(img)}
+                  alt={`Product Description ${index + 1}`}
+                  className="w-full h-auto object-contain rounded shadow-sm"
+                  style={{ maxHeight: '800px' }}
+                />
+              </div>
+            ))}
+            {videos.map((video, index) => (
+              <div key={`vid-${index}`} className="w-full">
+                <video controls className="w-full h-auto rounded shadow-sm" style={{ maxHeight: '800px' }}>
+                  <source src={video} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -287,7 +308,9 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
                       {review.images && review.images.length > 0 && (
                         <div className="flex gap-2 flex-wrap mt-2">
                           {review.images.map((img, idx) => (
-                            <Image key={idx} src={ensureHttps(img)} alt="review" width={80} height={80} className="w-20 h-20 object-cover rounded" />
+                            <div key={idx} className="cursor-pointer" onClick={() => setReviewImageModal(img)}>
+                              <Image src={ensureHttps(img)} alt="review" width={80} height={80} className="w-20 h-20 object-cover rounded hover:opacity-80 transition-opacity" />
+                            </div>
                           ))}
                         </div>
                       )}
@@ -422,6 +445,35 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
           </div>
         </div>
       </div>
+
+      {reviewImageModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setReviewImageModal(null)}
+        >
+          <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+            <button
+              className="absolute top-4 right-4 text-white text-4xl font-bold z-50 hover:text-gray-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                setReviewImageModal(null);
+              }}
+            >
+              &times;
+            </button>
+            <div
+              className="relative w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={ensureHttps(reviewImageModal)}
+                alt="Review Fullsize"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
@@ -430,6 +482,8 @@ Review.propTypes = {
   item: PropTypes.shape({
     description: PropTypes.string,
     _id: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+    images: PropTypes.arrayOf(PropTypes.string),
+    videos: PropTypes.arrayOf(PropTypes.string),
   }).isRequired,
   reloadFunction: PropTypes.func.isRequired,
   reviewList: PropTypes.array.isRequired,
