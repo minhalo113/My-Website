@@ -148,3 +148,25 @@ button.m-2.bg-warning {
     overflow-x: auto;
   }
 }
+
+/* Mobile horizontal scroll for category filter */
+@media (max-width: 768px) {
+  .course-filter-group .lab-ul {
+    display: flex;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    justify-content: flex-start !important;
+    /* Override inline style if present */
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .course-filter-group .lab-ul li {
+    flex: 0 0 auto;
+    /* Don't shrink */
+    white-space: nowrap;
+    margin-right: 10px;
+  }
+
+}
