@@ -171,8 +171,8 @@ const NavItems = () => {
       .nav-search-dropdown {
         position: absolute;
         top: calc(100% + 8px);
-        left: -25%; /* Center relative to parent */
-        width: 150%; /* Make wider */
+        left: -50%; 
+        width: 200%;
         background: white;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         border-radius: 12px;
@@ -280,16 +280,14 @@ const NavItems = () => {
         gap: 15px;
       }
 
-      /* Ensure logo doesn't overflow */
       .logo a {
         display: flex;
         align-items: center;
       }
 
-      @media (max-width: 991px) {
         .nav-search-dropdown {
-           width: 100%;
-           left: 0;
+           width: 200%;
+           left: -50%;
         }
 
         .nav-search-form {
@@ -331,7 +329,6 @@ const NavItems = () => {
         }
       }
       
-      /* Very small screens */
       @media (max-width: 380px) {
          .logo img {
             max-width: 70px;
