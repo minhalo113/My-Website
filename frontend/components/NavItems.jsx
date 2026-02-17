@@ -171,8 +171,8 @@ const NavItems = () => {
       .nav-search-dropdown {
         position: absolute;
         top: calc(100% + 8px);
-        left: 0;
-        right: 0;
+        left: -25%; /* Center relative to parent */
+        width: 150%; /* Make wider */
         background: white;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         border-radius: 12px;
@@ -183,7 +183,6 @@ const NavItems = () => {
         max-height: 450px;
         overflow-y: auto;
         border: 1px solid #f3f4f6;
-        overflow: hidden;
       }
 
       .nav-search-dropdown li {
@@ -192,55 +191,6 @@ const NavItems = () => {
 
       .nav-search-dropdown li:last-child {
         border-bottom: none;
-      }
-
-      .nav-search-item {
-         display: flex;
-         align-items: center;
-         padding: 10px 16px;
-         width: 100%;
-         text-decoration: none;
-         color: inherit;
-         transition: background 0.2s;
-         gap: 12px;
-      }
-
-      .nav-search-item:hover {
-          background-color: #fffbeb; /* Very light yellow tint on hover */
-      }
-
-      .nav-item-image {
-          width: 48px;
-          height: 48px;
-          flex-shrink: 0;
-          position: relative;
-          border-radius: 8px;
-          overflow: hidden;
-          background-color: #f3f4f6;
-          border: 1px solid #e5e7eb;
-      }
-
-      .nav-item-content {
-        flex-grow: 1;
-        min-width: 0; /* Enable truncation in flex item */
-      }
-
-      .nav-item-text {
-          display: block;
-          font-size: 14px;
-          font-weight: 600;
-          color: #374151;
-          line-height: 1.4;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-      }
-      
-      .nav-item-subtext {
-        display: block;
-        font-size: 12px;
-        color: #9ca3af;
-        margin-top: 2px;
       }
 
       .nav-search-footer {
@@ -337,6 +287,11 @@ const NavItems = () => {
       }
 
       @media (max-width: 991px) {
+        .nav-search-dropdown {
+           width: 100%;
+           left: 0;
+        }
+
         .nav-search-form {
            margin: 0 8px;
            padding: 6px 12px;
@@ -441,10 +396,29 @@ const NavItems = () => {
                       <li key={product._id?.toString() || i}>
                         <Link
                           href={`/shop/${product._id?.toString()}-${product.slug}`}
-                          className="nav-search-item"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            width: '100%',
+                            padding: '10px',
+                            gap: '12px',
+                            textDecoration: 'none',
+                            color: '#374151'
+                          }}
                           onClick={() => setShowNavDropdown(false)}
                         >
-                          <div className="nav-item-image">
+                          <div
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              flexShrink: 0,
+                              position: 'relative',
+                              borderRadius: '6px',
+                              overflow: 'hidden',
+                              backgroundColor: '#f3f4f6',
+                              border: '1px solid #e5e7eb'
+                            }}
+                          >
                             <Image
                               src={ensureHttps(product.coverImage || product.images?.[0] || "/placeholder.png")}
                               alt={product.name}
@@ -453,16 +427,46 @@ const NavItems = () => {
                               style={{ objectFit: "cover" }}
                             />
                           </div>
-                          <div className="nav-item-content">
-                            <span className="nav-item-text">{product.name}</span>
-                            <span className="nav-item-subtext">
+                          <div
+                            style={{
+                              flexGrow: 1,
+                              minWidth: 0,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                              // alignItems: 'center',
+                              overflowX: 'auto',
+                              gap: '8px'
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: 600,
+                                color: '#374151',
+                                whiteSpace: 'nowrap',
+                                flex: 1,
+                                marginRight: '8px'
+                              }}
+                            >
+                              {product.name}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                color: '#DCA54A',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0
+                              }}
+                            >
                               {product.price ? `$${product.price}` : 'View Product'}
                             </span>
                           </div>
                         </Link>
                       </li>
                     ))}
-                    {/* View All Footer */}
+
                     <li className="nav-search-footer">
                       <Link href={`/shop/direct-store?search=${navSearchValue}`} onClick={() => setShowNavDropdown(false)}>
                         View all results for "{navSearchValue}"

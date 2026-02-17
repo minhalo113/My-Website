@@ -13,6 +13,7 @@
     --color-orange-500: oklch(0.705 0.213 47.604);
     --color-amber-500: oklch(0.769 0.188 70.08);
     --color-amber-600: oklch(0.666 0.179 58.318);
+    --color-yellow-50: oklch(0.987 0.026 102.212);
     --color-yellow-200: oklch(0.945 0.129 101.54);
     --color-yellow-400: oklch(0.852 0.199 91.936);
     --color-yellow-500: oklch(0.795 0.184 86.047);
@@ -298,6 +299,9 @@
   .inset-0 {
     inset: calc(var(--spacing) * 0);
   }
+  .inset-x-0 {
+    inset-inline: calc(var(--spacing) * 0);
+  }
   .start-0 {
     inset-inline-start: calc(var(--spacing) * 0);
   }
@@ -339,6 +343,9 @@
   }
   .top-100 {
     top: calc(var(--spacing) * 100);
+  }
+  .top-\[120px\] {
+    top: 120px;
   }
   .-right-1 {
     right: calc(var(--spacing) * -1);
@@ -3362,6 +3369,9 @@
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
+  .p-2\.5 {
+    padding: calc(var(--spacing) * 2.5);
+  }
   .p-3 {
     padding: calc(var(--spacing) * 3);
   }
@@ -3496,6 +3506,9 @@
   }
   .pt-10 {
     padding-top: calc(var(--spacing) * 10);
+  }
+  .pr-2 {
+    padding-right: calc(var(--spacing) * 2);
   }
   .pb-0 {
     padding-bottom: calc(var(--spacing) * 0);
@@ -3671,6 +3684,9 @@
   }
   .whitespace-normal {
     white-space: normal;
+  }
+  .whitespace-nowrap {
+    white-space: nowrap;
   }
   .whitespace-pre-wrap {
     white-space: pre-wrap;
@@ -4124,6 +4140,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-slate-700);
+      }
+    }
+  }
+  .hover\:bg-yellow-50\/50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, var(--color-yellow-50) 50%, transparent);
       }
     }
   }

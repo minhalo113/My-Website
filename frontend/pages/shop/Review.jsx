@@ -448,7 +448,7 @@ const Review = ({ item, reloadFunction, reviewList, page = 1, totalPages = 1, to
 
       {reviewImageModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-x-0 bottom-0 top-[120px] z-50 flex items-center justify-center bg-black/80 p-4"
           onClick={() => setReviewImageModal(null)}
         >
           <div className="relative max-w-4xl max-h-full w-full h-full flex items-center justify-center">
