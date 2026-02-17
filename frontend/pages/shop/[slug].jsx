@@ -4,6 +4,7 @@ import PageHeader from '../../components/PageHeader';
 import ProductSwiper from "./MyCustomSwiper"
 import ProductDisplay from './ProductDisplay';
 import Review from './Review';
+import ProductSlider from './ProductSlider';
 import PopularPost from './PopularPost';
 import api from '../../src/api/api.js';
 import DiscountBadge from '../../components/DiscountBadge.jsx';
@@ -17,7 +18,6 @@ export async function getServerSideProps(context) {
     const productId = slug.substring(0, 24);
     const isValidId = /^[0-9a-fA-F]{24}$/.test(productId);
 
-    // Case 1: Invalid ID format -> Return null to show unavailable message
     if (!isValidId) {
         return {
             props: {
@@ -30,7 +30,6 @@ export async function getServerSideProps(context) {
         const { data } = await api.get(`/customers-product-get/${productId}`);
         const product = data.product;
 
-        // Case 2: Product not found in DB -> Return null
         if (!product) {
             return {
                 props: {
@@ -56,7 +55,6 @@ export async function getServerSideProps(context) {
         }
     } catch (error) {
         console.error("SSR Error fetching product:", error);
-        // Case 3: API Error -> Return null so user sees the message instead of a crash
         return {
             props: {
                 serverProduct: null,
@@ -68,7 +66,6 @@ export async function getServerSideProps(context) {
 const SingleProduct = ({ serverProduct }) => {
     const router = useRouter();
 
-    // 1. Logic: If no product came from server, show Unavailable Message immediately
     if (!serverProduct) {
         return (
             <div>
@@ -92,13 +89,14 @@ const SingleProduct = ({ serverProduct }) => {
         );
     }
 
-    // 2. State Initialization (Only runs if product exists)
     const [productData, setProduct] = useState(serverProduct);
     const [reviewList, setReviewList] = useState([]);
     const [reviewPage, setReviewPage] = useState(1);
     const [reviewTotalPages, setReviewTotalPages] = useState(1);
     const [reviewTotalCount, setReviewTotalCount] = useState(0);
     const [previewImage, setPreviewImage] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [popularProducts, setPopularProducts] = useState([]);
 
     const REVIEW_PAGE_SIZE = 10;
 
@@ -132,6 +130,45 @@ const SingleProduct = ({ serverProduct }) => {
             fetchReviews(serverProduct._id, 1);
         }
     }, [serverProduct]);
+
+    useEffect(() => {
+        if (!productData) return;
+
+        const fetchRelatedData = async () => {
+            try {
+
+                const popularRes = await api.get('/customers-products-get', {
+                    params: {
+                        sort: 'reviews',
+                        parPage: 12,
+                    },
+                    withCredentials: true
+                });
+                if (popularRes.data?.products) {
+                    setPopularProducts(popularRes.data.products);
+                }
+
+                if (productData.category) {
+                    const relatedRes = await api.get('/customers-products-get', {
+                        params: {
+                            category: productData.category,
+                            parPage: 12,
+                        },
+                        withCredentials: true
+                    });
+                    if (relatedRes.data?.products) {
+
+                        const filtered = relatedRes.data.products.filter(p => p._id !== productData._id);
+                        setRelatedProducts(filtered);
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching related/popular products:", err);
+            }
+        };
+
+        fetchRelatedData();
+    }, [productData]);
 
     // 4. Derived Values & Render Helpers
     const fallbackDescription = productData?.description || `${productData.name} available at A Figure A Day.`;
@@ -224,6 +261,17 @@ const SingleProduct = ({ serverProduct }) => {
                             <aside className='ps-lg-4'>
                                 <PopularPost />
                             </aside>
+                        </div>
+                    </div>
+
+                    <div className="row mt-5">
+                        <div className="col-12">
+                            {relatedProducts.length > 0 && (
+                                <ProductSlider title="Related Products" products={relatedProducts} />
+                            )}
+                            {popularProducts.length > 0 && (
+                                <ProductSlider title="Most Popular" products={popularProducts} />
+                            )}
                         </div>
                     </div>
                 </div>
