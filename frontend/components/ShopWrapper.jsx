@@ -327,7 +327,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
             <div className='shop-page padding-tb'>
                 <div className='container'>
                     <div className='row justify-content-center'>
-                        <div className='col-lg-8 col-12'>
+                        <div className='col-lg-8 col-12 order-2 order-lg-1'>
                             <article>
                                 <div className='shop-title d-flex flex-warp justify-content-between'>
                                     <p>{`Showing ${String(startResult).padStart(2, '0')} - ${String(endResult).padStart(2, '0')} of ${totalProducts} Results`}</p>
@@ -365,7 +365,7 @@ const ShopWrapper = ({ productType = 'all' }) => {
                             </article>
                         </div>
 
-                        <div className='col-lg-4 col-12'>
+                        <div className='col-lg-4 col-12 order-1 order-lg-2'>
                             <aside>
                                 <Search
                                     searchTerm={searchValue}

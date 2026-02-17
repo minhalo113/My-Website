@@ -7,7 +7,7 @@ import Image from 'next/image';
 import PropTypes from 'prop-types';
 import { ensureHttps } from '../../src/utils/imageUtils';
 
-const title = "Our Products"
+const title = "Most Popular"
 const btnText = "Start Shopping Now";
 
 const CategoryShowCase = () => {
@@ -44,8 +44,8 @@ const CategoryShowCase = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const allCategories = await api.get('/customers-category-get', { withCredentials: true })
-                setAllCategories(allCategories.data.categorys || []);
+                // const allCategories = await api.get('/customers-category-get', { withCredentials: true })
+                // setAllCategories(allCategories.data.categorys || []);
             } catch (err) {
                 console.log(err)
             }
@@ -141,16 +141,16 @@ const CategoryShowCase = () => {
                     <h2 className='title'>
                         {title}
                     </h2>
-                    <div className='course-filter-group'>
+                    {/* <div className='course-filter-group w-full'>
                         <ul className='lab-ul' style={{ justifyContent: 'center' }}>
-                            <li onClick={() => fetchProducts('All Categories')} style={{ background: activeCategory === "All Categories" ? "#DCA54A" : "" }}>All Categories</li>
+                            <li className="flex-shrink-0" onClick={() => fetchProducts('All Categories')} style={{ background: activeCategory === "All Categories" ? "#DCA54A" : "" }}>All Categories</li>
                             {
                                 allCategories.map((category, index) =>
-                                    <li key={index} onClick={() => { filterItem(category.name) }} style={{ background: activeCategory === category.name ? "#DCA54A" : "" }}>{category.name}</li>
+                                    <li className="flex-shrink-0" key={index} onClick={() => { filterItem(category.name) }} style={{ background: activeCategory === category.name ? "#DCA54A" : "" }}>{category.name}</li>
                                 )
                             }
                         </ul>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* section body */}
