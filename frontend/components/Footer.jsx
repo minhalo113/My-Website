@@ -15,7 +15,7 @@ const addressList = [
 const socialList = [
     { iconName: 'icofont-facebook', siteLink: 'https://www.facebook.com/profile.php?id=61569962775709', className: 'facebook', },
     // { iconName: 'icofont-x', siteLink: 'https://x.com/fact_a8206', className: 'twitter', },
-    //     { iconName: 'icofont-tiktok', siteLink: 'https://www.tiktok.com/@ahistoryfactaday', className: 'tiktok', },
+    { iconName: 'icofont-tiktok', siteLink: 'https://www.tiktok.com/@afigureaday', className: 'tiktok', },
     { iconName: 'icofont-instagram', siteLink: 'https://www.instagram.com/afigureaday123/?hl=en', className: 'instagram', },
     { iconName: 'icofont-youtube', siteLink: 'https://youtube.com/@afigureaday?si=Do3n3-JRXskMmYX0', className: 'youtube', },
 ]
