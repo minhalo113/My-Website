@@ -19,96 +19,102 @@ import Coupon from "../../views/admin/Coupon";
 
 import HomeSwiper from "../../views/admin/HomeSwiper";
 import ProductReviews from "../../views/admin/ProductReviews";
+import ScrapedReviews from "../../views/admin/ScrapedReviews";
 
 export const privateRoutesAdmin = [
     {
         path: "admin/dashboard",
-        element: <AdminDashboard/>,
+        element: <AdminDashboard />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/orders',
-        element : <Orders/> ,
-        role : 'admin'
+        element: <Orders />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/category',
-        element : <Category/>,
-        role : 'admin'
+        element: <Category />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/chat-customers',
-        element : <ChatCustomer/>,
-        role : 'admin'
+        element: <ChatCustomer />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/payment-request',
-        element : <PaymentRequest/> ,
-        role : 'admin'
+        element: <PaymentRequest />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/add-product',
-        element : <AddProduct/> ,
-        role : 'admin'
+        element: <AddProduct />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/products',
-        element : <Products/> ,
-        role : 'admin'
+        element: <Products />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/product-image-search',
-        element : <ProductImageSearch/> ,
-        role : 'admin'
+        element: <ProductImageSearch />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/discount-product',
-        element : <DiscountProducts/> ,
-        role : 'admin'
+        element: <DiscountProducts />,
+        role: 'admin'
     },
     {
         path: 'admin/dashboard/edit-product/:productId',
-        element: <EditProduct/>,
+        element: <EditProduct />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/product-reviews/:productId',
-        element: <ProductReviews/>,
+        element: <ProductReviews />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/order/details/:orderId',
-        element: <OrderDetails/>,
+        element: <OrderDetails />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/blog',
-        element: <BlogPost/>,
+        element: <BlogPost />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/blog-edit/:id',
-        element: <BlogEdit/>,
+        element: <BlogEdit />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/blog-comments/:id',
-        element: <BlogComments/>,
+        element: <BlogComments />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/add-blog',
-        element: <AddBlog/>,
+        element: <AddBlog />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/coupons',
-        element: <Coupon/>,
+        element: <Coupon />,
         role: 'admin'
     },
     {
         path: 'admin/dashboard/home-swiper',
-        element: <HomeSwiper/>,
+        element: <HomeSwiper />,
+        role: 'admin'
+    },
+    {
+        path: 'admin/dashboard/scraped-reviews',
+        element: <ScrapedReviews />,
         role: 'admin'
     }
 ]
