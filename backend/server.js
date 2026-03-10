@@ -49,7 +49,7 @@ app.post(
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.70:3001',
     DASHBOARD_URL, WEB_URL, GIT_WEB_URL, REAL_WEB_URL_1, REAL_WEB_URL_2,
-    'edge-extension://dmkeoiffnjomccaihbjjgjincphpipmk',
+    'edge-extension://dmkeoiffnjomccaihbjjgjincphpipmk', 'chrome-extension://dmkeoiffnjomccaihbjjgjincphpipmk'
   ],
   credentials: true
 }))
