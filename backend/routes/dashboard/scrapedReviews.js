@@ -1,6 +1,6 @@
 import express from "express";
 import authMiddleware from "../../middlewares/authMiddleware.js";
-import scrapedReviewController from "../../controllers/dashbaord/scrapedReviewController.js";
+import scrapedReviewController from "../../controllers/dashbaord/scrapedReviewsController.js";
 
 const scrapedReviewRouter = express.Router();
 
