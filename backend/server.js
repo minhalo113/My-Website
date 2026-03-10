@@ -29,6 +29,7 @@ import homeSwiperRouter from './routes/dashboard/homeSwiperRoutes.js';
 import dashboardRouter from './routes/dashboard/dashboardRoutes.js';
 import aiChatRouter from './routes/home/aiChatRoutes.js';
 import startIngestionJob from './services/ingestion/scheduler.js';
+import scrapedReviewRouter from './routes/dashboard/scrapedReviews.js';
 
 const PORT = process.env.PORT || 8080;
 const DASHBOARD_URL = process.env.DASHBOARD_URL
@@ -67,7 +68,8 @@ app.use('/api', couponRouter);
 app.use('/api', homeSwiperRouter);
 app.use('/api', dashboardRouter);
 app.use('/api', ebayRouter);
-app.use('/api', aiChatRouter)
+app.use('/api', aiChatRouter);
+app.use('/api', scrapedReviewRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).send('OK');

@@ -7,7 +7,7 @@ import { IoIosChatbubbles } from "react-icons/io";
 import { IoMdAdd } from "react-icons/io";
 import { MdViewList } from "react-icons/md";
 import { TbBasketDiscount } from "react-icons/tb";
-import { BsCartCheck } from "react-icons/bs"; 
+import { BsCartCheck } from "react-icons/bs";
 import { IoChatbubbles } from "react-icons/io5";
 import { BsFillChatQuoteFill } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
@@ -15,31 +15,31 @@ import { FaRegNewspaper } from "react-icons/fa";
 
 export const allNav = [
     {
-        id : 1,
-        title : 'Dashboard',
-        icon : <AiOutlineDashboard />,
-        role : 'admin',
+        id: 1,
+        title: 'Dashboard',
+        icon: <AiOutlineDashboard />,
+        role: 'admin',
         path: '/admin/dashboard'
     },
     {
-        id : 2,
-        title : 'Add Product',
-        icon : <IoMdAdd />,
-        role : 'admin',
+        id: 2,
+        title: 'Add Product',
+        icon: <IoMdAdd />,
+        role: 'admin',
         path: '/admin/dashboard/add-product'
-    },     
+    },
     {
-        id : 3,
-        title : 'All Product',
-        icon : <MdViewList />,
-        role : 'admin',
+        id: 3,
+        title: 'All Product',
+        icon: <MdViewList />,
+        role: 'admin',
         path: '/admin/dashboard/products'
     },
     {
-        id : 4,
-        title : 'Image Search',
-        icon : <FaSearch />,
-        role : 'admin',
+        id: 4,
+        title: 'Image Search',
+        icon: <FaSearch />,
+        role: 'admin',
         path: '/admin/dashboard/product-image-search'
     },
     // {
@@ -50,17 +50,17 @@ export const allNav = [
     //     path: '/admin/dashboard/discount-product'
     // },
     {
-        id : 5,
-        title : 'Category',
-        icon : <BiCategory  />,
-        role : 'admin',
+        id: 5,
+        title: 'Category',
+        icon: <BiCategory />,
+        role: 'admin',
         path: '/admin/dashboard/category'
     },
     {
-        id : 6,
-        title : 'Orders',
-        icon : <AiOutlineShoppingCart />,
-        role : 'admin',
+        id: 6,
+        title: 'Orders',
+        icon: <AiOutlineShoppingCart />,
+        role: 'admin',
         path: '/admin/dashboard/orders'
     },
     // {
@@ -71,10 +71,10 @@ export const allNav = [
     //     path: '/admin/dashboard/payment-request'
     // },
     {
-        id : 8,
-        title : 'Live Chat',
-        icon : <IoIosChatbubbles />,
-        role : 'admin',
+        id: 8,
+        title: 'Live Chat',
+        icon: <IoIosChatbubbles />,
+        role: 'admin',
         path: '/admin/dashboard/chat-customers'
     },
     {
@@ -97,5 +97,12 @@ export const allNav = [
         icon: <MdPayment />,
         role: 'admin',
         path: '/admin/dashboard/home-swiper'
+    },
+    {
+        id: 12,
+        title: 'Scraped Reviews',
+        icon: <IoChatbubbles />,
+        role: 'admin',
+        path: '/admin/dashboard/scraped-reviews'
     }
 ]
