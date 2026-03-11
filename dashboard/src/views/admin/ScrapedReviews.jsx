@@ -37,6 +37,39 @@ const ScrapedReviews = () => {
         return stars;
     };
 
+    const handleApprove = async (id) => {
+        try {
+            await toast.promise(
+                api.put(`/reviews/scraped/${id}/approve`, {}, { withCredentials: true }),
+                {
+                    loading: 'Approving...',
+                    success: 'Review approved and added to product!',
+                    error: 'Failed to approve review'
+                }
+            );
+            fetchReviews();
+        } catch (error) {
+            console.error('Error approving review:', error);
+        }
+    };
+
+    const handleReject = async (id) => {
+        if (!window.confirm("Are you sure you want to reject and delete this review?")) return;
+        try {
+            await toast.promise(
+                api.delete(`/reviews/scraped/${id}/reject`, { withCredentials: true }),
+                {
+                    loading: 'Rejecting...',
+                    success: 'Review rejected and deleted!',
+                    error: 'Failed to reject review'
+                }
+            );
+            fetchReviews();
+        } catch (error) {
+            console.error('Error rejecting review:', error);
+        }
+    };
+
     return (
         <div className='px-2 lg:px-7 pt-5'>
             <div className='w-full p-4 bg-[#6a5fdf] rounded-md'>
@@ -91,13 +124,13 @@ const ScrapedReviews = () => {
                                 <div className='flex md:flex-col justify-end gap-2 min-w-[120px]'>
                                     <button
                                         className='bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-sm transition-colors'
-                                        onClick={() => toast.success('Approve functionality to be wired later')}
+                                        onClick={() => handleApprove(review._id)}
                                     >
                                         Approve
                                     </button>
                                     <button
                                         className='bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm transition-colors'
-                                        onClick={() => toast.success('Reject functionality to be wired later')}
+                                        onClick={() => handleReject(review._id)}
                                     >
                                         Reject
                                     </button>
