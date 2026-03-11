@@ -67,7 +67,9 @@ class scrapedReviewController {
             'Brian', 'Kevin', 'Jason', 'Matthew', 'Justin', 'Megan', 'Lauren', 'Hannah', 'Rachel', 'Samantha',
             'Daniel', 'Robert', 'James', 'William', 'Joseph', 'Jennifer', 'Linda', 'Mary', 'Patricia', 'Elizabeth',
             'Thomas', 'Richard', 'Charles', 'Steven', 'Paul', 'Susan', 'Margaret', 'Dorothy', 'Lisa', 'Nancy',
-            'Mark', 'Donald', 'George', 'Kenneth', 'Betty', 'Helen', 'Sandra', 'Donna', 'Carol', 'Ruth'
+            'Mark', 'Donald', 'George', 'Kenneth', 'Betty', 'Helen', 'Sandra', 'Donna', 'Carol', 'Ruth',
+            'Kaito', 'Yuki', 'Kenji', 'Akira', 'Mei', 'Chloe', 'Ethan', 'Noah',
+            'Minh', 'Ali', 'Chen', 'Wei', 'Omar', 'Aisha', 'Carlos', 'Mateo'
         ];
 
         const lastNames = [
@@ -75,17 +77,40 @@ class scrapedReviewController {
             'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
             'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
             'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
-            'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts'
+            'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts',
+            'Tanaka', 'Sato', 'Suzuki', 'Takahashi', 'Watanabe', '', 'Lee', 'Park', 'Zhang', 'Wang',
+            'Singh', 'Patel', 'Gupta', 'Khan', 'Ahmed', 'Rodriguez', 'Martinez', 'Lopez', 'Gonzalez', 'Perez'
         ];
 
-        const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
-        const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
-        const useInitial = Math.random() > 0.5;
+        const getRand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        const fName = getRand(firstNames);
+        const lName = getRand(lastNames);
 
-        if (useInitial) {
-            return `${randomFirst} ${randomLast.charAt(0)}.`;
+        const roll = Math.random();
+
+        if (roll < 0.30) {
+            return Math.random() > 0.5
+                ? `${fName.toLowerCase()} ${lName.toLowerCase()}`
+                : `${fName.toLowerCase()} ${lName.charAt(0).toLowerCase()}.`;
         }
-        return `${randomFirst} ${randomLast}`;
+
+        if (roll < 0.55) {
+            const privacyRoll = Math.random();
+            if (privacyRoll < 0.3) return `${fName.charAt(0).toUpperCase()}. ${lName}`;
+            if (privacyRoll < 0.6) return `${fName}`;
+            return `${fName.charAt(0).toUpperCase()}. ${lName.charAt(0).toUpperCase()}.`;
+        }
+
+        if (roll < 0.70) {
+            const suffixes = ['99', '00', '88', '_x', '123', 'TTV'];
+            return `${fName.toLowerCase()}${getRand(suffixes)}`;
+        }
+
+        if (roll < 0.75) {
+            return `${fName.charAt(0).toLowerCase()}${fName.slice(1)} ${lName}`;
+        }
+
+        return `${fName} ${lName}`;
     }
 
     approve_scraped_review = async (req, res) => {
