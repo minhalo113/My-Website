@@ -38,6 +38,31 @@ class scrapedReviewController {
         }
     }
 
+    update_scraped_review = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { content, reviewImages, authorThumb, date, rating } = req.body;
+
+            const review = await scrapedReviewModel.findById(id);
+            if (!review) {
+                return responseReturn(res, 404, { error: 'Scraped review not found.' });
+            }
+
+            if (content !== undefined) review.content = content;
+            if (reviewImages !== undefined) review.reviewImages = reviewImages;
+            if (authorThumb !== undefined) review.authorThumb = authorThumb;
+            if (date !== undefined) review.date = date;
+            if (rating !== undefined) review.rating = Number(rating);
+
+            await review.save();
+
+            return responseReturn(res, 200, { message: 'Review updated successfully.', review });
+        } catch (error) {
+            console.error('Error updating scraped review:', error);
+            return responseReturn(res, 500, { error: 'Internal server error.' });
+        }
+    }
+
     get_scraped_reviews = async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -138,7 +163,7 @@ class scrapedReviewController {
 
             let userImage = null;
 
-            if (review.authorThumb && review.authorThumb !== "https://ae-pic-a1.aliexpress-media.com/kf/S47ea903b3b7a441087bea451695cc7a2x/144x144.png_960x960.png_.avif") {
+            if (review.authorThumb && review.authorThumb !== "//ae-pic-a1.aliexpress-media.com/kf/S47ea903b3b7a441087bea451695cc7a2x/144x144.png_960x960.png_.avif") {
                 try {
                     const uploadResult = await cloudinary.uploader.upload(review.authorThumb, {
                         folder: 'products/reviews/profiles',
