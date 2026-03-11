@@ -138,7 +138,7 @@ class scrapedReviewController {
 
             let userImage = null;
 
-            if (review.authorThumb && review.authorThumb !== "https://ae-pic-a1.aliexpress-media.com/kf/S47ea903b3b7a441087bea451695cc7a2x/144x144.png_960x960.png_.avif") {
+            if (review.authorThumb && review.authorThumb !== "//ae-pic-a1.aliexpress-media.com/kf/S47ea903b3b7a441087bea451695cc7a2x/144x144.png_960x960.png_.avif") {
                 try {
                     const uploadResult = await cloudinary.uploader.upload(review.authorThumb, {
                         folder: 'products/reviews/profiles',
