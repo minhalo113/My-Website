@@ -90,7 +90,7 @@ class paypalController {
                         <p>Thanks for shopping with <strong>A Figure A Day</strong>! We have received your order request.</p>
                         
                         <h3 style="color: #444;">What happens next?</h3>
-                        <p>We have placed a <strong>temporary authorization hold</strong> on your card for <strong>CAD $${(amountValue / 100).toFixed(2)}</strong>.</p>
+                        <p>We have placed a <strong>temporary authorization hold</strong> on your card for <strong>CAD $${(amountValue).toFixed(2)}</strong>.</p>
                         <p>We will <strong>not</strong> capture the payment until we verify that your items are in stock and ready for preparation.</p>
                         
                         <p>You will receive an <strong>Official Receipt</strong> via email as soon as your order is confirmed (usually within 24 hours).</p>
@@ -107,7 +107,7 @@ class paypalController {
                         </p>
                     </div>
                 `,
-                text: `Hi there,\n\nThanks for shopping with A Figure A Day! We have received your order request.\n\nWhat happens next?\nWe have placed a temporary authorization hold on your card for CAD $${(amountValue / 100).toFixed(2)}. We will not capture the payment until we verify that your items are in stock and ready for preparation.\n\nOrder reference: ${orderId}\n\nNeed help? Please email us at figureaday.store@gmail.com. (Please do not reply to this automated email).`
+                text: `Hi there,\n\nThanks for shopping with A Figure A Day! We have received your order request.\n\nWhat happens next?\nWe have placed a temporary authorization hold on your card for CAD $${(amountValue).toFixed(2)}. We will not capture the payment until we verify that your items are in stock and ready for preparation.\n\nOrder reference: ${orderId}\n\nNeed help? Please email us at figureaday.store@gmail.com. (Please do not reply to this automated email).`
             });
             return { success: true };
         } catch (error) {
