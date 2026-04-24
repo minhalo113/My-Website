@@ -69,18 +69,21 @@ const buildPriceString = (price, discount, colorPrices) => {
 
     const d = parseFloat(discount) || 0;
 
-    if (hasOptions && minPrice !== Infinity && maxPrice !== -Infinity && minPrice !== maxPrice) {
-        if (d > 0) {
-            const minDiscounted = minPrice - (minPrice * d) / 100;
-            const maxDiscounted = maxPrice - (maxPrice * d) / 100;
-            return `Price: $${minDiscounted.toFixed(2)} - $${maxDiscounted.toFixed(2)} (${d}% off! Original Price: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)})`;
+    if (hasOptions && minPrice !== Infinity && maxPrice !== -Infinity) {
+        if (minPrice !== maxPrice) {
+            if (d > 0) {
+                const minDiscounted = minPrice - (minPrice * d) / 100;
+                const maxDiscounted = maxPrice - (maxPrice * d) / 100;
+                return `Price: $${minDiscounted.toFixed(2)} - $${maxDiscounted.toFixed(2)} (${d}% off! Original Price: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)})`;
+            }
+            return `Price: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+        } else {
+            if (d > 0) {
+                const discounted = minPrice - (minPrice * d) / 100;
+                return `Price: $${discounted.toFixed(2)} (${d}% off! Original Price: $${minPrice.toFixed(2)})`;
+            }
+            return `Price: $${minPrice.toFixed(2)}`;
         }
-        return `Price: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
-    }
-
-    const basePrice = parseFloat(price);
-    if (!isNaN(basePrice)) {
-        return `Price: ${formatPriceWithDiscount(basePrice, discount)}`;
     }
 
     return '';
