@@ -164,7 +164,7 @@ export const generateProductSocialCopy = async ({
     let finalCaption = sanitize(parsed.caption) || trimmedDescription;
     const priceString = buildPriceString(price, discount, colorPrices);
     if (priceString) {
-        finalCaption += `\n\n${priceString}` + `\nEmail us at: ${RESEND_TO}`;
+        finalCaption += `\n\n${priceString}` + `\nEmail us at: ${process.env.RESEND_TO}`;
     }
 
     return {
