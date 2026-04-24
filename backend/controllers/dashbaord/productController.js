@@ -1162,13 +1162,16 @@ class productController {
         }
 
         try {
-            const { title, description, images = [], brand = '', productUrl = '' } = req.body || {};
+            const { title, description, images = [], brand = '', productUrl = '', price, discount, colorPrices } = req.body || {};
             const preview = await generateProductSocialCopy({
                 title,
                 description,
                 imageHints: images,
                 brand,
                 productUrl,
+                price,
+                discount,
+                colorPrices
             });
 
             return responseReturn(res, 200, { preview });
