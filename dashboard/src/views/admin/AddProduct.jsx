@@ -165,6 +165,9 @@ const AddProduct = () => {
         dispatch(generate_product_social_preview({
             title: trimmedName,
             description: trimmedDescription,
+            price: state.price,
+            discount: state.discount,
+            colorPrices: state.colorPrices,
         }));
     };
 

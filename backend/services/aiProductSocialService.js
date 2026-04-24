@@ -5,7 +5,7 @@ const DEFAULT_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 const SHOP_URL = "https://afigureaday.com/"
 
 const normalizeList = (value) => {
-    if(!value) return [];
+    if (!value) return [];
     if (Array.isArray(value)) {
         return value
             .map((item) => (typeof item === 'string' ? item.trim() : ''))
@@ -33,12 +33,68 @@ const buildImageSummary = (hints = []) => {
     return `The product photos include ${initial} and ${last}.`;
 };
 
+const formatPriceWithDiscount = (priceVal, discountVal) => {
+    const p = parseFloat(priceVal);
+    const d = parseFloat(discountVal) || 0;
+    if (isNaN(p)) return '';
+
+    if (d > 0) {
+        const discounted = p - (p * d) / 100;
+        return `$${discounted.toFixed(2)} (${d}% off! Original Price: $${p.toFixed(2)})`;
+    }
+    return `$${p.toFixed(2)}`;
+};
+
+const buildPriceString = (price, discount, colorPrices) => {
+    let hasOptions = false;
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
+
+    if (colorPrices) {
+        // colorPrices format is usually "Option 1: 10, Option 2: 20" or just an array
+        const entries = String(colorPrices).split(',').map(e => e.trim()).filter(Boolean);
+        if (entries.length > 0) {
+            hasOptions = true;
+            for (const entry of entries) {
+                const parts = entry.split(':');
+                const priceStr = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+                const p = parseFloat(priceStr);
+                if (!isNaN(p)) {
+                    if (p < minPrice) minPrice = p;
+                    if (p > maxPrice) maxPrice = p;
+                }
+            }
+        }
+    }
+
+    const d = parseFloat(discount) || 0;
+
+    if (hasOptions && minPrice !== Infinity && maxPrice !== -Infinity && minPrice !== maxPrice) {
+        if (d > 0) {
+            const minDiscounted = minPrice - (minPrice * d) / 100;
+            const maxDiscounted = maxPrice - (maxPrice * d) / 100;
+            return `Price: $${minDiscounted.toFixed(2)} - $${maxDiscounted.toFixed(2)} (${d}% off! Original Price: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)})`;
+        }
+        return `Price: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+    }
+
+    const basePrice = parseFloat(price);
+    if (!isNaN(basePrice)) {
+        return `Price: ${formatPriceWithDiscount(basePrice, discount)}`;
+    }
+
+    return '';
+};
+
 export const generateProductSocialCopy = async ({
     title,
     description,
     imageHints = [],
     brand,
     productUrl,
+    price,
+    discount,
+    colorPrices,
 }) => {
     const trimmedTitle = typeof title === 'string' ? title.trim() : '';
     const trimmedDescription = typeof description === 'string' ? description.trim() : '';
@@ -102,9 +158,15 @@ export const generateProductSocialCopy = async ({
     const sanitize = (value) => (typeof value === 'string' ? value.trim() : '');
     const hashtags = normalizeList(parsed.hashtags).map((tag) => tag.replace(/^#+/, '').trim()).filter(Boolean);
 
+    let finalCaption = sanitize(parsed.caption) || trimmedDescription;
+    const priceString = buildPriceString(price, discount, colorPrices);
+    if (priceString) {
+        finalCaption += `\n\n${priceString}`;
+    }
+
     return {
         headline: sanitize(parsed.headline) || trimmedTitle,
-        caption: sanitize(parsed.caption) || trimmedDescription,
+        caption: finalCaption,
         callToAction: sanitize(parsed.callToAction),
         hashtags,
     };
