@@ -1,71 +1,82 @@
 import React, { useEffect } from 'react';
-import { MdCurrencyExchange,MdProductionQuantityLimits } from "react-icons/md";
+import { MdCurrencyExchange, MdProductionQuantityLimits } from "react-icons/md";
 import { FaUsers } from "react-icons/fa";
-import { FaCartShopping } from "react-icons/fa6"; 
+import { FaCartShopping } from "react-icons/fa6";
 import Chart from 'react-apexcharts'
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { get_admin_dashboard_data } from '../../store/Reducers/dashboardReducer';
 import moment from 'moment';
+import api from '../../api/api';
+import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
 
     const dispatch = useDispatch()
     const { totalSale, totalOrder, totalProduct, totalCustomer, recentOrder } = useSelector(state => state.dashboard)
-    const {userInfo} = useSelector(state=> state.auth)
+    const { userInfo } = useSelector(state => state.auth)
 
     useEffect(() => {
         dispatch(get_admin_dashboard_data())
     }, [dispatch])
 
+    const handleRunSocialPost = async () => {
+        try {
+            const { data } = await api.post('/admin/trigger-social-post', {}, { withCredentials: true });
+            toast.success(data.message || 'Social post generation triggered manually.');
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to trigger social post generation.');
+        }
+    };
+
     const state = {
-        series : [
+        series: [
             {
-                name : "Orders",
-                data : []
+                name: "Orders",
+                data: []
             },
             {
-                name : "Revenue",
+                name: "Revenue",
                 data: []
             },
         ],
-        options : {
-            color : ['#181ee8','#181ee8'],
+        options: {
+            color: ['#181ee8', '#181ee8'],
             plotOptions: {
-                radius : 30
+                radius: 30
             },
-            chart : {
-                background : 'transparent',
-                foreColor : '#d0d2d6'
+            chart: {
+                background: 'transparent',
+                foreColor: '#d0d2d6'
             },
-            dataLabels : {
-                enabled : false
+            dataLabels: {
+                enabled: false
             },
-            strock : {
-                show : true,
-                curve : ['smooth','straight','stepline'],
-                lineCap : 'butt',
-                colors : '#f0f0f0',
-                width  : .5,
-                dashArray : 0
+            strock: {
+                show: true,
+                curve: ['smooth', 'straight', 'stepline'],
+                lineCap: 'butt',
+                colors: '#f0f0f0',
+                width: .5,
+                dashArray: 0
             },
-            xaxis : {
-                categories : ['Jan','Feb','Mar','Apl','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+            xaxis: {
+                categories: ['Jan', 'Feb', 'Mar', 'Apl', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
             },
-            legend : {
-                position : 'top'
+            legend: {
+                position: 'top'
             },
-            responsive : [
-                     {
-                        plotOptions: {
-                            bar : {
-                                horizontal : true
-                            }
-                        },
-                        chart : {
-                            height : "550px"
+            responsive: [
+                {
+                    plotOptions: {
+                        bar: {
+                            horizontal: true
                         }
+                    },
+                    chart: {
+                        height: "550px"
                     }
+                }
             ]
         }
     }
@@ -76,9 +87,16 @@ const AdminDashboard = () => {
     return (
         <div className='px-2 md:px-7 py-5'>
 
+            <div className='flex justify-between items-center mb-5'>
+                <h1 className='text-2xl font-bold text-[#5c5a5a]'>Admin Dashboard</h1>
+                <button onClick={handleRunSocialPost} className='bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded shadow transition-colors'>
+                    Run Social Post Ad
+                </button>
+            </div>
+
 
             <div className='w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-7'>
-                
+
                 <div className='flex justify-between items-center p-5 bg-[#fae8e8] rounded-md gap-3'>
                     <div className='flex flex-col justify-start items-start text-[#5c5a5a]'>
                         <h2 className='text-3xl font-bold'>${totalSale}</h2>
@@ -86,8 +104,8 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className='w-[40px] h-[47px] rounded-full bg-[#fa0305] flex justify-center items-center text-xl'>
-                    <MdCurrencyExchange className='text-[#fae8e8] shadow-lg' /> 
-                    </div> 
+                        <MdCurrencyExchange className='text-[#fae8e8] shadow-lg' />
+                    </div>
                 </div>
 
 
@@ -98,8 +116,8 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className='w-[40px] h-[47px] rounded-full bg-[#760077] flex justify-center items-center text-xl'>
-                    <MdProductionQuantityLimits  className='text-[#fae8e8] shadow-lg' /> 
-                    </div> 
+                        <MdProductionQuantityLimits className='text-[#fae8e8] shadow-lg' />
+                    </div>
                 </div>
 
 
@@ -110,7 +128,7 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className='w-[40px] h-[47px] rounded-full bg-[#038000] flex justify-center items-center text-xl'>
-                    <FaUsers  className='text-[#fae8e8] shadow-lg' />
+                        <FaUsers className='text-[#fae8e8] shadow-lg' />
                     </div>
                 </div>
 
@@ -122,68 +140,68 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className='w-[40px] h-[47px] rounded-full bg-[#0200f8] flex justify-center items-center text-xl'>
-                    <FaCartShopping  className='text-[#fae8e8] shadow-lg' /> 
-                    </div> 
+                        <FaCartShopping className='text-[#fae8e8] shadow-lg' />
+                    </div>
                 </div>
- 
+
             </div>
 
-        
-        
-        <div className='w-full flex flex-wrap mt-7'>
-            <div className='w-full lg:w-7/12 lg:pr-3'>
-                <div className='w-full bg-[#6a5fdf] p-4 rounded-md'>
-            <Chart options={state.options} series={state.series} type='bar' height={350} />
+
+
+            <div className='w-full flex flex-wrap mt-7'>
+                <div className='w-full lg:w-7/12 lg:pr-3'>
+                    <div className='w-full bg-[#6a5fdf] p-4 rounded-md'>
+                        <Chart options={state.options} series={state.series} type='bar' height={350} />
+                    </div>
                 </div>
+
+
+
+                <div className='w-full p-4 bg-[#6a5fdf] rounded-md mt-6'>
+                    <div className='flex justify-between items-center'>
+                        <h2 className='font-semibold text-lg text-[#d0d2d6] pb-3 '>Recent Orders</h2>
+                        <Link className='font-semibold text-sm text-[#d0d2d6]'>View All</Link>
+                    </div>
+
+                    <div className='relative overflow-x-auto'>
+                        <table className='w-full text-sm text-left text-[#d0d2d6]'>
+                            <thead className='text-sm text-[#d0d2d6] uppercase border-b border-slate-700'>
+                                <tr>
+                                    <th scope='col' className='py-3 px-4'>Order Id</th>
+                                    <th scope='col' className='py-3 px-4'>Price</th>
+                                    <th scope='col' className='py-3 px-4'>Payment Status</th>
+                                    <th scope='col' className='py-3 px-4'>Order Status</th>
+                                    <th scope='col' className='py-3 px-4'>Active</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {
+                                    recentOrder.map((d, i) => <tr key={i}>
+                                        <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>#{d._id}</td>
+                                        <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>${d.price}</td>
+                                        <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>{d.payment_status}</td>
+                                        <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>{d.delivery_status}</td>
+                                        <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>
+                                            <Link to={`/admin/dashboard/order/details/${d._id}`}>View</Link> </td>
+                                    </tr>)
+                                }
+
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+
+
+
             </div>
-
-
-
-        <div className='w-full p-4 bg-[#6a5fdf] rounded-md mt-6'>
-            <div className='flex justify-between items-center'>
-                <h2 className='font-semibold text-lg text-[#d0d2d6] pb-3 '>Recent Orders</h2>
-                <Link className='font-semibold text-sm text-[#d0d2d6]'>View All</Link>
-            </div>
-
-    <div className='relative overflow-x-auto'>
-    <table className='w-full text-sm text-left text-[#d0d2d6]'>
-        <thead className='text-sm text-[#d0d2d6] uppercase border-b border-slate-700'>
-        <tr>
-            <th scope='col' className='py-3 px-4'>Order Id</th>
-            <th scope='col' className='py-3 px-4'>Price</th>
-            <th scope='col' className='py-3 px-4'>Payment Status</th>
-            <th scope='col' className='py-3 px-4'>Order Status</th>
-            <th scope='col' className='py-3 px-4'>Active</th>
-        </tr>
-        </thead>
-
-        <tbody>
-            {
-                recentOrder.map((d, i) => <tr key={i}>
-                <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>#{d._id}</td>
-                <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>${d.price}</td>
-                <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>{d.payment_status}</td>
-                <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>{d.delivery_status}</td>
-                <td scope='row' className='py-3 px-4 font-medium whitespace-nowrap'>
-                    <Link to={`/admin/dashboard/order/details/${d._id}`}>View</Link> </td>
-            </tr> )
-            }
-
-            
-        </tbody>
-
-    </table>
-
-    </div>
-
         </div>
-
-
-
-
-             
-    </div>
-    </div>
     );
 };
 
