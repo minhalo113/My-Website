@@ -2,6 +2,7 @@ import customerOrder from '../../models/orderModel.js'
 import productModel from '../../models/productModel.js'
 import customerModel from '../../models/customerModel.js'
 import responseReturn from '../../utils/response.js';
+import automatedSocialPostService from '../../services/AutomatedSocialPostService.js';
 
 class dashboardController {
     admin_dashboard_data = async (req, res) => {
@@ -27,6 +28,16 @@ class dashboardController {
         } catch (error) {
             console.log('dashboard data error', error.message);
             return responseReturn(res, 500, { error: 'Internal Server Error' });
+        }
+    }
+
+    trigger_social_post = async (req, res) => {
+        try {
+            automatedSocialPostService.createAutomatedSocialPost();
+            return responseReturn(res, 200, { message: 'Social post generation triggered successfully.' });
+        } catch (error) {
+            console.log('trigger social post error', error.message);
+            return responseReturn(res, 500, { error: 'Failed to trigger social post generation' });
         }
     }
 }

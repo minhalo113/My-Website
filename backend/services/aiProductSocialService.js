@@ -20,30 +20,30 @@ const normalizeList = (value) => {
     return [];
 }
 
-const buildImageSummary = (hints = []) => {
-    const list = normalizeList(hints);
-    if (!list.length) {
-        return 'No specific image details were provided.';
-    }
-    if (list.length === 1) {
-        return `The product photo includes ${list[0]}.`;
-    }
-    const initial = list.slice(0, -1).join(', ');
-    const last = list[list.length - 1];
-    return `The product photos include ${initial} and ${last}.`;
-};
+// const buildImageSummary = (hints = []) => {
+//     const list = normalizeList(hints);
+//     if (!list.length) {
+//         return 'No specific image details were provided.';
+//     }
+//     if (list.length === 1) {
+//         return `The product photo includes ${list[0]}.`;
+//     }
+//     const initial = list.slice(0, -1).join(', ');
+//     const last = list[list.length - 1];
+//     return `The product photos include ${initial} and ${last}.`;
+// };
 
-const formatPriceWithDiscount = (priceVal, discountVal) => {
-    const p = parseFloat(priceVal);
-    const d = parseFloat(discountVal) || 0;
-    if (isNaN(p)) return '';
+// const formatPriceWithDiscount = (priceVal, discountVal) => {
+//     const p = parseFloat(priceVal);
+//     const d = parseFloat(discountVal) || 0;
+//     if (isNaN(p)) return '';
 
-    if (d > 0) {
-        const discounted = p - (p * d) / 100;
-        return `$${discounted.toFixed(2)} (${d}% off! Original Price: $${p.toFixed(2)})`;
-    }
-    return `$${p.toFixed(2)}`;
-};
+//     if (d > 0) {
+//         const discounted = p - (p * d) / 100;
+//         return `$${discounted.toFixed(2)} (${d}% off! Original Price: $${p.toFixed(2)})`;
+//     }
+//     return `$${p.toFixed(2)}`;
+// };
 
 const buildPriceString = (price, discount, colorPrices) => {
     let hasOptions = false;
