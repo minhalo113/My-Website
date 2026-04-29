@@ -1,7 +1,6 @@
 import request from 'supertest';
 import express from 'express';
 
-// mock formidable
 jest.mock('formidable', () => {
   const parseMock = jest.fn();
   const form = jest.fn(() => ({ parse: parseMock }));

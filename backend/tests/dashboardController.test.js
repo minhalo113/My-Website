@@ -27,7 +27,6 @@ describe('Dashboard Controller - trigger_social_post', () => {
     });
 
     it('should return 500 if an error occurs (though highly unlikely due to async void call)', async () => {
-        // Force an error inside the try block (e.g., if responseReturn throws)
         automatedSocialPostService.createAutomatedSocialPost.mockImplementation(() => {
             throw new Error('Sync error');
         });
