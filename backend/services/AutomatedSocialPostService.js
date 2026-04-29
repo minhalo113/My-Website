@@ -60,7 +60,7 @@ const createAutomatedSocialPost = async () => {
             });
             console.log('[AutomatedSocialPostService] Generated social copy.');
 
-            const productUrl = `https://afigureaday.com/product/details/${product.slug}`;
+            const productUrl = `https://afigureaday.com/shop/${product._id}-${product.slug}`;
             const result = await publishProductSocialPost({
                 title: socialCopy.headline,
                 caption: socialCopy.caption,
