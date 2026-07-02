@@ -15,14 +15,14 @@ const startIngestionJob = () => {
         await animeBlogService.createBlogPost();
     });
 
-    cron.schedule('0 */12 * * *', async () => {
+    cron.schedule('0 9 * * *', async () => {
         console.log('[Scheduler] Triggering automated social post generation...');
         await automatedSocialPostService.createAutomatedSocialPost();
     });
 
     console.log('[Scheduler] Ingestion job scheduled (Daily at 00:00).');
     console.log('[Scheduler] Anime blog generation scheduled (Daily at 09:00).');
-    console.log('[Scheduler] Automated social post generation scheduled (Every 12 hours).');
+    console.log('[Scheduler] Automated social post generation scheduled (Daily at 09:00).');
 };
 
 export default startIngestionJob;
